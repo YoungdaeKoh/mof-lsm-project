@@ -1,0 +1,6 @@
+&JULES_INITIAL
+  total_snow = .true.,
+  dump_file = .true.,
+  file = "/data1/backup/ChanhyukChoi/002.JULES_RUN/INPUT_DATA/initial_data/glosea.dump.spin20230830.19790101.0.nc"
+/
+

@@ -1,0 +1,10 @@
+&JULES_TIME
+  timestep_len   = 1800,
+
+  main_run_start = '1978-12-01 00:00:00',
+  main_run_end   = '1979-02-01 00:00:00'
+/
+
+&JULES_SPINUP
+  max_spinup_cycles = 0
+/

@@ -1,0 +1,27 @@
+&JULES_DRIVE
+  bl_height=1000.0,
+  data_start  = '1978-12-01 00:00:00',
+  data_end    = '2026-11-30 00:00:00',
+  data_period = 21600,
+  interp_wind = .true.,
+  l_daily_disagg = .false.,
+
+  file = "/data1/backup/ChanhyukChoi/002.JULES_RUN/INPUT_DATA/monitoring/92.GPCPobs_ERA5obs/%y4-%m2.nc",
+
+  nvars = 7,
+  var(1) = 'sw_down',   var_name(1) = 'SWdown',  interp(1) = 'f',
+  var(2) = 'lw_down',   var_name(2) = 'LWdown',  interp(2) = 'f',
+  var(3) = 'precip',    var_name(3) = 'Rainf',   interp(3) = 'f',
+  var(4) = 't',         var_name(4) = 'Tair',    interp(4) = 'f',
+  var(5) = 'wind',      var_name(5) = 'Wind',    interp(5) = 'f',
+  var(6) = 'pstar',     var_name(6) = 'PSurf',   interp(6) = 'f',
+  var(7) = 'q',         var_name(7) = 'Qair',    interp(7) = 'f'
+
+  diff_frac_const=0.1,
+  t_for_con_rain  = 293.15,
+  t_for_snow = 274.0,
+  z1_tq_in = 2.0,
+  z1_tq_vary = .false.,
+  z1_uv_in = 10.0,
+/
+

@@ -1,0 +1,39 @@
+&JULES_FRAC
+  file      = "/data1/backup/ChanhyukChoi/002.JULES_RUN/JULES/ancil/frac.nc",
+  frac_name = 'field1391'
+/
+
+&JULES_SOIL_PARAM
+  dzsoil_io = 0.1000 0.2500 0.6500 2.0000
+/
+
+&JULES_SOIL_PROPS
+  const_z   = .true.,
+
+  file      = '/data1/backup/ChanhyukChoi/002.JULES_RUN/JULES/ancil/soil.nc',
+
+  nvars     = 9,
+
+  var(1) = 'b',        var_name(1) = 'field1381',
+  var(2) = 'sathh',    var_name(2) = 'field342' ,
+  var(3) = 'satcon',   var_name(3) = 'field333' ,
+  var(4) = 'sm_sat',   var_name(4) = 'field332' ,
+  var(5) = 'sm_crit',  var_name(5) = 'field330' ,
+  var(6) = 'sm_wilt',  var_name(6) = 'field329' ,
+  var(7) = 'hcap',     var_name(7) = 'field335' ,
+  var(8) = 'hcon',     var_name(8) = 'field336' ,
+  var(9) = 'albsoil',  var_name(9) = 'field1395'
+/
+
+&JULES_PDM /
+
+&JULES_TOP /
+
+# No agricultural fraction
+&JULES_AGRIC
+  zero_agric =.true., 
+/
+
+&JULES_CO2
+  co2_mmr=5.24100e-4,
+/
