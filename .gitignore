@@ -1,0 +1,51 @@
+# ===== Large binary data (never commit) =====
+*.nc
+*.nc4
+*.hdf
+*.hdf5
+*.h5
+*.grib
+*.grib2
+*.grb
+*.bin
+
+# ===== Build artifacts =====
+build/
+*.o
+*.mod
+*.a
+*.so
+*.exe
+
+# ===== Model outputs / dumps =====
+output/
+outputs/
+*.dump
+*.dump.nc
+*.log
+*.bldlog.*
+
+# ===== Python =====
+__pycache__/
+*.pyc
+*.pyo
+.ipynb_checkpoints/
+*.egg-info/
+.venv/
+venv/
+
+# ===== Editor / OS =====
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*~
+
+# ===== Local-only files =====
+CLAUDE.local.md
+.env
+.env.local
+
+# ===== Allow exceptions (negate above patterns) =====
+# 작은 reference NetCDF는 명시적으로 추가하고 싶다면:
+# !docs/reference/*.nc
