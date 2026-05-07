@@ -1,0 +1,24 @@
+&JULES_OUTPUT
+  run_id = 'spinup_cy01',
+  output_dir = '~/JULES_test/output'
+  nprofiles = 1
+/
+
+&JULES_OUTPUT_PROFILE
+  profile_name = 'monthly',
+  file_period = -2, 		! 연별로 묶기
+  output_main_run = .true.,
+  !output_period = 86400,
+  output_period = 2592000,	! 30일*86400초
+
+  nvars = 8
+  var(1) = 'smc_tot'       output_type(1) = 'M'
+  var(2) = 'smcl'          output_type(2) = 'M'
+  var(3) = 't_soil'        output_type(3) = 'M'
+  var(4) = 'cs'            output_type(4) = 'M'
+  var(5) = 'runoff'        output_type(5) = 'M'
+  var(6) = 'latent_heat'   output_type(6) = 'M'
+  var(7) = 'tstar_gb'      output_type(7) = 'M'
+  var(8) = 'snow_mass_gb'  output_type(8) = 'M'
+/
+

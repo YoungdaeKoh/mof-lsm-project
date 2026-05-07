@@ -1,0 +1,7 @@
+&IMOGEN_ONOFF_SWITCH
+  l_imogen = .false.
+/
+&IMOGEN_RUN_LIST
+/
+&IMOGEN_ANLG_VALS_LIST
+/

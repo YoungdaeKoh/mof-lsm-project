@@ -1,0 +1,33 @@
+&jules_snow
+  cansnowpft=.false.  .true.  .false.  .false.  .false.,
+  frac_snow_subl_melt=0,
+  l_snowdep_surf=.true,
+  graupel_options=0,
+  i_basal_melting_opt=0,
+  l_et_metamorph=.false.,
+  l_snow_infilt=.false.,
+  l_snow_nocan_hc=.false.,
+  l_snowdep_surf=.false.,
+  i_grain_growth_opt=0,
+  lai_alb_lim_sn=5*0.5,
+  nsmax=3,
+  dzsnow=0.1 0.2 0.2,
+  rho_firn_albedo=550.0,
+  rho_snow_const=250.0,
+  snow_hcap=0.63e6,
+  snow_hcon=0.265,
+  snowliqcap=0.05,
+  snowinterceptfact=0.7,
+  snowloadlai=4.4,
+  snowunloadfact=0.4,
+/
+&Radiation parameters
+  r0              = 50.0,
+  rmax            = 2000.0,
+  snow_ggr        = 0.6  0.06  0.23e6,
+  amax            = 0.98  0.7,
+  maskd           = 50.0,
+  dtland          = 2.0,
+  kland_numerator = 0.3
+
+/
