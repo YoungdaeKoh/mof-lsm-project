@@ -9,6 +9,16 @@ Create and run a CLM5 test case using 2010-2019 Chanhyuk ERA5 forcing on climate
 - **Compiler**: ifort (Intel)
 - **MPI**: mvapich2 or OpenMPI
 
+## Prerequisites on climate00
+
+**MANDATORY**: Always load CESM2 modules before any CESM2 work:
+```bash
+source /home/ydkoh/CESM2.module.sh
+```
+
+This loads: intel21/compiler, intel21/intelmpi, intel21/netcdf, intel21/hdf5.
+Verify: `echo $NETCDF` should show NetCDF path.
+
 ## Steps on climate00
 
 ### 1. Create new case from existing
