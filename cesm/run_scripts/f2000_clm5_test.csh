@@ -3,7 +3,7 @@ cd ~/CESM/cime/scripts
 
 set CCSMROOT = /home/ydkoh/CESM
 set CNAME = f2000_clm5_test
-set COMPSET = F_2000_CAM4
+set COMPSET = F2000Nuopc
 set RES = f19_g17
 
 # Clean previous case and output
