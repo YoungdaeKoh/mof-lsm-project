@@ -48,9 +48,21 @@ Location: `/data1/ERA5/single_level/monthly_1.0/`
 - Variables: 2m_dewpoint_temperature, etc.
 - Years: 2007 onwards
 
+## Downloading F2000climo_test1 Input Files
+
+HTTPS servers now enabled in `config_inputdata.xml`. Run this on climate00 (interactive SSH):
+```bash
+ssh climate
+bash ~/MOF_LSM_project/cesm/download_f2000_inputs.sh
+```
+
+Expected time: 10-20 minutes (70+ files, ~several GB).
+
+---
+
 ## Known Issues
 
-### 1. F2000climo_test1 Input Files (Blocking)
+### 1. F2000climo_test1 Input Files (Solution Available)
 - **Problem**: Cannot download/write to `/data1/CESM2_INPUT/` due to permission restrictions
   - Parent directory has 777 perms but owned by `minseok7kim`
   - SVN download fails: `PermissionError: [Errno 13] Permission denied: '/data1/CESM2_INPUT/atm/waccm'`
@@ -70,3 +82,38 @@ Location: `/data1/ERA5/single_level/monthly_1.0/`
 - Multi-node distribution: climate01:48, climate02:48 (via mvapich2.hosts)
 - Status: Built successfully, ready to run
 - **To run**: `ssh climate; cd ~/CESM/cases/clm5_test02; ./.case.run`
+
+## CAM4/CLM4 Full-Physics (F2000C4L40) — Snowfall Sensitivity Experiments
+
+**Compset:** 2000_CAM40_CLM40%SP_CICE%PRES_DOCN%DOM_RTM_SGLC_SWAV @ f19_f19
+
+**Purpose:** Test snowfall rate sensitivity in coupled atmosphere-land model. Baseline for peer-reviewed publication.
+
+**Workflow:**
+
+1. **Spin-up (10 years, monthly restarts):**
+   ```bash
+   csh ~/run_scripts/F_spinup.csh          # Create + build
+   cd ~/CESM/cases/F_spinup
+   ./.case.run                              # ~60 hours
+   ```
+   
+2. **Monitor saturation:**
+   ```bash
+   python ~/MOF_LSM_project/analysis/spinup_analysis.py
+   # Output: spinup_output/F_spinup_timeseries.png, summary.txt
+   ```
+
+3. **Perturbation runs (5 years from year 10-11, snowfall -25/-50/-75%):**
+   - Branches from F_spinup restart file (year 0010-11-01)
+   - To be created after spin-up completion
+
+**Scripts & Analysis:**
+- Case creation: `/home/ydkoh/run_scripts/F_spinup.csh`
+- Post-processing: `/home/ydkoh/MOF_LSM_project/analysis/spinup_analysis.py`
+- Output dir: `/data2/ydkoh/cesm2_output/F_spinup/`
+
+**Key settings:**
+- STOP_N=10, STOP_OPTION=nyears (10 years)
+- REST_N=1, REST_OPTION=nmonths (monthly restart)
+- CONTINUE_RUN=FALSE (cold start)
