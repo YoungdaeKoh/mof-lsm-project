@@ -10,12 +10,18 @@ from datetime import datetime, timedelta
 import os
 import glob
 
-def era5_path(var_name, year, month):
-    """Build ERA5 path for variable."""
-    base = f"/data1/ERA5/single_level/hourly_0.25/{var_name}"
-    pattern = f"{base}/*{year}{month:02d}*.nc"
-    files = glob.glob(pattern)
-    return files[0] if files else None
+def era5_files(var_name, year, month):
+    """Get all daily ERA5 files for given month."""
+    from calendar import monthrange
+    base = f"/data1/ERA5/single_level/hourly_0.25/{var_name}/dataset"
+    days_in_month = monthrange(year, month)[1]
+    files = []
+    for day in range(1, days_in_month + 1):
+        date_str = f"{year}{month:02d}{day:02d}"
+        pattern = f"{base}/ERA5h_{date_str}.nc"
+        if os.path.exists(pattern):
+            files.append(pattern)
+    return sorted(files)
 
 def calc_specific_humidity(t2m, d2m, mslp):
     """
@@ -54,15 +60,17 @@ def create_clm_forcing(year, month, output_dir="/data2/ydkoh/era5_clm_forcing"):
 
     data = {}
     for era5_var, clm_var in vars_mapping.items():
-        path = era5_path(era5_var, year, month)
-        if path is None:
+        files = era5_files(era5_var, year, month)
+        if not files:
             print(f"  WARNING: {era5_var} not found for {year}-{month:02d}")
             continue
-        print(f"  Loading {era5_var}...")
-        ds = xr.open_dataset(path)
-        var_name = list(ds.data_vars)[0]
-        data[clm_var] = ds[var_name]
-        ds.close()
+        print(f"  Loading {era5_var} ({len(files)} files)...")
+        ds_list = [xr.open_dataset(f) for f in files]
+        ds_merged = xr.concat(ds_list, dim='time')
+        var_name = list(ds_merged.data_vars)[0]
+        data[clm_var] = ds_merged[var_name]
+        for ds in ds_list:
+            ds.close()
 
     # Align time coordinates
     times = data['Tair'].time.values
