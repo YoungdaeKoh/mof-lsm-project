@@ -122,5 +122,6 @@ def create_clm_forcing(year, month, output_dir="/data2/ydkoh/era5_clm_forcing"):
     return output_file
 
 if __name__ == '__main__':
-    # Test: 1979-01
-    create_clm_forcing(1979, 1)
+    # Generate full 1979
+    for month in range(1, 13):
+        create_clm_forcing(1979, month)
