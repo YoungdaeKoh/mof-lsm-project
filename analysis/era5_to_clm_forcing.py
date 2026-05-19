@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/home/ydkoh/anaconda3/bin/python
 """
 Convert ERA5 hourly data to CLM atmospheric forcing format.
 Output: single monthly file with all variables combined.
@@ -68,54 +68,55 @@ def create_clm_forcing(year, month, output_dir="/data2/ydkoh/era5_clm_forcing"):
         ds_list = [xr.open_dataset(f) for f in files]
         ds_merged = xr.concat(ds_list, dim='time')
         var_name = list(ds_merged.data_vars)[0]
-        data[clm_var] = ds_merged[var_name]
+        var_data = ds_merged[var_name]
+
+        # Resample precipitation to 6-hourly by summing
+        if era5_var in ['total_precipitation', 'snowfall']:
+            var_data = var_data.resample(time='6H').sum(dim='time')
+
+        data[clm_var] = var_data
         for ds in ds_list:
             ds.close()
 
-    # Align time coordinates
-    times = data['Tair'].time.values
-    nt = len(times)
-    nlat = len(data['Tair'].latitude)
-    nlon = len(data['Tair'].longitude)
-
-    # Initialize output with Tair structure
+    # Use ERA5 native coordinate names
     ref = data['Tair']
     lat = ref.latitude.values
     lon = ref.longitude.values
+    times = ref.time.values
 
-    # Create output dataset
+    # Create output dataset with ERA5 dimensions
     out_ds = xr.Dataset(
         coords={
             'time': times,
-            'lat': ('lat', lat),
-            'lon': ('lon', lon),
+            'latitude': ('latitude', lat),
+            'longitude': ('longitude', lon),
         }
     )
 
-    # Add variables with consistent naming
-    out_ds['Tair'] = data['Tair']
-    out_ds['Wind'] = np.sqrt(data['U10m']**2 + data['V10m']**2)
-    out_ds['Qair'] = calc_specific_humidity(data['Tair'], data['D2m'], data['PSurf'])
-    out_ds['PSurf'] = data['PSurf']
-    out_ds['LWdown'] = data['LWdown']
-    out_ds['SWdown'] = data['SWdown']
-    out_ds['Rainf'] = data['Precip'] - data['Snowf']  # Rain = total - snow
-    out_ds['Snowf'] = data['Snowf']
+    # Add variables using ERA5 dimensions
+    out_ds['Tair'] = data['Tair'].assign_coords(time=times)
+    out_ds['Wind'] = (np.sqrt(data['U10m']**2 + data['V10m']**2)).assign_coords(time=times)
+    out_ds['Qair'] = calc_specific_humidity(data['Tair'], data['D2m'], data['PSurf']).assign_coords(time=times)
+    out_ds['PSurf'] = data['PSurf'].assign_coords(time=times)
+    out_ds['LWdown'] = data['LWdown'].assign_coords(time=times)
+    out_ds['SWdown'] = data['SWdown'].assign_coords(time=times)
+    out_ds['Rainf'] = (data['Precip'] - data['Snowf']).assign_coords(time=times)
+    out_ds['Snowf'] = data['Snowf'].assign_coords(time=times)
 
     # Set attributes
     for var in ['Tair', 'Wind', 'Qair', 'PSurf', 'LWdown', 'SWdown', 'Rainf', 'Snowf']:
         out_ds[var].attrs['_FillValue'] = np.nan
         out_ds[var].attrs['missing_value'] = -32767
 
-    out_ds['time'].attrs['units'] = 'hours since 1900-01-01'
-    out_ds['time'].attrs['calendar'] = 'standard'
-    out_ds['lat'].attrs['units'] = 'degrees_north'
-    out_ds['lon'].attrs['units'] = 'degrees_east'
+    out_ds['latitude'].attrs['units'] = 'degrees_north'
+    out_ds['longitude'].attrs['units'] = 'degrees_east'
 
     # Write output
     output_file = f"{output_dir}/{year}-{month:02d}.nc"
     print(f"  Writing {output_file}...")
-    out_ds.to_netcdf(output_file, encoding={var: {'zlib': True, 'complevel': 4} for var in out_ds.data_vars})
+    encoding = {var: {'zlib': True, 'complevel': 4} for var in out_ds.data_vars}
+    encoding['time'] = {'units': 'hours since 1900-01-01', 'calendar': 'standard'}
+    out_ds.to_netcdf(output_file, encoding=encoding)
     print(f"  Done: {output_file} ({os.path.getsize(output_file)/1e9:.1f} GB)")
 
     return output_file
