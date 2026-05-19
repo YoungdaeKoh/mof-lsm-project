@@ -98,10 +98,10 @@ def create_clm_forcing(year, month, output_dir="/data2/ydkoh/era5_clm_forcing"):
     out_ds['Wind'] = (np.sqrt(data['U10m']**2 + data['V10m']**2)).assign_coords(time=times)
     out_ds['Qair'] = calc_specific_humidity(data['Tair'], data['D2m'], data['PSurf']).assign_coords(time=times)
     out_ds['PSurf'] = data['PSurf'].assign_coords(time=times)
-    out_ds['LWdown'] = data['LWdown'].assign_coords(time=times)
-    out_ds['SWdown'] = data['SWdown'].assign_coords(time=times)
-    out_ds['Rainf'] = (data['Precip'] - data['Snowf']).assign_coords(time=times)
-    out_ds['Snowf'] = data['Snowf'].assign_coords(time=times)
+    out_ds['LWdown'] = (data['LWdown'] / 21600).assign_coords(time=times)  # J/m² -> W/m²
+    out_ds['SWdown'] = (data['SWdown'] / 21600).assign_coords(time=times)  # J/m² -> W/m²
+    out_ds['Rainf'] = ((data['Precip'] - data['Snowf']) / 21600).assign_coords(time=times)  # m -> kg/m2/s
+    out_ds['Snowf'] = (data['Snowf'] / 21600).assign_coords(time=times)  # m -> kg/m2/s
 
     # Set attributes
     for var in ['Tair', 'Wind', 'Qair', 'PSurf', 'LWdown', 'SWdown', 'Rainf', 'Snowf']:
