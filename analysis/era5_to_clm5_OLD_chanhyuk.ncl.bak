@@ -1,0 +1,88 @@
+;----------------------------------------------------------------------
+; era5_to_clm5.ncl
+;
+; Convert Chanhyuk ERA5 to CLM5 atmospheric forcing format.
+; NCL port of era5_to_clm5.py: rename variables to CLM5 names,
+; attach CLM5 long_name/units, write one NetCDF file per month.
+; No unit conversion (Rainf is already mm/s); data values are copied as-is.
+;
+; Run on climate00 (input on /data1, output on /data2):
+;   /usr/local/ncl_ncarg/6.6.2_gcc485/bin/ncl era5_to_clm5.ncl
+;----------------------------------------------------------------------
+
+begin
+
+  era5_dir = "/data1/backup/ChanhyukChoi/002.JULES_RUN/INPUT_DATA/monitoring/92.GPCPobs_ERA5obs"
+  out_dir  = "/data2/ydkoh/clm5_forcing"
+  system("mkdir -p " + out_dir)
+
+  yr_start = 2010
+  yr_end   = 2019
+
+  ; CLM5 variable mapping: ERA5 name -> CLM5 name
+  era5_vars  = (/"Tair","Qair","PSurf","SWdown","LWdown","Rainf","Wind"/)
+  clm5_vars  = (/"TBOT","QBOT","PSRF","FSDS","FLDS","PRECTmms","WIND"/)
+  long_names = (/"temperature at the lowest atm level", \
+                 "specific humidity at the lowest atm level", \
+                 "surface pressure at the lowest atm level", \
+                 "total incident solar radiation", \
+                 "incident longwave radiation", \
+                 "PRECTmms total precipitation", \
+                 "wind at the lowest atm level"/)
+  units      = (/"K","kg/kg","Pa","W/m**2","W/m**2","mm H2O / sec","m/s"/)
+
+  nvar = dimsizes(era5_vars)
+
+  do yr = yr_start, yr_end
+  do mo = 1, 12
+
+    ym     = sprinti("%0.4d", yr) + "-" + sprinti("%0.2d", mo)
+    infile = era5_dir + "/" + ym + ".nc"
+
+    if (.not. fileexists(infile)) then
+      print("Warning: " + infile + " not found")
+      continue
+    end if
+
+    print("Processing " + ym + "...")
+
+    fin = addfile(infile, "r")
+
+    ; ---- create output file ----
+    outfile = out_dir + "/" + ym + "_clm5.nc"
+    system("/bin/rm -f " + outfile)
+    fout = addfile(outfile, "c")
+
+    ; global attributes
+    fAtt        = True
+    fAtt@title  = "CLM5 forcing from ERA5"
+    fAtt@source = "Chanhyuk ERA5 " + ym
+    fileattdef(fout, fAtt)
+
+    ; make time the unlimited (record) dimension
+    filedimdef(fout, "time", -1, True)
+
+    ; ---- map variables ----
+    do iv = 0, nvar-1
+      if (isfilevar(fin, era5_vars(iv))) then
+        var           = fin->$era5_vars(iv)$
+        var@long_name = long_names(iv)
+        var@units     = units(iv)
+        fout->$clm5_vars(iv)$ = var        ; coords (time,lat,lon) carried automatically
+        delete(var)
+      else
+        print("  Warning: " + era5_vars(iv) + " not in " + ym + ".nc")
+      end if
+    end do
+
+    print("  Created: " + outfile)
+
+    delete(fin)
+    delete(fout)
+
+  end do
+  end do
+
+  print("Done.")
+
+end

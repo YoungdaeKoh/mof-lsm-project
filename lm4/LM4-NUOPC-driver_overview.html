@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UFS LM4-NUOPC-driver 이해하기</title>
+<style>
+  :root{
+    --bg:#0f172a; --card:#1e293b; --card2:#273449;
+    --ink:#e2e8f0; --muted:#94a3b8; --line:#334155;
+    --lm4:#34d399; --atm:#60a5fa; --med:#fbbf24; --noah:#f472b6;
+    --accent:#38bdf8;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,"Apple SD Gothic Neo","Segoe UI",Roboto,sans-serif;
+    line-height:1.7;padding:0 0 80px}
+  .wrap{max-width:920px;margin:0 auto;padding:0 22px}
+  header{padding:46px 22px 30px;text-align:center;
+    background:linear-gradient(160deg,#13243f,#0f172a);border-bottom:1px solid var(--line)}
+  header h1{margin:0 0 8px;font-size:1.9rem;letter-spacing:-.3px}
+  header .sub{color:var(--muted);font-size:1.02rem}
+  header .tag{display:inline-block;margin-top:14px;padding:4px 12px;border:1px solid var(--lm4);
+    color:var(--lm4);border-radius:20px;font-size:.8rem;font-weight:600}
+  h2{font-size:1.3rem;margin:42px 0 14px;padding-left:12px;border-left:4px solid var(--accent)}
+  h3{font-size:1.05rem;margin:24px 0 8px;color:var(--accent)}
+  p{margin:10px 0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:16px 0}
+  .tldr{background:linear-gradient(140deg,#163a32,#1e293b);border:1px solid var(--lm4)}
+  .tldr b{color:var(--lm4)}
+  code{background:#0b1220;color:#7dd3fc;padding:2px 7px;border-radius:6px;font-size:.86em;
+    font-family:"SF Mono",Menlo,Consolas,monospace}
+  .muted{color:var(--muted)}
+  .em{color:#fde68a;font-weight:600}
+
+  /* analogy box */
+  .analogy{display:flex;gap:14px;align-items:flex-start;background:var(--card2);
+    border-radius:12px;padding:16px 18px;margin:14px 0;border-left:4px solid var(--med)}
+  .analogy .ico{font-size:1.6rem;line-height:1}
+
+  /* diagram */
+  .diagram{display:flex;flex-direction:column;align-items:center;gap:0;margin:18px 0}
+  .box{border-radius:12px;padding:14px 18px;text-align:center;width:100%;max-width:560px;
+    font-weight:600;border:2px solid}
+  .box small{display:block;font-weight:400;color:var(--ink);opacity:.8;margin-top:4px;font-size:.78rem}
+  .b-atm{background:#15243d;border-color:var(--atm);color:var(--atm)}
+  .b-med{background:#2a2410;border-color:var(--med);color:var(--med)}
+  .b-lm4{background:#10291f;border-color:var(--lm4);color:var(--lm4)}
+  .b-cap{background:#1a2733;border-color:var(--accent);color:var(--accent)}
+  .arrow{color:var(--muted);font-size:1.4rem;line-height:1.2;margin:2px 0}
+  .arrow small{display:block;font-size:.72rem;color:var(--muted)}
+
+  /* repo tree */
+  .tree{background:#0b1220;border:1px solid var(--line);border-radius:12px;
+    padding:18px 20px;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:.84rem;
+    line-height:1.9;overflow-x:auto}
+  .tree .dir{color:var(--accent)}
+  .tree .sub{color:var(--lm4)}
+  .tree .cmt{color:var(--muted)}
+
+  /* table */
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:.92rem}
+  th,td{border:1px solid var(--line);padding:10px 12px;text-align:left;vertical-align:top}
+  th{background:var(--card2);color:var(--accent)}
+  .c-lm4{color:var(--lm4);font-weight:600}
+  .c-noah{color:var(--noah);font-weight:600}
+
+  /* two columns of exchange */
+  .exch{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
+  .exch .col{background:var(--card2);border-radius:12px;padding:14px 16px}
+  .exch h4{margin:0 0 8px;font-size:.95rem}
+  .exch.in h4{color:var(--atm)}
+  .exch.out h4{color:var(--lm4)}
+  .exch ul{margin:6px 0 0;padding-left:18px}
+  .exch li{margin:3px 0;font-size:.88rem}
+  @media(max-width:640px){.exch{grid-template-columns:1fr}}
+
+  .note{font-size:.88rem;color:var(--muted);border-top:1px dashed var(--line);margin-top:8px;padding-top:8px}
+  ul.clean{padding-left:20px}
+  ul.clean li{margin:6px 0}
+  .pill{display:inline-block;padding:2px 9px;border-radius:20px;font-size:.74rem;font-weight:600;margin-right:4px}
+  .p-on{background:#10291f;color:var(--lm4);border:1px solid var(--lm4)}
+  .p-wip{background:#2a2410;color:var(--med);border:1px solid var(--med)}
+  footer{margin-top:50px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:.82rem}
+  footer a{color:var(--accent);text-decoration:none}
+  .mof{background:linear-gradient(140deg,#1c2b1f,#1e293b);border:1px solid var(--lm4)}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>UFS <span style="color:var(--lm4)">LM4-NUOPC-driver</span> 한눈에 이해하기</h1>
+  <div class="sub">GFDL Land Model v4를 UFS 기상모델에 붙이기 위한 "연결 어댑터" 서브모듈</div>
+  <div class="tag">MOF KIMST · LSM 진단 testbed 참고자료</div>
+</header>
+
+<div class="wrap">
+
+<!-- TL;DR -->
+<div class="card tldr">
+  <b>TL;DR — 30초 요약</b>
+  <p><code>LM4-NUOPC-driver</code>는 <b>LM4(육지모델) 그 자체가 아니라</b>, LM4를 UFS 결합 프레임워크에
+  꽂기 위한 <b class="em">NUOPC 어댑터(cap)</b>입니다. 이 저장소 안에 LM4 본체가
+  <b>git submodule</b>로 들어있고, 그 위에 "UFS 표준 플러그"를 씌운 구조입니다.</p>
+  <p class="muted">즉 — LM4를 노트북(UFS)에 연결하는 <b>USB-C 어댑터</b>라고 보면 됩니다. 어댑터(driver)와
+  기기(LM4)는 별개지만 한 상자(repo)에 같이 들어있습니다.</p>
+</div>
+
+<!-- 1. 용어 -->
+<h2>1. 먼저 용어 3개만</h2>
+<div class="card">
+  <ul class="clean">
+    <li><b style="color:var(--lm4)">LM4</b> — GFDL Land Model version 4. 미국 GFDL의 육지모델로,
+      GFDL 기후모델 CM4 · ESM4 · SPEAR의 land 컴포넌트입니다. 식생·눈·토양·하천유출까지 다룹니다.</li>
+    <li><b style="color:var(--accent)">NUOPC</b> — 여러 모델(대기·해양·육지)을 표준 방식으로 결합하기 위한
+      규약(ESMF 기반). 각 모델은 NUOPC <span class="em">cap</span>(얇은 래퍼)을 갖춰야 결합 가능.</li>
+    <li><b style="color:var(--med)">UFS</b> — Unified Forecast System. NOAA의 통합 예보 시스템 우산 저장소
+      (<code>ufs-weather-model</code>). 대기(FV3)·해양·해빙·육지 등을 submodule로 모아 결합 실행.</li>
+  </ul>
+  <div class="note">핵심: UFS는 "여러 모델을 모으는 우산"이고, LM4가 그 우산에 들어가려면
+  <b>NUOPC cap을 입은 driver</b> 형태여야 합니다. 그게 바로 <code>LM4-NUOPC-driver</code>.</div>
+</div>
+
+<!-- 2. 어댑터 비유 -->
+<h2>2. driver(cap)가 왜 필요한가</h2>
+<div class="analogy">
+  <div class="ico">🔌</div>
+  <div>
+    <b>비유:</b> LM4는 "성능 좋은 외장 모니터"입니다. 그런데 UFS라는 노트북은 NUOPC라는 규격의
+    포트만 받습니다. LM4를 그냥은 못 꽂으니, <b>NUOPC cap = 어댑터</b>를 끼워야 합니다.
+    이 어댑터가 하는 일:
+    <ul class="clean" style="margin-top:6px">
+      <li>대기에서 오는 입력(기온·바람·복사 등)을 LM4가 이해하는 형태로 변환</li>
+      <li>LM4의 출력(land fraction 등)을 UFS 중재자(CMEPS)에게 전달</li>
+      <li>실행 순서·타임스텝(빠른 육지과정 ↔ 느린 육지과정)을 UFS 시계에 맞춤</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 3. 저장소 구조 -->
+<h2>3. 저장소 구조 (submodule 관계)</h2>
+<div class="card">
+  <p>UFS는 <b>중첩 submodule</b> 구조입니다. 위에서 아래로 들어갑니다:</p>
+  <div class="tree">
+<span class="dir">ufs-weather-model/</span>            <span class="cmt"># ① UFS 우산 repo (최상위)</span>
+└── <span class="dir">LM4-driver/</span>               <span class="cmt"># ② = NOAA-GFDL/LM4-NUOPC-driver (이 글의 주인공)</span>
+    ├── <span class="dir">nuopc_cap/</span>           <span class="cmt"># NUOPC 어댑터 코드 (Fortran)</span>
+    ├── <span class="sub">LM4/</span>                 <span class="cmt"># ③ LM4 본체 = 또 다른 submodule (gitlab.gfdl)</span>
+    ├── CMakeLists.txt          <span class="cmt"># CMake 빌드 정의</span>
+    ├── lm4_src_files.cmake     <span class="cmt"># 소스 파일 목록</span>
+    └── *.IN / *.nml.IN         <span class="cmt"># 설정 템플릿 (ufs.configure, namelist)</span>
+  </div>
+  <div class="note">즉 LM4 본체는 <b>submodule 안의 submodule</b>입니다. <code>git submodule update --init --recursive</code>로
+  재귀적으로 받아야 LM4 소스까지 내려옵니다. 빌드는 <b>CMake</b>, 코드의 ~97%가 Fortran입니다.</div>
+</div>
+
+<!-- 4. UFS 안에서의 위치 -->
+<h2>4. UFS 안에서 어디에 위치하나 (결합 그림)</h2>
+<div class="card">
+  <div class="diagram">
+    <div class="box b-atm">🌍 대기 컴포넌트 (FV3 atmosphere)
+      <small>또는 offline 시: CDEPS 데이터 대기 (DATM)</small></div>
+    <div class="arrow">⇅<small>flux 교환</small></div>
+    <div class="box b-med">⚙️ CMEPS 중재자 (Mediator)
+      <small>컴포넌트 간 격자 보간·flux 중계 — 1st-order conservative</small></div>
+    <div class="arrow">⇅</div>
+    <div class="box b-cap">🔌 LM4-NUOPC-driver (cap)
+      <small>UFS ↔ LM4 변환 어댑터</small></div>
+    <div class="arrow">⇅</div>
+    <div class="box b-lm4">🌱 LM4 본체
+      <small>식생·눈·토양·하천유출 물리</small></div>
+  </div>
+  <p class="muted">대기와 육지는 <b>직접</b> 대화하지 않습니다. 항상 <b>CMEPS 중재자</b>를 거쳐
+  주고받습니다. driver의 cap은 LM4 쪽 "통역사" 역할입니다.</p>
+</div>
+
+<!-- 5. 교환장 -->
+<h2>5. 무엇을 주고받나 (import / export)</h2>
+<div class="exch in">
+  <div class="col">
+    <h4>⬇️ Import — 대기→LM4 (받는 것)</h4>
+    <ul>
+      <li>기온 (temperature)</li>
+      <li>기압 (pressure)</li>
+      <li>바람 성분 (u, v wind)</li>
+      <li>비습 (humidity)</li>
+      <li>하향 복사 — 장파(LW)·단파(SW) 성분</li>
+      <li>강수 (precipitation forcing)</li>
+    </ul>
+  </div>
+</div>
+<div class="exch out">
+  <div class="col">
+    <h4>⬆️ Export — LM4→중재자 (내보내는 것)</h4>
+    <ul>
+      <li>land fraction (<code>lnd%sg_landfrac</code>)</li>
+      <li>지면 flux(현열·잠열)·알베도·지면온도 등
+        <span class="muted">(결합 단계에서 확장 중)</span></li>
+    </ul>
+    <p class="note">현재 export는 결합 완성도에 따라 계속 추가되는 중. offline 테스트는
+    import(대기 forcing) 위주로 검증.</p>
+  </div>
+</div>
+
+<!-- 6. LM4 vs Noah-MP -->
+<h2>6. LM4 vs Noah-MP (UFS의 두 육지모델)</h2>
+<div class="card">
+  <p>UFS는 육지모델을 <b>두 개</b> 품고 있습니다. 둘 다 NUOPC cap으로 붙습니다.</p>
+  <table>
+    <tr><th>항목</th><th class="c-lm4">LM4 (GFDL)</th><th class="c-noah">Noah-MP</th></tr>
+    <tr><td>성격</td><td>지구시스템급 육지모델</td><td>수치예보용 경량 육지모델</td></tr>
+    <tr><td>식생</td><td>동역학 식생(PPA), 다층 캐노피, 페놀로지, 산불·작물</td><td>주로 규정형(prescribed) 식생</td></tr>
+    <tr><td>탄소/생화학</td><td>CORPSE 토양탄소, 다중 탄소 풀</td><td>제한적 (옵션)</td></tr>
+    <tr><td>수문</td><td>예단적 하천유출, 수온 추적 tracer</td><td>토양수·눈 중심</td></tr>
+    <tr><td>UFS 결합 driver</td><td><code>LM4-driver</code> (NUOPC cap)</td><td><code>NOAHMP-interface</code> (NUOPC cap)</td></tr>
+    <tr><td>주 용도</td><td>S2S·기후, land-atmosphere 상호작용</td><td>현업 단기·중기 예보</td></tr>
+  </table>
+  <div class="note">과제 관점: <b>다중 LSM 비교(JULES · CLM5 · Noah-MP · LM4)</b>에서 LM4는
+  "식생·생화학까지 가장 복잡한 쪽" 끝에 위치. Noah-MP는 "현업 경량" 쪽 끝.</div>
+</div>
+
+<!-- 7. 빌드/실행 상태 -->
+<h2>7. 빌드 · 실행 · 현재 상태</h2>
+<div class="card">
+  <ul class="clean">
+    <li><b>빌드:</b> CMake. 현재 global <b>C96 cubed-sphere</b> 격자 지원.</li>
+    <li><b>offline 모드 <span class="pill p-on">가능</span></b> —
+      <b>CDEPS</b>(데이터 컴포넌트)로 관측 대기 forcing(<b>GSWP3</b>)을 먹여 LM4만 단독 구동·검증.
+      회귀시험(regression test) 2종 제공 (<code>ufs.configure.atm_lm4.IN</code>).</li>
+    <li><b>결합 모드 <span class="pill p-wip">진행 중</span></b> —
+      FV3 대기와 2-way 결합 및 S2S 규모 평가가 현재 개발 단계.</li>
+    <li><b>restart:</b> FMS 기반, 9개 restart 파일 필요.</li>
+  </ul>
+  <div class="analogy" style="border-color:var(--lm4)">
+    <div class="ico">🎯</div>
+    <div><b>통합 동기:</b> 강수 극값·S2S 예측력. 지면-대기 상호작용이 계절내~계절 규모 예측의
+    중요한 예측가능성 원천이고, LM4의 정교한 캐노피·눈·토양 물 교환이 거기에 기여한다는 것이
+    NOAA/EPIC의 통합 명분입니다.</div>
+  </div>
+</div>
+
+<!-- 8. 내 과제와의 연결 -->
+<h2>8. MOF LSM 과제와의 연결</h2>
+<div class="card mof">
+  <p>우리 과제(해수부 차세대 해양기후모델 LSM 진단)의 Phase 1 testbed 4종 중 하나가 <b>LM4+</b>입니다.
+  이 driver가 그 진입로입니다:</p>
+  <ul class="clean">
+    <li><b>오프라인 testbed로 바로 활용 가능</b> — CDEPS + GSWP3 경로가 이미 있으니,
+      <b>우리가 받는 forcing(ERA5 / Sheffield-PGF / CMFD)</b>을 같은 DATM 틀에 먹이면
+      JULES·CLM5와 <b>동일 forcing·동일 격자</b>로 LM4를 굴려 비교할 수 있습니다.</li>
+    <li><b>빌드 난이도:</b> CLAUDE.md 메모대로 "FMS 프레임워크 별도 빌드 필요" — 중첩 submodule(LM4)과
+      FMS·CMake 의존성이 JULES보다 무겁습니다. climate00에서 먼저 offline 회귀시험부터.</li>
+    <li><b>진단 포인트:</b> ILAMB/PLUMBER2 틀에서 LM4의 동역학 식생·하천유출이
+      Noah-MP/CLM5 대비 land-atmosphere coupling 지표(Mi, λ)를 어떻게 바꾸는지가 비교 핵심.</li>
+  </ul>
+  <div class="note">다음 액션 후보(나중): climate00에서 <code>LM4-NUOPC-driver</code>를
+  <code>--recursive</code>로 clone → CDEPS+GSWP3 회귀시험 1개 빌드·실행 성공시키기.</div>
+</div>
+
+<footer>
+  <b>출처</b><br>
+  • <a href="https://github.com/NOAA-GFDL/LM4-NUOPC-driver">NOAA-GFDL/LM4-NUOPC-driver (GitHub)</a><br>
+  • <a href="https://epic.noaa.gov/gfdl-land-model-lm4-0/">EPIC — Integration of LM4 in the UFS</a><br>
+  • <a href="https://ufs-weather-model.readthedocs.io/en/latest/CodeOverview.html">UFS Weather Model Users Guide — Code Overview</a><br>
+  • <a href="https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2023MS003922">Shevliakova et al. 2024 — LM4.1 (JAMES)</a><br>
+  <span class="muted">생성: MOF_LSM_project · 이해용 정리 (모델 버전·결합 상태는 UFS release에 따라 변동)</span>
+</footer>
+
+</div>
+</body>
+</html>

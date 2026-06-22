@@ -41,20 +41,16 @@
 | Batch system | none (직접 실행) |
 | Login shell | tcsh; 빌드/실행 스크립트는 bash |
 
-### 핵심 경로
+### 핵심 경로 (climate00)
 
 | 종류 | 경로 |
 |---|---|
-| JULES 소스 | `~/jules-vn7.4/` |
-| JULES 실행파일 | `~/jules-vn7.4/build/bin/jules.exe` |
-| JULES 실험 | `~/JULES_runs/` |
-| JULES 포팅 작업물 | `~/JULES_porting/` |
-| CESM 소스 | `~/CESM/` (release-cesm2.1.5) |
-| CESM cases | `~/CESM/cases/` |
-| FCM | `~/fcm/bin/fcm` (anaconda perl 5.32) |
-| 입력자료 | `/data1/` |
-| 동료 백업 (찬혁) | `/data1/backup/ChanhyukChoi/002.JULES_RUN/` |
-| 출력자료 | `/data2/ydkoh/` |
+| JULES | 소스 `~/jules-vn7.4/` · exe `~/jules-vn7.4/build/bin/jules.exe` · 실험 `~/JULES_runs/` |
+| CESM | 소스 `~/CESM/` (release-cesm2.1.5) · cases `~/CESM/cases/` |
+| 입력 / 출력 | 입력 `/data1/` · 출력 `/data2/ydkoh/` |
+| 동료 백업(찬혁) | `/data1/backup/ChanhyukChoi/002.JULES_RUN/` |
+
+(FCM `~/fcm/bin/fcm`, JULES 포팅 `~/JULES_porting/` 등 부수 경로는 필요 시 참조)
 
 ## 4. Model status (2026.05 기준)
 
@@ -76,27 +72,26 @@
 - JULES log page: `33ca128b-012a-81de-93d7-d2caf9435195`
 - CLM5 log page: `33ca128b-012a-8182-99d8-d87a4916e89f`
 
-## 6. Repo layout (expected)
+## 6. Repo layout (current/evolving)
 
 ```
-~/MOF_LSM_project/
-├── CLAUDE.md                  # 이 파일
-├── README.md
-├── .gitignore
-├── docs/                      # HTML 로드맵, 포팅 가이드, 보고서
-├── jules/
-│   ├── namelists/             # JULES namelist 사본
-│   ├── build/                 # build_jules.sh 등
-│   └── runs/                  # 실험 설정
+MOF_LSM_project/                # 로컬 = /Volumes/data01/MOF_LSM_project
+├── CLAUDE.md                   # 이 파일 / README.md
+├── 2026/                       # 해수부 마일스톤·착수보고·분기 보고 (docx/pdf/md/html)
+├── jules/                      # JULES namelist·빌드·실험 설정 사본
 ├── cesm/
-│   ├── config/                # ~/.cime/ 사본
-│   └── cases/                 # case 스크립트
-├── noahmp/                    # 추후
-├── lm4/                       # 추후
-└── analysis/                  # Python/NCL 분석 코드
+│   ├── cases/                  # case 스크립트
+│   ├── run_scripts/            # 실행 스크립트
+│   ├── clm_output/             # 로컬 분석용 경량 CLM 출력
+│   └── download_*.{sh,py}      # 입력자료 다운로드
+├── analysis/                   # Python/NCL 분석 코드
+├── data/ · figures/            # 경량 데이터·그림 (대용량 제외)
+└── (docs/ — 계획만, 미생성)     # 로드맵·포팅가이드 예정, 아직 없음
 ```
 
-대용량 파일(NetCDF, 빌드 산출물, 입력자료)은 git에 넣지 않음. `.gitignore`로 차단.
+- noahmp/·lm4/는 모델 착수 후 생성 예정.
+- 대용량 파일(NetCDF, 빌드 산출물, 입력자료)은 git 제외(`.gitignore`).
+- `CLAUDE-FABLE-5.md`는 시스템 프롬프트 사본 — 프로젝트 메모리 아님. `.claude/` 이동 또는 gitignore 권장(별도 확인 후).
 
 ## 7. Working rules (Claude Code 작업 규칙)
 
