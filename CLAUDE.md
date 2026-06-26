@@ -59,7 +59,7 @@
 | **JULES vn7.4** | 빌드·테스트런 완료, spinup_cy01 설정 중 | serial(nompi). MPI 빌드 실패 미해결. ERA5 forcing time coord 이슈 미해결 |
 | **CESM2.1.5 (CAM6/CLM5)** | 빌드 완료 | I2000Clm50Sp @ f09_g17. F2000climo timeaddmonths 에러 (PE layout 불일치) |
 | **CESM2.1.5 (CAM4/CLM4)** | smoke test 완료, spin-up 중 | F2000C4L40 @ f19_f19. F_ctrl_smoke 1개월 ✓. F_spinup 10년 실행 중 (매월 restart). Snowfall sensitivity: 5년 perturbation (-25/-50/-75% from year 10-11) |
-| **Noah-MP** | 미시작 | CLM5와 같은 모듈 스택 활용 예정 |
+| **Noah-MP v5.2.1** | **gridded global 실행 완료** | HRLDAS offline(`~/HRLDAS/`, v5.2.1). intel21 serial. 단일격자 ✓ + **global 0.5° GSWP3 gridded 실행 ✓**(WRF/WPS geo_em, GSWP3→LDASIN 변환기). 다음: 2-stage spin-up(static DVEG=4 cold start → dynamic DVEG=2). 상세 `noahmp/NOAHMP_PORTING_NOTES.md` |
 | **LM4+** | 미시작 | FMS 프레임워크 별도 빌드 필요 |
 
 ## 5. Notion (research hub)
@@ -89,7 +89,7 @@ MOF_LSM_project/                # 로컬 = /Volumes/data01/MOF_LSM_project
 └── (docs/ — 계획만, 미생성)     # 로드맵·포팅가이드 예정, 아직 없음
 ```
 
-- noahmp/·lm4/는 모델 착수 후 생성 예정.
+- noahmp/(porting notes)·lm4/(spin-up notes) 생성됨.
 - 대용량 파일(NetCDF, 빌드 산출물, 입력자료)은 git 제외(`.gitignore`).
 - `CLAUDE-FABLE-5.md`는 시스템 프롬프트 사본 — 프로젝트 메모리 아님. `.claude/` 이동 또는 gitignore 권장(별도 확인 후).
 
