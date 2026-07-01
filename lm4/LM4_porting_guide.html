@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UFS LND-LM4 포팅 가이드 — climate 서버 (gfortran)</title>
+<style>
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
+       line-height:1.6;color:#222;max-width:980px;margin:0 auto;padding:24px 28px;background:#fafafa;}
+  h1{font-size:1.7em;border-bottom:3px solid #2c6e9b;padding-bottom:8px;color:#1d4e6e;}
+  h2{font-size:1.3em;margin-top:1.8em;border-left:5px solid #2c6e9b;padding-left:10px;color:#1d4e6e;}
+  h3{font-size:1.08em;color:#2c6e9b;margin-top:1.3em;}
+  code{background:#eef2f5;padding:1px 5px;border-radius:3px;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:0.88em;color:#b5005a;}
+  pre{background:#1e2630;color:#e6edf3;padding:14px 16px;border-radius:7px;overflow-x:auto;font-size:0.84em;line-height:1.45;}
+  pre code{background:none;color:inherit;padding:0;}
+  .ok{color:#1a7f37;font-weight:bold;} .warn{color:#9a6700;font-weight:bold;} .bad{color:#b5005a;font-weight:bold;}
+  table{border-collapse:collapse;width:100%;margin:1em 0;font-size:0.9em;}
+  th,td{border:1px solid #ccd;padding:7px 10px;text-align:left;} th{background:#e7eff5;}
+  .box{background:#fff;border:1px solid #d8e0e8;border-radius:7px;padding:6px 18px;margin:1em 0;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+  .crit{background:#fff6f6;border:1px solid #f0c0c0;border-radius:7px;padding:6px 18px;margin:1em 0;}
+  .tip{background:#f3faf3;border:1px solid #bfe3bf;border-radius:7px;padding:6px 18px;margin:1em 0;}
+  .meta{color:#667;font-size:0.85em;}
+  ol li,ul li{margin:4px 0;}
+</style>
+</head>
+<body>
+
+<h1>UFS Weather Model · LND-LM4 포팅 가이드 (climate 서버, gfortran)</h1>
+<p class="meta">작성 2026-06-20 · 대상: 세종대 정지훈 연구실 climate 서버 (Rocky8, sapphirerapids, tcsh 로그인셸) ·
+LM4 = NOAA-GFDL/LM4 <code>land_lad2_2023.02</code> (동적식생 PPA + CORPSE 토양탄소) · 컴파일러 gfortran 12.2.1</p>
+
+<div class="tip"><b>최종 결과:</b> <span class="ok">datm_cdeps_lm4_gswp3 48시간 적분 완주 (exit 0)</span>.
+동적식생(LAI/NPP/GPP) 출력 확인. 빌드물 <code>ufs_model</code> 24MB, 런 디렉토리 <code>/data2/ydkoh/lm4/RUN/lm4_gswp3/</code>.</div>
+
+<h2>0. 개요 — 왜 까다로웠나</h2>
+<p>LM4-driver 소스는 <b>intel <code>fpp</code> 전용</b>으로 쓰여 있어(ISO cpp <code>#</code> stringify / <code>##</code> token-paste를
+디버그 + <code>DEFINE_*_ACCESSOR</code> 매크로에 광범위 사용) gfortran으로는 그대로 빌드되지 않는다. 핵심 해법은
+<b>LM4 소스만 intel fpp로 전처리한 뒤 gfortran으로 컴파일</b>하는 것. 또한 라이브러리 스택은 spack-stack(gcc)으로 직접 빌드한다.</p>
+
+<h2>1. 라이브러리 스택 (spack-stack, gcc@12.2.1)</h2>
+<p>서버 시스템 모듈엔 ESMF/FMS가 없으므로 spack-stack으로 직접 빌드한다. 위치 <code>/data2/ydkoh/spack-stack</code>.</p>
+<div class="box">
+<b>설치 완료 패키지 (hash는 이 서버 기준 — 재빌드 시 달라짐):</b>
+<table>
+<tr><th>패키지</th><th>버전</th><th>hash</th></tr>
+<tr><td>esmf</td><td>8.8.0</td><td>3cfkk4a</td></tr>
+<tr><td>fms (r4/r8)</td><td>2025.03</td><td>dksylqk</td></tr>
+<tr><td>parallelio (PIO)</td><td>2.6.5</td><td>snsodk7</td></tr>
+<tr><td>bacio</td><td>2.6.0</td><td>y5kptwe</td></tr>
+<tr><td>sp</td><td>2.5.0</td><td>4kwzqxv</td></tr>
+<tr><td>w3emc</td><td>2.12.0</td><td>kycgq3h</td></tr>
+<tr><td>openmpi</td><td>5.0.10</td><td>evn6nxf</td></tr>
+<tr><td>netcdf-c / netcdf-fortran / hdf5</td><td>4.9.2 / 4.6.1 / 1.14.6</td><td>(deps)</td></tr>
+</table>
+</div>
+<div class="crit"><b class="bad">함정 ① bufr:</b> <code>bufr+python</code>을 요청하면 Python≥3.12(distutils 제거)에서 f2py가 깨지며
+설치 트랜잭션 전체가 실패한다. <b>w3emc는 기본 <code>~bufr</code>라 bufr 불필요</b> → <code>spack install w3emc</code> 단독으로 해결.
+anaconda 끌어올 필요 없음.</div>
+<pre><code># spack 환경 (매 세션)
+setenv SPACK_STACK_DIR /data2/ydkoh/spack-stack
+source spack/share/spack/setup-env.csh   # bash면 .sh
+# 중복 설치가 많아 이름 load는 모호 → hash로 load
+spack load /3cfkk4a /dksylqk /snsodk7 /y5kptwe /4kwzqxv /kycgq3h /evn6nxf</code></pre>
+
+<h2>2. UFS 소스 + LM4-driver</h2>
+<pre><code>cd /data2/ydkoh/lm4
+git clone --recursive https://github.com/ufs-community/ufs-weather-model
+# LM4-driver는 UFS 서브모듈로 포함됨 (LM4-driver/, LM4/ = NOAA-GFDL/LM4 land_lad2_2023.02)</code></pre>
+
+<h2>3. 소스/빌드 패치 (★ 재현 시 반드시 재적용 — git submodule update 시 사라짐)</h2>
+
+<h3>3-1. FindESMF: ESMF::ESMF 타겟 생성</h3>
+<p><code>CMakeModules/Modules/FindESMF.cmake</code>(구버전 스텁)가 변수만 세팅하고 imported 타겟을 안 만들어
+UFS/CDEPS/CMEPS/LM4가 링크하는 <code>ESMF::ESMF</code>를 못 찾는다. 파일 끝에 추가:</p>
+<pre><code>if (ESMF_FOUND AND NOT TARGET ESMF::ESMF)
+  string(STRIP "${ESMF_F90ESMFLINKRPATHS} ${ESMF_F90ESMFLINKPATHS} ${ESMF_F90ESMFLINKLIBS}" ESMF_INTERFACE_LINK_LIBRARIES)
+  add_library(ESMF::ESMF INTERFACE IMPORTED)
+  set_target_properties(ESMF::ESMF PROPERTIES
+    INTERFACE_INCLUDE_DIRECTORIES "${ESMF_F90COMPILEPATHS}"
+    INTERFACE_LINK_LIBRARIES "${ESMF_INTERFACE_LINK_LIBRARIES}")
+endif()</code></pre>
+
+<h3>3-2. ★ LM4를 intel fpp로 전처리 (핵심)</h3>
+<p>gfortran 통합 전처리기는 traditional 모드라 <code>#</code>/<code>##</code> 연산자를 지원하지 않는다.
+<code>LM4-driver/CMakeLists.txt</code>의 <code>include("lm4_src_files.cmake")</code> 다음, <code>add_library(lm4 ...)</code> 앞에 삽입:</p>
+<pre><code>if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
+  set(FPP_EXE "/usr/local/intel/oneapi/compiler/latest/linux/bin/intel64/fpp")
+  set(FMS_INC "/data2/ydkoh/spack-stack/spack/opt/spack/linux-sapphirerapids/fms-2025.03-dksylqkysm2ngh3mlon7d4fbu334hpca/include_r8")
+  set(_lm4_pp_srcs "")
+  foreach(_src ${lm4_src_files})
+    get_filename_component(_ext ${_src} EXT)
+    if(_ext STREQUAL ".F90")
+      get_filename_component(_nm ${_src} NAME_WE)
+      get_filename_component(_dr ${_src} DIRECTORY)
+      set(_out "${CMAKE_CURRENT_BINARY_DIR}/fpp/${_dr}/${_nm}.f90")
+      get_filename_component(_outdir ${_out} DIRECTORY)
+      file(MAKE_DIRECTORY ${_outdir})
+      add_custom_command(OUTPUT ${_out}
+        COMMAND ${FPP_EXE} -P -DINTERNAL_FILE_NML -DMPI -I${FMS_INC} ${_nm}.F90 ${_out}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${_dr}
+        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${_src} VERBATIM)
+      list(APPEND _lm4_pp_srcs ${_out})
+    endif()
+  endforeach()
+  set(lm4_src_files ${_lm4_pp_srcs})
+endif()</code></pre>
+<p class="meta">fpp가 .F90→.f90(소문자, 순수 Fortran)으로 전개 → gfortran은 .f90을 추가 전처리 없이 컴파일.
+LM4엔 컴파일러 분기 cpp가 없어 fpp의 intel 매크로는 무해. (이 방식이면 아래 3-3의 수동 디버그 패치는 사실 불필요하나 무해.)</p>
+
+<h3>3-3. ★ lm4_cap.F90 할당 순서 버그 (SEGV)</h3>
+<div class="crit"><code>nuopc_cap/lm4_cap.F90</code> InitializeAdvertise에서 <code>init_driver</code>(→compute_gust가 <code>atm_forc%gust</code>에 값 대입)가
+<code>alloc_atmforc</code>(gust 할당)보다 <b>먼저</b> 호출됨 → 미할당 포인터 접근 → <b>segfault</b>.
+intel은 우연히 안 죽던 잠복버그. <b>alloc_atmforc 블록을 init_driver 앞으로 이동.</b></div>
+<pre><code>      call land_model_init( ... )
+      call alloc_atmforc(lm4_model%atm_forc)        ! ← init_driver 앞으로 이동
+      if (debug_cap > 0) call alloc_atmforc2d(lm4_model%atm_forc2d)
+      call init_driver(lm4_model)
+      call ESMF_LogWrite('======== COMPLETED land_model_init ==========', ESMF_LOGMSG_INFO)</code></pre>
+
+<h2>4. cmake 설정 (APP=LND-LM4)</h2>
+<div class="crit"><b class="bad">함정 ② 컴파일러:</b> cmake가 시스템 gcc 8.5(UFS는 ≥9 요구)를 잡으므로 MPI 래퍼를 강제 지정.</div>
+<pre><code>spack load /3cfkk4a /dksylqk /snsodk7 /y5kptwe /4kwzqxv /kycgq3h /evn6nxf
+setenv CC mpicc; setenv CXX mpicxx; setenv FC mpif90
+cd /data2/ydkoh/lm4/ufs-weather-model
+rm -rf build; mkdir build; cd build
+cmake -DAPP=LND-LM4 \
+      -DCMAKE_C_COMPILER=mpicc -DCMAKE_CXX_COMPILER=mpicxx -DCMAKE_Fortran_COMPILER=mpif90 \
+      -DCMAKE_EXE_LINKER_FLAGS="-L<hdf5>/lib -Wl,-rpath,<hdf5>/lib -lhdf5_mpi_hl -lhdf5_mpi" ..</code></pre>
+<div class="crit"><b class="bad">함정 ③ 링크:</b> ESMF link line이 netcdf만 갖고 hdf5/pio를 빠뜨림 + PIO와 ESMF가 서로 다른 netcdf/hdf5 사본에 빌드됨.
+netcdf-c가 <b>parallel</b>이라 <code>libhdf5_mpi</code> 필요 → 위 <code>CMAKE_EXE_LINKER_FLAGS</code>로 명시.
+<code>&lt;hdf5&gt;</code> = parallel hdf5 설치 경로(<code>libhdf5_mpi.so</code> 보유).</div>
+
+<h2>5. make (fpp 전처리 + 컴파일 + 링크)</h2>
+<pre><code>cd build; make -j6      # 산출물: build/ufs_model (~24MB ELF)</code></pre>
+<p class="meta">make 환경에 LIBRARY_PATH로 pio/hdf5 lib 추가 권장. 100% 컴파일 후 ufs_model 링크.</p>
+
+<h2>6. 런타임 라이브러리</h2>
+<div class="crit"><b class="bad">함정 ④:</b> 시스템 <code>/usr/lib64/libgfortran.so.5</code>·<code>libstdc++.so.6</code>이 너무 오래돼 <code>GFORTRAN_10</code>·<code>GLIBCXX_3.4.29</code>가 없다.
+새 버전은 conda env <code>/home/ydkoh/anaconda3/envs/lm4build/lib</code>에 있다.</div>
+<pre><code># 실행 전: 컴파일러 런타임만 보충 (spack 라이브러리는 바이너리 RUNPATH가 처리)
+export LD_LIBRARY_PATH=/home/ydkoh/anaconda3/envs/lm4build/lib:$LD_LIBRARY_PATH
+ldd ufs_model | grep "not found"    # → 0개여야 함</code></pre>
+
+<h2>7. 입력 데이터 (공개 S3, ~8.3 GB)</h2>
+<p>NOAA UFS regression 베이스라인. 데이터 버전 <code>input-data-20251015</code> (rt.sh 기준). aws cli(<code>pip install --user awscli</code>) 사용.</p>
+<pre><code>set R = /data2/ydkoh/lm4/INPUTDATA/input-data-20251015
+set B = s3://noaa-ufs-regtests-pds/input-data-20251015
+~/.local/bin/aws s3 cp --no-sign-request --recursive $B/LM4_input_data/        $R/LM4_input_data/
+~/.local/bin/aws s3 cp --no-sign-request --recursive $B/DATM_GSWP3_input_data/ $R/DATM_GSWP3_input_data/
+~/.local/bin/aws s3 cp --no-sign-request --recursive $B/MOM6_FIX/100/          $R/MOM6_FIX/100/   # ocean_mosaic 등 (41MB)
+~/.local/bin/aws s3 cp --no-sign-request $B/CPL_FIX/aC96o100/grid_spec.nc      $R/CPL_FIX/aC96o100/
+~/.local/bin/aws s3 cp --no-sign-request --recursive --exclude "*" --include "C96_grid.tile*.nc" --include "grid_spec.nc" $B/FV3_input_data/INPUT/ $R/FV3_input_data/INPUT/</code></pre>
+<table>
+<tr><th>데이터</th><th>내용</th></tr>
+<tr><td>LM4_input_data/common_LM4</td><td>biodata·cover_type·geohydrology·ground_type·landuse·soil_brdf·soil_type</td></tr>
+<tr><td>LM4_input_data/c96_grid, c96_LM4</td><td>C96 격자·교환격자·수문·topo·static_veg tar</td></tr>
+<tr><td>DATM_GSWP3_input_data</td><td>GSWP3 forcing(1999-12,2000-01) + ESMF mesh 3종</td></tr>
+<tr><td>MOM6_FIX/100</td><td><b>ocean_mosaic.nc</b> 등 (결합 grid_spec이 참조)</td></tr>
+</table>
+<p class="meta">GSWP3 forcing은 로컬에도 있음: <code>/data1/CESM2_INPUT/atm/datm7/atm_forcing.datm7.GSWP3.0.5d.v1.c170516/</code> (1979–2010).</p>
+
+<h2>8. 런 디렉토리 구성 (rt 프레임워크 재사용)</h2>
+<p>rt.sh는 이 서버에서 안 도므로, framework의 변수정의 + atparse를 source하는 드라이버로 config를 생성한다.
+핵심 변수: 케이스 <code>datm_cdeps_lm4_gswp3</code> (cold start, 2000-01-01, 48h, C96, 2×2 layout) →
+PET: ATM(datm)·MED(cmeps)·LND(lm4) 전부 <code>0 23</code> → <b>mpirun -np 24</b>.</p>
+<pre><code>#!/bin/bash   # setup_lm4_run.sh (요지)
+export PATHRT=.../ufs-weather-model/tests
+export RUNDIR=/data2/ydkoh/lm4/RUN/lm4_gswp3
+export INPUTDATA_ROOT=/data2/ydkoh/lm4/INPUTDATA/input-data-20251015
+export INPUTDATA_LM4=$INPUTDATA_ROOT/LM4_input_data
+export THRD=1 TPN=40 atm_omp_num_threads=1 lnd_omp_num_threads=1 med_omp_num_threads=1
+cd $PATHRT; source default_vars.sh; source rt_utils.sh; source atparse.bash
+source $PATHRT/tests/datm_cdeps_lm4_gswp3
+export ESMF_THREADING=false ; export ATM_tasks=$ATM_compute_tasks
+compute_petbounds_and_tasks_traditional_threading
+rm -rf $RUNDIR; mkdir -p $RUNDIR; cd $RUNDIR
+atparse < $PATHRT/parm/$INPUT_NML            > input.nml
+atparse < $PATHRT/parm/$MODEL_CONFIGURE      > model_configure
+atparse < $PATHRT/parm/$UFS_CONFIGURE        > ufs.configure ; sed -i '/_omp_num_threads:/d' ufs.configure
+atparse < $PATHRT/parm/diag_table/$DIAG_TABLE > diag_table
+cp      $PATHRT/parm/field_table/$FIELD_TABLE_ADDITIONAL field_table
+cp      $PATHRT/parm/fd_ufs.yaml              fd_ufs.yaml      # ← 함정 ⑤: 빠뜨리면 YAML read 실패
+atparse < $PATHRT/parm/$DATM_IN_CONFIGURE    > datm_in
+atparse < $PATHRT/parm/$DATM_STREAM_CONFIGURE > datm.streams
+for i in $FV3_RUN; do atparse < $PATHRT/fv3_conf/$i >> fv3_run; done
+bash ./fv3_run                                                # INPUT/ staging (tar 풀기·링크·rsync)
+rsync -a $INPUTDATA_ROOT/MOM6_FIX/100/ INPUT/                 # ← 함정 ⑥: ocean_mosaic.nc</code></pre>
+
+<h2>9. 실행 + 런타임 함정</h2>
+<pre><code>#!/bin/bash   # run_lm4.sh
+source /data2/ydkoh/spack-stack/spack/share/spack/setup-env.sh
+spack load /evn6nxf
+export LD_LIBRARY_PATH=/home/ydkoh/anaconda3/envs/lm4build/lib:$LD_LIBRARY_PATH
+ulimit -s unlimited
+cd /data2/ydkoh/lm4/RUN/lm4_gswp3
+ln -sf /data2/ydkoh/lm4/ufs-weather-model/build/ufs_model .
+mpirun -np 24 ./ufs_model</code></pre>
+<table>
+<tr><th>#</th><th>증상</th><th>해결</th></tr>
+<tr><td>⑤</td><td>ESMF YAML read 실패 / <code>Faxa_swdn not a StandardName</code></td><td><code>fd_ufs.yaml</code> 복사</td></tr>
+<tr><td>⑥</td><td>FMS <code>Error opening INPUT/ocean_mosaic.nc</code></td><td>MOM6_FIX/100 → INPUT staging</td></tr>
+<tr><td>⑦</td><td>SEGV at <code>lm4_driver compute_gust</code></td><td>3-3 할당순서 패치 (재빌드)</td></tr>
+<tr><td>⑧</td><td>PIO <code>PIOc_createfile</code> 실패</td><td>parallelio가 <span class="bad">PnetCDF 미지원</span> → ufs.configure <code>pio_typename = pnetcdf</code> → <b>netcdf</b></td></tr>
+</table>
+
+<h2>10. 결과 확인</h2>
+<p>런 디렉토리 <code>/data2/ydkoh/lm4/RUN/lm4_gswp3/</code>:</p>
+<ul>
+<li><b>LM4 land 진단 (핵심):</b> <code>YYYYMMDD.land_hourly.tile1-6.nc</code> — 시간별. 변수: <code>vegn_T, LAI, npp, gpp, soil_liq, soil_ice, runf, precip, snow_soil…</code> (<span class="ok">동적식생 LAI/NPP/GPP 포함</span>)</li>
+<li><code>land_month.tile?.nc</code>(월평균), <code>land_static.tile?.nc</code>(정적)</li>
+<li><b>커플러:</b> <code>ufs.cpld.cpl.hi*.nc</code>, <code>ufs.cpld.cpl.hi.lnd*.nc</code></li>
+<li><b>Restart:</b> <code>RESTART/*.res.tile?.nc</code> (6h마다 + 최종 48h)</li>
+</ul>
+<div class="tip"><b>출력은 C96 cubed-sphere 6타일</b> → 분석/도시는 lat-lon regrid 필요 (ESMF/CDO/fregrid).
+검증은 같은 컴파일러(gfortran) 내 재현성으로 — intel 공식 baseline과는 부동소수점 roundoff 차이로 bit-identical 아님.</div>
+
+<h2>11. 다음 단계</h2>
+<ul>
+<li>C96 6타일 → lat-lon regrid 파이프라인</li>
+<li><b>ERA5 강제</b>: CDEPS DATM 입력으로 ERA5 변환 (UFS에 <code>datm_cdeps_lnd_era5</code> 케이스 존재 — 참고).
+GSWP3↔ERA5 매핑: TBOT/QBOT/PBOT/WIND/FLDS + SW(4-band vis/nir × dir/dif).</li>
+<li>장기 적분(최대 GSWP3 2010)·LIS 4모델(NOAH33/NOAHMP/MOSAIC/CLSM)과 통합 진단</li>
+</ul>
+
+<hr>
+<p class="meta">관련 파일(서버): <code>/data2/ydkoh/lm4/PORTING_NOTES.md</code>(원본 노트),
+<code>/data2/ydkoh/spack-stack/{install_w3emc,ufs_cmake,make_ufs,relink_ufs}.csh</code>,
+<code>/data2/ydkoh/lm4/{setup_lm4_run,run_lm4}.sh</code>. 작성: Claude Code, 2026-06-20.</p>
+
+</body>
+</html>

@@ -1,0 +1,491 @@
+<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8">
+<title>LM4 사용가능 진단 필드 목록</title><style>
+body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:1000px;margin:0 auto;padding:20px;color:#222;background:#fafafa}
+h1{color:#1d4e6e;border-bottom:3px solid #2c6e9b;padding-bottom:6px}
+h2{color:#1d4e6e;border-left:5px solid #2c6e9b;padding-left:8px;margin-top:1.4em}
+table{border-collapse:collapse;width:100%;font-size:0.86em;margin:.4em 0}
+th,td{border:1px solid #ccd;padding:4px 8px;text-align:left;vertical-align:top}
+th{background:#e7eff5} code{background:#eef2f5;color:#b5005a;padding:1px 4px;border-radius:3px}
+.meta{color:#667;font-size:.85em}.spin{background:#fffbe6}</style></head><body>
+<h1>LM4 사용 가능 진단 필드 (register_tiled_diag_field)</h1>
+<p class="meta">자동 추출: NOAA-GFDL/LM4 land_lad2_2023.02 소스 · 총 461개 · 2026-06-20.<br>diag_table에 이 short name을 넣어 출력. <span class="spin">노란색</span> = spin-up 수렴 모니터링 추천 변수.</p>
+<h2>glacier <span class="meta">(9)</span></h2>
+<table><tr><th>short name</th><th>long name</th><th>units</th><th>file</th></tr>
+<tr><td><code>glac_T</code></td><td>temperature</td><td>degK</td><td class="meta">glacier.F90</td></tr>
+<tr><td><code>glac_hbf</code></td><td></td><td></td><td class="meta">glacier.F90</td></tr>
+<tr><td><code>glac_hie</code></td><td></td><td></td><td class="meta">glacier.F90</td></tr>
+<tr><td><code>glac_hsn</code></td><td></td><td></td><td class="meta">glacier.F90</td></tr>
+<tr><td><code>glac_ice</code></td><td>bulk density of solid water</td><td>kg/m3</td><td class="meta">glacier.F90</td></tr>
+<tr><td><code>glac_liq</code></td><td>bulk density of liquid water</td><td>kg/m3</td><td class="meta">glacier.F90</td></tr>
+<tr><td><code>glac_rbf</code></td><td></td><td></td><td class="meta">glacier.F90</td></tr>
+<tr><td><code>glac_rie</code></td><td></td><td></td><td class="meta">glacier.F90</td></tr>
+<tr><td><code>glac_rsn</code></td><td></td><td></td><td class="meta">glacier.F90</td></tr>
+</table>
+<h2>lake <span class="meta">(8)</span></h2>
+<table><tr><th>short name</th><th>long name</th><th>units</th><th>file</th></tr>
+<tr><td><code>lake_K_z</code></td><td>vertical diffusivity</td><td>m2/s</td><td class="meta">lake.F90</td></tr>
+<tr><td><code>lake_T</code></td><td>temperature</td><td>degK</td><td class="meta">lake.F90</td></tr>
+<tr><td><code>lake_dz</code></td><td>nominal layer thickness</td><td></td><td class="meta">lake.F90</td></tr>
+<tr><td><code>lake_evap</code></td><td></td><td></td><td class="meta">lake.F90</td></tr>
+<tr><td><code>lake_ice</code></td><td>bulk density of solid water</td><td>kg/m3</td><td class="meta">lake.F90</td></tr>
+<tr><td><code>lake_liq</code></td><td>bulk density of liquid water</td><td>kg/m3</td><td class="meta">lake.F90</td></tr>
+<tr><td><code>lake_wl</code></td><td>liquid water mass</td><td>kg/m2</td><td class="meta">lake.F90</td></tr>
+<tr><td><code>lake_ws</code></td><td>solid water mass</td><td>kg/m2</td><td class="meta">lake.F90</td></tr>
+</table>
+<h2>land_core <span class="meta">(149)</span></h2>
+<table><tr><th>short name</th><th>long name</th><th>units</th><th>file</th></tr>
+<tr><td><code>Eg_max</code></td><td>soil_water limit on vapor flux from ground liquid</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>FWS</code></td><td>frozen storage on land</td><td>kg/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>FWSg</code></td><td>frozen ground storage</td><td>kg/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>FWSs</code></td><td>frozen storage in snowpack</td><td>kg/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>FWSv</code></td><td>frozen interception storage</td><td>kg/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>HS</code></td><td>land heat storage</td><td>J/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>HSc</code></td><td>canopy-air heat storage</td><td>J/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>HSg</code></td><td>ground heat storage</td><td>J/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>HSs</code></td><td>heat storage in snowpack</td><td>J/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>HSv</code></td><td>interception heat storage</td><td>J/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>LWS</code></td><td>liquid storage on land</td><td>kg/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>LWSg</code></td><td>liquid ground storage</td><td>kg/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>LWSs</code></td><td>liquid storage in snowpack</td><td>kg/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>LWSv</code></td><td>liquid interception storage</td><td>kg/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>T_snow_subs</code></td><td>sub-surface snow temperature</td><td>degK</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>Tca</code></td><td>canopy-air temperature</td><td>degK</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>Tgrnd</code></td><td>ground surface temperature</td><td>degK</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>Trad</code></td><td>radiative sfc temperature</td><td>degK</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>VWS</code></td><td>vapor storage on land</td><td>kg/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>VWSc</code></td><td>vapor mass in canopy air</td><td>kg/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>albedo_dif</code></td><td></td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>albedo_dir</code></td><td></td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>cLand</code></td><td>Total Carbon in All Terrestrial Carbon Pools</td><td>kg m-2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>cana_</code></td><td></td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>carbon_cons</code></td><td>carbon non-conservation in update_land_model_fast_0d</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>cd_m</code></td><td>drag coefficient for momentum</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>cd_t</code></td><td>drag coefficient for heat and tracers</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>con_g_h</code></td><td>conductance for sensible heat between ground surface and canopy air</td><td>m/s</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>coszen</code></td><td>cosine of zenith angle</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>e_res_1</code></td><td>canopy air energy residual due to nonlinearities</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>e_res_2</code></td><td>canopy energy residual due to nonlinearities</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr class="spin"><td><code>evap</code></td><td>vapor flux up from land</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>evspsblsoi</code></td><td>Water Evaporation from Soil</td><td>kg m-2 s-1</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>evspsblveg</code></td><td>Evaporation from Canopy</td><td>kg m-2 s-1</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>fco2</code></td><td>flux of CO2 to canopy air</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>fevap</code></td><td>vapor flux from all ice</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>fevapg</code></td><td>vapor flux leaving ground ice</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>fevaps</code></td><td>vapor flux leaving snow ice</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>fevapv</code></td><td>vapor flux leaving vegn ice</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>flw</code></td><td>net lw rad to land</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>flwg</code></td><td>net lw rad to ground</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>flws</code></td><td>net lw rad to snow</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>flwv</code></td><td>net lw rad to vegetation</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>fprec_l</code></td><td>snowfall to land</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>fprecs</code></td><td>effective snowfall to snowpack</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>fprecv</code></td><td>net snowfall to vegetation</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>frunf</code></td><td>total rate of solid runoff</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>frunfs</code></td><td>rate of solid calving</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>fsw</code></td><td>net sw rad to land</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>fswg</code></td><td>net sw rad to ground</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>fsws</code></td><td>net sw rad to snow</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>fswv</code></td><td>net sw rad to vegetation</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>gequil</code></td><td>snow-subs equilibration flux</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>grnd_flux</code></td><td>sensible heat into ground from surface</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>gsnow</code></td><td>sens heat into ground from snow</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>hevap</code></td><td>sensible heat of evap</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>hfdsn</code></td><td>Downward Heat Flux into Snow Where Land over Land</td><td>W m-2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>hfevap</code></td><td>vapor flux heat from solid source</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>hfevapg</code></td><td>vapor heat from ground sol</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>hfevaps</code></td><td>vapor heat from snow sol</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>hfevapv</code></td><td>vapor heat from sol interc</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>hflsLut</code></td><td>Latent Heat Flux on Land Use Tile</td><td>W m-2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>hfprec</code></td><td>sens heat of snowfall</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>hfprecs</code></td><td>net sol heat to snow</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>hfprecv</code></td><td>net sol heat to vegetation</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>hfrunf</code></td><td>heat of total ice runoff</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>hfrunfs</code></td><td>heat of sol snow runoff</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>hlevap</code></td><td>vapor flux heat from liq source</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>hlevapg</code></td><td>vapor heat from ground liq</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>hlevaps</code></td><td>vapor heat from snow liq</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>hlevapv</code></td><td>vapor heat from liq interc</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>hlprec</code></td><td>total liq precipitation heat</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>hlprecg</code></td><td>net liq heat to ground sfc</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>hlprecs</code></td><td>net liq heat to snow</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>hlprecv</code></td><td>net liq heat to vegetation</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>hlrunf</code></td><td>heat of liq runoff</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>hlrunfg</code></td><td>heat of liq surface runoff</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>hlrunfs</code></td><td>heat of liq runoff from snow pack</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>hprec</code></td><td>sensible heat of precipitation</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>hroff</code></td><td>sensible heat of runoff</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>hrunf</code></td><td>sensible heat of total runoff</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>htransp</code></td><td>heat of transpired vapior</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>huptk</code></td><td>heat of soil water uptake</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>levap</code></td><td></td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>levapg</code></td><td>vapor flux from ground liquid</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>levaps</code></td><td>vapor flux leaving snow liquid</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>levapv</code></td><td>vapor flux leaving intercepted liquid</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>lprec_l</code></td><td>rainfall to land</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>lprecg</code></td><td>effective rainfall to ground sfc</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>lprecs</code></td><td>rainfall to snow, minus drainage</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>lprecv</code></td><td>net rainfall to vegetation</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>lrunf</code></td><td>total rate of liq runoff</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>lrunf_DOC</code></td><td>total rate of DOC runoff</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>lrunfg</code></td><td>rate of liq runoff, ground</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>lrunfs</code></td><td>rate of liq runoff via calving</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>lwdn</code></td><td>downward long-wave radiation flux to the land surface</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>lwsnl</code></td><td>Liquid Water Content of Snow Layer</td><td>kg m-2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>melt</code></td><td>total rate of melt</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>meltg</code></td><td>rate of substrate thaw</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>melts</code></td><td>rate of snow melt</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>meltv</code></td><td>rate of melt, interception</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>nbp</code></td><td>Carbon Mass Flux out of Atmosphere due to Net Biospheric Production on Land</td><td>kg m-2 s-1</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>netAtmosLandCO2Flux</code></td><td></td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>ntiles</code></td><td>number of tiles</td><td>unitless</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>nwdFracLut</code></td><td>Fraction of Land Use Tile Tile That is Non-Woody Vegetation</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>pcp</code></td><td>Total Precipitation</td><td>kg m-2 s-1</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>precip</code></td><td>precipitation rate</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>prra</code></td><td>Rainfall Rate</td><td>kg m-2 s-1</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>prveg</code></td><td>Precipitation onto Canopy</td><td>kg m-2 s-1</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>qca</code></td><td>canopy-air specific humidity</td><td>kg/kg</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>qco2_dvmr</code></td><td>canopy-air CO2 dry volumetric mixing ratio</td><td>mol CO2/mol air</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>rlusLut</code></td><td>Surface Upwelling Longwave on Land Use Tile</td><td>W m-2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>rsusLut</code></td><td>Surface Upwelling Shortwave on Land Use Tile</td><td>W m-2</td><td class="meta">land_model.F90</td></tr>
+<tr class="spin"><td><code>runf</code></td><td>total runoff</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>sens</code></td><td>sens heat flux from land</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>sensg</code></td><td>sens heat flux from ground</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>senss</code></td><td>sens heat flux from snow</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>sensv</code></td><td>sens heat flux from vegn</td><td>W/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>snc</code></td><td>Snow Area Fraction</td><td>%</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>snd</code></td><td>Snow Depth</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>snm</code></td><td>Surface Snow Melt</td><td>kg m-2 s-1</td><td class="meta">land_model.F90</td></tr>
+<tr class="spin"><td><code>snow</code></td><td>column-integrated snow water</td><td>kg/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>snw</code></td><td>Surface Snow Amount</td><td>kg m-2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>soil_water_supply</code></td><td>maximum rate of soil water supply to vegetation</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>sroff</code></td><td>rate of solid runoff to rivers</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>subs_emis</code></td><td>substrate emissivity for long-wave radiation</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>subs_refl_dif</code></td><td></td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>subs_refl_dir</code></td><td></td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>swdn_dif</code></td><td></td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>swdn_dir</code></td><td></td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>sweLut</code></td><td>Snow Water Equivalent on Land Use Tile</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>swup_dif</code></td><td></td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>swup_dir</code></td><td></td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>tran</code></td><td>Transpiration</td><td>kg m-2 s-1</td><td class="meta">land_model.F90</td></tr>
+<tr class="spin"><td><code>transp</code></td><td>Transpiration</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>tslsiLut</code></td><td>Surface Skin Temperature on Land Use Tile</td><td>K</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>vegn_cover</code></td><td>fraction covered by vegetation</td><td>fraction covered by vegetation</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>vegn_refl_dif</code></td><td></td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>vegn_refl_dir</code></td><td></td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>vegn_refl_lw</code></td><td>canopy reflectivity for thermal radiation</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>vegn_sctr_dir</code></td><td></td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>vegn_tran_dif</code></td><td></td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>vegn_tran_dir</code></td><td></td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>vegn_tran_lw</code></td><td>canopy transmittance for thermal radiation</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr class="spin"><td><code>water</code></td><td>column-integrated soil water</td><td>kg/m2</td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>water_cons</code></td><td>water non-conservation in update_land_model_fast_0d</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>wroff</code></td><td>rate of liquid runoff to rivers</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>z0m</code></td><td>momentum roughness of land</td><td></td><td class="meta">land_model.F90</td></tr>
+<tr><td><code>z0s</code></td><td>scalar roughness of land</td><td></td><td class="meta">land_model.F90</td></tr>
+</table>
+<h2>land_tracers <span class="meta">(11)</span></h2>
+<table><tr><th>short name</th><th>long name</th><th>units</th><th>file</th></tr>
+<tr><td><code>bareness</code></td><td></td><td></td><td class="meta">land_dust.F90</td></tr>
+<tr><td><code>cana_dens</code></td><td></td><td></td><td class="meta">land_dust.F90</td></tr>
+<tr><td><code>dust_ddep</code></td><td></td><td></td><td class="meta">land_dust.F90</td></tr>
+<tr><td><code>dust_emis</code></td><td></td><td></td><td class="meta">land_dust.F90</td></tr>
+<tr><td><code>dust_fatm</code></td><td></td><td></td><td class="meta">land_dust.F90</td></tr>
+<tr><td><code>dust_wdep</code></td><td></td><td></td><td class="meta">land_dust.F90</td></tr>
+<tr><td><code>snow_fmass</code></td><td></td><td></td><td class="meta">land_dust.F90</td></tr>
+<tr><td><code>soil_iceness</code></td><td></td><td></td><td class="meta">land_dust.F90</td></tr>
+<tr><td><code>soil_wetness</code></td><td></td><td></td><td class="meta">land_dust.F90</td></tr>
+<tr><td><code>u_ts</code></td><td></td><td></td><td class="meta">land_dust.F90</td></tr>
+<tr><td><code>w10m</code></td><td></td><td></td><td class="meta">land_dust.F90</td></tr>
+</table>
+<h2>soil <span class="meta">(184)</span></h2>
+<table><tr><th>short name</th><th>long name</th><th>units</th><th>file</th></tr>
+<tr><td><code>Qmax</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr class="spin"><td><code>asoil</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>cSoil</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>cSoilFast</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>cSoilMedium</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>cSoilSlow</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>coarsewoodlitter_dead_microbe_C</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>coarsewoodlitter_dead_microbe_dissolved_C</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>coarsewoodlitter_deadmic_deposition_rate</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>coarsewoodlitter_deadmic_dissolve_rate</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>coarsewoodlitter_fast_deposition_rate</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>coarsewoodlitter_fast_dissolve_rate</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>coarsewoodlitter_live_microbe_C</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>coarsewoodlitter_slow_deposition_rate</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>coarsewoodlitter_slow_dissolve_rate</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>dead_microbe_C</code></td><td>dead microbe soil carbon per layer</td><td>kg C/m3</td><td class="meta">soil.F90</td></tr>
+<tr><td><code>dead_microbe_dissolved_C</code></td><td>dead microbe dissolved carbon per layer</td><td>kg C/m3</td><td class="meta">soil.F90</td></tr>
+<tr><td><code>deadmic_C_leaching</code></td><td>net layer dead microbe soil C leaching</td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>deadmic_DOC_div_loss</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>deadmic_coarsewoodlitter_C_leaching</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>deadmic_deposition_rate</code></td><td>dead microbe soil carbon deposition from DOC rate</td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>deadmic_dissolve_rate</code></td><td>dead microbe soil carbon dissolving rate</td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>deadmic_finewoodlitter_C_leaching</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>deadmic_leaflitter_C_leaching</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>deadmic_total</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>dissolved_total</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>fast_C_leaching</code></td><td>net layer fast soil C leaching</td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>fast_DOC_div_loss</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>fast_coarsewoodlitter_C</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>fast_coarsewoodlitter_C_leaching</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>fast_coarsewoodlitter_dissolved_C</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>fast_deposition_rate</code></td><td>fast soil carbon deposition from DOC rate</td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>fast_dissolve_rate</code></td><td>fast soil carbon dissolving rate</td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>fast_dissolved_C</code></td><td>fast dissolved carbon per layer</td><td>kg C/m3</td><td class="meta">soil.F90</td></tr>
+<tr><td><code>fast_finewoodlitter_C</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>fast_finewoodlitter_C_leaching</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>fast_finewoodlitter_dissolved_C</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>fast_leaflitter_C</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>fast_leaflitter_C_leaching</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>fast_leaflitter_dissolved_C</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr class="spin"><td><code>fast_soil_C</code></td><td>fast soil carbon</td><td>kg C/m3</td><td class="meta">soil.F90</td></tr>
+<tr><td><code>finewoodlitter_dead_microbe_C</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>finewoodlitter_dead_microbe_dissolved_C</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>finewoodlitter_deadmic_deposition_rate</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>finewoodlitter_deadmic_dissolve_rate</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>finewoodlitter_fast_deposition_rate</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>finewoodlitter_fast_dissolve_rate</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>finewoodlitter_live_microbe_C</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>finewoodlitter_slow_deposition_rate</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>finewoodlitter_slow_dissolve_rate</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>flow</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr class="spin"><td><code>fsc</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>grnd_to_stream_heat</code></td><td></td><td></td><td class="meta">hillslope_hydrology.F90</td></tr>
+<tr><td><code>grnd_to_stream_water</code></td><td></td><td></td><td class="meta">hillslope_hydrology.F90</td></tr>
+<tr><td><code>grounddiv_to_stream</code></td><td>groundwater divergence out of tiles directly to stream</td><td>mm/s</td><td class="meta">hillslope_hydrology.F90</td></tr>
+<tr><td><code>groundheatdiv_to_stream</code></td><td>heat flux associated with groundwater divergence to stream</td><td>W/m^2</td><td class="meta">hillslope_hydrology.F90</td></tr>
+<tr><td><code>groundtracer_to_stream</code></td><td>DOC flux to stream via groundwater</td><td>kg C/m^2/s</td><td class="meta">hillslope_hydrology.F90</td></tr>
+<tr><td><code>groundwater_divergence</code></td><td></td><td></td><td class="meta">hillslope_hydrology.F90</td></tr>
+<tr><td><code>groundwater_heat_div</code></td><td></td><td></td><td class="meta">hillslope_hydrology.F90</td></tr>
+<tr><td><code>groundwater_tracer_div</code></td><td>DOC groundwater divergence out of tiles, excluding to stream</td><td>kg C/m^2/s</td><td class="meta">hillslope_hydrology.F90</td></tr>
+<tr><td><code>inun_fraction</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>leaflitter_dead_microbe_C</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>leaflitter_dead_microbe_dissolved_C</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>leaflitter_deadmic_deposition_rate</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>leaflitter_deadmic_dissolve_rate</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>leaflitter_fast_deposition_rate</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>leaflitter_fast_dissolve_rate</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>leaflitter_live_microbe_C</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>leaflitter_slow_deposition_rate</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>leaflitter_slow_dissolve_rate</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>live_microbe_C</code></td><td>Total live microbe soil carbon</td><td>kg C/m3</td><td class="meta">soil.F90</td></tr>
+<tr><td><code>livemic</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>livemic_C_leaching</code></td><td>net layer live microbe C leaching</td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>livemic_total</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>macro_inf</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>mrfso</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>mrlsl</code></td><td>Water Content of Soil Layer</td><td>kg m-2</td><td class="meta">soil.F90</td></tr>
+<tr><td><code>mrlso</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>mrro</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>mrros</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>mrs1mLut</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>mrsfl</code></td><td>Frozen Water Content of Soil Layer</td><td>kg m-2</td><td class="meta">soil.F90</td></tr>
+<tr><td><code>mrsll</code></td><td>Liquid Water Content of Soil Layer</td><td>kg m-2</td><td class="meta">soil.F90</td></tr>
+<tr><td><code>mrso</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>mrsol</code></td><td>Total Water Content of Soil Layer</td><td>kg m-2</td><td class="meta">soil.F90</td></tr>
+<tr><td><code>mrsos</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>n_coarsewoodlitter_cohorts</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>n_finewoodlitter_cohorts</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>n_leaflitter_cohorts</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>n_soil_cohorts</code></td><td>number of soil cohorts</td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>protected_C_leaching</code></td><td>net layer protected soil C leaching</td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>protected_soil_C</code></td><td>protected soil carbon per layer</td><td>kg C/m3</td><td class="meta">soil.F90</td></tr>
+<tr><td><code>protected_total</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>reflux</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>rh</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr class="spin"><td><code>rsoil</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>rsoil_coarsewoodlitter_deadmic</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>rsoil_coarsewoodlitter_fast</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>rsoil_coarsewoodlitter_slow</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>rsoil_deadmic</code></td><td>dead microbe soil carbon respiration</td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>rsoil_fast</code></td><td>fast soil carbon respiration</td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>rsoil_finewoodlitter_deadmic</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>rsoil_finewoodlitter_fast</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>rsoil_finewoodlitter_slow</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>rsoil_leaflitter_deadmic</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>rsoil_leaflitter_fast</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>rsoil_leaflitter_slow</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>rsoil_slow</code></td><td>slow soil carbon respiration</td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>sfc_excess</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>slow_C_leaching</code></td><td>net layer slow soil C leaching</td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>slow_DOC_div_loss</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>slow_coarsewoodlitter_C</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>slow_coarsewoodlitter_C_leaching</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>slow_coarsewoodlitter_dissolved_C</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>slow_deposition_rate</code></td><td>slow soil carbon deposition from DOC rate</td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>slow_dissolve_rate</code></td><td>slow soil carbon dissolving rate</td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>slow_dissolved_C</code></td><td>slow dissolved carbon per layer</td><td>kg C/m3</td><td class="meta">soil.F90</td></tr>
+<tr><td><code>slow_finewoodlitter_C</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>slow_finewoodlitter_C_leaching</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>slow_finewoodlitter_dissolved_C</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>slow_leaflitter_C</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>slow_leaflitter_C_leaching</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>slow_leaflitter_dissolved_C</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr class="spin"><td><code>slow_soil_C</code></td><td>slow soil carbon</td><td>kg C/m3</td><td class="meta">soil.F90</td></tr>
+<tr class="spin"><td><code>soil_T</code></td><td>temperature</td><td>degK</td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_T_diff</code></td><td>soil Temperature difference after advection with tridiagonal solution</td><td>K</td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_alt</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_cf_1</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_cf_3</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_def</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_def2</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_def3</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_def4</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_dval</code></td><td>active-layer flow by layer</td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_dvbf</code></td><td>baseflow by layer</td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_dvif</code></td><td>interflow by layer</td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_evap</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_fgw</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_fsat</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_hal</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_hbf</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_heat_cap</code></td><td>heat capacity of dry soil</td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_hie</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_hif</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_hnu</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_hsc</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_hsn</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr class="spin"><td><code>soil_ice</code></td><td>bulk density of solid water</td><td>kg/m3</td><td class="meta">soil.F90</td></tr>
+<tr class="spin"><td><code>soil_liq</code></td><td>bulk density of liquid water</td><td>kg/m3</td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_psi</code></td><td>soil-water matric head</td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_psi_n</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_psix0</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_psix0_sws</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_ral</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_rbf</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_rie</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_rif</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_rnu</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_rsc</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_rsn</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_tcon</code></td><td>soil thermal conductivity</td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_uptk</code></td><td>uptake of water by roots</td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_wt2_3</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_wt_1</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_wt_2</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_wt_2a</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_wt_2b</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_wt_3</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_wt_4</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_wtdep</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_wtdp2</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>soil_zcap</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr class="spin"><td><code>ssc</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>surf_DOC_loss</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>surface_runoff_frac</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>surface_water</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>sws_n_iter</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>total_C_leaching</code></td><td>net layer total vertical soil C leaching</td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>total_DOC_div</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>total_lit_SOM_C</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>total_soil_C</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>total_soil_carbon_layered</code></td><td>total soil carbon per layer</td><td>kg C/m3</td><td class="meta">soil.F90</td></tr>
+<tr><td><code>uptake_n_iter</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+<tr><td><code>wet_fraction</code></td><td></td><td></td><td class="meta">soil.F90</td></tr>
+</table>
+<h2>vegetation <span class="meta">(100)</span></h2>
+<table><tr><th>short name</th><th>long name</th><th>units</th><th>file</th></tr>
+<tr><td><code>Anlayer</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>Anlayer_acm</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>afire</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>an_cl</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>an_op</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>atfall</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr class="spin"><td><code>bl</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>bl_previous</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>bl_target</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr class="spin"><td><code>blv</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr class="spin"><td><code>br</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr class="spin"><td><code>bsw</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>btot</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr class="spin"><td><code>bwood</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>cAnt</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>cLeaf</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>cMisc</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>cProduct</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>cRoot</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>cWood</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>cgain</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>closs</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>coarsewoodlitter_buffer_ag</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>coarsewoodlitter_buffer_rate_ag</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>con_v_h</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>con_v_v</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr class="spin"><td><code>csmoke</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>csmoke_rate</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>deadmic_out</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>evap_demand</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>fAnthDisturb</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>fFire</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>fFireNat</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>fGrazing</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>fHarvest</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>fLuc</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>fProductDecomp</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>fsc_in</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>fsc_out</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>fsc_pool_ag</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>fsc_pool_bg</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>fsc_rate_ag</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>fsc_rate_bg</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>fuel</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr class="spin"><td><code>gpp</code></td><td></td><td></td><td class="meta">vegn_dynamics.F90</td></tr>
+<tr><td><code>harv_pool</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>harv_rate</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>height</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>lai</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>lai_kok</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>lai_light</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>lai_light_max</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>lai_std</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>lai_var</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>lambda</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>leaf_age</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>leaf_emis</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>leaf_refl</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>leaf_size</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>leaf_tran</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>leaflitter_buffer_ag</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>leaflitter_buffer_rate_ag</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>litter</code></td><td></td><td></td><td class="meta">vegn_dynamics.F90</td></tr>
+<tr><td><code>ncm</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr class="spin"><td><code>nep</code></td><td></td><td></td><td class="meta">vegn_dynamics.F90</td></tr>
+<tr class="spin"><td><code>npp</code></td><td></td><td></td><td class="meta">vegn_dynamics.F90</td></tr>
+<tr><td><code>p_ann</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>psiph</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>qco2_phot</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>rGrowth</code></td><td></td><td></td><td class="meta">vegn_dynamics.F90</td></tr>
+<tr><td><code>ra</code></td><td></td><td></td><td class="meta">vegn_dynamics.F90</td></tr>
+<tr><td><code>resg</code></td><td></td><td></td><td class="meta">vegn_dynamics.F90</td></tr>
+<tr><td><code>resl</code></td><td></td><td></td><td class="meta">vegn_dynamics.F90</td></tr>
+<tr><td><code>resp</code></td><td></td><td></td><td class="meta">vegn_dynamics.F90</td></tr>
+<tr><td><code>resr</code></td><td></td><td></td><td class="meta">vegn_dynamics.F90</td></tr>
+<tr><td><code>root_density</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>root_zeta</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>rs_min</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>sai</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>snow_crit</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>species</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>ssc_in</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>ssc_out</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>ssc_pool_ag</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>ssc_pool_bg</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>ssc_rate_ag</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>ssc_rate_bg</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>status</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>stomatal_cond</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>t_ann</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>t_cold</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>temp</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>theph</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr class="spin"><td><code>theta</code></td><td></td><td></td><td class="meta">vegn_dynamics.F90</td></tr>
+<tr><td><code>tsoil_av</code></td><td></td><td></td><td class="meta">vegn_dynamics.F90</td></tr>
+<tr><td><code>veg_in</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>veg_out</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>wdgain</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>wl</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+<tr><td><code>ws</code></td><td></td><td></td><td class="meta">vegetation.F90</td></tr>
+</table>
+</body></html>

@@ -1,0 +1,42 @@
+@[SYEAR]@[SMONTH]@[SDAY].@[SHOUR]Z.@[ATMRES].64bit.non-mono
+@[SYEAR] @[SMONTH] @[SDAY] @[SHOUR] 0 0
+
+#=====================================================================
+# LM4 spin-up diagnostics — ANNUAL means only (slow-pool convergence)
+#=====================================================================
+
+#output files
+"land_static",    -1, "months", 1, "days", "time"
+"land_annual",     1, "years",  1, "days", "time"
+
+#--- static (grid / mask / area measures) ---
+"land", "geolon_t",  "geolon_t",  "land_static", "all", .false., "none", 1
+"land", "geolat_t",  "geolat_t",  "land_static", "all", .false., "none", 1
+"land", "area_land", "land_area", "land_static", "all", .false., "none", 2
+"land", "area_lake", "lake_area", "land_static", "all", .false., "none", 2
+"land", "area_soil", "soil_area", "land_static", "all", .false., "none", 2
+
+#--- area measures required by cell_measures of annual fields ---
+"land", "geolon_t",  "geolon_t",  "land_annual", "all", .false., "none", 1
+"land", "geolat_t",  "geolat_t",  "land_annual", "all", .false., "none", 1
+"land", "area_land", "land_area", "land_annual", "all", .false., "none", 2
+"land", "area_lake", "lake_area", "land_annual", "all", .false., "none", 2
+"land", "area_soil", "soil_area", "land_annual", "all", .false., "none", 2
+
+#--- vegetation (state + carbon balance) ---
+"vegn", "LAI",   "LAI",   "land_annual", "all", .true., "none", 2
+"vegn", "bwood", "bwood", "land_annual", "all", .true., "none", 2
+"vegn", "nep",   "nep",   "land_annual", "all", .true., "none", 2
+
+#--- soil carbon pools (CORPSE) ---
+"soil", "fast_soil_C", "fast_soil_C", "land_annual", "all", .true., "none", 2
+"soil", "slow_soil_C", "slow_soil_C", "land_annual", "all", .true., "none", 2
+
+#--- soil physics (layered: bottom->deep) ---
+"soil", "soil_T",   "soil_T",   "land_annual", "all", .true., "none", 2
+"soil", "soil_liq", "soil_liq", "land_annual", "all", .true., "none", 2
+"soil", "soil_ice", "soil_ice", "land_annual", "all", .true., "none", 2
+
+#--- hydrology + groundwater ---
+"land", "runf",       "runf",       "land_annual", "all", .true., "none", 2
+"soil", "soil_wtdep", "soil_wtdep", "land_annual", "all", .true., "none", 2

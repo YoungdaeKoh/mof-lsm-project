@@ -56,11 +56,11 @@
 
 | 모델 | 상태 | 비고 |
 |---|---|---|
-| **JULES vn7.4** | 빌드·테스트런 완료, spinup_cy01 설정 중 | serial(nompi). MPI 빌드 실패 미해결. ERA5 forcing time coord 이슈 미해결 |
+| **JULES vn7.4** | **gridded 전구 + DGVM 실행 완료** | **gfortran 재빌드**로 Intel netcdf 깨짐(`__libm_feature_flag`) 우회. 0.5° 전구 맵 런 ✓ + TRIFFID(4-pool RothC) DGVM ✓. serial(nompi), 81분/월. 상세 `jules/JULES_PORTING_NOTES.md`. 전면 areal 경쟁(frac 진화)·MPI는 미해결 |
 | **CESM2.1.5 (CAM6/CLM5)** | 빌드 완료 | I2000Clm50Sp @ f09_g17. F2000climo timeaddmonths 에러 (PE layout 불일치) |
 | **CESM2.1.5 (CAM4/CLM4)** | smoke test 완료, spin-up 중 | F2000C4L40 @ f19_f19. F_ctrl_smoke 1개월 ✓. F_spinup 10년 실행 중 (매월 restart). Snowfall sensitivity: 5년 perturbation (-25/-50/-75% from year 10-11) |
 | **Noah-MP v5.2.1** | **gridded global 실행 완료** | HRLDAS offline(`~/HRLDAS/`, v5.2.1). intel21 serial. 단일격자 ✓ + **global 0.5° GSWP3 gridded 실행 ✓**(WRF/WPS geo_em, GSWP3→LDASIN 변환기). 다음: 2-stage spin-up(static DVEG=4 cold start → dynamic DVEG=2). 상세 `noahmp/NOAHMP_PORTING_NOTES.md` |
-| **LM4+** | 미시작 | FMS 프레임워크 별도 빌드 필요 |
+| **LM4+** | **300년 static-veg spin-up 완료** | UFS LND-LM4(CDEPS DATM), C96, gfortran. cold-start qscomp clamp 패치. GSWP3 cycling 300yr → 평형 IC. 다음: WFDE5 forcing 이어달리기 + dynamic veg 1200yr+. 상세 `lm4/LM4_SPINUP_NOTES.md` |
 
 ## 5. Notion (research hub)
 
@@ -106,13 +106,17 @@ MOF_LSM_project/                # 로컬 = /Volumes/data01/MOF_LSM_project
 
 ## 8. Known issues
 
-- **JULES MPI 빌드 실패**: `PMPI_Comm_size: Invalid communicator` (mvapich2-2.3.4 + intel21 / OpenMPI-5.0.0 + gcc85 둘 다). 현재 nompi(serial) 사용
-- **JULES ERA5 forcing time coord 불일치**: `/data1/backup/ChanhyukChoi/.../92.GPCPobs_ERA5obs/`의 1978-12.nc는 `proleptic_gregorian`, 다른 파일은 `standard`. 1979-01.nc 첫 time value가 ~Jan 23. 찬혁님 확인 또는 재생성 필요
-- **ifort 최적화 버그 (해결됨, 패치 필요)**: `src/control/standalone/parallel/parallel_mod.F90`의 local 변수 미초기화. `ntasks_x`, `ntasks_y`, `task_nx`, `task_ny`, `x_start`, `y_start`를 `= 0`으로 초기화하는 패치 적용 필수
+- **JULES Intel netcdf 깨짐 (해결됨 → gfortran)**: `libnetcdf.so.13`이 요구하는 `__libm_feature_flag` 심볼이 시스템 Intel 런타임(oneAPI 2022.0.1; "intel21" 모듈도 실제 이걸 가리킴) libimf에 없음. admin이 netcdf 빌드 후 컴파일러 교체로 깨진 상태. **해결 = gfortran + netcdf-4.6.1_gcc85 재빌드**(Intel 안 씀). 상세 `jules/JULES_PORTING_NOTES.md`
+- **JULES MPI 빌드 실패 (미해결)**: `PMPI_Comm_size: Invalid communicator` (mvapich2-2.3.4 + intel21 / OpenMPI-5.0.0 + gcc85 둘 다). 현재 nompi(serial). 0.5° 전구 81분/월이라 장기 spin-up엔 MPI/영역축소 필요
+- **JULES 전면 areal 경쟁 미해결**: DGVM은 `l_veg_compete=.false.`(탄소·phenology·LAI/수고만)로 구동. `=.true.`는 frac을 prognostic IC로 요구(합=1) → frac.nc를 use_file로 끌어오는 처리 필요
+- **JULES ERA5 forcing time coord 불일치**: `/data1/backup/ChanhyukChoi/.../92.GPCPobs_ERA5obs/`의 1978-12.nc는 `proleptic_gregorian`, 다른 파일은 `standard`. 1979-01.nc 첫 time value가 ~Jan 23. (2010 파일은 정상.) 1979부터 돌릴 땐 재확인 필요
+- **ifort 최적화 버그 (해결됨, 패치 적용됨)**: `src/control/standalone/parallel/parallel_mod.F90`의 local 변수 미초기화. `ntasks_x`, `ntasks_y`, `task_nx`, `task_ny`, `x_start`, `y_start`를 `= 0`으로 초기화하는 패치 적용됨 (gfortran에도 무해)
 
 ## 9. Key learnings
 
 - JULES vn6.0 → vn7.4 namelist 변경 6건: `l_coord_latlon=.true.` (JULES_LATLON), `model_grid.nml` 순서, 5개 PFT 인덱스, `confrac=0.3` (jules_soil), `ctile_orog_fix=2` (science_fixes), `&IMOGEN_ONOFF_SWITCH l_imogen=.false.` (imogen)
+- JULES gfortran 빌드: `-fallow-argument-mismatch`(gcc10+)는 gcc8.5에 없음 → `-Wno-argument-mismatch` 사용. fcm-make `custom` 플랫폼은 env(JULES_COMPILER/NETCDF_*/LDFLAGS_EXTRA)를 읽음
+- JULES gridded run namelist 함정: drive.nml var은 JULES 식별자(t/q/pstar/wind/sw_down/lw_down/precip), `data_period`(≠tinc), `z1_uv_in/z1_tq_in` 필수. can_rad_mod=6엔 `ilayers=10`. DGVM은 soil_bgc_model=2(+kaps_4pool/n_inorg_turnover/bio_hum_cn), triffid_params 6종(alloc_*/dpm_rpm_ratio/retran_*), initial_conditions에 canht. 상세 `jules/JULES_PORTING_NOTES.md`
 - CESM2.1.5 `config_compilers.xml`의 `<SLIBS>`는 반드시 `<append>` 태그로 감싸야 함. 외부 PIO 설정은 내부 PIO1과 충돌하므로 제거
 - JULES spinup 우선순위: smc_tot/smcl (~0.1 kg/m²), t_soil (~0.01 K). 깊은 층 수렴은 layer-specific smcl로 확인
 - 다중 모델 운용: 각 실행 스크립트 `module purge` + 모델별 모듈. 분석 도구(nco, cdo, ncview)는 `.cshrc`에 공통, 모델 모듈은 절대 .cshrc 금지

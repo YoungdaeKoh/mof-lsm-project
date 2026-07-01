@@ -1,0 +1,21 @@
+&JULES_DRIVE
+  l_imogen = .false.
+  diff_frac_const = 0.4
+  t_for_snow      = 274.0
+  t_for_con_rain  = 293.15
+
+  data_start  = "1981-01-01 00:00:00"
+  data_end    = "1982-01-01 00:00:00"
+  data_period = 10800
+
+  file = "/data2/ydkoh/jules_gswp3_forcing/clmforc.GSWP3.c2011.0.5x0.5.%vv.%y4-%m2.nc"
+
+  nvars    = 7
+  var      = 't',     'q',     'pstar', 'wind',  'lw_down', 'sw_down', 'precip'
+  var_name = 'TBOT',  'QBOT',  'PSRF',  'WIND',  'FLDS',    'FSDS',    'PRECTmms'
+  tpl_name = 'TPQWL', 'TPQWL', 'TPQWL', 'TPQWL', 'TPQWL',   'Solr',    'Prec'
+  interp   = 'nf',    'nf',    'nf',    'nf',    'nf',      'nf',      'nf'
+
+  z1_uv_in = 10.0
+  z1_tq_in = 2.0
+/

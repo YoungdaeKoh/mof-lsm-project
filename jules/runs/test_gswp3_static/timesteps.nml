@@ -1,0 +1,11 @@
+&JULES_TIME
+  l_360  = .false.,
+  l_leap = .false.,
+  timestep_len   = 1800,
+  main_run_start = '1981-01-01 00:00:00',
+  main_run_end   = '1981-02-01 00:00:00'
+/
+
+&JULES_SPINUP
+  max_spinup_cycles = 0
+/

@@ -1,0 +1,23 @@
+&JULES_DRIVE
+
+  l_imogen = .false.
+
+  diff_frac_const = 0.4
+  t_for_snow      = 274.0
+  t_for_con_rain  = 293.15
+
+  data_start  = "2010-01-01 00:00:00"
+  data_end    = "2010-02-01 00:00:00"
+  data_period = 21600
+
+  file = "/data1/backup/ChanhyukChoi/002.JULES_RUN/INPUT_DATA/monitoring/92.GPCPobs_ERA5obs/%y4-%m2.nc"
+
+  nvars    = 7
+  var      = 't',    'q',    'pstar', 'wind', 'lw_down', 'sw_down', 'precip'
+  var_name = 'Tair', 'Qair', 'PSurf', 'Wind', 'LWdown',  'SWdown',  'Rainf'
+  interp   = 'nf',   'nf',   'nf',    'nf',   'nf',      'nf',      'nf'
+
+  z1_uv_in = 10.0
+  z1_tq_in = 2.0
+
+/

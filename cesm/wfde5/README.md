@@ -27,6 +27,16 @@ ERA5를 CRU 관측으로 bias 보정한 0.5° hourly 지면 forcing → **0.5° 
 - **모든 변수 6h 평균** (강수 Rainf도 `kg m⁻² s⁻¹` **flux**라 평균이 맞음 — 누적 아님)
 - nc는 float(packed 아님)이라 cdo OK
 
+## CLM5 변환
+- `analysis/wfde5_to_clm5.py`: 변수별 6h 파일 → 월별 통합 CLM5 forcing
+  (`/data2/ydkoh/clm5_forcing_wfde5/YYYY-MM_clm5.nc`)
+- **lon −180~180 → 0~360 정렬 변환기에 통합** (별도 단계 불필요)
+- `PRECTmms = Rainf + Snowf` (둘 다 kg m⁻² s⁻¹ = mm/s)
+- 매핑: Tair→TBOT, Qair→QBOT, PSurf→PBOT, SWdown→FSDS, LWdown→FLDS, Wind→WIND
+- lon-sort·값보존 검증 완료(Tair 197901). **전체 실행은 8변수 6h 전처리 완료 후**
+  (`python wfde5_to_clm5.py [YEAR_START] [YEAR_END]`, anaconda python)
+
 ## 다음 (TODO)
-1. lon −180~180 → 0~360 정렬
-2. LSM별 포맷 변환 (CLM5 clmforc 우선)
+1. 6h 전처리 완료 대기 (변수별 순차, Tair✓·Qair 진행 중)
+2. 완료 후 `wfde5_to_clm5.py` 전체 실행 (1979–2024)
+3. 다른 LSM 포맷 변환 (LM4·JULES·Noah-MP)
