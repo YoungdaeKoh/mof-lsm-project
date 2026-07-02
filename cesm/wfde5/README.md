@@ -27,16 +27,27 @@ ERA5를 CRU 관측으로 bias 보정한 0.5° hourly 지면 forcing → **0.5° 
 - **모든 변수 6h 평균** (강수 Rainf도 `kg m⁻² s⁻¹` **flux**라 평균이 맞음 — 누적 아님)
 - nc는 float(packed 아님)이라 cdo OK
 
-## CLM5 변환
-- `analysis/wfde5_to_clm5.py`: 변수별 6h 파일 → 월별 통합 CLM5 forcing
-  (`/data2/ydkoh/clm5_forcing_wfde5/YYYY-MM_clm5.nc`)
-- **lon −180~180 → 0~360 정렬 변환기에 통합** (별도 단계 불필요)
-- `PRECTmms = Rainf + Snowf` (둘 다 kg m⁻² s⁻¹ = mm/s)
-- 매핑: Tair→TBOT, Qair→QBOT, PSurf→PBOT, SWdown→FSDS, LWdown→FLDS, Wind→WIND
-- lon-sort·값보존 검증 완료(Tair 197901). **전체 실행은 8변수 6h 전처리 완료 후**
-  (`python wfde5_to_clm5.py [YEAR_START] [YEAR_END]`, anaconda python)
+## CLM5 변환 (★ NCL, 검증된 ERA5 파이프라인 보존)
+- `analysis/wfde5_to_clm5.ncl`: 서버 `1_CLM/era5_to_clm5.ncl`(연도별 단일파일 버전)의
+  WFDE5 판. **연도별 1파일** `YYYY_wfde5.nc`에 7변수(TBOT/QBOT/PSRF/FSDS/FLDS/PRECTmms/WIND)
+  + LONGXY/LATIXY/EDGE + noleap time 통합. 출력 `/data2/ydkoh/2026_MOF_LSM/Atm_forc/1_CLM_WFDE5/`
+- 매핑: Tair→TBOT, Qair→QBOT, PSurf→**PSRF**, SWdown→FSDS, LWdown→FLDS, Wind→WIND
+- `PRECTmms = Rainf + Snowf` (둘 다 kg m⁻² s⁻¹ = mm/s), 단위환산 불필요(이미 LSM-ready)
+- lon −180~180 → `lonFlip` → 0~360 (GSWP3 셀과 셀단위 일치)
+- **⚠️ area_conserve_remap 쓰면 안 됨**: WFDE5는 land-only(ocean=1e20 fill)라 remap이
+  fill을 섞어 전 격자를 망침(ERA5는 전구 완전자료라 OK였음) → grid 일치하니 **remap 생략, 직접 대입**
+- noleap: WFDE5는 proleptic_gregorian(2/29 존재) → `drop_feb29`로 제거 (연 1460 step)
+- `_FillValue=1.e20` (ERA5는 1.e36; WFDE5 ocean missing 보존)
+- **실행**: `setenv NCARG_ROOT /usr/local/ncl_ncarg/6.6.2_gcc485` 필수(비대화형 ssh),
+  `$NCARG_ROOT/bin/ncl wfde5_to_clm5.ncl`
+- **1980 1년치 검증 완료**: TBOT 197.9–321.3K, FSDS 0–1093, WIND 0.06–37.7, valid 35.8%(land) ✓
+- (폐기: python 버전·monthly ncl 버전 — CLM5 datm 필수요소 누락으로 삭제)
+
+## 6h 전처리 완료 상태
+- 8변수 × 552(46년×12월) = **4416 완료**. 단 PSurf 1993은 소스 zip 손상(648MB) →
+  CDS 재다운로드(1811MB) → 6h 재변환 완료
 
 ## 다음 (TODO)
-1. 6h 전처리 완료 대기 (변수별 순차, Tair✓·Qair 진행 중)
-2. 완료 후 `wfde5_to_clm5.py` 전체 실행 (1979–2024)
+1. `wfde5_to_clm5.ncl` 전체 실행 (1979–2024, 연 ~10.6GB × 46 ≈ 490GB, /data2 여유 확인)
+2. datm stream 설정 → CLM5 offline 런
 3. 다른 LSM 포맷 변환 (LM4·JULES·Noah-MP)
