@@ -61,6 +61,7 @@
 | **CESM2.1.5 (CAM4/CLM4)** | smoke test 완료, spin-up 중 | F2000C4L40 @ f19_f19. F_ctrl_smoke 1개월 ✓. F_spinup 10년 실행 중 (매월 restart). Snowfall sensitivity: 5년 perturbation (-25/-50/-75% from year 10-11) |
 | **Noah-MP v5.2.1** | **gridded global 실행 완료** | HRLDAS offline(`~/HRLDAS/`, v5.2.1). intel21 serial. 단일격자 ✓ + **global 0.5° GSWP3 gridded 실행 ✓**(WRF/WPS geo_em, GSWP3→LDASIN 변환기). 다음: 2-stage spin-up(static DVEG=4 cold start → dynamic DVEG=2). 상세 `noahmp/NOAHMP_PORTING_NOTES.md` |
 | **LM4+** | **300년 static-veg spin-up 완료** | UFS LND-LM4(CDEPS DATM), C96, gfortran. cold-start qscomp clamp 패치. GSWP3 cycling 300yr → 평형 IC. 다음: WFDE5 forcing 이어달리기 + dynamic veg 1200yr+. 상세 `lm4/LM4_SPINUP_NOTES.md` |
+| **KIOST-ESM2 (GFDL ESM4.5)** | **빌드 + smoke test 완료** | 결합 ESM(FV3-C96+AM4.5+MOM6+SIS2+COBALT+LM4). tomo(Intel19/mvapich4.0/nc4.9.2)→climate00(intel21/mvapich2-2.3.4/nc4.6.1) 재빌드 ✓(223M, AVX2). netcdf `__libm_feature_flag`는 oneAPI 런타임이 해결(gfortran 불필요). 720→48 PE 축소 config(FV3 2,2/MOM 6,4, concurrent)로 **1 model-day 결합적분 완주**(ocean.stats NaN 0, RESTART 129). mvapich2 `MV2_ENABLE_AFFINITY=0` 필수. 1 model-day≈43분(48코어)→**생산런 불가, 검증용**. 상세 `kiost/KIOST_ESM2_PORTING_NOTES.md` |
 
 ## 5. Notion (research hub)
 
@@ -79,6 +80,7 @@ MOF_LSM_project/                # 로컬 = /Volumes/data01/MOF_LSM_project
 ├── CLAUDE.md                   # 이 파일 / README.md
 ├── 2026/                       # 해수부 마일스톤·착수보고·분기 보고 (docx/pdf/md/html)
 ├── jules/                      # JULES namelist·빌드·실험 설정 사본
+├── kiost/                      # KIOST-ESM2 (GFDL ESM4.5) 포팅 노트
 ├── cesm/
 │   ├── cases/                  # case 스크립트
 │   ├── run_scripts/            # 실행 스크립트
