@@ -1,0 +1,32 @@
+#!/bin/bash
+#PBS -N clm5_cyc1
+#PBS -q workq
+#PBS -l select=1:ncpus=48:mpiprocs=48:host=climate01
+#PBS -l walltime=30:00:00
+#PBS -j oe
+#PBS -o /home/ydkoh/CESM/cases/clm5_spinup_gswp3/cyc1.log
+#
+# CLM5.0 SP GSWP3 spin-up, cycle 1: continue 1982-2010 (year 1981 already done cold-start).
+# 48 PE on climate01 = the machine's ceiling (climate00 is the login node, climate02 is in use).
+# ~38.3 min/model-year -> ~18.5 h for 29 years.
+#
+# CESM has BATCH_SYSTEM=none here, so case.submit would otherwise launch on the login node.
+# --no-batch runs case.run inside this PBS job. Its trailing "No result from jobs" error is a
+# CIME artifact of --no-batch; judge success by "MODEL EXECUTION HAS FINISHED" and the restarts.
+set -u
+export PERL5LIB=/home/ydkoh/perl5/lib/perl5${PERL5LIB:+:$PERL5LIB}   # compute nodes lack bigint
+cd /home/ydkoh/CESM/cases/clm5_spinup_gswp3 || exit 1
+
+echo "=== START $(date) on $(hostname) ==="
+./case.submit --no-batch
+echo "=== MODEL PHASE DONE $(date) ==="
+
+# Raw preservation: rsync WITHOUT --delete -> archive only accumulates, never auto-removes.
+RUN=/data2/ydkoh/cesm2_output/clm5_spinup_gswp3/run
+ARCH=/home/ydkoh/CESM/spinup_raw/clm5_GSWP3_SP_cyc1
+mkdir -p "$ARCH"
+shopt -s nullglob
+rsync -a "$RUN"/*.clm2.r.*.nc "$RUN"/*.clm2.h0.*.nc "$RUN"/rpointer.* "$ARCH/" 2>/dev/null
+shopt -u nullglob
+echo "=== archived -> $ARCH ($(ls $ARCH/*.clm2.r.*.nc 2>/dev/null | wc -l) restarts, $(ls $ARCH/*.clm2.h0.*.nc 2>/dev/null | wc -l) history) $(date) ==="
+echo "=== END $(date) ==="

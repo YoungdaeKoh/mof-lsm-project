@@ -320,3 +320,28 @@ LFMASS/STMASS/RTMASS/WOOD/FASTCP/STBLCP   cold->cyc2 |d| = 0.000000
 ### 9g. 아카이브 rsync 수정 (2026-07-10)
 - 기존 rsync가 `RESTART.*` + namelist + log만 담고 **`*.LDASOUT_DOMAIN1` 누락** → `prep_*.sh`가 run dir을 `rm` 하면 출력 소실. cycle 2 출력(2.5GB)은 수동 보강함.
 - 수정: `noahmp_spinup.pbs`, `run_pass1_c00.sh`, `run_spinup300_1deg.sh`, `run_cyc2b_c01.sh` 4개에 `*.LDASOUT_DOMAIN1` 추가 + `shopt -s nullglob`(짧은 런에서 glob 미매치 시 rsync 실패 방지). 원본은 `*.bak_noldasout`로 보존.
+
+### 9h. ★ 모델비교용 Jan-01 스냅샷 생성 (2026-07-10, job 2923)
+**두 모델 다 그레고리력(leap)이다. 차이는 달력이 아니라 restart 알람 방식이다.**
+- **Noah-MP**: `RESTART_FREQUENCY_HOURS=8760` = **시간 기반** 알람 → 윤년마다 1일씩 밀림 (1981-01-01 → 2010-12-25).
+- **LM4**: FMS **달력-연 기반** 알람 → leap이어도 매년 정확히 1월 1일 (`19820101` … `20100101`). `model_configure`의 `restart_fh`는 비어 있고 `soil.res`는 LM4 cap이 씀.
+- 검증: LM4 `nhours_fcst=262800` = 10,950일. `1981-01-01 + 10950d = 2010-12-25`(leap), 2011-01-01 restart 부재 → leap 확정. LM4 노트 §9c·§9d(“NOLEAP 전환 실패 → leap 유지”)와 일치.
+- GSWP3 원본은 `calendar=noleap`(1984-02 = 224스텝). Noah-MP는 2/29를 `0.5*(Feb28+Mar1)`로 **합성 주입**해 LDASIN에 넣었고, LM4는 CDEPS가 처리. 적분 일수: Noah-MP 10,957일(1981-01-01~2010-12-31) vs LM4 10,950일(~2010-12-25).
+
+- **해법**: 밀린 restart에서 다음 1월 1일까지 1~7일만 이어달리기(동일 forcing·동일 옵션 → 연속 궤적 정확히 재현). 27개 tail, 총 105일, **6분**.
+- 산출: `spinup_raw/noahmp_GSWP3_1deg_jan1snap_cyc2/JAN1.YYYY010100_DOMAIN1` **30개(1981–2010, 624MB)**, Times 전수 검증 + NaN 0.
+- **2011-01-01은 생성 불가**: HRLDAS가 적분 종료 시각의 LDASIN을 반드시 염 → `Problem opening ... 2011010100.LDASIN_DOMAIN1`. LDASIN은 `2010123121`까지. LM4 시계열도 2010-01-01에서 끝나므로 무관.
+- **함정 2개**:
+  - HRLDAS는 런 종료 시 restart를 안 씀 → tail은 `RESTART_FREQUENCY_HOURS = 24*KDAY`로 끝점에 정확히 찍히게 해야 함.
+  - `while read` 루프 안의 `mpirun`이 **stdin(here-string)을 삼켜** 첫 tail 후 루프가 조용히 종료됨 → `mpirun ... < /dev/null` 필수.
+
+**제거된 계절 어긋남의 크기** (밀린 restart → 다음 1월 1일, 비빙설 cos(lat) 가중):
+
+| 어긋남 | d(심층T) | d(SWE) |
+|---|---|---|
+| 1일 | −0.034 K | +0.27 mm |
+| 7일 | **−0.272 K** | **+2.49 mm** |
+
+- 일수에 거의 선형(−0.039 K/일). **수렴 표류(3e-6 K)보다 ~9만 배 큼** → 표류 판정엔 상쇄되어 무해했으나 **모델 간 절대값 비교엔 치명적**이었음. SWE는 평균 22.5 mm 대비 +11%.
+- 진단 코드: `noahmp/scripts/extract_jan1_snapshots.py`, 데이터 `noahmp/data/jan1_snapshots.csv`, 실행 `jan1_snap/make_jan1.sh`.
+- **원칙: 다중 LSM 비교는 반드시 Jan-01 스냅샷(`JAN1.*`)을 쓸 것. 수렴 판정만 밀린 restart(Dec-25) 사용.** [[lsm-landmean-comparability]]
