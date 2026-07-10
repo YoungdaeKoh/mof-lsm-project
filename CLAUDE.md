@@ -38,7 +38,8 @@
 | HDF5 | /usr/local/hdf5/1.10.5_intel21 |
 | PnetCDF | /usr/local/pnetcdf/1.11.2_intel21_mvapich2-2.3.4 |
 | MKL | Intel MKL (intel21/mkl) |
-| Batch system | none (직접 실행) |
+| Batch system | PBS (`qsub`/`qstat -u ydkoh`, queue `workq`). 짧은 검증은 직접 실행 가능 |
+| Compute nodes | climate00 (login+compute) · climate01 · climate02, 각 48코어. `-l select=1:ncpus=48:mpiprocs=48:host=climateNN` 으로 노드 지정 |
 | Login shell | tcsh; 빌드/실행 스크립트는 bash |
 
 ### 핵심 경로 (climate00)
@@ -59,9 +60,9 @@
 | **JULES vn7.4** | **gridded 전구 + DGVM 실행 완료** | **gfortran 재빌드**로 Intel netcdf 깨짐(`__libm_feature_flag`) 우회. 0.5° 전구 맵 런 ✓ + TRIFFID(4-pool RothC) DGVM ✓. serial(nompi), 81분/월. 상세 `jules/JULES_PORTING_NOTES.md`. 전면 areal 경쟁(frac 진화)·MPI는 미해결 |
 | **CESM2.1.5 (CAM6/CLM5)** | 빌드 완료 | I2000Clm50Sp @ f09_g17. F2000climo timeaddmonths 에러 (PE layout 불일치) |
 | **CESM2.1.5 (CAM4/CLM4)** | smoke test 완료, spin-up 중 | F2000C4L40 @ f19_f19. F_ctrl_smoke 1개월 ✓. F_spinup 10년 실행 중 (매월 restart). Snowfall sensitivity: 5년 perturbation (-25/-50/-75% from year 10-11) |
-| **Noah-MP v5.2.1** | **gridded global 실행 완료** | HRLDAS offline(`~/HRLDAS/`, v5.2.1). intel21 serial. 단일격자 ✓ + **global 0.5° GSWP3 gridded 실행 ✓**(WRF/WPS geo_em, GSWP3→LDASIN 변환기). 다음: 2-stage spin-up(static DVEG=4 cold start → dynamic DVEG=2). 상세 `noahmp/NOAHMP_PORTING_NOTES.md` |
+| **Noah-MP v5.2.1** | **static-veg spin-up 수렴 완료 (1°, 2 cycle)** | HRLDAS offline(`~/HRLDAS/`, v5.2.1). intel21 + **intelmpi-21, 48-rank MPI**(≈11분/model-yr, 30yr≈5.7h). 단일격자 ✓ · 0.5° gridded ✓ · **1°/3h GSWP3 static veg(DVEG=4) 1981–2010 × 2 cycle 완주**. 비빙설 지면 수렴(cos(lat) 가중): cycle 간 표류 심층T 3e-6 K, 컬럼수분 0.56 kg/m², SWE 2e-5 mm. 단 격자별 컬럼수분 p99=18 kg/m² 잔차. 빙상은 원리상 미수렴(아래 §8). seed = `forcing_GSWP3_1deg/spinup/RESTART.2010122500_DOMAIN1`. **다음: dynamic veg — 단 탄소풀은 아직 0에서 시작**. 상세 `noahmp/NOAHMP_PORTING_NOTES.md` §9 |
 | **LM4+** | **300년 static-veg spin-up 완료** | UFS LND-LM4(CDEPS DATM), C96, gfortran. cold-start qscomp clamp 패치. GSWP3 cycling 300yr → 평형 IC. 다음: WFDE5 forcing 이어달리기 + dynamic veg 1200yr+. 상세 `lm4/LM4_SPINUP_NOTES.md` |
-| **KIOST-ESM2 (GFDL ESM4.5)** | **빌드 + smoke test 완료** | 결합 ESM(FV3-C96+AM4.5+MOM6+SIS2+COBALT+LM4). tomo(Intel19/mvapich4.0/nc4.9.2)→climate00(intel21/mvapich2-2.3.4/nc4.6.1) 재빌드 ✓(223M, AVX2). netcdf `__libm_feature_flag`는 oneAPI 런타임이 해결(gfortran 불필요). 720→48 PE 축소 config(FV3 2,2/MOM 6,4, concurrent)로 **1 model-day 결합적분 완주**(ocean.stats NaN 0, RESTART 129). mvapich2 `MV2_ENABLE_AFFINITY=0` 필수. 1 model-day≈43분(48코어)→**생산런 불가, 검증용**. 상세 `kiost/KIOST_ESM2_PORTING_NOTES.md` |
+| **KIOST-ESM2 (GFDL ESM4.5)** | **빌드 + smoke test 완료 (coupled + AMIP)** | 결합 ESM(FV3-C96+AM4.5+MOM6+SIS2+COBALT+LM4). tomo(Intel19/mvapich4.0/nc4.9.2)→climate00(intel21/mvapich2-2.3.4/nc4.6.1) 재빌드 ✓(223M, AVX2). netcdf `__libm_feature_flag`는 oneAPI 런타임이 해결(gfortran 불필요). 720→48 PE 축소 config(FV3 2,2/MOM 6,4, concurrent)로 **1 model-day 결합적분 완주**(ocean.stats NaN 0, RESTART 129). mvapich2 `MV2_ENABLE_AFFINITY=0` 필수. 1 model-day≈43분(48코어)→**생산런 불가, 검증용**. **AMIP 변형**(2026-07-06): 동일 exe 재사용(재빌드 X), 해양 PE 0 + SIS2 SPECIFIED_ICE로 CMIP7 관측 SST/해빙 처방. INPUT 심링크 529개 tomo경로→coupled INPUT 재연결, PE 720→24 축소로 **1 model-day(1979) 완주**(rc=0, RESTART 119, ocean diag 0). 지면 진단엔 AMIP이 실용적. 상세 `kiost/KIOST_ESM2_PORTING_NOTES.md` §11 |
 
 ## 5. Notion (research hub)
 
@@ -108,6 +109,10 @@ MOF_LSM_project/                # 로컬 = /Volumes/data01/MOF_LSM_project
 
 ## 8. Known issues
 
+- **Noah-MP 빙상은 spin-up으로 수렴 불가 (설계상)**: offline엔 빙하 역학·calving이 없어 IGBP 15(ice, 7477격자) 컬럼의 SWE가 `SNEQV` 상한 5000 mm까지 단조 증가(60년에 10→4112 mm, 상한 도달 0→1652격자). **수렴 판정·land-mean 진단은 반드시 non-ice land만.** 전 지면 평균을 쓰면 심층T 표류가 0.0007 K→0.184 K로 뻥튀기됨. `IVGTYP` max=21이면 MODIS-IGBP(ice=15, water=17). 상세 [[lsm-spinup-ice-mask-convergence]]
+- **모델 간 "land-mean"은 같은 양이 아님 (다중 LSM 비교 전 필수 정합)**: 격자·샘플링이 모델마다 달라 그대로 비교하면 안 됨. **Noah-MP** 1° 정규격자 → 무가중 평균은 고위도 과대대표(비빙설 심층T 285.53 vs cos(lat)가중 288.89 K, SWE 34.5 vs 22.5 mm), restart 샘플 날짜가 8760h stride 탓에 Jan-01→Dec-25로 표류. **LM4** cubed sphere C96 → 준등면적이라 무가중≈면적가중, 샘플은 매년 Jan-01 고정. 각 모델 진단 스크립트에 가중·샘플시점을 주석으로 명시할 것. 상세 `noahmp/NOAHMP_PORTING_NOTES.md` §9f
+- **Noah-MP 심층 T는 수렴 지표로 약함**: `TBOT_OPTION=2`가 하부경계를 setup의 고정 TMN으로 relax시킴(`SoilSnowThermalDiffusionMod.F90`) → 심층T가 안 움직이는 건 경계조건 강제 결과. **자유 예후변수인 컬럼 토양수분·SWE로 판정할 것**
+- **Noah-MP `exit=255` (benign, §8d)**: KDAY 완주 후 Intel-MPI 종료 아티팩트. 전 rank SIGKILL·`BAD TERMINATION` 로그가 뜨지만 계산·산출물 정상(NaN 0, restart 무결). walltime kill 때는 안 뜸. **성공/실패를 exit code로 판별하지 말 것** — 마지막 restart와 로그의 model date로 확인
 - **JULES Intel netcdf 깨짐 (해결됨 → gfortran)**: `libnetcdf.so.13`이 요구하는 `__libm_feature_flag` 심볼이 시스템 Intel 런타임(oneAPI 2022.0.1; "intel21" 모듈도 실제 이걸 가리킴) libimf에 없음. admin이 netcdf 빌드 후 컴파일러 교체로 깨진 상태. **해결 = gfortran + netcdf-4.6.1_gcc85 재빌드**(Intel 안 씀). 상세 `jules/JULES_PORTING_NOTES.md`
 - **JULES MPI 빌드 실패 (미해결)**: `PMPI_Comm_size: Invalid communicator` (mvapich2-2.3.4 + intel21 / OpenMPI-5.0.0 + gcc85 둘 다). 현재 nompi(serial). 0.5° 전구 81분/월이라 장기 spin-up엔 MPI/영역축소 필요
 - **JULES 전면 areal 경쟁 미해결**: DGVM은 `l_veg_compete=.false.`(탄소·phenology·LAI/수고만)로 구동. `=.true.`는 frac을 prognostic IC로 요구(합=1) → frac.nc를 use_file로 끌어오는 처리 필요

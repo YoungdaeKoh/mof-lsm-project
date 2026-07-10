@@ -1,7 +1,7 @@
 # Noah-MP v5.2.1 Offline Porting — 작업 로그 & 현황 (2026-06-25)
 
 _climate00 서버. HRLDAS offline driver + Noah-MP v5.2.1 (intel21 serial). 동적식생(DGVM) LSM 3종(CLM5·LM4.1·Noah-MP) 중 마지막._
-_**상태: 빌드·smoke test 완료 ✓** — 다음 단계는 2-stage spin-up (§5) → ERA5 실전 forcing (§6)._
+_**상태: cold-start spin-up 가동 중 (2026-07-06: climate02 job 2899 실행 중, 1982-09-23에서 재개, §8)** — 이후 평형까지 다년 + ERA5 실전 forcing (§6)._
 
 ## 0. 목표
 Noah-MP를 offline(강제) 모드로 climate00에 포팅 → 진단 테스트베드 가동. 최종적으로 ERA5 forcing으로 long spin-up → 평형 RESTART를 본 실험 IC로.
@@ -201,3 +201,122 @@ serial은 global 0.5° 30년이 ~12일로 비현실 → MPI 필수. **HRLDAS는 
 - `~/HRLDAS/hrldas/run/README.namelist` — 전 namelist 옵션 설명
 - `~/HRLDAS/hrldas/docs/README.{ERA5,GLDAS,NARR,NLDAS,single_point,vector}` — forcing별 셋업
 - 온라인: https://ral.ucar.edu/solutions/products/noah-multiparameterization-land-surface-model-noah-mp-lsm · He et al. 2023a, GMD 16, 5131
+
+## 8. Spin-up 실행 로그 (2026-07-03)
+
+DVEG=4 static cold-start spin-up 본격 가동. run dir `~/HRLDAS/forcing_GSWP3/spinup/`.
+
+### 8a. 진행 현황 (★ 현재 상태)
+- **2026-07-06 재개: climate02에서 실행 중 (job 2899, 48코어, R).** spinup.log가 `Found restart file: 'RESTART.1982092300_DOMAIN1'` + `***DATE=1982-09-23` → 1982-09-23부터 정상 이어달리기 확인(cold-start 아님). tail의 `GLACIER HAS MELTED / ARE YOU SURE...`는 benign 정보성 경고(빙하격자 처리), 옛 `WATER AT A LAND-POINT` flood와 무관. KDAY=10326으로 2010말까지 적분, 완주 시 PBS가 자동 `spinup_raw/` 아카이빙. walltime 72h 초과 시 마지막 연 restart에서 재 `qsub`.
+- (7-03) cold-start 1981-01-01 → 1982-09-23 도달 (~1.7 model-year), restart 21개 보존.
+- 재개 준비 완료: namelist가 `RESTART_FILENAME_REQUESTED="RESTART.1982092300_DOMAIN1"`, START=1982-09-23, KDAY=10326(→2010말), **연 restart**로 세팅됨. **다음엔 `qsub noahmp_spinup.pbs`만** 하면 이어짐.
+- PBS: `noahmp_spinup.pbs` = 48코어·**climate02**(7-06 climate01→02 변경)·walltime 72h, `mpirun ... > spinup.log 2>&1`.
+- 백업: `namelist.hrldas.bak_coldstart`(원 cold-start), `.bak_resume30day`(30일 restart판).
+
+### 8b. ★ 이전 "멈춤" 원인 규명 (오진 정정)
+- `repro.log` 6.2GB flood(`SOIL TYPE ... WATER AT A LAND-POINT` ~5만회 → SIGNAL 9)는 **6-30 이전 옛 문제, 이미 setup 수정으로 해결**. setup 검증: land 87,710점 중 water 토양(ISLTYP==14) **0개**.
+- 7-02 diag 런 죽음 = **20분 diag 잡에 30년 namelist 걸어서 PBS walltime kill**(진짜 버그 아님). diag.log는 flood 0, 64일 정상 적분.
+- **교훈: 첫 그럴듯한 원인(flood)에서 멈추지 말 것. diag.log 재확인(flood 0)이 오진을 정정.**
+
+### 8c. ★ 24 vs 48 코어 벤치마크 (검증, KDAY=60)
+| 코어 | 60일 wall | → 1 model-year |
+|---|---|---|
+| 24 | 517초 | ~52분 |
+| **48** | **423초** | **~43분** |
+- **48이 1.22× 빠름** (병렬효율 61%, Amdahl). 2배 안 나는 이유 = init/`MPI_Bcast`·I/O·통신·부하불균형·메모리대역폭(비병렬 고정비용). Noah-MP는 **column-독립**이라 LM4(halo 교환 有, 48서 오히려 느림)와 달리 48서 병목 아님 → **48 채택**.
+- 실제 spin-up은 ~65분/년이었음(30일 restart+상세로그 오버헤드). **연 restart 전환 시 벤치(43분/년) 근접 예상** → 30년 ~32h→~22h.
+
+### 8d. ★ Resumability 검증 (잡2897, climate02)
+- `RESTART_FILENAME_REQUESTED`로 재개 실측: 로그 `Found restart file: 'RESTART.1982032700_DOMAIN1'`, **첫 date=1982-03-27**(1981 아님)→2일 정상 진행. **이어달리기 확정 YES.**
+- 끝의 exit=255/SIGKILL은 KDAY 완주 시 Intel-MPI 종료 아티팩트(benign, 계산 정상). walltime kill 시엔 안 뜸 → resume 무관.
+
+### 8e. restart/로그 규모 & 정책
+- restart 개당 **83MB**. 30일 주기=~12개/년(~1GB/년, 30년 ~30GB) → **연 1회(8760h)로 전환**: 30개(~2.5GB), I/O 12배↓. 연 checkpoint면 spin-up 재개에 충분.
+- 로그: 30일판 spinup.log ~200MB/년(30년 ~6GB). **속도 병목 아님**(rank0 stdout ~32KB/s)이라 모니터링 위해 유지; 원하면 `/dev/null` 가능.
+
+### 8f. ★ Forcing = GSWP3 3-hourly 유지 (LM4 정합)
+- 6시간 간격 검토했으나 **일변화(특히 SWDOWN 정오피크·야간0, T2D 일교차) 훼손**으로 기각. 속도 이득도 미미(주 오버헤드는 restart+로그, forcing읽기 아님).
+- **LM4 spin-up도 GSWP3 3-hourly** + CDEPS DATM **coszen 보간**([[lm4 notes]] §2). 다중 LSM 비교 정합 위해 Noah-MP도 3시간 유지가 맞음.
+
+### 8g. ★ 결과값 검증 (restart, land-mean, NaN 0)
+| date | SMC 4층 [m³/m³] | SOIL_T 4층 [K] | SWE |
+|---|---|---|---|
+| 1981-01-31 | 0.51/0.52/0.53/0.54 | 269/271/271/272 | 16mm |
+| 1981-08-29 | 0.48/0.52/0.52/0.53 | 274/276/276/275 | 54mm |
+| 1982-03-27 | 0.50/0.52/0.52/0.53 | 270/271/272/272 | 139mm |
+- SOIL_T 계절변화 정상(범위 224–312K), NaN 0. **토양수분 ~0.5로 다소 젖음**(최대 1.0 포화·빙하점 포함) — 젖은 초기값서 서서히 배수(drift L1 −0.014/14개월). **SWE는 cold-start 0서 축적 중** → 둘 다 **미수렴, 다년 필요**(1.7년치라 당연). 진단 py: `~/nmp_result.py`(land-mean SMC/SOIL_T), `~/nmp_setup_check.py`(land-soil 정합).
+
+### 8h. ★ Restart 보존 (LM4 방식 그대로, [[lsm-spinup-raw-preservation]])
+raw restart **절대 자동삭제 금지 + 이중 보존**. run dir 밖으로 아카이빙(run dir 재사용/rm 대비).
+- **서버 아카이브**: `noahmp_spinup.pbs` 끝에 `rsync -a`(--delete 없음) 단계 추가 → `/home/ydkoh/HRLDAS/spinup_raw/noahmp_GSWP3_staticveg/`에 매 세그먼트 후 자동 누적 보존. (LM4는 /data2였으나 96%참 → Noah-MP는 /home 111T)
+- **로컬 이중보존**: `noahmp/scripts/pull_noahmp_spinup.sh` = 서버 spinup_raw → Mac `/Volumes/data02/NOAHMP/spinup_raw/` rsync(--delete 없음). 주기 실행 권장(LM4 puller와 동일 개념).
+- **삭제는 사용자가 수동으로만.** rsync 어디에도 `--delete` 없음 → 아카이브는 누적만.
+- 2026-07-03 초기 보존 완료: 22 restart(1.9GB) 서버+로컬 양쪽 확보.
+
+## 9. ★ 1°/3h static-veg spin-up 2 cycle — 수렴 판정 (2026-07-09~10)
+
+### 9a. 실행 이력
+| cycle | 노드 | 기간 | wall | 종료 |
+|---|---|---|---|---|
+| 1 | climate00 | 1981-01-01 → 2010-12-31 (KDAY=10956) | — | exit=255 (§8d benign) |
+| 2 | climate01 (job 2920, np48) | 동일 forcing 재생 | 5h41m (14:50→20:31) | exit=255 (§8d benign) |
+
+- cycle 2 seed = cycle 1 최종 restart를 `redate_restart.py`로 Times만 1981-01-01로 재기입 → **원본 forcing 재사용**(forcing 재생성 불필요).
+- 속도 **≈11분/model-year** (48-rank intelmpi, 1°/3h). 30년 ≈ 5.7h. 8c의 0.5° 벤치(43분/년)와 별개 config.
+- `RESTART_FREQUENCY_HOURS=8760`은 365일 고정 → 윤년마다 하루씩 밀려 **최종 restart가 12-25**에 찍힘(런은 12-31 종료). 마지막 6일 상태는 restart에 없음. spin-up seed로는 무해.
+- 산출물: LDASOUT 30 + RESTART 32. **아카이브 rsync가 LDASOUT을 안 담고 있었음** → 수동 보강 완료 (`spinup_raw/noahmp_GSWP3_1deg_staticveg_cyc2/`, 2.5GB). pbs 스크립트의 rsync 패턴에 `*.LDASOUT_DOMAIN1` 추가 필요.
+
+### 9b. ★★ 수렴 판정: 지표를 바꿔야 함
+동일 forcing을 재생하므로 **cycle 간 같은 날짜(2010-12-25) restart 차이 = 순수 표류**. 반면 `|annual change|`는 GSWP3 경년변동이 지배 → 수렴 판별 불가.
+
+**모든 평균은 cos(lat) 면적가중** (§9f 참조).
+
+| 지표 (non-ice land, 14717격자) | cycle 1 순변화 | cycle 2 동일날짜 표류 | 비고 |
+|---|---|---|---|
+| 심층 토양온도 | +0.623 K | **+3.0e-6 K** | ⚠ TBOT=2가 고정 TMN으로 relax → 약한 증거 |
+| 컬럼 토양수분 | −3.29 kg/m² | **−0.56 kg/m²** | 자유 예후변수 → **주 증거** |
+| SWE | — | **+1.8e-5 mm** | |
+| 연간 변화 노이즈 \|ΔT\| | — | 0.051 K | 표류의 **1.7만배** |
+
+- **판정: 비빙설 전구 지면 수렴 완료.** cycle 3 static은 불필요 — 583 kg/m² 컬럼에서 얻을 게 ~0.5 kg/m²(0.1%)인데 비용 5.7h×48코어.
+- ⚠ **전구 평균만 수렴.** 격자별 컬럼수분 표류는 mean\|d\|=0.51 kg/m²지만 **p99=18.1, max=53.7 kg/m²**. land-mean 진단엔 무해하나 **지역별 토양수분 진단 시 상위 1% 격자의 잔차 유의**.
+- 잔여 표류는 최하층(1 m)에 집중, `SMC` mean\|d\| 1.9e-4 m³/m³.
+- **seed 확정**: `forcing_GSWP3_1deg/spinup/RESTART.2010122500_DOMAIN1` (NaN/Inf 0, 헤더 정상).
+
+### 9c. ★ 빙상은 제외해야 함 ([[lsm-spinup-ice-mask-convergence]])
+- capped(≥4999mm) 격자는 cycle 1·2 모두 **100% IGBP 15 안**(off-ice = 0). 일반 지면으로의 "눈 폭주" 아님.
+- 빙상(7477격자) 평균 SWE 10 → 4096 mm, 상한 도달 0 → 1652격자(22%). offline엔 빙하 역학 없어 **평형 자체가 존재하지 않음**.
+- 전 지면 평균으로 보면 심층T 표류가 부풀려짐 → cycle 1 그림이 "미수렴"으로 보였던 원인.
+- `IVGTYP` max=21 → **MODIS-IGBP**(ice=15, water=17). `ICE = 15 if max<=20 else 24` 식 휴리스틱은 IGBP를 USGS로 오판함.
+
+### 9d. ★ 탄소풀은 60년 동안 한 번도 적분되지 않음
+```
+WOOD identical cold-start vs cyc2 end? True
+LFMASS/STMASS/RTMASS/WOOD/FASTCP/STBLCP   cold->cyc2 |d| = 0.000000
+```
+- DVEG=4 → `FlagDynamicVeg = .false.` (`PhenologyMainMod.F90` L158: 2/5/6일 때만 true) → 탄소 모듈 미실행.
+- **dynamic veg로 가면 탄소 spin-up은 0에서 시작.** WOOD 회전시간 수십~수백 년 → 30년 1 cycle로 불가, 4~10 cycle(23~57h) 예상.
+- **DVEG=2 vs 5 결정 필요**: 옵션 4(현재)는 `VegFrac = VegFracAnnMax` 고정. 옵션 2는 `VegFrac = 1-exp(-0.52(LAI+SAI))`로 **피복률 산정식까지 바뀜**. 옵션 5는 dynamic이면서 VegFrac 연최대 유지 → 변수 하나만 바꿔 비교 가능(진단 목적엔 5가 깔끔할 수 있음).
+
+### 9e. 재현 도구
+- 추출: `noahmp/scripts/extract_spinup_cyc12.py` (서버 실행, ice/non-ice 분리 CSV)
+- 데이터: `noahmp/data/spinup_cyc12.csv` (61 model-year)
+- 그림: `noahmp/scripts/plot_spinup.py` → `figures/noahmp_spinup_convergence_2cyc.png` (4-panel; LM4 `lm4/scripts/plot_spinup.py` 구조 계승 + 빙상 패널·표류 지표 추가)
+
+### 9f. ★ LM4와 그림 기준 정합 (2026-07-10 점검)
+두 모델의 "land-mean"은 **같은 양이 아니었음**. 비교 전 반드시 맞출 것.
+
+| | LM4 (`lm4_equil.py`) | Noah-MP (수정 전) | Noah-MP (수정 후) |
+|---|---|---|---|
+| 샘플링 시점 | `{year}0101.000000.soil.res.*` = **1월 1일 고정** | 8760h stride → **Jan-01 → Dec-25로 표류**(7일) | 동일(구조상 불가피), 그림에 명시 |
+| 공간 평균 | cubed sphere C96 = **준등면적** → 무가중 ≈ 면적가중 | 1° 정규격자 **무가중 → 고위도 과대대표** | **cos(lat) 가중** |
+
+- 무가중 → 가중 전환 시 비빙설 심층T **285.53 → 288.89 K (+3.36)**, SWE **34.50 → 22.54 mm (−35%)**. 컬럼수분만 −0.11로 둔감.
+- **수렴 판정은 가중 여부와 무관하게 유지**(동일 날짜 차분이라 상쇄): 심층T 표류 3.0e-6 K, SWE 1.8e-5 mm.
+- 샘플링 표류는 **cycle 간 동일날짜(2010-12-25) 차분에는 영향 없음**. cycle 내 시계열에만 ≤7일 계절 wobble.
+- CSV 정밀도 함정: `%.4f`로 쓰면 심층T 표류(O(1e-6) K)가 0으로 반올림됨 → `%.6f` 사용.
+- 향후: LM4도 면적×land-fraction 가중으로 맞추면 완전 정합.
+
+### 9g. 아카이브 rsync 수정 (2026-07-10)
+- 기존 rsync가 `RESTART.*` + namelist + log만 담고 **`*.LDASOUT_DOMAIN1` 누락** → `prep_*.sh`가 run dir을 `rm` 하면 출력 소실. cycle 2 출력(2.5GB)은 수동 보강함.
+- 수정: `noahmp_spinup.pbs`, `run_pass1_c00.sh`, `run_spinup300_1deg.sh`, `run_cyc2b_c01.sh` 4개에 `*.LDASOUT_DOMAIN1` 추가 + `shopt -s nullglob`(짧은 런에서 glob 미매치 시 rsync 실패 방지). 원본은 `*.bak_noldasout`로 보존.
