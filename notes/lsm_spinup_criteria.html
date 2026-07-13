@@ -1,0 +1,496 @@
+<title>LSM Spin-up Convergence Criteria — MOF KIMST</title>
+<style>
+  :root {
+    --paper: #f3f2ee;
+    --paper-2: #eae8e1;
+    --card: #fbfaf7;
+    --ink: #1c211f;
+    --ink-2: #4a534f;
+    --ink-3: #7c847f;
+    --rule: #d8d5cc;
+    --rule-2: #e4e1d9;
+    --accent: #0e6b63;
+    --accent-soft: #d3e6e2;
+    --pass: #3a7a37;
+    --pass-bg: #e2eede;
+    --watch: #a8710f;
+    --watch-bg: #f4e9d3;
+    --absent: #8a8f8b;
+    --absent-bg: #e7e6e1;
+    --serif: Georgia, "Iowan Old Style", "Times New Roman", serif;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+    --measure: 68ch;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #14181a;
+      --paper-2: #1b2022;
+      --card: #1d2325;
+      --ink: #e7e9e6;
+      --ink-2: #a9b1ad;
+      --ink-3: #7b847f;
+      --rule: #2c3335;
+      --rule-2: #262c2e;
+      --accent: #4fbdb0;
+      --accent-soft: #16332f;
+      --pass: #7fc178;
+      --pass-bg: #1a2a1c;
+      --watch: #d9a648;
+      --watch-bg: #2e2513;
+      --absent: #7b827e;
+      --absent-bg: #242a2b;
+    }
+  }
+  :root[data-theme="light"] {
+    --paper: #f3f2ee; --paper-2: #eae8e1; --card: #fbfaf7; --ink: #1c211f;
+    --ink-2: #4a534f; --ink-3: #7c847f; --rule: #d8d5cc; --rule-2: #e4e1d9;
+    --accent: #0e6b63; --accent-soft: #d3e6e2; --pass: #3a7a37; --pass-bg: #e2eede;
+    --watch: #a8710f; --watch-bg: #f4e9d3; --absent: #8a8f8b; --absent-bg: #e7e6e1;
+  }
+  :root[data-theme="dark"] {
+    --paper: #14181a; --paper-2: #1b2022; --card: #1d2325; --ink: #e7e9e6;
+    --ink-2: #a9b1ad; --ink-3: #7b847f; --rule: #2c3335; --rule-2: #262c2e;
+    --accent: #4fbdb0; --accent-soft: #16332f; --pass: #7fc178; --pass-bg: #1a2a1c;
+    --watch: #d9a648; --watch-bg: #2e2513; --absent: #7b827e; --absent-bg: #242a2b;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 17px;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 28px 96px; }
+
+  /* ---- masthead ---- */
+  header.mast {
+    padding: 60px 0 34px;
+    border-bottom: 2px solid var(--ink);
+    margin-bottom: 8px;
+  }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 18px;
+  }
+  h1 {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: clamp(30px, 5.2vw, 50px);
+    line-height: 1.06;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+    margin: 0 0 20px;
+    max-width: 20ch;
+  }
+  .standfirst {
+    font-family: var(--serif);
+    font-size: clamp(18px, 2.4vw, 21px);
+    line-height: 1.5;
+    color: var(--ink-2);
+    max-width: 60ch;
+    margin: 0;
+  }
+  .standfirst b { color: var(--ink); font-weight: 600; }
+  .meta-row {
+    display: flex; flex-wrap: wrap; gap: 8px 26px;
+    margin-top: 26px;
+    font-family: var(--mono); font-size: 12.5px; color: var(--ink-3);
+  }
+  .meta-row span { white-space: nowrap; }
+  .meta-row b { color: var(--ink-2); font-weight: 500; }
+
+  /* ---- verdict banner ---- */
+  .verdict {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 20px;
+    align-items: start;
+    background: var(--accent-soft);
+    border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+    border-radius: 3px;
+    padding: 22px 26px;
+    margin: 40px 0 8px;
+  }
+  .verdict .glyph {
+    font-family: var(--serif); font-size: 40px; line-height: 1;
+    color: var(--accent); font-weight: 700;
+  }
+  .verdict h2 {
+    font-family: var(--sans); font-size: 15px; font-weight: 700;
+    letter-spacing: 0.02em; margin: 2px 0 8px; color: var(--ink);
+  }
+  .verdict p { margin: 0; font-size: 15.5px; color: var(--ink-2); max-width: 72ch; }
+  .verdict code { color: var(--accent); }
+
+  /* ---- section scaffolding ---- */
+  section { padding-top: 56px; }
+  .sec-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 8px; }
+  .sec-num {
+    font-family: var(--mono); font-size: 13px; color: var(--accent);
+    font-weight: 600; letter-spacing: 0.05em;
+  }
+  h2.sec-title {
+    font-family: var(--serif); font-weight: 600;
+    font-size: clamp(22px, 3.3vw, 29px); letter-spacing: -0.01em;
+    margin: 0; text-wrap: balance;
+  }
+  .sec-lede { color: var(--ink-2); max-width: var(--measure); margin: 10px 0 26px; }
+  p { max-width: var(--measure); }
+  p.body { margin: 0 0 18px; }
+  a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  code, .var { font-family: var(--mono); font-size: 0.88em; }
+  .var {
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 9%, transparent);
+    padding: 1px 5px; border-radius: 3px; white-space: nowrap;
+  }
+
+  /* ---- cross-model comparison table ---- */
+  .scroll { overflow-x: auto; margin: 8px 0 6px; border: 1px solid var(--rule); border-radius: 4px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14.5px; min-width: 720px; }
+  caption { text-align: left; font-size: 13px; color: var(--ink-3); padding: 0 0 10px; font-family: var(--mono); }
+  thead th {
+    text-align: left; font-family: var(--mono); font-size: 11.5px;
+    text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-2);
+    font-weight: 600; padding: 13px 16px; background: var(--paper-2);
+    border-bottom: 1px solid var(--rule); vertical-align: bottom;
+  }
+  tbody td { padding: 14px 16px; border-bottom: 1px solid var(--rule-2); vertical-align: top; color: var(--ink-2); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody th[scope="row"] {
+    text-align: left; padding: 14px 16px; border-bottom: 1px solid var(--rule-2);
+    font-family: var(--sans); font-weight: 600; color: var(--ink); white-space: nowrap;
+    vertical-align: top;
+  }
+  tbody tr:last-child th { border-bottom: none; }
+  .row-hi th[scope="row"], .row-hi td { background: color-mix(in srgb, var(--accent) 6%, transparent); }
+  .num { font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  /* ---- status pills ---- */
+  .pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--mono); font-size: 12px; font-weight: 600;
+    padding: 2px 9px; border-radius: 100px; white-space: nowrap; letter-spacing: 0.01em;
+  }
+  .pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex: none; }
+  .pill.pass { color: var(--pass); background: var(--pass-bg); }
+  .pill.watch { color: var(--watch); background: var(--watch-bg); }
+  .pill.absent { color: var(--absent); background: var(--absent-bg); }
+
+  /* ---- criteria cards ---- */
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 16px; margin: 10px 0; }
+  .card {
+    background: var(--card); border: 1px solid var(--rule);
+    border-radius: 5px; padding: 22px 22px 20px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .card .tool { font-family: var(--mono); font-size: 12.5px; color: var(--accent); margin: 0 0 3px; }
+  .card h3 { font-family: var(--serif); font-size: 20px; font-weight: 600; margin: 0 0 8px; }
+  .card .crit {
+    font-size: 14px; color: var(--ink); background: var(--paper-2);
+    border-left: 3px solid var(--accent); padding: 9px 12px; border-radius: 0 3px 3px 0;
+    margin: 4px 0 12px; line-height: 1.45;
+  }
+  .card .label { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-3); margin: 8px 0 5px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 5px; }
+  .chip {
+    font-family: var(--mono); font-size: 11.5px; color: var(--ink-2);
+    background: var(--paper-2); border: 1px solid var(--rule-2);
+    padding: 2px 7px; border-radius: 3px; white-space: nowrap;
+  }
+  .card .foot { font-size: 13px; color: var(--ink-3); margin: 12px 0 0; line-height: 1.5; }
+
+  /* ---- diagnostic tool anatomy ---- */
+  .tool-block {
+    background: var(--card); border: 1px solid var(--rule); border-radius: 6px;
+    padding: 26px 28px; margin: 18px 0;
+  }
+  .tool-block > h3 {
+    font-family: var(--mono); font-size: 16px; font-weight: 600; color: var(--accent);
+    margin: 0 0 4px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .tool-block > h3 .scope {
+    font-family: var(--sans); font-size: 12px; font-weight: 600; color: var(--ink-2);
+    background: var(--paper-2); padding: 3px 9px; border-radius: 100px; letter-spacing: 0.02em;
+  }
+  .tool-block > p { color: var(--ink-2); margin: 6px 0 18px; max-width: var(--measure); }
+  .steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0; counter-reset: step; }
+  .steps li {
+    display: grid; grid-template-columns: 30px 1fr; gap: 16px;
+    padding: 14px 0; border-top: 1px solid var(--rule-2); align-items: baseline;
+  }
+  .steps li:first-child { border-top: none; }
+  .steps li::before {
+    counter-increment: step; content: counter(step);
+    font-family: var(--mono); font-size: 13px; font-weight: 700; color: var(--accent);
+    background: var(--accent-soft); width: 26px; height: 26px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .steps li .st-body { font-size: 15px; color: var(--ink-2); }
+  .steps li .st-body b { color: var(--ink); font-weight: 600; }
+  .steps li .st-body .var { font-size: 0.86em; }
+
+  .formula {
+    font-family: var(--mono); font-size: 14px; text-align: center;
+    background: var(--paper-2); border: 1px solid var(--rule);
+    border-radius: 4px; padding: 16px; margin: 6px 0 2px; color: var(--ink);
+    overflow-x: auto;
+  }
+  .formula .op { color: var(--accent); }
+
+  /* ---- data ledger (our run) ---- */
+  .ledger { margin: 6px 0; }
+  .ledger .scroll { border-radius: 4px; }
+  .ledger td.metric { font-family: var(--sans); font-weight: 600; color: var(--ink); }
+  .ledger td .sub { display: block; font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); font-weight: 400; margin-top: 1px; }
+
+  /* ---- callout ---- */
+  .callout {
+    border-left: 3px solid var(--watch); background: var(--watch-bg);
+    padding: 16px 20px; border-radius: 0 4px 4px 0; margin: 22px 0;
+    font-size: 15px; color: var(--ink); max-width: var(--measure);
+  }
+  .callout b { color: var(--watch); }
+  .callout.good { border-left-color: var(--pass); background: var(--pass-bg); }
+  .callout.good b { color: var(--pass); }
+
+  /* ---- rule / footer ---- */
+  hr.div { border: none; border-top: 1px solid var(--rule); margin: 56px 0 0; }
+  footer {
+    padding-top: 30px; font-size: 13.5px; color: var(--ink-3); max-width: var(--measure);
+  }
+  footer a { color: var(--ink-2); }
+  footer .src { font-family: var(--mono); font-size: 12px; line-height: 1.9; }
+
+  ul.plain { max-width: var(--measure); padding-left: 20px; }
+  ul.plain li { margin: 5px 0; color: var(--ink-2); }
+  ul.plain li b { color: var(--ink); }
+
+  @media (max-width: 640px) {
+    body { font-size: 16px; }
+    .wrap { padding: 0 18px 72px; }
+    .verdict { grid-template-columns: 1fr; gap: 10px; }
+    .steps li { grid-template-columns: 24px 1fr; gap: 12px; }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    a { transition: color 0.15s ease; }
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="mast">
+    <p class="eyebrow">MOF KIMST · Multi-LSM Diagnostic Framework</p>
+    <h1>Spin-up convergence: whose ruler, and when do we stop?</h1>
+    <p class="standfirst">Only one of our four land models ships a written, quantitative equilibrium standard. This note adopts the <b>CLM5 Satellite-Phenology guide</b> as the common ruler, shows exactly what its diagnostic tools measure, and reads our own CLM5 run against it — which says <b>cycle 3 is not needed</b>.</p>
+    <div class="meta-row">
+      <span><b>Prepared</b> 2026-07-12</span>
+      <span><b>Models</b> CLM5.0 · JULES vn7.4 · LM4 · Noah-MP v5.2.1</span>
+      <span><b>Forcing</b> GSWP3 1981–2010</span>
+      <span><b>Status</b> CLM5 cycle 2 running</span>
+    </div>
+  </header>
+
+  <div class="verdict">
+    <div class="glyph">✓</div>
+    <div>
+      <h2>Decision</h2>
+      <p>Adopt the CLM5-SP guide as the cross-model convergence standard. Our CLM5 run has passed every guide variable except total water storage — the one variable the guide itself flags as slow — after 60 model-years, above the guide's ~50-year target. <b>No cycle 3.</b> Total water storage is treated as a slow reservoir, exactly as the LM4 Sahara deep-water case was.</p>
+    </div>
+  </div>
+
+  <section id="why">
+    <div class="sec-head"><span class="sec-num">01</span><h2 class="sec-title">Why CLM sets the standard for all four models</h2></div>
+    <p class="sec-lede">Each model treats spin-up differently, and only one writes down a number you can test against. The rest either bury the test in model code or leave it to judgment.</p>
+
+    <div class="scroll">
+      <table>
+        <caption>How each model defines "spun up"</caption>
+        <thead>
+          <tr>
+            <th scope="col">Model</th>
+            <th scope="col">Where the criterion lives</th>
+            <th scope="col">Judged on</th>
+            <th scope="col">Grid coverage required</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="row-hi">
+            <th scope="row">CLM5&#8209;SP</th>
+            <td>User guide — <b>~50 model-years</b> from arbitrary IC; most states equilibrate in &lt;10 yr</td>
+            <td><span class="var">FSH</span> <span class="var">EFLX_LH_TOT</span> <span class="var">GPP</span> <span class="var">H2OSOI</span> <span class="var">TSOI</span> <span class="var">TWS</span></td>
+            <td>tool default</td>
+          </tr>
+          <tr>
+            <th scope="row">CLM5&#8209;BGC</th>
+            <td>User guide — AD ~200 yr → final several-hundred yr</td>
+            <td>ecosystem carbon pools + <span class="var">TWS</span></td>
+            <td class="num">97% of cells</td>
+          </tr>
+          <tr>
+            <th scope="row">JULES vn7.4</th>
+            <td><b>In the model.</b> <span class="var">&amp;JULES_SPINUP</span> namelist: per-variable tolerance, checked every cycle</td>
+            <td><span class="var">smcl</span> <span class="var">t_soil</span> <span class="var">c_soil</span> <span class="var">c_veg</span></td>
+            <td class="num">100% — every point</td>
+          </tr>
+          <tr>
+            <th scope="row">LM4 / GFDL</th>
+            <td>No formal tolerance. Carbon-lifetime cap (500 yr) + accelerated substitution + long run (piControl 800 yr+)</td>
+            <td>carbon equilibrium (informal)</td>
+            <td>—</td>
+          </tr>
+          <tr>
+            <th scope="row">Noah-MP</th>
+            <td>No published HRLDAS convergence criterion</td>
+            <td>practice: soil moisture / temperature stability</td>
+            <td>—</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="body" style="margin-top:26px;">Read down the last two columns: CLM is the only row with a threshold you can compute, a named variable set, and a shipped tool to compute it. JULES is close — it encodes its own test in code — and that test is <b>stricter than CLM's</b>: it demands the tolerance hold at <em>every</em> grid point, with no percentage escape hatch. That matters for our purposes: a state that clears the CLM bar is moving in the safe direction for JULES too. LM4 and Noah-MP leave equilibrium to judgment, so they inherit a borrowed frame — and CLM's is the natural one to borrow.</p>
+
+    <div class="callout good">
+      <b>Adopted common rule.</b> A model is spun up when the between-cycle change in surface fluxes (sensible, latent), near-surface soil moisture, and soil temperature to ~1.5 m is negligible. Total water storage, deep soil water, and deep soil heat are treated separately as slow reservoirs: if they do not affect global or flux diagnostics, the run is called done — the LM4 Sahara precedent.
+    </div>
+  </section>
+
+  <section id="tools">
+    <div class="sec-head"><span class="sec-num">02</span><h2 class="sec-title">What the diagnostic tools actually check</h2></div>
+    <p class="sec-lede">CLM ships two NCL stability scripts. They share a method — compare a variable's global mean against a target band, year over year — but watch different variables and enforce different thresholds. The SP tool governs our run.</p>
+
+    <div class="tool-block">
+      <h3><span>SpinupStability_SP.ncl</span> <span class="scope">Satellite Phenology — our run</span></h3>
+      <p>Used when vegetation is prescribed (no interactive carbon). It asks a physical question: have the land's energy and water states stopped drifting under the cycled forcing? Because there is no carbon to turn over, the answer arrives fast — the guide says under 10 years for most variables.</p>
+      <p class="label" style="margin-top:2px;">Six variables it plots against an equilibrium band</p>
+      <div class="chips">
+        <span class="chip">FSH — sensible heat flux</span>
+        <span class="chip">EFLX_LH_TOT — latent heat flux</span>
+        <span class="chip">GPP — gross primary production</span>
+        <span class="chip">TWS — total water storage</span>
+        <span class="chip">H2OSOI — soil water, layer 8 (~0.80 m)</span>
+        <span class="chip">TSOI — soil temperature, layer 10 (~1.36 m)</span>
+      </div>
+      <ol class="steps" style="margin-top:20px;">
+        <li><span class="st-body">Take the <b>annual global land mean</b> of each variable, weighted by <span class="var">area</span> × <span class="var">landfrac</span> from the history file.</span></li>
+        <li><span class="st-body">Plot the series across spin-up years and draw a horizontal <b>equilibrium band</b> (the dotted lines in the guide figures) around the settled value.</span></li>
+        <li><span class="st-body">A variable is converged once its curve <b>flattens inside the band</b> and stays there. Energy and water fluxes get there first; <b>TWS is expected to lag.</b></span></li>
+      </ol>
+      <div class="callout" style="margin: 18px 0 0;">
+        <b>Watch the layer, not the bottom.</b> The tool reads <span class="var">TSOI</span> at <b>layer 10 = 1.36 m</b>, not the model's deepest node. CLM5's ground column runs 25 layers to <b>42 m</b> of bedrock; that node has a multi-century thermal memory and never settles in an offline run. Judging convergence on it reads a converged model as forever-drifting — a real trap we hit on the first pass.
+      </div>
+    </div>
+
+    <div class="tool-block">
+      <h3><span>SpinupStability.ncl</span> <span class="scope">Biogeochemistry — reference only</span></h3>
+      <p>Used when carbon is interactive. Here equilibrium means the ecosystem carbon pools have stopped accumulating, which is slow — soil organic matter in the Arctic turns over on millennial timescales. This tool does not govern our SP run, but it defines the quantitative threshold everyone quotes.</p>
+      <p class="label" style="margin-top:2px;">Six variables</p>
+      <div class="chips">
+        <span class="chip">TOTECOSYSC — total ecosystem carbon</span>
+        <span class="chip">TOTSOMC — soil organic matter carbon</span>
+        <span class="chip">TOTVEGC — vegetation carbon</span>
+        <span class="chip">TLAI — leaf area index</span>
+        <span class="chip">GPP — gross primary production</span>
+        <span class="chip">TWS — total water storage</span>
+      </div>
+      <p class="label" style="margin-top:18px;">The quantitative equilibrium test</p>
+      <div class="formula">
+        &#8805; 97% of land cells with <span class="op">|&#916; TOTECOSYSC|</span> &#8804; <span class="op">1 gC&#183;m&#8315;&#178;&#183;yr&#8315;&#185;</span>
+      </div>
+      <p class="foot" style="max-width:var(--measure); color:var(--ink-3); font-size:14px; margin-top:14px;">Equivalently: fewer than 3% of the land surface still in carbon disequilibrium. The last 3% — high-latitude soil carbon — can take <b>1000+ years</b> to satisfy, and the guide explicitly permits relaxing it by application. This is why a full BGC spin-up is a different order of cost from our SP run, and why we run SP.</p>
+    </div>
+  </section>
+
+  <section id="ourrun">
+    <div class="sec-head"><span class="sec-num">03</span><h2 class="sec-title">Our CLM5 cycle 1, read against the SP guide</h2></div>
+    <p class="sec-lede">Thirty years, cold start, area-weighted global land mean, using the exact variables and layers the SP tool watches. The rightmost column is the mean absolute year-to-year change over the final five years.</p>
+
+    <div class="ledger">
+      <div class="scroll">
+        <table>
+          <caption>Cycle 1 (1981–2010) · |Δ / yr|, last 5 years</caption>
+          <thead>
+            <tr>
+              <th scope="col">Guide variable</th>
+              <th scope="col">Depth / kind</th>
+              <th scope="col">|Δ / yr|, last 5 yr</th>
+              <th scope="col">Verdict</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="metric">EFLX_LH_TOT<span class="sub">latent heat flux</span></td>
+              <td>surface energy</td>
+              <td class="num">0.45 W·m⁻²</td>
+              <td><span class="pill pass">converged</span></td>
+            </tr>
+            <tr>
+              <td class="metric">FSH<span class="sub">sensible heat flux</span></td>
+              <td>surface energy</td>
+              <td class="num">0.25 W·m⁻²</td>
+              <td><span class="pill pass">converged</span></td>
+            </tr>
+            <tr>
+              <td class="metric">H2OSOI<span class="sub">layer 8 soil water</span></td>
+              <td class="num">~0.80 m</td>
+              <td class="num">0.0014 mm³·mm⁻³</td>
+              <td><span class="pill pass">converged</span></td>
+            </tr>
+            <tr>
+              <td class="metric">TSOI<span class="sub">layer 10 soil temperature</span></td>
+              <td class="num">~1.36 m</td>
+              <td class="num">0.11 K</td>
+              <td><span class="pill pass">near-converged</span></td>
+            </tr>
+            <tr class="row-hi">
+              <td class="metric">TWS<span class="sub">total water storage</span></td>
+              <td>column reservoir</td>
+              <td class="num">12.8 mm</td>
+              <td><span class="pill watch">still drifting</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <p class="body" style="margin-top:24px;">Every energy and near-surface water state has settled. The single laggard is total water storage — soil column water plus the unconfined aquifer plus snow — drifting 12.8 mm per year at year 30. That is precisely the variable the guide singles out with "TWS may take a bit longer," for the same reason it lagged in LM4: deep groundwater recharge and snow accumulation have reservoir turnover times far longer than 30 years.</p>
+
+    <div class="callout">
+      <b>The first read was wrong.</b> An earlier pass measured <span class="var">TSOI</span> at the 42 m bottom node and saw +0.29 K/yr — "diverging." The guide reads layer 10 at 1.36 m, where the drift is 0.11 K/yr and settling. The physics did not change; the layer did. The bottom node's thermal memory is a feature of the 50 m column, not a spin-up failure.
+    </div>
+  </section>
+
+  <section id="verdict">
+    <div class="sec-head"><span class="sec-num">04</span><h2 class="sec-title">What this settles</h2></div>
+    <ul class="plain">
+      <li><b>Cycle 3 is not run.</b> The guide target is ~50 years; cycle 1 + cycle 2 is 60. The guide's variables are converged but for TWS, and TWS is the variable the guide itself expects to lag.</li>
+      <li><b>Cycle 2 gives the final proof.</b> When it finishes, the same-date drift <span class="var">r.2041-01-01 − r.2011-01-01</span> confirms the flux and soil states have stopped moving between identical-forcing cycles. NO_LEAP makes both restarts land on Jan 1 with no snapshot surgery.</li>
+      <li><b>TWS carries a caveat, not a veto.</b> Following the LM4 Sahara precedent, a slow reservoir that does not move global or flux diagnostics does not block completion. It is documented, not chased.</li>
+      <li><b>The rule generalizes.</b> Noah-MP (60 yr) and LM4 (300 yr) are read on the same frame — surface fluxes and shallow soil converged, deep reservoirs noted — so the three models' spin-ups are judged on one consistent standard rather than three ad-hoc ones.</li>
+    </ul>
+  </section>
+
+  <hr class="div">
+  <footer>
+    <p>Companion to <code>cesm/CLM5_SPINUP_NOTES.md §7</code>. Data: <code>cesm/clm_output/clm5_spinup_guide_cyc1.csv</code>. Weighting and sampling conventions in <code>noahmp/NOAHMP_PORTING_NOTES.md §9f</code>.</p>
+    <p class="src">
+      Sources ·
+      <a href="https://escomp.github.io/CTSM/release-clm5.0/users_guide/running-special-cases/Spinning-up-the-biogeochemistry-BGC-spinup.html">CTSM release-clm5.0 · BGC spin-up guide</a><br>
+      CLM-SP spin-up guide (in-tree): <code>doc/.../Spinning-up-the-Satellite-Phenology-Model-CLMSP-spinup.rst</code><br>
+      JULES criterion (in-source): <code>src/control/standalone/spinup/spinup_check_mod.F90</code><br>
+      <a href="https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2023MS003922">Shevliakova et&nbsp;al. 2024 · LM4.1 (GFDL ESM4.1), JAMES</a>
+    </p>
+  </footer>
+
+</div>

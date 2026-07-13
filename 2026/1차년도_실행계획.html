@@ -1,0 +1,454 @@
+<title>1.7 1차년도 실행계획 · 지면모델 성능진단</title>
+<style>
+  :root{
+    --paper:#f4f1ec; --paper-2:#eae5db; --card:#fbf9f5; --ink:#1b201f; --ink-2:#4c534f;
+    --ink-3:#7f857f; --rule:#dcd6ca; --rule-2:#e7e2d7;
+    --sea:#0c5a63; --sea-soft:#d3e7e6; --land:#9a6d3f;
+    --done:#3a7a37; --done-bg:#e3efdd; --active:#b5791a; --active-bg:#f5ebd2;
+    --todo:#8a6752; --todo-bg:#ece2da; --gap:#b0392e; --gap-bg:#f4dcd7;
+    --serif:Georgia,"Times New Roman",serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR","Segoe UI",Roboto,sans-serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --measure:70ch;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --paper:#151817; --paper-2:#1d211f; --card:#1e2321; --ink:#e8e9e5; --ink-2:#a9b0aa;
+      --ink-3:#79807a; --rule:#2c322f; --rule-2:#262b28;
+      --sea:#4cb6c0; --sea-soft:#153232; --land:#c79862;
+      --done:#7ec177; --done-bg:#1a2a1c; --active:#d8a748; --active-bg:#2d2512;
+      --todo:#c39a7f; --todo-bg:#2a221c; --gap:#e0736a; --gap-bg:#301c1a;
+    }
+  }
+  :root[data-theme="light"]{
+    --paper:#f4f1ec; --paper-2:#eae5db; --card:#fbf9f5; --ink:#1b201f; --ink-2:#4c534f;
+    --ink-3:#7f857f; --rule:#dcd6ca; --rule-2:#e7e2d7; --sea:#0c5a63; --sea-soft:#d3e7e6; --land:#9a6d3f;
+    --done:#3a7a37; --done-bg:#e3efdd; --active:#b5791a; --active-bg:#f5ebd2;
+    --todo:#8a6752; --todo-bg:#ece2da; --gap:#b0392e; --gap-bg:#f4dcd7;
+  }
+  :root[data-theme="dark"]{
+    --paper:#151817; --paper-2:#1d211f; --card:#1e2321; --ink:#e8e9e5; --ink-2:#a9b0aa;
+    --ink-3:#79807a; --rule:#2c322f; --rule-2:#262b28; --sea:#4cb6c0; --sea-soft:#153232; --land:#c79862;
+    --done:#7ec177; --done-bg:#1a2a1c; --active:#d8a748; --active-bg:#2d2512;
+    --todo:#c39a7f; --todo-bg:#2a221c; --gap:#e0736a; --gap-bg:#301c1a;
+  }
+
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+    font-size:16.5px;line-height:1.65;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 26px 90px;}
+
+  header.mast{padding:58px 0 30px;border-bottom:2px solid var(--ink);}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.13em;text-transform:uppercase;
+    color:var(--sea);margin:0 0 16px;}
+  h1{font-weight:700;font-size:clamp(27px,4.6vw,44px);line-height:1.12;letter-spacing:-.01em;
+    text-wrap:balance;margin:0 0 16px;max-width:24ch;}
+  .stand{font-size:clamp(17px,2.2vw,19.5px);line-height:1.55;color:var(--ink-2);max-width:64ch;margin:0;}
+  .stand b{color:var(--ink);font-weight:600;}
+  .mast-meta{display:flex;flex-wrap:wrap;gap:8px 24px;margin-top:22px;
+    font-family:var(--mono);font-size:12.5px;color:var(--ink-3);}
+  .mast-meta b{color:var(--ink-2);font-weight:500;}
+  .deadline{color:var(--gap);}
+
+  .verdict{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:start;
+    background:var(--sea-soft);border:1px solid color-mix(in srgb,var(--sea) 32%,transparent);
+    border-radius:4px;padding:22px 24px;margin:34px 0 6px;}
+  .verdict .g{font-family:var(--serif);font-size:34px;line-height:1;color:var(--sea);font-weight:700;}
+  .verdict h2{font-size:15px;font-weight:700;margin:2px 0 8px;}
+  .verdict p{margin:0 0 8px;font-size:15px;color:var(--ink-2);max-width:76ch;}
+  .verdict p:last-child{margin-bottom:0;}
+  .verdict b{color:var(--ink);}
+  .verdict .em{color:var(--sea);font-weight:600;}
+
+  section{padding-top:52px;}
+  .sh{display:flex;align-items:baseline;gap:13px;margin-bottom:6px;}
+  .sn{font-family:var(--mono);font-size:13px;color:var(--sea);font-weight:600;letter-spacing:.04em;}
+  h2.st{font-weight:700;font-size:clamp(21px,3.1vw,27px);letter-spacing:-.01em;margin:0;text-wrap:balance;}
+  .lede{color:var(--ink-2);max-width:var(--measure);margin:9px 0 24px;}
+  p{max-width:var(--measure);}
+  a{color:var(--sea);text-underline-offset:2px;}
+  code,.v{font-family:var(--mono);font-size:.87em;}
+  .v{color:var(--sea);background:color-mix(in srgb,var(--sea) 10%,transparent);
+    padding:1px 5px;border-radius:3px;white-space:nowrap;}
+
+  /* status pills */
+  .pill{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11.5px;
+    font-weight:600;padding:2px 9px;border-radius:100px;white-space:nowrap;}
+  .pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor;flex:none;}
+  .pill.done{color:var(--done);background:var(--done-bg);}
+  .pill.active{color:var(--active);background:var(--active-bg);}
+  .pill.todo{color:var(--todo);background:var(--todo-bg);}
+  .pill.gap{color:var(--gap);background:var(--gap-bg);}
+
+  /* status board */
+  .board{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:15px;margin:8px 0;}
+  .bcard{background:var(--card);border:1px solid var(--rule);border-radius:6px;padding:20px 20px 18px;
+    display:flex;flex-direction:column;gap:9px;}
+  .bcard .top{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .bcard h3{font-size:16px;font-weight:700;margin:0;}
+  .bcard .tag{font-family:var(--mono);font-size:11px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;}
+  .bcard ul{margin:2px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px;}
+  .bcard li{display:flex;align-items:baseline;gap:9px;font-size:14px;color:var(--ink-2);}
+  .bcard li .m{font-family:var(--mono);font-size:11px;flex:none;width:16px;text-align:center;}
+  .bcard li .m.d{color:var(--done);} .bcard li .m.a{color:var(--active);}
+  .bcard li .m.t{color:var(--todo);} .bcard li .m.g{color:var(--gap);}
+
+  /* timeline */
+  .tl{display:flex;flex-direction:column;margin:6px 0;border:1px solid var(--rule);border-radius:7px;overflow:hidden;}
+  .mo{display:grid;grid-template-columns:74px 108px 1fr;gap:0;border-top:1px solid var(--rule-2);}
+  .mo:first-child{border-top:none;}
+  .mo.now{background:color-mix(in srgb,var(--active) 8%,transparent);}
+  .mo.report{background:color-mix(in srgb,var(--sea) 8%,transparent);}
+  .mo .lab{padding:16px 14px;border-right:1px solid var(--rule-2);}
+  .mo .lab .m{font-family:var(--serif);font-size:23px;font-weight:600;line-height:1;}
+  .mo .lab .y{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin-top:3px;}
+  .mo .phase{padding:16px 12px;border-right:1px solid var(--rule-2);font-size:12.5px;color:var(--ink-2);
+    display:flex;align-items:flex-start;}
+  .mo .goal{padding:15px 16px;font-size:14px;color:var(--ink-2);}
+  .mo .goal .h{color:var(--ink);font-weight:600;display:block;margin-bottom:3px;}
+  .mo .goal .h .pill{margin-left:6px;vertical-align:1px;}
+  .mo .goal .d{font-size:13px;color:var(--ink-3);}
+  .flag{display:inline-block;font-family:var(--mono);font-size:10.5px;font-weight:700;
+    color:var(--sea);border:1px solid var(--sea);border-radius:3px;padding:0 5px;margin-left:8px;letter-spacing:.03em;}
+
+  /* risk callouts */
+  .risk{border-left:3px solid var(--gap);background:var(--gap-bg);padding:15px 19px;border-radius:0 4px 4px 0;
+    margin:14px 0;max-width:var(--measure);font-size:14.5px;color:var(--ink);}
+  .risk b{color:var(--gap);}
+  .risk.mid{border-left-color:var(--active);background:var(--active-bg);}
+  .risk.mid b{color:var(--active);}
+  .risk .fix{display:block;margin-top:6px;color:var(--ink-2);font-size:14px;}
+  .risk .fix b{color:var(--ink);}
+
+  /* tables */
+  .scroll{overflow-x:auto;margin:8px 0;border:1px solid var(--rule);border-radius:5px;}
+  table{border-collapse:collapse;width:100%;font-size:13.8px;min-width:640px;}
+  caption{text-align:left;font-family:var(--mono);font-size:12px;color:var(--ink-3);padding:0 0 9px;}
+  thead th{text-align:left;font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.05em;
+    color:var(--ink-2);font-weight:600;padding:12px 14px;background:var(--paper-2);border-bottom:1px solid var(--rule);}
+  tbody td{padding:12px 14px;border-bottom:1px solid var(--rule-2);vertical-align:top;color:var(--ink-2);}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody th[scope=row]{text-align:left;padding:12px 14px;border-bottom:1px solid var(--rule-2);font-weight:600;
+    color:var(--ink);white-space:nowrap;vertical-align:top;}
+  tbody tr:last-child th{border-bottom:none;}
+  .t1 th[scope=row]{border-left:3px solid var(--sea);}
+  .t2 th[scope=row]{border-left:3px solid var(--land);}
+
+  /* figure catalog */
+  .figs{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin:8px 0;}
+  .fig{background:var(--card);border:1px solid var(--rule);border-radius:6px;padding:18px 18px 16px;
+    display:flex;flex-direction:column;gap:7px;position:relative;}
+  .fig.core{border-color:color-mix(in srgb,var(--sea) 40%,var(--rule));}
+  .fig .num{font-family:var(--mono);font-size:11px;color:var(--sea);font-weight:700;}
+  .fig h4{font-size:15px;font-weight:700;margin:0;}
+  .fig .desc{font-size:13.5px;color:var(--ink-2);margin:0;}
+  .fig .obs{font-family:var(--mono);font-size:11px;color:var(--ink-3);margin-top:2px;}
+  .fig .must{position:absolute;top:14px;right:14px;font-family:var(--mono);font-size:9.5px;font-weight:700;
+    color:var(--sea);background:var(--sea-soft);border-radius:3px;padding:1px 6px;letter-spacing:.04em;}
+  .fig svg{width:100%;height:74px;margin-top:4px;border-radius:3px;background:var(--paper-2);}
+
+  ul.plain{max-width:var(--measure);padding-left:19px;}
+  ul.plain li{margin:5px 0;color:var(--ink-2);}
+  ul.plain li b{color:var(--ink);}
+  .mini{font-size:13.5px;color:var(--ink-3);max-width:var(--measure);margin-top:8px;}
+
+  hr.div{border:none;border-top:1px solid var(--rule);margin:54px 0 0;}
+  footer{padding-top:28px;font-size:13px;color:var(--ink-3);max-width:var(--measure);}
+  footer code{font-size:12px;}
+
+  @media (max-width:680px){
+    body{font-size:15.5px;}
+    .wrap{padding:0 16px 68px;}
+    .verdict{grid-template-columns:1fr;gap:8px;}
+    .mo{grid-template-columns:56px 1fr;}
+    .mo .phase{display:none;}
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="mast">
+    <p class="eyebrow">해양수산부 KIMST · Milestone 1.7 · 1차년도</p>
+    <h1>지면-식생모델 성능·해양영향 진단 체계 구축</h1>
+    <p class="stand">테스트베드는 사실상 완성됐고, forcing도 준비됐다. 남은 승부처는 <b>평가용 관측 DB 구축</b>과 <b>모델-관측 비교 진단</b> — 그리고 <b>JULES 병목</b>이다. 이 문서는 11월 최종보고서까지 월별 도달점과, 보고서에 들어갈 최적의 변수·그림을 확정한다.</p>
+    <div class="mast-meta">
+      <span><b>PI</b> 정지훈 (세종대)</span>
+      <span><b>수행</b> ydkoh · 1인</span>
+      <span><b>최종보고</b> <span class="deadline">2026.11.30</span></span>
+      <span><b>작성</b> 2026.07.12</span>
+    </div>
+  </header>
+
+  <div class="verdict">
+    <div class="g">▸</div>
+    <div>
+      <h2>지금 위치와 핵심 결정</h2>
+      <p><b>현재(7월 중순):</b> 오프라인 LSM 4종 중 Noah-MP·LM4 spin-up 완료, CLM5는 내일 종료, JULES만 지연. 공통 forcing WFDE5(1979–2024) 확보. <span class="em">그러나 평가용 관측 DB와 production 런은 아직 미착수</span> — 여기가 최종보고서의 임계경로다.</p>
+      <p><b>결정 1 — 코어 3모델 전략.</b> Noah-MP·CLM5·LM4를 1979–2023 전기간 core로 돌리고, <span class="em">serial 병목인 JULES는 동아시아 축소/단기간 부분진단</span>으로 마일스톤을 충족한다. JULES 전구 40년(≈27일 연속)은 1인·4개월 안에 불가.</p>
+      <p><b>결정 2 — ILAMB를 진단 엔진으로.</b> 스코어카드·bias 지도·Taylor·계절순환을 자동 생성하고 관측 다수를 내장한다. 동아시아 포커스만 NCL/Python으로 보완한다.</p>
+    </div>
+  </div>
+
+  <section id="status">
+    <div class="sh"><span class="sn">01</span><h2 class="st">3개 점검항목 현황</h2></div>
+    <p class="lede">마일스톤 점검표는 테스트베드·자료구축·성능진단 세 항목을 요구한다. 두 항목은 앞서 있고, 하나는 아직 비어 있다.</p>
+    <div class="board">
+      <div class="bcard">
+        <div class="top"><h3>① 테스트베드</h3><span class="pill done">거의 완료</span></div>
+        <span class="tag">오프라인 지면모델 구축</span>
+        <ul>
+          <li><span class="m d">✓</span> Noah-MP v5.2.1 — 60yr static spin-up 수렴</li>
+          <li><span class="m d">✓</span> LM4+ — 300yr static spin-up 완료</li>
+          <li><span class="m a">◐</span> CLM5.0 SP — spin-up cycle 2, 내일 종료</li>
+          <li><span class="m t">◔</span> JULES vn7.4 — 빌드·전구런 ✓, spin-up 지연·serial</li>
+          <li><span class="m d">+</span> KIOST-ESM2 — 결합+AMIP smoke (해양영향 보너스)</li>
+        </ul>
+      </div>
+      <div class="bcard">
+        <div class="top"><h3>② 자료 DB</h3><span class="pill gap">최대 갭</span></div>
+        <span class="tag">평가용 토양수분/온도·식생</span>
+        <ul>
+          <li><span class="m d">✓</span> Forcing: WFDE5 v3.0 (1979–2024, 0.5°)</li>
+          <li><span class="m d">✓</span> Forcing: ERA5 · GSWP3 파이프라인</li>
+          <li><span class="m g">✗</span> 평가관측: 토양수분/온도 (ERA5-Land·GLEAM·ESA-CCI)</li>
+          <li><span class="m g">✗</span> 평가관측: 식생 LAI/GPP (MODIS·FLUXCOM)</li>
+          <li><span class="m g">✗</span> 사이트: FLUXNET / PLUMBER2</li>
+        </ul>
+      </div>
+      <div class="bcard">
+        <div class="top"><h3>③ 성능진단</h3><span class="pill todo">미착수</span></div>
+        <span class="tag">offline → 모델-관측 비교</span>
+        <ul>
+          <li><span class="m t">○</span> 1979–현재 production 런 (WFDE5)</li>
+          <li><span class="m t">○</span> ILAMB 진단 파이프라인 셋업</li>
+          <li><span class="m d">✓</span> 진단 그림 표준세트 설계 완료</li>
+          <li><span class="m t">○</span> 모델-관측 비교 그림·정량지표</li>
+          <li><span class="m t">○</span> 결과 해석·보고서 반영</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="road">
+    <div class="sh"><span class="sn">02</span><h2 class="st">월별 로드맵 — 4월에서 11월 최종보고서까지</h2></div>
+    <p class="lede">각 월의 "도달점"을 그 달 말 기준으로 적었다. 4–6월은 완료된 실적, 7월이 현재, 8–10월이 승부처, 11월이 마감이다.</p>
+    <div class="tl">
+      <div class="mo">
+        <div class="lab"><div class="m">4</div><div class="y">2026</div></div>
+        <div class="phase">착수 · 인프라</div>
+        <div class="goal"><span class="h">착수 · 모델 빌드 착수 <span class="pill done">완료</span></span><span class="d">마일스톤 확정 · JULES/CESM 빌드 착수 · repo 구축</span></div>
+      </div>
+      <div class="mo">
+        <div class="lab"><div class="m">5</div><div class="y">2026</div></div>
+        <div class="phase">Forcing · 빌드</div>
+        <div class="goal"><span class="h">Forcing 파이프라인 <span class="pill done">완료</span></span><span class="d">ERA5→LSM 변환 · Noah-MP·LM4 빌드 · spin-up 착수</span></div>
+      </div>
+      <div class="mo">
+        <div class="lab"><div class="m">6</div><div class="y">2026</div></div>
+        <div class="phase">착수보고 · WFDE5</div>
+        <div class="goal"><span class="h">착수보고회 · WFDE5 확보 <span class="pill done">완료</span></span><span class="d">WFDE5 v3.0 다운로드(584GB) · LM4 300yr spin-up 완료</span></div>
+      </div>
+      <div class="mo now">
+        <div class="lab"><div class="m">7</div><div class="y">현재</div></div>
+        <div class="phase">Spin-up 마무리</div>
+        <div class="goal"><span class="h">4모델 spin-up 정리 · 진도보고서 <span class="pill active">진행중</span></span><span class="d">Noah-MP 수렴 확정 · CLM5 spin-up 종료 · WFDE5→4모델 변환기 · 진도보고서(8월 제출)</span></div>
+      </div>
+      <div class="mo">
+        <div class="lab"><div class="m">8</div><div class="y">2026</div></div>
+        <div class="phase">자료 DB · production 착수</div>
+        <div class="goal"><span class="h">평가관측 DB 1차 완성 + 코어 production <span class="pill todo">목표</span></span><span class="d">ERA5-Land(토양수분/온도)·ESA-CCI SM·MODIS LAI 다운로드+공통격자 regrid · <b>Noah-MP·CLM5 production(1979–2023)</b> 완료</span></div>
+      </div>
+      <div class="mo">
+        <div class="lab"><div class="m">9</div><div class="y">2026</div></div>
+        <div class="phase">진단 셋업 · 그림 v1</div>
+        <div class="goal"><span class="h">4모델 production + ILAMB 스코어카드 초안 <span class="pill todo">목표</span></span><span class="d">LM4 WFDE5 production · JULES 동아시아 축소 · ILAMB 셋업 · 핵심그림 v1(bias 지도·계절순환)</span></div>
+      </div>
+      <div class="mo">
+        <div class="lab"><div class="m">10</div><div class="y">2026</div></div>
+        <div class="phase">진단 완성 · 해석</div>
+        <div class="goal"><span class="h">보고서 그림·표 전부 완성 <span class="pill todo">목표</span></span><span class="d">Taylor·스코어카드·경년 시계열·동아시아 포커스 · 정량지표 표(bias/RMSE/r/NSE) · 모델간 비교 해석 초안</span></div>
+      </div>
+      <div class="mo report">
+        <div class="lab"><div class="m">11</div><div class="y">2026</div></div>
+        <div class="phase">최종보고서</div>
+        <div class="goal"><span class="h">1차년도 최종보고서 완성·제출 <span class="flag">11.30 마감</span></span><span class="d">3개 점검항목 결과 정리 · 모델-관측 비교결과 제시 · 성과물 3종 문서화</span></div>
+      </div>
+      <div class="mo">
+        <div class="lab"><div class="m">12</div><div class="y">2026</div></div>
+        <div class="phase">2년차 준비</div>
+        <div class="goal"><span class="h">2차년도 설계 · 논문화 착수 <span class="pill todo">여유</span></span><span class="d">민감도 실험 설계(산업화이후 장기적분) · 진단결과 논문 초고 · 잔여 정리</span></div>
+      </div>
+    </div>
+    <p class="mini">※ 성과물 3종(테스트베드·자료DB·성능진단)은 모두 "현황 제시"가 점검방법이므로, 각 항목은 <b>완결이 아니라 문서화 가능한 상태</b>면 마일스톤을 충족한다. 이 여유가 JULES 부분진단·TWS 미수렴 같은 잔여를 흡수한다.</p>
+  </section>
+
+  <section id="risk">
+    <div class="sh"><span class="sn">03</span><h2 class="st">임계경로와 리스크</h2></div>
+    <div class="risk">
+      <b>리스크 1 — JULES serial 병목.</b> 0.5° 전구 81분/월 × 12 × 40년 ≈ <b>27일 연속</b>. MPI 빌드는 미해결(<span class="v">Invalid communicator</span>). 1인·4개월엔 전구 전기간 불가.
+      <span class="fix"><b>대응:</b> 8월 초 결정 — 코어 3모델(Noah-MP·CLM5·LM4)을 전구·전기간으로, <b>JULES는 동아시아 영역 또는 대표 10년 축소</b>로 부분진단. 마일스톤은 "비교결과 제시"라 4모델 전구 전기간을 요구하지 않는다.</span>
+    </div>
+    <div class="risk gap">
+      <b>리스크 2 — 평가관측 DB 미착수(최대 갭).</b> forcing은 있으나 검증용 관측이 없다. 진단 전체가 여기서 막힌다.
+      <span class="fix"><b>대응:</b> 8월 즉시 착수, <b>ERA5-Land부터</b>(토양수분·토양온도 전층, CDS 접근이 forcing 파이프라인과 동일). 이어 ESA-CCI SM·GLEAM·MODIS LAI. 사이트(FLUXNET/PLUMBER2)는 ILAMB 번들 활용.</span>
+    </div>
+    <div class="risk mid">
+      <b>리스크 3 — production forcing 선택.</b> ERA5 직접변환은 +12 W/m² SW regrid bias가 있었다.
+      <span class="fix"><b>대응(확정):</b> <b>WFDE5 v3.0 1979–2023</b>을 공통 forcing으로. 0.5° native라 regrid 불필요, SW bias 원천 차단. 이미 4모델 중 CLM5 변환기 검증 완료 — 나머지 3모델 변환기를 7월 내 완성.</span>
+    </div>
+  </section>
+
+  <section id="vars">
+    <div class="sh"><span class="sn">04</span><h2 class="st">모델-관측 비교: 변수와 관측 DB</h2></div>
+    <p class="lede">마일스톤 핵심은 "토양 수분/온도, 식생 모의 기본성능"이다. Tier 1은 이 문구에 직접 대응하는 필수 변수, Tier 2는 성능 맥락과 2년차(담수유출→해양영향)를 잇는 지원 변수다.</p>
+    <div class="scroll">
+      <table>
+        <caption>진단 변수 × 검증 관측/재분석</caption>
+        <thead>
+          <tr><th scope="col">변수</th><th scope="col">모델 출력</th><th scope="col">검증 관측 / 재분석</th><th scope="col">비고</th></tr>
+        </thead>
+        <tbody class="t1">
+          <tr><th scope="row">표층 토양수분</th><td class="v">H2OSOI / SMC · 0–10cm</td><td><b>ESA CCI SM</b>(위성) · ERA5-Land · GLEAM</td><td>위성 독립검증 핵심</td></tr>
+          <tr><th scope="row">근권 토양수분</th><td>root-zone SM</td><td><b>GLEAM SMroot</b> · ERA5-Land</td><td>식생 가용수분</td></tr>
+          <tr><th scope="row">토양온도</th><td class="v">TSOI / T_SOISNO · 층별</td><td><b>ERA5-Land</b> soil temp(전층)</td><td>표층·심층 분리</td></tr>
+          <tr><th scope="row">식생 LAI</th><td class="v">TLAI / LAI</td><td><b>MODIS MOD15</b> · GLASS · GLOBMAP</td><td>SP는 처방→검증은 일관성</td></tr>
+          <tr><th scope="row">식생 GPP</th><td class="v">GPP</td><td><b>FLUXCOM</b> · MODIS MOD17</td><td>광합성 생산성</td></tr>
+        </tbody>
+        <tbody class="t2">
+          <tr><th scope="row">잠열·현열</th><td class="v">EFLX_LH_TOT · FSH</td><td><b>FLUXNET2015 · PLUMBER2</b>(사이트) · FLUXCOM</td><td>에너지수지 품질</td></tr>
+          <tr><th scope="row">지표 유출</th><td class="v">QRUNOFF</td><td><b>GRDC</b>(유역)</td><td>2년차 담수유출→해양 연결</td></tr>
+          <tr><th scope="row">총수분저장</th><td class="v">TWS</td><td><b>GRACE / GRACE-FO</b></td><td>수문수지 종합 검증</td></tr>
+          <tr><th scope="row">지면온도·T2m</th><td class="v">TG · TSA</td><td>ERA5</td><td>에너지수지 맥락</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="mini"><span class="pill done" style="vertical-align:1px;">Tier 1</span> 마일스톤 직접 대응(필수) &nbsp;·&nbsp; <span class="pill todo" style="vertical-align:1px;">Tier 2</span> 지원·2년차 연결. 최소 충족은 Tier 1의 토양수분·토양온도·LAI만으로 가능하다.</p>
+  </section>
+
+  <section id="figs">
+    <div class="sh"><span class="sn">05</span><h2 class="st">진단 그림 카탈로그</h2></div>
+    <p class="lede">모델-관측 비교의 표준 세트(ILAMB/PLUMBER2 계열). 파란 테두리 <b>핵심 5종</b>은 보고서 필수, 나머지는 여유 시 확장이다. 대부분 ILAMB가 자동 생성한다.</p>
+    <div class="figs">
+
+      <div class="fig core">
+        <span class="must">필수</span>
+        <span class="num">FIG 1</span><h4>공간 bias 지도</h4>
+        <p class="desc">연·계절 평균 (모델 − 관측). 변수별, 4모델 패널. 어디서 젖고/마르고 뜨겁고 찬지 한눈에.</p>
+        <svg viewBox="0 0 300 74" preserveAspectRatio="none" aria-hidden="true">
+          <rect x="8" y="10" width="130" height="54" rx="2" fill="none" stroke="currentColor" opacity=".25"/>
+          <rect x="162" y="10" width="130" height="54" rx="2" fill="none" stroke="currentColor" opacity=".25"/>
+          <circle cx="55" cy="30" r="14" fill="var(--gap)" opacity=".5"/>
+          <circle cx="95" cy="48" r="11" fill="var(--sea)" opacity=".5"/>
+          <circle cx="210" cy="34" r="15" fill="var(--sea)" opacity=".45"/>
+          <circle cx="250" cy="46" r="9" fill="var(--gap)" opacity=".45"/>
+        </svg>
+        <p class="obs">SM · ST · LAI vs ESA-CCI · ERA5-Land · MODIS</p>
+      </div>
+
+      <div class="fig core">
+        <span class="must">필수</span>
+        <span class="num">FIG 2</span><h4>영역평균 계절순환</h4>
+        <p class="desc">12개월 climatology, 모델 vs 관측 overlay. 전구 + <b>동아시아 포커스</b>. 위상·진폭 오차.</p>
+        <svg viewBox="0 0 300 74" preserveAspectRatio="none" aria-hidden="true">
+          <polyline points="10,52 34,40 58,26 82,18 106,22 130,34 154,46 178,54 202,50 226,40 250,30 274,24 290,20" fill="none" stroke="var(--sea)" stroke-width="2.2"/>
+          <polyline points="10,56 34,46 58,32 82,26 106,30 130,42 154,52 178,58 202,54 226,46 250,36 274,30 290,26" fill="none" stroke="var(--ink-3)" stroke-width="1.6" stroke-dasharray="4 3"/>
+        </svg>
+        <p class="obs">line: 모델(실선) vs 관측(점선)</p>
+      </div>
+
+      <div class="fig core">
+        <span class="must">필수</span>
+        <span class="num">FIG 3</span><h4>Taylor diagram</h4>
+        <p class="desc">상관·표준편차·RMSE를 한 장에. 변수별 1장, 4모델을 점으로. 종합 성능 요약의 표준.</p>
+        <svg viewBox="0 0 300 74" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M40,66 A54,54 0 0 1 148,66" fill="none" stroke="currentColor" opacity=".2"/>
+          <path d="M40,66 A34,34 0 0 1 108,66" fill="none" stroke="currentColor" opacity=".2"/>
+          <line x1="40" y1="66" x2="148" y2="66" stroke="currentColor" opacity=".25"/>
+          <line x1="40" y1="66" x2="116" y2="28" stroke="currentColor" opacity=".15"/>
+          <circle cx="112" cy="44" r="4" fill="var(--sea)"/><circle cx="96" cy="52" r="4" fill="var(--land)"/>
+          <circle cx="126" cy="38" r="4" fill="var(--active)"/><circle cx="140" cy="66" r="4" fill="var(--done)"/>
+        </svg>
+        <p class="obs">4모델 × 변수별 = 종합 스코어</p>
+      </div>
+
+      <div class="fig core">
+        <span class="must">필수</span>
+        <span class="num">FIG 4</span><h4>ILAMB 스코어카드</h4>
+        <p class="desc">heatmap: 행=모델, 열=변수, 색=종합 skill(bias·RMSE·r). 보고서 표지 그림감.</p>
+        <svg viewBox="0 0 300 74" preserveAspectRatio="none" aria-hidden="true">
+          <g>
+            <rect x="70" y="10" width="52" height="16" fill="var(--done)" opacity=".6"/><rect x="124" y="10" width="52" height="16" fill="var(--active)" opacity=".55"/><rect x="178" y="10" width="52" height="16" fill="var(--done)" opacity=".45"/><rect x="232" y="10" width="52" height="16" fill="var(--gap)" opacity=".4"/>
+            <rect x="70" y="29" width="52" height="16" fill="var(--active)" opacity=".5"/><rect x="124" y="29" width="52" height="16" fill="var(--done)" opacity=".6"/><rect x="178" y="29" width="52" height="16" fill="var(--done)" opacity=".5"/><rect x="232" y="29" width="52" height="16" fill="var(--active)" opacity=".45"/>
+            <rect x="70" y="48" width="52" height="16" fill="var(--done)" opacity=".5"/><rect x="124" y="48" width="52" height="16" fill="var(--gap)" opacity=".4"/><rect x="178" y="48" width="52" height="16" fill="var(--active)" opacity=".5"/><rect x="232" y="48" width="52" height="16" fill="var(--done)" opacity=".55"/>
+          </g>
+        </svg>
+        <p class="obs">한 장으로 모델×변수 전 성능</p>
+      </div>
+
+      <div class="fig core">
+        <span class="must">필수</span>
+        <span class="num">FIG 5</span><h4>경년 시계열 · 아노말리</h4>
+        <p class="desc">월 아노말리 1979–2023, 모델 vs 관측. 경년 변동 추종성(가뭄·습윤년) 검증.</p>
+        <svg viewBox="0 0 300 74" preserveAspectRatio="none" aria-hidden="true">
+          <line x1="8" y1="37" x2="292" y2="37" stroke="currentColor" opacity=".2"/>
+          <polyline points="8,37 30,28 52,44 74,24 96,40 118,20 140,46 162,32 184,48 206,26 228,42 250,30 272,38 292,34" fill="none" stroke="var(--sea)" stroke-width="1.8"/>
+          <polyline points="8,40 30,32 52,46 74,28 96,42 118,26 140,44 162,36 184,46 206,30 228,40 250,34 272,40 292,36" fill="none" stroke="var(--ink-3)" stroke-width="1.3" stroke-dasharray="3 3"/>
+        </svg>
+        <p class="obs">SM · ST vs ERA5-Land · ESA-CCI</p>
+      </div>
+
+      <div class="fig">
+        <span class="num">FIG 6</span><h4>사이트 플럭스 산점도</h4>
+        <p class="desc">FLUXNET/PLUMBER2 타워에서 LH·SH·GPP 산점(1:1선·R²) 또는 Taylor. 지점 스케일 검증.</p>
+        <svg viewBox="0 0 300 74" preserveAspectRatio="none" aria-hidden="true">
+          <line x1="20" y1="64" x2="20" y2="10" stroke="currentColor" opacity=".2"/><line x1="20" y1="64" x2="280" y2="64" stroke="currentColor" opacity=".2"/>
+          <line x1="20" y1="64" x2="260" y2="14" stroke="currentColor" opacity=".3" stroke-dasharray="3 3"/>
+          <g fill="var(--sea)" opacity=".55"><circle cx="70" cy="52" r="3"/><circle cx="110" cy="44" r="3"/><circle cx="140" cy="40" r="3"/><circle cx="180" cy="30" r="3"/><circle cx="210" cy="26" r="3"/><circle cx="150" cy="46" r="3"/><circle cx="95" cy="50" r="3"/></g>
+        </svg>
+        <p class="obs">확장 · ILAMB 번들</p>
+      </div>
+
+      <div class="fig">
+        <span class="num">FIG 7</span><h4>종평균 프로파일</h4>
+        <p class="desc">위도대별 zonal mean (모델 vs 관측). 토양수분·온도의 위도 구조 오차.</p>
+        <svg viewBox="0 0 300 74" preserveAspectRatio="none" aria-hidden="true">
+          <polyline points="60,10 120,22 150,34 130,46 90,58 130,66" fill="none" stroke="var(--sea)" stroke-width="2"/>
+          <polyline points="70,10 132,22 160,34 140,46 100,58 138,66" fill="none" stroke="var(--ink-3)" stroke-width="1.4" stroke-dasharray="4 3"/>
+          <line x1="30" y1="10" x2="30" y2="66" stroke="currentColor" opacity=".2"/>
+        </svg>
+        <p class="obs">확장 · 위도-변수</p>
+      </div>
+
+      <div class="fig">
+        <span class="num">FIG 8</span><h4>유출·TWS 검증</h4>
+        <p class="desc">주요 유역 유출 계절순환(GRDC) + TWS(GRACE). 2년차 담수유출→해양영향의 교두보.</p>
+        <svg viewBox="0 0 300 74" preserveAspectRatio="none" aria-hidden="true">
+          <g opacity=".55"><rect x="24" y="40" width="18" height="24" fill="var(--sea)"/><rect x="52" y="30" width="18" height="34" fill="var(--sea)"/><rect x="80" y="18" width="18" height="46" fill="var(--sea)"/><rect x="108" y="26" width="18" height="38" fill="var(--sea)"/><rect x="136" y="44" width="18" height="20" fill="var(--sea)"/></g>
+          <polyline points="170,54 196,44 222,30 248,36 274,48 290,42" fill="none" stroke="var(--land)" stroke-width="2"/>
+        </svg>
+        <p class="obs">확장 · GRDC · GRACE</p>
+      </div>
+
+    </div>
+  </section>
+
+  <section id="min">
+    <div class="sh"><span class="sn">06</span><h2 class="st">보고서 최소 그림 세트 — 마일스톤 충족선</h2></div>
+    <p class="lede">시간이 빠듯할 때 이것만 있으면 "모델-관측 비교결과 제시"를 충족한다. 우선순위 순.</p>
+    <ul class="plain">
+      <li><b>FIG 4 ILAMB 스코어카드 1장</b> — 4모델 × (토양수분·토양온도·LAI) 종합 skill. 보고서의 얼굴.</li>
+      <li><b>FIG 1 bias 지도</b> — 변수 3종 × 연평균(최소), 여유 시 계절. 공간 오차의 근거.</li>
+      <li><b>FIG 2 계절순환</b> — 변수 3종 × (전구 + 동아시아). 위상·진폭 검증.</li>
+      <li><b>FIG 3 Taylor diagram</b> — 변수별 1장. 다모델 종합 요약.</li>
+      <li><b>정량지표 표</b> — bias · RMSE · 상관 r · NSE, 변수·모델별. 그림을 숫자로 뒷받침.</li>
+    </ul>
+    <p class="mini">위 4그림 + 1표면 마일스톤의 세 번째 점검항목이 닫힌다. 나머지(FIG 5–8, Tier 2 변수)는 보고서 완성도와 2년차 연결을 위한 상향이다.</p>
+  </section>
+
+  <hr class="div">
+  <footer>
+    <p>근거: 마일스톤 <code>2026/해수부_마일스톤.pdf</code> · 모델 현황 <code>CLAUDE.md §4</code> · forcing <code>mof-wfde5-forcing</code> · 그림 표준 <code>mof-lsm-diagnostic-figures</code> · CLM5 spin-up <code>cesm/CLM5_SPINUP_NOTES.md</code>. 진단 엔진 ILAMB(International Land Model Benchmarking) 채택 권장.</p>
+  </footer>
+
+</div>

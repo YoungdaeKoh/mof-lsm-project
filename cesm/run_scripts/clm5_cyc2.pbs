@@ -1,0 +1,54 @@
+#!/bin/bash
+#PBS -N clm5_cyc2
+#PBS -q workq
+#PBS -l select=1:ncpus=48:mpiprocs=48:host=climate01
+#PBS -l walltime=30:00:00
+#PBS -j oe
+#PBS -o /home/ydkoh/CESM/cases/clm5_spinup_gswp3/cyc2.log
+#
+# CLM5.0 SP GSWP3 spin-up, cycle 2: model years 2011-2040.
+#
+# No restart re-dating is needed (unlike Noah-MP). DATM is cyclic with
+# YR_START=1981, YR_END=2010, YR_ALIGN=1981, so model year 2011 reads 1981 forcing.
+# The compset is `2000`, so orb_iyear is fixed at 2000 and the changing model year
+# does not move the orbit. Convergence is then r.2041-01-01 minus r.2011-01-01:
+# same calendar day, same forcing phase.
+#
+# Guard: cycle 1 is launched with case.submit --no-batch, which exits 1 even on success,
+# so its exit code proves nothing. Verify the 2011-01-01 restart exists instead.
+set -u
+export PERL5LIB=/home/ydkoh/perl5/lib/perl5${PERL5LIB:+:$PERL5LIB}
+CASE=/home/ydkoh/CESM/cases/clm5_spinup_gswp3
+RUN=/data2/ydkoh/cesm2_output/clm5_spinup_gswp3/run
+SEED="$RUN/clm5_spinup_gswp3.clm2.r.2011-01-01-00000.nc"
+
+echo "=== cycle-2 guard $(date) ==="
+if [ ! -f "$SEED" ]; then
+  echo "ABORT: cycle 1 never wrote $(basename "$SEED"); cycle 1 did not reach 2011-01-01."
+  echo "last restarts present:"; ls -1 "$RUN"/*.clm2.r.*.nc 2>/dev/null | tail -3
+  exit 2
+fi
+if ! grep -q '2011-01-01' "$RUN/rpointer.lnd"; then
+  echo "ABORT: rpointer.lnd does not point at 2011-01-01:"; cat "$RUN/rpointer.lnd"
+  exit 3
+fi
+echo "guard OK: cycle 1 ended at 2011-01-01"
+
+cd "$CASE" || exit 1
+./xmlchange CONTINUE_RUN=TRUE
+./xmlchange STOP_OPTION=nyears,STOP_N=30
+./xmlchange REST_OPTION=nyears,REST_N=1
+./xmlchange RESUBMIT=0,DOUT_S=FALSE
+
+echo "=== START $(date) on $(hostname) ==="
+./case.submit --no-batch
+echo "=== MODEL PHASE DONE $(date) ==="
+
+# Raw preservation: rsync WITHOUT --delete -> archive accumulates, never auto-removes.
+ARCH=/home/ydkoh/CESM/spinup_raw/clm5_GSWP3_SP_cyc2
+mkdir -p "$ARCH"
+shopt -s nullglob
+rsync -a "$RUN"/*.clm2.r.20[1-4]*.nc "$RUN"/*.clm2.h0.20[1-4]*.nc "$RUN"/rpointer.* "$ARCH/" 2>/dev/null
+shopt -u nullglob
+echo "=== archived -> $ARCH ($(ls $ARCH/*.clm2.r.*.nc 2>/dev/null | wc -l) restarts) $(date) ==="
+echo "=== END $(date) ==="

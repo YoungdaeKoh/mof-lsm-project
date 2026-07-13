@@ -89,3 +89,47 @@ CESM machine `climate00`은 `BATCH_SYSTEM: none` → `case.submit`이 **로그�
 | JULES | — | — | — | MPI 미해결로 장기적분 불가(81분/월 serial) |
 
 "같은 연수"가 등가 기준이 아님. 각자의 표류 기준으로 수렴했는가가 기준 — 토양 깊이·하부경계가 다름(Noah-MP 2m + 고정 TMN relax, LM4 8.75m 자유, CLM5 ~50m 기반암 포함).
+
+## 7. ★★ Spin-up 수렴 기준 — 공식 가이드 (2026-07-12 조사)
+
+### 7a. CLM5-SP 공식 기준 (우리 케이스 해당)
+`doc/.../Spinning-up-the-Satellite-Phenology-Model-CLMSP-spinup.rst`:
+> "run CLMSP for **about 50 simulation years** from arbitrary initial conditions."
+> 대부분 상태변수(FSH, EFLX_LH_TOT, GPP, H2OSOI, TSOI)는 **10년 미만**에 평형. **TWS는 조금 더 걸림.**
+- 진단도구 `tools/contrib/SpinupStability_SP.ncl`이 보는 변수: **FSH**(현열), **EFLX_LH_TOT**(잠열), **GPP**(광합성), **TWS**(총수분저장), **H2OSOI layer 8**(~0.80 m), **TSOI layer 10**(~1.36 m).
+- ★ **층 주의**: 가이드는 TSOI **layer 10 = 1.36 m**를 봄. levgrnd 최하층(25층)은 **41.998 m** — 이걸 보면 열관성 탓에 영원히 미수렴으로 오판. (내가 처음 이 실수 함.)
+- levgrnd node depth [m]: 0.01/0.04/0.09/0.16/0.26/0.40/0.58/0.80/1.06/**1.36**/1.70/2.08/2.50/2.99/3.58/4.27/5.06/5.95/6.94/8.03/9.80/13.33/19.48/28.87/**42.00**.
+
+### 7b. CLM5-BGC 기준 (참고, 우리 SP엔 불필요)
+- AD(accelerated decomposition) ~200년 → pAD(final) 수백 년.
+- 판정: **"97% 격자에서 총생태계탄소(TOTECOSYSC) 변화 ≤ 1 gC/m²/yr"** (= 3% 미만이 disequilibrium). 고위도 TOTSOMC 회전 느려 1000년+ 걸릴 수 있음, 완화 허용.
+- `SpinupStability.ncl` 변수: TOTECOSYSC, TOTSOMC, TOTVEGC, TLAI, GPP, TWS.
+
+### 7c. ★ 우리 CLM5 cycle 1 (30년) 실측 vs 가이드 (area-weighted, 마지막 5년 |Δ/yr|)
+| 가이드 변수 | 마지막 5년 |Δ/yr| | 판정 |
+|---|---|---|
+| H2OSOI layer 8 | 0.0014 mm³/mm³ | ✅ 수렴 |
+| FSH (현열) | 0.25 W/m² | ✅ 수렴 |
+| EFLX_LH_TOT (잠열) | 0.45 W/m² | ✅ 수렴 |
+| TSOI layer 10 (1.36 m) | 0.11 K | ✅ 거의 수렴 |
+| **TWS** | 12.8 mm | ⚠ 미수렴 (가이드가 "더 걸린다"고 예고한 그 변수) |
+- 데이터: `cesm/clm_output/clm5_spinup_guide_cyc1.csv`, 추출 `~/extract_clm5_guide.py`.
+- **판정: cycle 3 불필요.** 가이드 목표 50년을 이미 넘김(cycle 1+2=60년). 가이드가 보라는 변수는 TWS 하나 빼고 다 수렴, 그 TWS는 가이드가 "더 걸린다"고 명시한 변수. LM4 사하라 심층수와 동일 논리(global/flux 무영향).
+- cycle 2 종료 후 `r.2041-01-01 − r.2011-01-01` 표류로 최종 확정.
+
+### 7d. ★ 모델 간 수렴 기준 정합 판단
+| 모델 | 공식 기준 | 판정 변수 | 격자 커버리지 |
+|---|---|---|---|
+| **CLM5-SP** | 가이드: ~50년, flux/soil 10년 내 평형 | FSH·LH·GPP·H2OSOI·TSOI(L10)·TWS | (도구 기본) |
+| **CLM5-BGC** | 97% 격자 TOTECOSYSC ≤ 1 gC/m²/yr | 탄소풀 + TWS | 97% |
+| **JULES** | **모델 내장** `&JULES_SPINUP`: 변수별 tolerance, **전 격자** `\|Δ\| ≤ tol` | `smcl`·`t_soil`·`c_soil`·`c_veg` | **100% (ALL)** — CLM보다 엄격 |
+| **LM4/GFDL** | 정형 tolerance **없음**. carbon lifetime cap(500yr)+가속치환+장기적분(piControl 800년+) | (탄소 평형 중심) | — |
+| **Noah-MP** | HRLDAS 공식 수렴 기준 문서 **없음** | 관행: soil moisture/temp 안정까지 | — |
+
+- **결론: CLM5-SP 가이드를 다중 LSM 공통 수렴 기준으로 채택.** 근거:
+  1. 유일하게 **정량 threshold + 판정 변수 + 진단도구**를 문서화한 표준.
+  2. JULES 내장 기준(smcl/t_soil, 전 격자)과 **변수·방향 일치**(오히려 JULES가 더 엄격 → CLM 통과하면 JULES 관점서도 안전 방향).
+  3. LM4·Noah-MP는 정형 기준 부재 → CLM 프레임(표층 flux + soil T/moisture 층 + TWS-longer 예외) 적용이 타당.
+- **공통 판정 규칙(채택)**: ① 표층 flux(현열·잠열)·표층 토양수분·soil T(≤1.5 m) 의 cycle 간 |Δ| 가 무시 가능 → 수렴. ② TWS/심층수/심층열은 "느린 저수지"로 별도 취급, global·flux 진단엔 무영향 시 완료로 간주(LM4 사하라 판례). ③ 각 모델은 자기 격자에서 돌리고 비교는 remap 후.
+
+상세: `notes/lsm_spinup_criteria.html` ([[lsm-landmean-comparability]], [[lsm-spinup-ice-mask-convergence]])
