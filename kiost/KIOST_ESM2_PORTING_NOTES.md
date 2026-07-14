@@ -3,11 +3,12 @@
 **Model:** GFDL ESM4.5 coupled Earth-System Model, KIOST-ESM2 (v2b) configuration
 **Origin cluster:** `tomo` (AMD EPYC Zen2, Intel19 + MVAPICH 4.0, SLURM/PBS)
 **Target cluster:** `climate00` (Intel Xeon Gold 5418Y Sapphire Rapids, Intel oneAPI 21 + mvapich2-2.3.4, OpenPBS)
-**Ported by:** ydkoh / 눈사람 — 2026-07-02 ~ 07-03
-**Status:** ✅ **BUILD + SMOKE TEST 성공** (48-core 축소 config, 1 model-day 결합적분 완주)
+**Ported by:** ydkoh / 눈사람 — 2026-07-02 ~ 07-03 (coupled), 2026-07-06 (AMIP)
+**Status:** ✅ **BUILD + SMOKE TEST 성공** — coupled(48-core, 1 model-day 결합적분) + **AMIP(24-core, 1 model-day, §11)** 둘 다 완주
 
 > 목표 확정: climate00에서는 **빌드 + 동작·결합 검증(smoke test)까지**가 deliverable.
 > 720-rank 생산 config는 climate00 자원(3노드×48=144코어)으로 불가 → 생산런은 별도 트랙.
+> **AMIP 변형(§11): 동일 exe 재사용(재빌드 X), 해양 PE 0 + SPECIFIED_ICE로 SST 처방. 지면 진단엔 이쪽이 실용적.**
 
 ---
 
@@ -254,3 +255,47 @@ ssh climate 'cd /home/ydkoh && openssl enc -d -aes-256-cbc -md sha256 -in KIOST-
 ssh climate 'cd /home/ydkoh/KIOST-ESM2 && qsub run_kiost-esm2.sh'
 # 검증: grep "Total runtime" esm4p5.log ; tail ocean.stats seaice.stats ; ls RESTART | wc -l
 ```
+
+---
+
+## 11. AMIP 변형 포팅 (2026-07-06) ✅ SMOKE TEST 성공
+
+**한 줄:** coupled와 **동일 실행파일**을 config만 바꿔(해양 PE 0 + SIS2 SPECIFIED_ICE로 SST/해빙 관측 처방) climate00에서 AMIP(대기 AM4.5 + 육상 LM4)를 구동. **재빌드 불필요**. 24-core 축소로 1 model-day(1979-01-01→02) `rc=0` 완주, RESTART 119개·atmos diag 생성·ocean diag 0.
+
+### 11.1 AMIP이란 (coupled와의 차이)
+- 소스: `KIOST-ESM2_AMIP.tar.gz.enc`(24GB, sha256 `6987e8d9…ce6e`). CMIP7 AMIP(1979–2022) 실험셋, base=historical config + PI IC.
+- 메커니즘 (README_amip.md): `&coupler_nml do_ocean=.false., ocean_npes=0, concurrent=.false.` → **MOM6/COBALT 초기화조차 안 됨**. SIS2 `SPECIFIED_ICE=True` → slab ice(cat 1, 동역학 없음), 매 스텝 data_override로 `sst_obs/sic_obs/sit_obs` 강제.
+- 경계자료: input4MIPs **CMIP7 PCMDI-AMIP-1-1-10** mid-month bcs (`amipbc_{sst,sic}_*.nc`, INPUT에 실파일). data_table 마지막 3줄에 `ICE sic_obs/sit_obs/sst_obs` 엔트리.
+- IC: 대기·육지 = PI 평형 최종상태(1979 관측 아님) → **1979–80은 스핀업, 분석 제외 권장**. 개선: historical이 1979 도달 시 그 RESTART로 교체.
+- **바이너리 동일**: `fms_esm4.5_compile_v3_1007_fix.x` (§3 빌드 그대로). 패키지 내장 .x는 tomo(intel19/mvapich4.0/nc4.9.2) 빌드라 climate00에서 불가 → climate00 exec로 심링크 교체.
+
+### 11.2 climate00 셋업 (coupled와 다른 점만)
+run dir `/home/ydkoh/KIOST-ESM2_AMIP/`. 3가지 조치:
+
+1. **심볼릭링크 재연결 (핵심)**: 배포 INPUT의 **529개 링크가 tomo 경로 `/data3/noah/KIOST-ESM2/INPUT`을 가리켜 전부 깨짐**. climate00 coupled INPUT(`/home/ydkoh/KIOST-ESM2/INPUT`)로 재지정 → basename 100% 존재(missing 0)라 전부 해소. exec 링크·tomo MKL 심(`libmkl_*.so.1`, soname부터 틀림)도 정리. 스크립트 `amip_symlink_fix.sh`. 결과 broken link 0.
+   - AMIP INPUT 자체는 실파일 ≈24GB(강제력 16G nc4압축 + 재시작 2.8G) + 529 링크(coupled INPUT 공유) 구조. 즉 **coupled INPUT이 먼저 있어야 AMIP이 돎**.
+2. **PE 축소 (720 → 24)**: `input.nml` `atmos_npes 720→24`, `&fv_core_nml layout 12,10→2,2 · io_layout 2,2→1,1`, `&land_model_nml` 동일, `SIS_layout LAYOUT 30,24→6,4`(coupled 검증 분할 재사용). do_ocean/ocean_npes는 이미 F/0. **총 랭크=atmos_npes 불일치 시 coupler_init 즉시 FATAL**. 원본은 `*.bak_720` 백업.
+   - AMIP은 해양 PE가 없어 전 코어가 대기 → coupled(atmos24+ocean24)보다 단순. 24랭크 = climate00 단일노드.
+3. **run 스크립트** `run_amip_smoke.sh`: §5.3 coupled 스크립트 복제 + work_dir/PBS만 변경(`ncpus=24:mpiprocs=24`), 동일 모듈·`MV2_ENABLE_AFFINITY=0`. smoke는 `&coupler_nml months=0, days=1`.
+
+### 11.3 Smoke test 결과 (job 2900, climate00 24코어, ~17.5분)
+- `SIS Date 1979/01/02 00:00:00 (step 24)` 완주, PBS 로그 `END rc=0` (SIGKILL 아님).
+- **SPECIFIED_ICE=True** (SIS_parameter_doc.short), `input_filename='F'` slab ice cold-start, ice mass/heat conservation Error ~1e-4, NaN 0.
+- RESTART **119개**(atmos_coupled/cana/cg_drag/land…), diag `19790101.atmos_daily_cmip`·`atmos_month_aer` 생성, **ocean diag 0개**(정상). GHG co2=337ppm@1979(연도 정합).
+- init(HITRAN LW gas transmission 등 forcing 다량 로딩)이 대부분 시간 차지. 적분은 6-hourly SIS diag로 진행 확인. **qstat "Time Use 00:00:00"은 PBS 미집계 아티팩트** — `ps`로 24 rank 전부 99% 확인이 진짜 상태.
+
+### 11.4 알아둘 것
+- 크래시 3건(landuse.res 날짜 1979, SIS `input_filename='F'`, `FATAL_UNUSED_PARAMS=False`)은 **배포 config에 이미 패치됨**(tomo에서 해결). climate00 재현 시 재현 안 됨.
+- 다음: 생산런은 48/96랭크로 확대 + 다년(스핀업 1979–80 버림). 초기조건은 historical 1979 도달 시 교체가 정석.
+- 정리(선택): `/home/ydkoh/KIOST-ESM2_AMIP.tar.gz.enc`(24GB) — 해제 완료라 삭제 가능(/home 111T).
+```
+
+### 11.5 CFC lbc 활성화 (협력기관 patch `amip_mod.tar.gz`, 2026-07-13)
+협력기관(noah/`yhkimstar@gmail.com`)이 "AMIP 세팅 수정" 패치 `amip_mod.tar.gz`(로컬 `/Volumes/data03/`) 전달. **목적: 대류권 화학에서 CFC→오존 변화 모의** (배포본은 CFC 꺼져 있었음). 내용물 2개: `input.nml`, `chemlbf`.
+
+- **입력 판정 (통째 교체 금지)**: 협력기관 `input.nml`은 **full production**(atmos_npes 720, `&coupler_nml months=12`, fv/land layout 12,10 · io 2,2)이고 내 서버본은 **축소 smoke**(npes 24, 1일, layout 2,2). diff하면 CFC 2줄 + PE/layout/기간이 다름 → **CFC 2줄만 이식**(1623-1624), 축소설정 유지. 통째 교체했으면 720 PE라 climate01 48코어서 안 돎.
+  - `&tropchem_driver_nml`: `time_varying_cfc_lbc = .false.→.true.`, `cfc_lbc_dataset_entry = 1950,…→1979,1,1,0,0,0,`. (line 884 `do_generic_CFC=.false.`는 별개 메커니즘, 불변.)
+- **chemlbf 교체 (AMIP만)**: `chemlbf`는 CFC lbc **ASCII 시계열**(26372줄, namelist에 경로 없음 = 모델이 고정 파일명 `chemlbf` 읽음). 새 CMIP7본은 구본과 **뒤 226줄(26146-26372)만 다름**(sha `51befd…` vs 구 `3cfbd5…`). AMIP `INPUT/chemlbf`가 **coupled INPUT 심링크 공유**였음 → 심링크 끊고 새 실파일 배치(AMIP만), **coupled INPUT은 불변**(구본 `3cfbd5…` 유지, 되돌리기 가능).
+- **백업**: `input.nml.bak_precfc`, `chemlbf.symlink.bak_info`(원 심링크 기록).
+- **검증 — smoke test 재확인 (job 2933, climate01 24코어, 17분)**: `time_varying_cfc_lbc=.true.`로 `tropchem_driver_init nt=145` 통과, 새 chemlbf 읽고 **1979/01/02 00:00 완주 rc=0**. RESTART 117 · atmos diag 103 · 실제 abort 0(FATAL 4건은 benign `FATAL_UNUSED_PARAMS over-ridden` 경고). CFC 켠 게 안정성 무해(구 CFC-off smoke RESTART 119와 대등).
+- **주의**: 이 변경은 **서버에만** 존재(로컬 repo 미반영). coupled는 여전히 CFC-off + 구 chemlbf. 생산 AMIP 시 PE/기간은 production input.nml 참고하되 climate01 단일노드(48코어) 한계 고려.
