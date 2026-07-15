@@ -191,7 +191,7 @@ tpl_name = 'TPQWL','TPQWL','TPQWL','TPQWL','TPQWL','Solr','Prec'   # %vv ← tpl
 
 ## 10. 미해결 / TODO
 
-- **MPI 빌드 (내일 재도전 예정)**: serial 최적화 throughput = **24.8분/model-month ≈ 5 hr/model-yr** (30년 cycle ~6일).
+- **MPI 빌드 → ✅ 해결됨 (§11, 2026-07-15)**: serial 최적화 throughput = **24.8분/model-month ≈ 5 hr/model-yr** (30년 cycle ~6일).
   장기 spin-up·dynamic veg엔 MPI 필수. 과거 실패(`PMPI_Comm_size: Invalid communicator`)는 Intel netcdf 시절.
   ★ **레퍼런스 발견(2026-07-02)**: 찬혁님이 이미 **MPI JULES vn7.7을 mpich 40코어로 구동 중**
   (`/home/ChanhyukChoi/JULES_MODEL_VERSIONS/jules-vn7.7/build/bin/jules.exe`,
@@ -201,3 +201,31 @@ tpl_name = 'TPQWL','TPQWL','TPQWL','TPQWL','TPQWL','Solr','Prec'   # %vv ← tpl
 - **DGVM spin-up**: 위 로드맵 3단계. 현재 1개월 테스트만.
 - ERA5 forcing 1979 파일 time coord 손상 이력(1978-12 proleptic, 1979-01 첫 time ~Jan23).
   2010·GSWP3는 정상. 1979부터 ERA5로 돌릴 땐 재확인.
+
+## 11. ★★ MPI 빌드 성공 (2026-07-15) — Invalid communicator 해결
+
+**한 줄:** gfortran + **mvapich2-2.3.4(gcc85)** clean 빌드로 `PMPI_Comm_size: Invalid communicator` 해결. JULES가 4-task 병렬로 init 완주 확인. 찬혁님 mpich 레퍼런스(§10)와 같은 계열(mvapich2=MPICH 파생).
+
+### 11.1 근본 원인
+`utils/mpi_dummy/mpi_mod.F90`의 **가짜 `mpi_comm_world = 1`(INTEGER PARAMETER)** 이 real MPI 빌드에 섞여 들어감. dummy 모드에선 `mpi_comm_size`가 stub이라 comm 무시 → 안 터짐. real MPI에선 정수 1이 유효 communicator 아님 → 즉시 `Invalid communicator`. (`jules.F90`: `USE mpi, ONLY: mpi_comm_world` → dummy값 1 → `mpi_local_comm=1` → `parallel_mod` `mpi_comm_size(1,...)` FATAL.)
+
+### 11.2 수정 (4가지 조합)
+1. **일관 스택**: gfortran(gcc8.5) + **mvapich2-2.3.4 gcc85**(`/usr/local/mpi/gcc85/mvapich2-2.3.4`) + netcdf-4.6.1_gcc85 + hdf5-1.10.5_gcc85. 과거 실패 조합(mvapich2+intel=netcdf깨짐, OpenMPI+gcc85)과 달리 **mvapich2+gcc는 미시도였고, Noah-MP가 쓰는 안정 MPI**. mpif90 `-show` = `gfortran ... -lmpifort -lmpi`(mvapich2) 확인 필수.
+2. **`JULES_MPI=mpi` + clean 빌드(`fcm make --new`)** → `mpi/mpi.cfg`가 `$compiler=$compiler_mpi=mpif90`, mpi_dummy 제외. incremental 빌드는 옛 dummy 잔재 남으니 `--new` 필수.
+3. **`JULES_COMPILER=gfortran`** (gnu 아님 — `compiler/gfortran.cfg`).
+4. **netcdf static libs에서 curl 제거**: `ncdf/netcdf.cfg` `$ncdf_libs_static`에서 `curl` 삭제(백업 `.bak_curl`). MPI 빌드는 static netcdf 강제라 `-lcurl` 나오는데 `/usr/lib64/libcurl.so`가 링크 순서상 안 잡힘. offline 로컬파일엔 curl 불필요(serial은 dynamic이라 무관했음).
+
+★ **빌드 래퍼 = 실행 mpirun 일치 필수**: 둘 다 mvapich2-gcc85. (ldd가 로그인노드서 Intel IMPI `libmpi.so.12` 잡는 건 MPICH ABI 호환일 뿐; `LD_LIBRARY_PATH`에 mvapich2 넣으면 mvapich2 링크 확인.)
+
+### 11.3 검증 (잡 2943-2944, climate01 -np 4)
+- **Invalid communicator 사라짐 ✓.** `{MPI Task 0..3}`으로 병렬 실행, JULES_DRIVE·OUTPUT_PROFILE·init_vars_tmp 전부 4-task 통과.
+- 마지막 `file_ts_seek_to_datetime: No data for datetime`는 **serial도 동일하게 나는 forcing 시각 이슈**(§10, 1978-12 time coord)라 MPI 무관.
+- exe: `build/bin/jules.exe.mpi_mvapich2`(45MB, mvapich2). serial은 `jules.exe.serial_bak` 보존.
+- 부수: `drive.nml`의 `interp_wind = .true.`는 vn7.4에 없는 무효 변수 → 제거(per-변수 interp은 `interp(N)` 배열로 처리).
+
+### 11.4 빌드 레시피 (재현)
+`JULES_porting/build_jules_mpi.pbs` (climate01). 핵심 env: `PATH=$MV/bin:$PATH`(MV=mvapich2-gcc85), `JULES_COMPILER=gfortran`, `JULES_MPI=mpi`, netcdf/hdf5=gcc85, `JULES_LDFLAGS_EXTRA="-L/usr/lib64 -L.../hdf5.../lib -lhdf5_hl -lhdf5 -lz -L$MV/lib -lmpifort -lmpi"`, `fcm make --new`. 실행: mvapich2 mpirun + `LD_LIBRARY_PATH=$MV/lib:netcdf_gcc85/lib` + `MV2_ENABLE_AFFINITY=0`.
+
+### 11.5 임팩트 / 다음
+- JULES 48-rank MPI 가능 → **1° 전구가 serial 16h/년에서 대폭 단축**. 1차년도 "JULES 부분진단" 제약 해소.
+- 다음: (1) forcing 시작날짜/time-coord 정리(1979부터 또는 GSWP3), (2) **1° JULES forcing 필요** — 현 JULES GSWP3는 0.5°만(§9), 1°는 regrid 필요, (3) 48-rank 1° spin-up.
