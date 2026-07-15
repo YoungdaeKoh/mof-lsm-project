@@ -229,3 +229,19 @@ tpl_name = 'TPQWL','TPQWL','TPQWL','TPQWL','TPQWL','Solr','Prec'   # %vv ← tpl
 ### 11.5 임팩트 / 다음
 - JULES 48-rank MPI 가능 → **1° 전구가 serial 16h/년에서 대폭 단축**. 1차년도 "JULES 부분진단" 제약 해소.
 - 다음: (1) forcing 시작날짜/time-coord 정리(1979부터 또는 GSWP3), (2) **1° JULES forcing 필요** — 현 JULES GSWP3는 0.5°만(§9), 1°는 regrid 필요, (3) 48-rank 1° spin-up.
+
+## 12. ★ 1° GSWP3 forcing 생성 (JULES 1° 런용, 2026-07-15)
+
+**배경:** JULES는 standalone이라 forcing을 모델격자로 자동 regrid 안 함(CLM5·LM4는 CDEPS가 regrid). 1° JULES 런엔 1° forcing 필수. 기존 JULES GSWP3는 0.5°만(§9). Noah-MP 1° forcing은 LDASIN 포맷이라 공유 불가.
+
+**방법: CDO conservative remap (0.5°→1°).** GSWP3는 전구 완전자료(100% 유효, ocean fill 없음)라 conservative remap 안전.
+- **★ NCL area_conserve_remap 폐기**: 적도 1개 위도행(lat 0.5°) 전체가 0 K 되는 버그 + Prec 그룹 dim 에러. CDO로 전환.
+- **★ CDO의 LONGXY 2D좌표 거부** ("Unsupported generic coordinates") → **소스 grid 명시로 우회**: `src_grid_0.5.txt`(gridtype=lonlat, 720×360, xfirst=0.25 xinc=0.5, yfirst=-89.75 yinc=0.5) + `cdo remapcon,r360x180 -setgrid,src_grid -selname,VARS in out`.
+- **★ climate01에 `libgfortran.so.3` 없음**(perl bigint 때와 같은 계산노드 패키지 부족) → 로그인노드 `/usr/lib64/libgfortran.so.3`를 `~/lib`에 복사 + `LD_LIBRARY_PATH`. (단 CDO는 netcdf_gcc85만 필요, NCL만 so.3 필요.)
+- **★ partial-write 함정**: 쓰는 중 파일 읽으면 0 K/변수누락으로 오판(WFDE5 HDF와 동일). 완성본만 검증.
+
+**구성:** 3그룹 CLM포맷 유지 — TPQWL(TBOT/QBOT/PSRF/WIND/FLDS)·Solr(FSDS)·Prec(PRECTmms). 출력 `/data2/ydkoh/jules_gswp3_1deg/clmforc.GSWP3.c2011.1x1.{grp}.YYYY-MM.nc`, 1° 전구 r360x180(360×180, lon 0~359, lat -89.5~89.5).
+- 기간 1981-2010(cycling spin-up용, 30년×12×3=1080). 배치 `gswp3_cdo_batch.pbs`(climate01), ~1시간.
+- 검증: TBOT 154~328 K, FSDS 0~1400, PRECTmms 0~0.015, 0 K 셀 0.
+
+**다음(JULES 1° 연결):** ① `model_grid.nml` nx=360 ny=180. ② **1° grid_info.nc**(land mask + 좌표) 필요 — 0.5° grid_info 재regrid 또는 표준 1° land mask. ③ drive.nml `%vv` 경로를 1° 파일로. ④ 48-rank MPI(§11) 1° spin-up.
