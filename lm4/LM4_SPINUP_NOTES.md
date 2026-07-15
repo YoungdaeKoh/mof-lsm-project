@@ -137,3 +137,41 @@ LUMIP/CMIP6 프로토콜(Lawrence et al. 2016 GMD; GFDL E.Shevliakova): ① pote
 **스크립트 (lm4/scripts/ + server /data2/ydkoh/lm4/):** `spinup_loop.sh`(오케스트레이터, raw보존), `recovery_c02.sh`(climate02 복구), `lm4_region_spinup.py`(지역+Global, `--plot_only`), `plot_global.py`, `check_warm.py`, `stage_restart.sh`, `pull_raw.sh`, `merge_recov.py`.
 
 **다음 단계:** ① 본 실험 = `IC_static_300yr` warm-start(ERA5 등 forcing 교체). ② 동적식생 1200년+ 단계 = 이 평형 물리상태서 동적식생 ON 후 식생·탄소 추가 spin-up. ③ (선택) 91-119 raw 공백은 cycle 4 재실행으로 복구(맵 필요시).
+
+## 11. ★★ 동적식생 warm-start 검증 완료 (2026-07-15, 잡2934-2936)
+
+**한 줄:** `IC_static_300yr`(300년 평형)에서 warm-start + 동적식생 ON + GSWP3 1년 → **크래시 없이 완주(rc=0)**. 노트 §5의 `lookup_es` overshoot 우려가 평형 warm-start로 해소됨. 월별 지면변수(분석용 13종) + raw 보존까지 세팅.
+
+### 11.1 동적식생 크래시 회피 (§5 숙제 해결)
+- **한 줄 변경**: `input.nml &static_veg_nml use_static_veg = .TRUE. → .FALSE.` (vegn_nml `do_cohort_dynamics/do_phenology`는 이미 TRUE).
+- **크래시 안 남**: §5가 우려한 "동적식생 cold-start 얇은 캐노피 → Tv overshoot → `lookup_es` FATAL"이 **재현 안 됨**. 이유 = `IC_static_300yr`에 **`cana.res`(캐노피공기)·`vegn1/vegn2.res`(식생 cohort)가 300년 평형 상태로 존재** → §5-2가 짚은 "cana까지 평형된 restart" 조건 그대로라 overshoot 조건 자체가 없음. es-clamp 패치는 추가 안전망.
+- 1981년 1년 완주(1981-01-01→1982-01-01), `lookup_es`/qscomp/forrtl FATAL **0건**, NaN 0. 식생 진화 확인(LAI 0~10.5, bwood 1.8, nep −0.26).
+
+### 11.2 테스트 run dir 구성
+- 새 dir `RUN/lm4_dynveg_test`(300년 spin-up dir 불변). config 복사 + INPUT 경계자료(6GB) 복사 + `IC_static_300yr` restart 48개를 undated `.res`로 스테이징(`build_dynveg_test.sh`). exe 심링크, `nhours_fcst=8760`(1년).
+- PBS `dynveg_test.pbs`: spinup.pbs 복제(climate01 48코어, spack-stack + HPC-X, `OMPI_MCA_coll=^hcoll`) + 경로만 변경. ~7분/년.
+
+### 11.3 ★ 월별 지면변수 출력 (diag_table `land_month` 추가)
+CLM5 SpinupStability 분석([[cesm/CLM5_SPINUP_NOTES §7]])을 LM4에도 적용하려면 **동적식생 수렴의 느린 모드=탄소**를 월별로 봐야 함. diag_table에 `land_month`(1,"months", FMS 진짜 월평균) 추가, 13변수:
+
+| 분석 대응(CLM) | LM4 필드 | 모듈 |
+|---|---|---|
+| FSH 현열 | `sens` | land |
+| EFLX_LH_TOT 잠열 | `evap` | land |
+| TSOI 토양온도 | `soil_T` | soil |
+| H2OSOI 토양수분 | `soil_liq`,`soil_ice` | soil |
+| **TOTVEGC 총식생탄소** | `btot` | vegn |
+| **TOTSOMC 토양탄소** | `slow_soil_C`,`fast_soil_C` | soil |
+| GPP/생산성 | `nep` | vegn |
+| TLAI | `LAI` | vegn |
+| (부수) | `bwood`,`runf`,`soil_wtdep` | vegn/land |
+
+- **flux 필드명 규명**: `sens`·`evap`는 **module `land`**(land_model.F90 line 3129/3219). 앞서 "LM4는 flux가 diag_table에 없어 6패널 불가"였던 것 해소. `latent`/`cSoil`은 `ocean_model`/`cmor_name` 모듈이라 회피, 검증된 `soil`/`vegn` 필드 사용.
+- 검증: land_month 12개월(1981-01~12), `average_DT`=31/28/31…(진짜 월평균), 미등록필드 0.
+
+### 11.4 raw 보존 (PBS 내장)
+- `dynveg_test.pbs` 끝에 rsync(`--delete` 없음) → `/data2/ydkoh/lm4/history_raw/lm4_dynveg_test/`(land_month/annual/static + RESTART). 잡2936에서 자동 아카이브 확인(land_month 6타일 + restart 97). [[lsm-spinup-raw-preservation]]
+
+### 11.5 다음 (2·3단계)
+- **2단계 WFDE5 forcing 구축**: WFDE5 raw(0.5°, lon −180~180, 552개월)는 있으나 LM4 CDEPS용 mesh/streams 미준비. **ERA5GPCP mesh(lon −179.75~179.75)가 WFDE5와 격자 일치 → 재사용 후보**. WFDE5 변수(Tair/Rainf…) → CDEPS datamode 매핑 필요.
+- **3단계 실행 의도 미정**: (a) 식생·탄소 spin-up(cyclic 반복, 탄소 느려 장기) vs (b) historical(WFDE5 1979-2024 순차). forcing 구성·compute 좌우.
