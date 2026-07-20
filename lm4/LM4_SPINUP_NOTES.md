@@ -536,3 +536,20 @@ warm-start 하는 KIOST 평형 restart가 "역학식생까지 평형인가"를 n
 **결정 (2026-07-20): 1차년도 spin-up·진단은 `do_biogeography=.FALSE.` 유지.**
 왜: 끄면 종 조성이 `cover_type.nc`(관측 기반 지면피복)에 고정되어, 플럭스·물수지 편차를 **모델 물리 탓으로 해석**할 수 있음. 켜면 모델이 스스로 종을 정하는데 역학 biogeography는 관측에서 벗어나는 게 흔해, "이 편차가 물리 때문인가 식생 분포가 틀려서인가"를 구분할 수 없게 됨 — 진단 프레임워크의 목적을 훼손. 다수 기관이 같은 이유로 끔.
 Phase 2 역학식생 실험은 **이 30년 offline 평형을 초기장으로 삼아 biogeography만 켜서 이어달리면 됨**(처음부터 재실행 불필요). 그 실험에서는 "식생 분포가 관측에서 얼마나 벗어나는가"가 곧 결과 = LM4 biogeography 성능 평가.
+
+### 13.21 ★★ 1981 시험 세그먼트: warm start 확인 O, 체이닝은 분산 restart로 막힘 (2026-07-21, job 8280)
+
+**과학은 정상**: rc=0, 07:14 완주(7h35m/model-yr — walltime 여유), RESTART 146개, FATAL 0.
+- **★ silent cold start 아님 (확정)**: `RESTART/vegn1.res.tile1.nc.0001` 헤더 = **tile=14, cohort=63**. cold start였다면 §13.7 uniform 모드(tile=1, cohort=1)로 리셋. → KIOST 평형 multi-tile 식생을 정상 warm-start, 1년간 식생 진화(cohort 57→63대).
+- **심층토양 T 판정법 주의**: `land_month`의 soil_T **최하층**은 하부경계라 mean 286.9K로 나옴(>285 오탐). §13.6의 270K 기준은 **2 m 깊이(zfull_soil idx 12)**였음 — 최하층 아님. **silent cold start 판정은 vegn tile/cohort 구조로 하는 게 확실**(soil_T 임계값은 층·baseline 의존).
+
+**★★ 블로커: 48 PE는 restart를 분산 조각(`.res.tile1.nc.0001`, `.0002`)으로 씀.**
+- `io_layout=1,1`인데도 분산됨 — LM4 land의 compressed-by-gathering(grid_index/tile/cohort) 포맷은 io_layout 무시하고 io-domain별 조각 출력으로 추정. **24 PE probe(job 8269)는 결합 `vegn1.res.tile1.nc` 생성**했으므로 PE수/layout에 의존.
+- **결합 도구 없음**: `combine-ncc`·`mppnccombine`·`FRE-NCtools` 모듈 전부 climate00에 부재(tomo는 `intel19/FRE-NCtools` 썼음). KIOST AMIP INPUT의 결합 restart는 tomo에서 결합된 것.
+- **guard 3 오탐**: 체인이 `RESTART/cana.res.tile1.nc`(결합명)을 찾는데 실제는 `.0001/.0002` → stat 실패 → "not newer" ABORT. 실제론 정상 완주. guard가 세그먼트를 죽여 데이터 오염은 없었음(의도된 안전 방향).
+
+**미결 — 다음 세션 결정 필요 (셋 중 택1)**:
+1. **24 PE로 실행**: 결합 restart 네이티브 생성, 체이닝 깨끗, 도구 불필요. 대신 11.1 h/yr(48 PE 7.85 대비 1.4×). 30년 333h vs 235h(+98h).
+2. **FRE-NCtools 빌드**: 48 PE 속도 유지, 단 mppnccombine + **combine-ncc**(land 압축포맷 전용) 빌드 필요.
+3. **분산 restart 직접 read**: INPUT의 stale 결합본 제거 후 분산 조각만 두고 read. 매 세그먼트 동일 48 PE/layout이라 이론상 가능하나, io_layout=1,1인데 2조각인 모순 미해결 → 검증에 8h 런 필요, 리스크.
+- **권고: 옵션 1(24 PE)**. 도구 빌드·검증 리스크 없이 즉시 굴러감. 98h 손해는 combine 빌드·디버그 시간과 상쇄. forcing·config·clamp·guard는 그대로 재사용.
