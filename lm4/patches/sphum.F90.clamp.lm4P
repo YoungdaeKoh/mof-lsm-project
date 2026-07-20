@@ -1,0 +1,52 @@
+module sphum_mod
+
+use constants_mod,      only: rdgas, rvgas
+use sat_vapor_pres_mod, only: escomp
+use fms_mod,            only: WARNING
+use land_debug_mod,     only: check_temp_range
+
+implicit none
+private
+
+public :: qscomp
+
+! ==== module constants ======================================================
+real, parameter :: d622 = rdgas/rvgas
+real, parameter :: d378 = 1.0-d622
+real, parameter :: del_temp = 0.1 ! temperature increment for q_sat derivative calc.
+
+contains ! -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+subroutine qscomp(T, p, qsat, DqsatDT )
+  real, intent(in) :: T    ! temperature
+  real, intent(in) :: p    ! pressure
+  real, intent(out):: qsat ! saturated specific humidity
+  real, intent(out), optional :: DqsatDT ! deriv of specific humidity w.r.t. T
+
+  real :: esat ! sat. water vapor pressure
+  real :: Tc   ! T clamped to es-table range (offline spin-up guard)
+
+  call check_temp_range(T,'qscomp','temperature')
+
+  ! Offline (data-atmosphere) forcing removes the atmospheric feedback that damps
+  ! canopy temperature in the coupled model, so a dry cell can transiently exceed
+  ! 100C before the land state adjusts; escomp would then abort with an es-table
+  ! overflow FATAL. Clamp T into the FMS sat_vapor_pres table range (~113-373K)
+  ! for the lookup only. Real surfaces stay below ~70C, so the clamp acts solely
+  ! on already-unphysical values and is a no-op once spun up -- scaffolding to
+  ! reach equilibrium (verify zero activations before removing). CLM uses the
+  ! same guard for offline robustness.
+  Tc = min(max(T, 173.16), 372.16)
+
+  ! calculate saturated specific humidity
+  call escomp(Tc,esat)
+  qsat = d622*esat /(p-d378*esat )
+
+  ! if requested, calculate the derivative of qsat w.r.t. temperature
+  if (present(DqsatDT)) then
+     call escomp(Tc+del_temp,esat)
+     DqsatDT = (d622*esat/(p-d378*esat)-qsat)/del_temp
+  endif
+end subroutine qscomp
+
+end module sphum_mod

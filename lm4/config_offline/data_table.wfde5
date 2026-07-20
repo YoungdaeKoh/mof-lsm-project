@@ -1,0 +1,48 @@
+# Route B: real WFDE5 forcing for offline lm4P via FMS data_override.
+# Source file is the ATM-ready rewrite (CF 1D coords, ocean-filled, derived
+# lprec/fprec/coszen) -- see wfde5_to_lm4p_atm.py.
+#
+# LM4 builds its incoming shortwave from the four *_down_* components only
+# (land_model.F90:1264-1269, NIR = total - vis); Atm%flux_sw itself is never
+# used by the land, so the split below just has to be self-consistent:
+#   dir/dif = 50/50, vis/nir = 50/50  =>  total_dir=total_dif=0.5*FSDS,
+#   vis_dir=vis_dif=0.25*FSDS, leaving NIR_dir=NIR_dif=0.25*FSDS.
+#
+"ATM", "t_bot"    , "t_bot"    , "./FORCING/wfde5_atm_1981.nc", "bilinear", 1.0
+"ATM", "sphum_bot", "sphum_bot", "./FORCING/wfde5_atm_1981.nc", "bilinear", 1.0
+"ATM", "p_surf"   , "p_surf"   , "./FORCING/wfde5_atm_1981.nc", "bilinear", 1.0
+"ATM", "p_bot"    , "p_surf"   , "./FORCING/wfde5_atm_1981.nc", "bilinear", 1.0
+"ATM", "u_bot"    , "u_bot"    , "./FORCING/wfde5_atm_1981.nc", "bilinear", 1.0
+"ATM", "flux_lw"  , "flux_lw"  , "./FORCING/wfde5_atm_1981.nc", "bilinear", 1.0
+"ATM", "coszen"   , "coszen"   , "./FORCING/wfde5_atm_1981.nc", "bilinear", 1.0
+"ATM", "lprec"    , "lprec"    , "./FORCING/wfde5_atm_1981.nc", "bilinear", 1.0
+"ATM", "fprec"    , "fprec"    , "./FORCING/wfde5_atm_1981.nc", "bilinear", 1.0
+#
+# shortwave: one stored field, split by the factor column
+"ATM", "flux_sw"               , "flux_sw", "./FORCING/wfde5_atm_1981.nc", "bilinear", 1.0
+"ATM", "flux_sw_down_total_dir", "flux_sw", "./FORCING/wfde5_atm_1981.nc", "bilinear", 0.5
+"ATM", "flux_sw_down_total_dif", "flux_sw", "./FORCING/wfde5_atm_1981.nc", "bilinear", 0.5
+"ATM", "flux_sw_down_vis_dir"  , "flux_sw", "./FORCING/wfde5_atm_1981.nc", "bilinear", 0.25
+"ATM", "flux_sw_down_vis_dif"  , "flux_sw", "./FORCING/wfde5_atm_1981.nc", "bilinear", 0.25
+"ATM", "flux_sw_dir"           , "flux_sw", "./FORCING/wfde5_atm_1981.nc", "bilinear", 0.5
+"ATM", "flux_sw_dif"           , "flux_sw", "./FORCING/wfde5_atm_1981.nc", "bilinear", 0.5
+"ATM", "flux_sw_vis"           , "flux_sw", "./FORCING/wfde5_atm_1981.nc", "bilinear", 0.5
+"ATM", "flux_sw_vis_dir"       , "flux_sw", "./FORCING/wfde5_atm_1981.nc", "bilinear", 0.25
+"ATM", "flux_sw_vis_dif"       , "flux_sw", "./FORCING/wfde5_atm_1981.nc", "bilinear", 0.25
+#
+# constants: WFDE5 has scalar wind only, so v_bot=0 keeps |V| = WIND.
+# z_bot 10 m = WFDE5 wind reference height (T/q are 2 m -- see notes).
+# gust 3.0 matches the validated LM4 offline config (gust_const=3.0).
+"ATM", "v_bot" , "", "", "none", 0.0
+"ATM", "z_bot" , "", "", "none", 10.0
+"ATM", "gust"  , "", "", "none", 3.0
+"ATM", "slp"   , "", "", "none", 101325.0
+#
+# --- chemistry boundary conditions carried over from AMIP ---
+"ATM", "o2_flux_pcair_atm", ""         , ""                             , "none" , 0.214
+"ATM", "co2_dvmr_restore", "co2", "./INPUT/co2_gblannualdata.nc", "none", 1.0e-6
+#
+# --- specified ice/SST (do_ice=.true. still needs boundary data) ---
+"ICE", "sic_obs", "siconcbcs", "./INPUT/amipbc_sic_PCMDI-AMIP-1-1-10.nc", "bilinear", 0.01
+"ICE", "sit_obs", ""         , ""                                       , "none"    , 2.0
+"ICE", "sst_obs", "tosbcs"   , "./INPUT/amipbc_sst_PCMDI-AMIP-1-1-10.nc", "bilinear", 1.0

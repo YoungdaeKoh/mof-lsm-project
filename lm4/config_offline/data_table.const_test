@@ -1,0 +1,42 @@
+# Route B step 1.5: prove the data-atmosphere path end-to-end with CONSTANT
+# atmospheric forcing (empty filename => field is set to the constant factor).
+# No WFDE5 preprocessing involved; this only tests the mechanism.
+#
+# Physically bland but self-consistent state: T=280 K, q=5 g/kg, calm, overcast.
+#
+"ATM", "t_bot"   , "", "", "none", 280.0
+"ATM", "sphum_bot", "", "", "none", 0.005
+"ATM", "u_bot"   , "", "", "none", 2.0
+"ATM", "v_bot"   , "", "", "none", 0.0
+"ATM", "z_bot"   , "", "", "none", 10.0
+"ATM", "p_bot"   , "", "", "none", 99000.0
+"ATM", "p_surf"  , "", "", "none", 100000.0
+"ATM", "slp"     , "", "", "none", 101325.0
+"ATM", "gust"    , "", "", "none", 3.0
+#
+# radiation: modest overcast daytime
+"ATM", "flux_lw" , "", "", "none", 300.0
+"ATM", "flux_sw" , "", "", "none", 200.0
+"ATM", "flux_sw_dir", "", "", "none", 100.0
+"ATM", "flux_sw_dif", "", "", "none", 100.0
+"ATM", "flux_sw_vis", "", "", "none", 100.0
+"ATM", "flux_sw_vis_dir", "", "", "none", 50.0
+"ATM", "flux_sw_vis_dif", "", "", "none", 50.0
+"ATM", "flux_sw_down_vis_dir", "", "", "none", 50.0
+"ATM", "flux_sw_down_vis_dif", "", "", "none", 50.0
+"ATM", "flux_sw_down_total_dir", "", "", "none", 100.0
+"ATM", "flux_sw_down_total_dif", "", "", "none", 100.0
+"ATM", "coszen"  , "", "", "none", 0.5
+#
+# precipitation: dry, to keep the first step simple
+"ATM", "lprec"   , "", "", "none", 0.0
+"ATM", "fprec"   , "", "", "none", 0.0
+#
+# --- carried over from the AMIP data_table (chemistry boundary conditions) ---
+"ATM", "o2_flux_pcair_atm", ""         , ""                             , "none" , 0.214
+"ATM", "co2_dvmr_restore", "co2", "./INPUT/co2_gblannualdata.nc", "none", 1.0e-6
+#
+# --- specified ice/SST (do_ice=.true. still needs its boundary data) ---
+"ICE", "sic_obs", "siconcbcs", "./INPUT/amipbc_sic_PCMDI-AMIP-1-1-10.nc", "bilinear", 0.01
+"ICE", "sit_obs", ""         , ""                                       , "none"    , 2.0
+"ICE", "sst_obs", "tosbcs"   , "./INPUT/amipbc_sst_PCMDI-AMIP-1-1-10.nc", "bilinear", 1.0

@@ -306,3 +306,74 @@ before=276.4987 after=276.4988 diff=6.6e-6  time=1982-01-01 00:00:00
   - **Route A** = UFS CMake 스왑: CDEPS/WFDE5/DATM offline 인프라 재사용(forcing 해결됨) BUT 브랜치 통합 컴파일 반복 + ESMF 환경.
   - **Route B** = GFDL FMS-make로 lm4P + `coupler/simple`(`do_land` 스위치) land-only + data-atmosphere: **lm4P 네이티브(스왑·divergence 없음)** + KIOST 빌드 이미 됨 BUT offline data-atmosphere forcing 드라이버 새로 구성.
   - **결정 미정** — 다음 세션 첫 작업 = Route 선택 후 착수. (Fable 5로 잠깐 전환했다 Opus로 복귀.)
+
+### 13.10 ★★★ Route B 확정 + 재정의 — full coupler에 data-atmosphere가 이미 내장 (2026-07-20)
+
+**Route A 실측 = 폐기 권고.** clone(`/data2/ydkoh/lm4/ufs-weather-model-lm4p`)에서 확인: NOAA offline 개조는 "7파일 추가"가 아니라 **core tile 모듈 안에 짜여 있음**. 원본 land_lad2에서 offline glue(`tiling_input`·`land_chksum`)를 참조하는 파일 7개(`land_tile_io`·`soil_tile`·`vegn_cohort_io`·`glac_tile`·`lake_tile`·`land_tile` + glue). lm4P로 덮은 뒤 참조 **0건 = glue 고아**. `vegn_static_override.F90`의 `read_remap_cohort_data_new.inc` include(2곳)도 lm4P엔 없음. 덮어쓴 8개 파일 diff 합계 **~7,800줄**(land_model.F90만 4,577, lm4P가 1,052줄 더 김). 즉 스왑이 아니라 merge이고, NOAA offline 개조와 LM4.1→LM4.2 과학업그레이드가 같은 파일에 섞여 분리 불가.
+
+**★ 노트 13.8의 Route B 전제는 틀렸었다**: `coupler/simple`의 `do_land`는 land-only 스위치가 아니라 **완전결합 루프 안에서 land만 껐다 켜는 토글**(atmos/ice 호출은 무조건 실행, `do_atmos`/`do_ocean` 없음, 기본값 `.FALSE.`). 게다가 KIOST가 실제 빌드한 건 `coupler/full`이라 **`coupler/simple`은 이 환경에서 컴파일된 적 없음**(`exec/coupler/Makefile`이 전부 `full/`).
+
+**★★ 진짜 답은 full coupler (사용자 지적: "AMIP과 비교해봐라" → 결정타).** AMIP이 결합을 줄인 손잡이가 그대로 land-only로 확장됨:
+- `coupler/full/coupler_main.F90:484-490` — **`do_atmos`·`do_land`·`do_ice`·`do_ocean`·`do_flux` 전부 coupler_nml 스위치**("If .FALSE., then execution is skipped"). AMIP은 이미 `do_ocean=.false.`+`ocean_npes=0`+`use_lag_fluxes=.false.`+`concurrent=.false.`로 MOM6를 껐음. `.not.do_atmos` 전용 init 분기 실재(1383·1492행) → **GFDL이 무대기 구동을 설계에 넣어둠**.
+- `full/atm_land_ice_flux_exchange.F90` — **LM4가 필요로 하는 모든 강제장에 `fms_data_override('ATM',...)` 훅이 이미 있음**: `t_bot`·`z_bot`·`p_bot`·`u_bot`·`v_bot`·`p_surf`·`slp`·`gust`(874-881), 트레이서 `q_bot`(897), **`flux_lw`·flux_sw 10종·`lprec`(2114-2125)·`fprec`·`coszen`(2149-2150)**.
+- data_table 기구는 AMIP에서 이미 실증(`"ICE","sic_obs","siconcbcs",...,"bilinear",0.01` — 0.5° lat-lon input4MIPs → C96 이중선형).
+- **→ Route B = 새 드라이버 작성이 아니라 namelist + data_table 작업. 신규 Fortran 0줄 전망.**
+
+**`Surf_Diff` 우려도 해소**: `flux_down_from_atmos`에서만 7필드 사용. `dtmass=0`·delta/dflux=0이면 `gamma=1/(1-0)=1` → 보정항이 정확히 소거되고 explicit flux만 남음, 0으로 나누는 곳 없음. `do_atmos=.false.`면 `update_atmos_model_down`이 안 돌아 초기값 유지 → 0 확인만 필요.
+
+**남은 리스크(미검증)**: ① `do_ice`는 켜둬야 할 가능성(교환격자 마스크; AMIP도 SIS2 SPECIFIED_ICE 유지) → 예상 config `do_atmos=.F., do_ocean=.F., do_ice=.T.(specified), do_land=.T., do_flux=.T.` ② `.not.do_atmos` 경로가 FV3 격자 초기화와 맞물려 실제로 도는지 미검증 ③ **WFDE5는 육지만 있는 0.5° 자료 → bilinear override 시 해안 결측 오염 위험**(grid-verify 대상) ④ Atm 구조체 할당이 do_atmos=.F.에서도 유효한지.
+
+**작업 clone**: `/data2/ydkoh/lm4/esm4p5-lm4p-offline/{src,exec,bin}` (1.4G, DATA·tar 제외). 원본 `~/ESM4p5_KIOSTv2b` 미변경.
+
+### 13.11 ★★★★ Route B 성공 — offline lm4P land-only 완주 + 평형 multi-tile 식생 보존 (2026-07-20)
+
+**결과: `rc=0`, FATAL 0, RESTART 119, `vegn1.res.tile1` = `tile=13 / tile_index=15085 / cohort=61 / cohort_index=162058`** — §13.8이 목표로 삼은 KIOST 400년 결합 spin-up 평형 multi-tile 식생이 **offline에서 그대로 보존**됨. §13.7의 `vegn_to_use='uniform'` 희박식생 문제를 우회하는 경로 확보.
+
+**신규 Fortran 0줄.** 구성 = `coupler/full` + namelist + data_table 뿐:
+- run dir `/data2/ydkoh/lm4/RUN/lm4_offline_probe` (AMIP config 복제, INPUT·exe는 심링크로 원본 재사용, 원본 `~/KIOST-ESM2_AMIP` 미변경).
+- `&coupler_nml`: `do_atmos=.false.` · `do_ocean=.false.` · `do_ice=.true.` · `do_land=.true.` · `use_lag_fluxes=.false.` · `concurrent=.false.` · `atmos_npes=24`(= 총 rank수, 필수) · `hours=1`.
+- `data_table`: `"ATM"` 강제장 전부 **상수**로 주입(파일명 공란 → factor가 상수값). ICE는 AMIP sic/sit/sst 유지.
+- 24 PE @climate01, 초기화 atmos 3분35초 → land 42초 → ice 1초, 총 5분26초.
+
+**구조 확인 (소스 근거)**:
+- `coupler_main.F90:484-490` — `do_atmos/do_land/do_ice/do_ocean/do_flux` 전부 namelist 스위치. `.not.do_atmos` 분기 주석에 **"data atmos"** 명시(1383·1492행) → GFDL 설계 의도.
+- **`atmos_model_init`은 `do_atmos`가 아니라 `Atm%pe`로 게이팅**(1712행) → 대기는 여전히 init됨(화학·에어로졸 포함). 시간적분(`update_atmos_model_*`)만 스킵. **AMIP INPUT 24GB 전량 필요**, 초기화 비용도 잔존.
+- **`flux_down_from_atmos`는 `if(do_atmos)` 블록 바깥에서 무조건 호출**(블록 853행 종료, 호출 859행). `sfc_boundary_layer`는 `do_flux` 게이트. → **강제장 주입 훅과 flux 계산은 do_atmos와 무관하게 작동**. 이게 Route B의 핵심 근거.
+- ATM override 훅 위치: 상태변수 `sfc_boundary_layer`(874-881, +`sphum_bot` 897), 복사·강수 `flux_down_from_atmos`(2114-2150).
+
+**낮/밤 대조로 확인한 것 (중요)**: 상수 SW=200 W/m²를 전지구 밤낮 없이 주면 `vegetation.F90:1800`→`sphum.F90:31 qscomp`→`lookup_es` overflow로 FATAL(= §4·§5의 cold-start 캐노피 overshoot와 동일 traceback). **SW=0(야간)으론 완주.** 즉 **크래시는 엉터리 상수 강제장 아티팩트이지 구조 문제가 아님.** 실제 WFDE5로 갈 때 재발하면 `lm4/patches/sphum.F90.clamp`의 2줄 clamp가 lm4P `shared/sphum.F90`에 **구조 동일하게 그대로 이식 가능**(escomp 2곳 + check_temp_range). 단 KIOST restart는 cana까지 평형이라 §13.6-154행 논리상 재발 가능성 낮음.
+
+**부수 수정**: probe 사본의 `sst_degk=.true.`→`.false.` (§KIOST 노트 12의 단위 버그, 원본 AMIP은 미수정).
+
+**다음 = 진짜 forcing.** `data_override`는 **단순 파일 리더**(시간·공간 보간만, 강제장 유도 로직 없음). CDEPS DATM이 해주던 걸 **전처리로 옮겨야 함**:
+- WFDE5(`/data2/ydkoh/2026_MOF_LSM/Atm_forc/1_CLM_WFDE5/{year}_wfde5.nc`) 보유 7종 = `TBOT·QBOT·PSRF·FSDS·FLDS·PRECTmms·WIND` (0.5°=360×720, 6시간, 1460스텝, noleap, lat **ascending** −89.75→89.75, lon **0-360**).
+- 필요 14종과의 격차: `u_bot/v_bot`(WIND 스칼라뿐→분해) · `flux_sw` 4종(FSDS 전천→vis/nir×dir/dif 분할) · `lprec/fprec`(PRECTmms→상 분리) · `coszen`·`z_bot`·`gust`·`slp`(생성).
+- **grid-verify 결과(1981 파일)**: 육지 92,889/259,200 = **35.8%**, 물리범위 정상(TBOT 220.3~314.5 K, FSDS 0~1048 W/m², PRECT max 3.9e-3 mm/s). **1D 좌표변수 없음 — `LATIXY/LONGXY` 2D뿐 → data_override의 `bilinear`가 못 읽음. CF 1D lat/lon으로 재작성 필수.**
+- **해안 리스크 정량**: 4-이웃 중 하나라도 결측인 육지셀 = **7,936개 = 육지의 8.5%**. bilinear가 fill값을 섞을 수 있는 셀. **동아시아 연안이 정확히 여기 해당**(과제 과학목표와 직결) → 전처리에서 해양측 nearest-neighbor 외삽으로 메운 뒤 넘길 것.
+- **CDEPS/DATM 자체 이식은 금지** — NUOPC/ESMF라 FMS coupler와 비호환, Route A의 merge 문제 재현. 유도 로직만 Python 전처리로 옮길 것.
+
+### 13.12 ★★★★ Route B 실제 WFDE5 구동 성공 (2026-07-20, job 8269)
+
+**`rc=0`, FATAL 0, RESTART 119, 1 model-day (1981-01-01 03:00 시작), 24 PE @climate01, 8분 56초.**
+- `vegn1.res.tile1`: `tile=13 / tile_index=15085 / cohort=57 / cohort_index=143546` — multi-tile 평형 구조 유지, **cohort 61→57로 변화 = 역학식생이 실제로 진화**.
+- 물리 검증(`land_daily`, 무가중 셀평균, C96 준등면적): **precip 2.604e-05 kg/m²/s = 2.25 mm/day**(관측 육지평균 ~2와 일치, max 102 mm/day), **npp 0.387 kg C/m²/yr**(관측 0.4~0.5 범위, 1월이라 음수격자 존재, NaN 1398=빙설·비식생). → **강제장이 지면까지 실제로 도달함이 수치로 확인.**
+- `land_month`는 월평균이라 1일 런에선 전부 fill(9.969e+36)이 정상 — 단기 검증은 `land_daily`/`land_8xdaily_*`로 볼 것.
+
+**성공까지 밟은 4개 실패와 각 원인 (재현용):**
+1. `time_interp_external: time is before range` — **WFDE5 레코드가 03/09/15/21 UTC**인데 `current_date`를 00:00으로 둠. → `current_date = 1981,1,1,3,0,0` + `force_date_from_namelist=.true.`. (장기런은 전처리에서 연초/연말 경계 레코드를 덧붙이는 게 정석.)
+2. `vegetation.F90:1800 → sphum.F90:31 qscomp → lookup_es overflow` — **§4·§5의 cold-start 캐노피 overshoot**. restart는 무날짜 이름이라 평형 캐노피를 정상 warm-start 중이었음에도 발생. 원인 = **KIOST restart는 "결합" 평형**이라 대기 피드백 damping에 의존했는데 offline로 오면서 그게 사라짐(§4가 예측한 그대로). → **clamp 패치로 해결**(아래).
+3. `diag_integral_mod: field_count equals zero for field_name prec` — `do_atmos=.false.`면 대기 적분이 누적 안 됨. → `&diag_integral_nml output_interval`을 런보다 길게.
+4. `set_time_i: time is negative. days=-24856` — 위 값을 `1.0e8`로 줬더니 **int32 오버플로**(days×86400 < 2^31 → **24,855일이 상한**). → `output_interval = 20000.0`(54.8년).
+
+**★ qscomp clamp를 lm4P에 이식 (clone 전용, 원본 미변경)**:
+- `esm4p5-lm4p-offline/src/lm4P/shared/sphum.F90`의 `qscomp`에 **추가 2줄**(`real :: Tc` 선언 + `Tc = min(max(T,173.16),372.16)`) **+ 수정 2줄**(`escomp(T,...)`→`escomp(Tc,...)`, `escomp(T+del_temp,...)`→`escomp(Tc+del_temp,...)`). 주석 포함 실제 diff = 12줄 추가·2줄 수정. **동작을 바꾸는 건 수정 2줄** — 추가분만으론 Tc를 계산해놓고 안 쓰므로 무효과(§5의 "2줄+인자교체"가 정확한 표현). lm4P의 qscomp가 land_lad2와 **구조 동일**해서 `lm4/patches/sphum.F90.clamp`가 그대로 이식됨. 원본 `~/ESM4p5_KIOSTv2b/.../sphum.F90`은 clamp 0건으로 확인.
+- 재빌드: `BASEDIR=/data2/ydkoh/lm4/esm4p5-lm4p-offline` 로 `make lm4P/liblm4P.a` → 재링크. 증분빌드 동작(나머지 라이브러리 up-to-date), 실행파일 233 MB. 스크립트 `build_lm4p_clamp.sh`.
+- **clamp 발동 2775건/1일** — `Tv` 374.2 K(101°C), 위치 **27.27°E 19.28°S(칼라하리) 남반구 한여름** = §4의 "건조 사막셀+강일사" 조건과 정확히 일치. 결합→offline 전환 transient라 예상된 동작이나, **장기런에서 발동 횟수가 줄어드는지 추적할 것**(평형서 무발동이면 clamp 제거 가능).
+
+**운영 메모**: run dir에 이전 상수-forcing 테스트의 `19790101.*` 산출물이 남아 있음(정리 대상). 실행파일 심링크는 이제 clone 빌드를 가리킴.
+
+### 13.13 디스크 정리 (2026-07-20) — 4.19 TB 회수
+`/data2` 여유 **4.2 T → 8.4 T**(98%→95%). 삭제 전 백업 무결성 확인 후 진행.
+- `PET*.ESMF_LogFile` **362개 0.58 TB** 삭제. 개당 18.5 GB 디버그 로그(크래시루프 시기 팽창), 과학적 가치 0.
+- `ufs.cpld.cpl.hi.*` **269,014개 3.61 TB** 삭제(전부 `RUN/` 아래, 백업 디렉토리엔 0개로 확인 후). CMEPS mediator history = LM4 진단에 미사용([[lm4-cont-spinup-runaway-disk]]). 좌표는 §13.6의 C96 supergrid 복원법으로 대체됨.
+- **★ 삭제 전 발견한 백업 공백 (중요)**: `lm4_wfde5_cont`(§13.6 분석의 원본 300년 연속런)의 **월별 history가 백업 없었음**. `spinup_raw`는 restart+land_annual만 보존(land_month **0개**), `history_raw`엔 cont 항목 자체가 없었음. → **`history_raw/lm4_wfde5_cont`에 land_month/annual/static 120개 30 GB 복사**, 최종 IC를 **`IC_wfde5_cont_yr299`(22791205, 49파일 35 MB)**로 아카이브. 30년평균·전구맵 재작도에 필요한 raw는 이제 확보됨.

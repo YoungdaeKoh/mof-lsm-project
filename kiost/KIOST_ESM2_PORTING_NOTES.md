@@ -299,3 +299,14 @@ run dir `/home/ydkoh/KIOST-ESM2_AMIP/`. 3가지 조치:
 - **백업**: `input.nml.bak_precfc`, `chemlbf.symlink.bak_info`(원 심링크 기록).
 - **검증 — smoke test 재확인 (job 2933, climate01 24코어, 17분)**: `time_varying_cfc_lbc=.true.`로 `tropchem_driver_init nt=145` 통과, 새 chemlbf 읽고 **1979/01/02 00:00 완주 rc=0**. RESTART 117 · atmos diag 103 · 실제 abort 0(FATAL 4건은 benign `FATAL_UNUSED_PARAMS over-ridden` 경고). CFC 켠 게 안정성 무해(구 CFC-off smoke RESTART 119와 대등).
 - **주의**: 이 변경은 **서버에만** 존재(로컬 repo 미반영). coupled는 여전히 CFC-off + 구 chemlbf. 생산 AMIP 시 PE/기간은 production input.nml 참고하되 climate01 단일노드(48코어) 한계 고려.
+
+## 12. ★★ AMIP SST 단위 버그 — `sst_degk=.true.`인데 입력은 degC (2026-07-20, 미수정)
+
+**증상 아님(스모크는 통과) — 조용한 물리 오류.** 1 model-day 스모크는 rc=0·RESTART 119로 통과했으나 SST 필드 자체가 틀린 상태.
+
+- 입력: `INPUT/amipbc_sst_PCMDI-AMIP-1-1-10.nc`의 `tosbcs:units = "degC"` (ncdump 확인).
+- 설정: `input.nml &ice_spec_nml sst_degk = .true.` — 소스 정의는 `ice_spec.F90:30` "when sst_degk=true **the input sst data is in degrees Kelvin**".
+- 결과: `ice_spec.F90:160` `SST_offset = 0.0 ; if (sst_degk) SST_offset = -T_0degC` → 이미 degC인 값에서 **273.15를 또 뺌**. 개빙면 SST가 −273 °C 부근으로 감. (해빙 격자는 `t_sw_freeze0 + T_0degC`로 채운 뒤 같은 offset이 걸려 우연히 맞음 → **개빙면만 망가져서 더 안 보임**.)
+- **본인 data_table 주석이 이미 정답을 적어둠**: `# tosbcs in degC (ice_spec sst_degk=.false.)`. 즉 주석과 namelist가 불일치.
+- **수정 = `sst_degk = .false.`** (한 줄). 서버 `~/KIOST-ESM2_AMIP/input.nml:949`. 아직 미적용 — 적용 시 백업 후 1일 스모크 재실행하고 SST min/max를 물리범위(−2~35 °C)로 검증할 것.
+- **교훈**: rc=0 · RESTART 개수 · abort 0 은 **물리 검증이 아니다**. 처방 경계장은 반드시 min/max·영역평균을 찍어볼 것 (grid-safety 정신과 동일).
