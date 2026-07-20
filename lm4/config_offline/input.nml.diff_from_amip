@@ -1,6 +1,8 @@
-554c554,560
+553,554c553,560
+<         days   = 1,
 <         current_date = 1979,1,1,0,0,0,
 ---
+>         days   = 5,
 >         hours  = 0,
 > ! WFDE5 forcing file covers 1981; override the restart date so data_override
 > ! reads inside the file's time range instead of looking for 1979.
@@ -8,12 +10,15 @@
 > ! timestep before the file's range. Start on the first record instead.
 >         current_date = 1981,1,1,3,0,0,
 >         force_date_from_namelist = .true.
-561a568,572
+562c568,573
+<         atmos_npes = 24
+---
 > ! Route B probe: land-only (data atmosphere). Atmosphere is still initialized
 > ! (atmos_model_init is gated on Atm%pe, not do_atmos) but not time-stepped.
 >         do_atmos = .false.
 >         do_land  = .true.
 >         do_ice   = .true.
+>         atmos_npes = 48
 625c636,640
 <       output_interval = 1.0
 ---
@@ -22,9 +27,25 @@
 > ! any run length to keep it from firing. Stay under ~24855 days: set_time converts
 > ! days to seconds in int32, so anything larger wraps negative.
 >       output_interval = 20000.0
+815c830
+<         layout   = 2,2
+---
+>         layout   = 2,4
 949c964,966
 <       sst_degk = .true.
 ---
 > ! tosbcs in amipbc_sst_PCMDI-AMIP-1-1-10.nc has units "degC", so sst_degk must
 > ! be .false.; .true. subtracts a further 273.15 (ice_spec.F90:160).
 >       sst_degk = .false.
+1039c1056
+<        layout   = 2,2
+---
+>        layout   = 2,4
+1614c1631,1635
+<         do_tropchem = .true.,
+---
+> ! Offline: the atmosphere never steps and radiation is gated off, so the
+> ! chemistry feeds nothing. Turning it off also drops the land-side dry
+> ! deposition of ~43 tracers (18% of the main loop) and the emission-field reads
+> ! that dominate atmos_model_init.
+>         do_tropchem = .false.,

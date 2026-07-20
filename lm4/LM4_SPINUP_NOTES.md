@@ -377,3 +377,139 @@ before=276.4987 after=276.4988 diff=6.6e-6  time=1982-01-01 00:00:00
 - `PET*.ESMF_LogFile` **362개 0.58 TB** 삭제. 개당 18.5 GB 디버그 로그(크래시루프 시기 팽창), 과학적 가치 0.
 - `ufs.cpld.cpl.hi.*` **269,014개 3.61 TB** 삭제(전부 `RUN/` 아래, 백업 디렉토리엔 0개로 확인 후). CMEPS mediator history = LM4 진단에 미사용([[lm4-cont-spinup-runaway-disk]]). 좌표는 §13.6의 C96 supergrid 복원법으로 대체됨.
 - **★ 삭제 전 발견한 백업 공백 (중요)**: `lm4_wfde5_cont`(§13.6 분석의 원본 300년 연속런)의 **월별 history가 백업 없었음**. `spinup_raw`는 restart+land_annual만 보존(land_month **0개**), `history_raw`엔 cont 항목 자체가 없었음. → **`history_raw/lm4_wfde5_cont`에 land_month/annual/static 120개 30 GB 복사**, 최종 IC를 **`IC_wfde5_cont_yr299`(22791205, 49파일 35 MB)**로 아카이브. 30년평균·전구맵 재작도에 필요한 raw는 이제 확보됨.
+
+### 13.14 48 PE 해금 + diag_table 정리 (2026-07-20, job 8270→8271)
+
+**★ "48코어 금지"는 UFS 한정 — FMS 빌드엔 해당 없음.** §10 표의 "48코어 layout(2,4) 교착(land 분해에서 일부 PET가 land점 0개 → init collective hang)"은 **UFS/NUOPC의 ESMF PET 분해** 문제였음. FMS mpp 도메인 분해는 경로가 달라 **동일한 layout 2,4가 49초에 통과**(job 8270: atmos init 19:41:57 → land 19:42:46 → ice 19:42:49, `coupler_init`이 Atmos/Land/Ice PE range 0–47 정상 배정, Ocean은 `do_ocean=.false.`로 미설정 인식). CPU 99.4%로 정상 적분 확인.
+- **48 PE 전환 시 같이 바꿀 것 4개**: `coupler_nml atmos_npes=48`(총 rank와 반드시 일치) · `fv_core_nml layout=2,4` · **`land_model_nml layout=2,4`**(빠뜨리기 쉬움) · `SIS_layout LAYOUT=6,8`. C96은 96×96이라 2,4=48×24로 정확히 나뉘고, 해양 720×576은 6,8=120×72로 나뉨.
+
+**★ diag_table이 안 도는 컴포넌트를 계속 쓰고 있었음 (4.3 TB 사고와 동종 낭비).** AMIP diag_table(3,713줄)을 그대로 쓰면 `do_atmos=.false.`인 얼어붙은 대기와 존재하지 않는 해양의 진단을 매번 계산·기록 → 적분 5분 만에 run dir 534 MB(`atmos_daily_cmip` 타일당 12.6 MB 등).
+- **land 전용으로 필터링**: 유지 22 스트림(land_* 21 + grid_spec), **제거 89 스트림**(atmos/ocean/aerosol/ice). 필드 855 유지 / **2,478 제거(74%)**. 줄 수 3,714→1,147.
+- 스크립트 `lm4/scripts/lm4p_offline_trim_diag_table.py`, 결과 `lm4/config_offline/diag_table.land`. 원본은 run dir에 `diag_table.amip_full`로 보존.
+- land 스트림은 **전부 유지**(land_month뿐 아니라 land_daily·land_forcing·land_month_by_species 등) — 나중에 30년평균·전구맵을 다시 그리려면 raw history가 필요하다는 원칙([[lsm-spinup-raw-preservation]]). 특히 `land_forcing`은 지면이 실제 받은 강제장이 기록되어 WFDE5 전달 검증용.
+
+**★ 처리량 추정 오류 정정**: 1일 probe(24 PE, 8분 56초)를 그대로 곱해 "364일 = 20시간"이라 추정했으나 **틀림**. 그 9분 중 초기화 4분 + 종료 시 restart 119개·진단파일 130여 개 쓰기가 대부분이고 1년 런에선 1회로 분산됨. **기록된 LM4 실제 처리량은 연당 7~44분**(§: GSWP3+static veg np24 8.5분/년, dynveg_test 7분/년, WFDE5 연간파일 I/O 44분/년, gustiness+tol 후 30분/년). **단기 런 wall-clock으로 장기 처리량을 외삽하지 말 것.**
+
+### 13.15 ★★★ 성능 — `do_atmos=.false.`가 복사를 안 끈다 (coupler 버그) + 실측 처리량 (2026-07-20)
+
+**★★ 근본 문제: `update_atmos_model_radiation`만 `do_atmos` 게이트 밖에 있음.** `coupler/full/coupler_main.F90`:
+- 839행 직렬 경로 `if (.not.do_concurrent_radiation)` — **`do_atmos` 안 봄**
+- 920행 동시 경로 `if (do_concurrent_radiation)` — **역시 안 봄**
+- 형제 호출은 전부 `if (do_atmos)`: `_dynamics`(830) · `_down`(849) · `_up`(902) · `_state` · `atmos_tracer_driver_gather_data`(789).
+- → **어느 쪽으로 설정해도 복사는 반드시 실행됨. namelist로 끌 방법 없음.** 24 PE 1일 probe 프로파일에서 `Radiation` 48회 **148.0초 = main loop(264.7초)의 56%**. 물리적으론 무해(계산 결과를 `flux_down_from_atmos`가 data_override 값으로 덮어씀) — **순수 낭비**.
+- **패치(clone 전용, 2곳)**: `if (do_atmos .and. .not.do_concurrent_radiation)` / `if (do_atmos .and. do_concurrent_radiation)`. 재빌드 후 `Radiation` **0회 0.000초** 확인.
+
+**★ 실측 처리량 (job 8272, 48 PE @climate01, 5 model-day, 복사 OFF + diag_table land 전용, rc=0)**
+| 구간 | 시간 | 비중 |
+|---|---|---|
+| Total runtime | 631.2 s | |
+| Initialization | 177.8 s | 28% (`atmos_model_init` 154.3 = 얼어붙은 대기 init) |
+| **Main loop** | **442.1 s** | **70%** → **모델 1일 88.4 s** |
+| Update-Land-Fast | 256.8 s | main loop의 58% (원하는 비용) |
+| land_tracer:ddep | 80.6 s | **18% — 건성침착, 다음 최적화 후보** |
+| SFC boundary layer | 39.6 s | 9% |
+| Ice | 13.7 s | 3% |
+| Radiation | **0.0 s** | 패치 확인 |
+
+- **모델 1년 = 8.96시간** (88.4 s/day × 365). 복사 켜짐 24 PE(264.7 s/day) 대비 **3배 개선**.
+- **30년 = 269시간 = 11.2일.** 세그먼트는 5년(45시간)×6 권장 — 초기화 178초는 세그먼트당 1회라 무시 가능.
+
+**★ "UFS LM4는 연당 7~44분인데 왜 100배 느리냐"는 잘못된 비교**: 그 런들은 `vegn_to_use='uniform'`(§13.7) = **tile 1개·cohort 1개**였음. 지금은 KIOST 평형 **tile 13·cohort 57 multi-tile 경쟁 식생**이라 지면 계산량 자체가 자릿수로 다름. 즉 느린 건 우리가 원한 과학(다중 PFT 경쟁)의 대가이지 설정 실패가 아님. 추가로 FV3 도메인·교환격자·SIS2를 계속 지고 감(§13.11 "정직한 부채").
+
+**★★ 방법론 교훈 — 진행률/처리량은 로그 문자열로 재지 말 것.** 이 세션에서 3번 틀림: ① 1일 런 wall-clock 외삽 → 20시간/년(고정비 미분리) ② `Total Ice Mass` 블록을 결합스텝당 1개로 가정 → 87.6시간/년(실제는 블록당 ~4.8 모델시간, 5배 과소평가) ③ 그 보정값 → 18시간/년. **정답은 FMS 클록의 `Main loop`** (모델이 직접 잰 값). 벤치마크는 짧은 런(5일)으로 돌리고 클록을 읽을 것.
+
+**미해결/후속**
+- `land_tracer:ddep` 80.6초(18%): field_table `land_mod` 화학 트레이서 ~40종이 유발. 제거하면 restart 정합성 위험 → 별도 검증 필요.
+- 48 PE는 24 PE 대비 정상 스케일(CLM5 벤치 1.55×와 정합). §13.14의 "48 PE 3.3배 느림"은 위 ② 오측정에서 나온 것으로 **철회**.
+
+### 13.16 ★★★ `do_atmos=.false.`는 대기를 다 끄지 못한다 — 3겹 잔존 계산 제거 (2026-07-20)
+
+offline 성능의 핵심. `do_atmos=.false.`로도 **세 종류의 대기 계산이 계속 돌았고**, 각각 해법이 다름.
+
+| # | 잔존 계산 | 비용 | 해법 | namelist로 가능? |
+|---|---|---|---|---|
+| 1 | **복사(radiation)** | main loop의 **56%** (148 s/264.7 s @24PE) | **소스 패치** | **불가** |
+| 2 | **대류권 화학(tropchem)** | 초기화 154.3→86.4 s, main loop −12% | `do_tropchem=.false.` | 가능 |
+| 3 | **트레이서 건성침착(ddep)** | main loop의 7.5% (29 s/387 s) | field_table 양쪽 제거 | 가능 |
+
+**#1 복사 — 유일하게 소스 패치가 필요한 항목.** `coupler/full/coupler_main.F90`:
+- 839행 직렬 `if (.not.do_concurrent_radiation)` / 920행 동시 `if (do_concurrent_radiation)` — **둘 다 `do_atmos`를 안 봄.** `do_concurrent_radiation`을 어느 값으로 줘도 **하나는 반드시 실행** → namelist 탈출구 없음.
+- 형제 호출은 전부 `if (do_atmos)`: `_dynamics`(830)·`_down`(849)·`_up`(902)·`_state`·`atmos_tracer_driver_gather_data`(789). **복사만 누락** = GFDL 쪽 버그로 보고할 만함(data-atmosphere 모드를 쓰는 누구나 겪음).
+- 패치 = 두 조건에 `do_atmos .and.` 추가. **동작 변경이 아니라 원래 의도대로 정렬.** 물리적으로도 무해(복사 결과를 `flux_down_from_atmos`가 data_override 값으로 덮어씀).
+- 보존: `lm4/patches/coupler_main.F90.radiation_gate.diff`.
+
+**#3 트레이서 — 양쪽을 함께 제거해야 함(한쪽만 빼면 FATAL).**
+- 지면만 빼면: `atmos_tracer_utilities_init: Dry deposition of atmospheric tracer "X" is done on land side, but corresponding land tracer is not defined in the field table.` → 초기화 시점 **정합성 검사**이지 계산상 필요가 아님.
+- 따라서 **atmos_mod 트레이서의 `dry_deposition` 선언도 같이 제거**해야 함. 스크립트 `lm4/scripts/lm4p_offline_trim_field_table.py`, 결과 `lm4/config_offline/field_table.land_only`.
+- **★ 함정: field_table이 `"TRACER"`와 `"tracer"`를 섞어 씀.** 대소문자 구분 정규식으로 파싱하면 atmos_mod 트레이서 **37개만 잡히고 108개를 놓침**(so4 등) → 두 번 헛돌았음. `re.IGNORECASE` 필수. 이후 145개 인식, 활성 `dry_deposition` 0개.
+- **남긴 land_mod 트레이서 2개: `sphum`·`co2`.** co2는 **필수** — `co2_to_use_for_photosynthesis='interactive'`(input.nml:1206)라 캐노피 공기 CO2가 광합성을 구동. 빼면 탄소흡수가 깨짐.
+
+**★ 제거해도 되는 과학적 근거 (4중 확인)**
+1. 대기 화학이 안 돌아 침착 결과를 소비할 상대가 없음(일방통행 사장).
+2. **오존 손상 과정 없음** — `vegn_photosynthesis.F90` 및 식생 모듈 전체에 ozone 0건.
+3. **질소순환 자체가 꺼져 있음** — `soil_carbon_model_to_use = 'CENTURY-like'  !Nitrogen turned off`(input.nml:1454). 옵션 4종 중 질소를 쓰려면 `CORPSE-N` 필요. **결합런·AMIP도 동일** → 우리가 깬 게 아니라 물려받은 설정.
+4. 설령 질소를 켜더라도 N은 **`ndep_nit.nc`/`ndep_amm.nc` 처방 지도**에서 받음(`nitrogen_sources.F90`, `n_deposition_type='interpolate-two-maps'`) — **트레이서 침착과 완전히 별개 경로**. 단 현재 `do_nitrogen_deposition=.FALSE.`(기본값)이고 `nitrogen_deposition_nml`도 ndep 파일도 없음. **질소를 켜는 건 새 spin-up + 새 입력자료가 필요한 별도 실험.**
+5. 캐노피 공기 트레이서는 **빠른 변수**(난류교환으로 수 시간 평형) → cana.res에서 빠져도 결합런 복귀 시 즉시 재평형. 토양탄소/식생 같은 느린 상태가 아님.
+
+**★ 성능 개선 궤적 (5 model-day 벤치, 48 PE @climate01)**
+| 설정 | Main loop | 모델 1년 |
+|---|---|---|
+| 원래(24 PE, 복사 ON, AMIP diag_table 전체) | 264.7 s/**day** | ~26.8 h |
+| 48 PE + diag_table land 전용 + **복사 OFF** | 442.1 s | **8.96 h** |
+| + **tropchem OFF** | 387.0 s | **7.85 h** |
+| + **트레이서 43종 제거** | (job 8277 측정중) | ~7.3 h 예상 |
+
+- 초기화도 동반 감소: `atmos_model_init` 212 s(24PE) → 154.3 → **86.4 s**.
+- 30년 spin-up ≈ 220~235시간. 세그먼트 5년(≈37~40 h)×6 권장.
+
+### 13.17 ★★ "LM4.1은 안 이랬는데 왜 느리냐" — 같은 일을 하는 게 아니다 (2026-07-20)
+
+restart 헤더 직접 비교(둘 다 C96 tile1):
+
+| | UFS LM4.1 (`IC_static_300yr/20100101...vegn1.res.tile1.nc`) | 현재 lm4P (KIOST 평형) | 배수 |
+|---|---|---|---|
+| tile (셀당 최대) | 1 | 13 | |
+| **tile_index (총 타일)** | **3,867** | **15,085** | **3.9×** |
+| cohort | 1 | 57 | |
+| **cohort_index (총 코호트)** | **3,867** | **143,546** | **37.1×** |
+
+- 식생 물리(광합성·호흡·배분·경쟁)는 **코호트 수에 비례** → **37배**. 토양·눈·에너지는 타일 수 비례 → 3.9배.
+- 실측 정합: 지면만 떼면 `Update-Land-Fast` 241 s/5day = **4.9 h/model-yr**. UFS LM4.1은 7~44분/년이었으므로 **7~40×** — 위 배수 범위와 일치.
+- **★ 즉 UFS가 빨랐던 건 `vegn_to_use='uniform'`(§13.7)의 최퇴화 모드(식생 1종·코호트 1개)였기 때문.** 지금 느린 건 §13.7에서 문제로 지목한 그것을 실제로 고쳤기 때문 — **성능 저하가 아니라 과학의 비용**. 처리량 비교 시 반드시 tile/cohort 수를 함께 볼 것.
+
+### 13.18 ★★ 트레이서 제거 실패 — `dry_deposition` 정합성 검사는 segfault 방어막이었다 (2026-07-20, job 8275~8277)
+
+§13.16의 #3(트레이서 침착 제거)은 **실패. field_table은 원본 유지가 정답.**
+- 지면 트레이서만 제거 → `atmos_tracer_utilities_init: ... corresponding land tracer is not defined` **FATAL**(초기화 검사).
+- 그 검사를 없애려 atmos_mod 쪽 `dry_deposition` 선언까지 제거 → 초기화는 통과하나 **첫 결합스텝에서 `forrtl: severe (174) SIGSEGV`**, 스택 `xgrid.F90:4097 get_from_xgrid` ← `atm_land_ice_flux_exchange.F90:1484` ← `sfc_boundary_layer`.
+- **원인: 교환격자가 대기(145종)↔지면(2종) 트레이서 배열 크기 일치를 전제.** 그 정합성 검사가 **바로 이 segfault를 막던 방어막**이었음. **경고를 지운다고 원인이 없어지지 않는다** — 검사를 우회한 게 잘못.
+- 줄이려면 대기 트레이서까지 일관되게 줄이고 `fv_tracer.res`도 재구성해야 함 → 배보다 배꼽. **잔여 낭비 `land_tracer` 29 s = main loop의 7.5%는 수용.**
+- **★ 진단 함정: 죽은 뒤에도 잡이 큐에 R로 남고 CPU 99.7%로 보임.** 일부 rank가 SIGSEGV로 죽고 나머지가 `mpi_wait`에서 무한 대기. **CPU 사용률이 높다 ≠ 계산 중.** 판정은 **로그 mtime**으로 — 17분간 로그가 안 자라면 행. (이 세션에서 "정상 적분 중"이라고 두 번 오판.)
+
+**★ `dt_atmos`는 1800 s 유지 (성능 최적화 대상 아님).**
+- `num_atmos_calls = dt_cpld/dt_atmos` = 3600/1800 = 2. 이 루프에서 ① `sfc_boundary_layer`(여기서 ATM data_override = 강제장 시간보간) ② `flux_down_from_atmos`(복사·강수 주입) ③ `update_land_model_fast`(지면 물리)가 함께 돎. 즉 **강제장 갱신 주기이자 지면 물리 timestep**.
+- 3600 s로 늘리면 지면 호출 절반 → main loop 387→~266 s(약 −31%, 7.85→5.4 h/yr). **그러나 이건 "아무도 안 쓰는 계산 제거"가 아니라 정확도 거래.**
+- **유지 근거**: ① WFDE5가 6시간 자료라 1800 s는 보간만 촘촘할 뿐 정보 증가 없음 — 실질 차이는 지면 적분 해상도 ② **CLM5 `clm5_spinup_gswp3`의 `ATM_NCPL=48` = 1800 s로 동일**(`LND_NCPL=$ATM_NCPL`). 다중 LSM 비교가 과제 핵심인데 LM4만 바꾸면 모델 차이인지 적분간격 차이인지 구분 불가 ③ KIOST 결합런과도 동일. → 바꾸려면 1800 vs 3600 각 1년 돌려 잠열·현열·토양온도 비교하는 **별도 실험**으로.
+
+### 13.19 ★ PE 스케일링 실측 — 48 PE 확정 (2026-07-20, job 8274 vs 8278)
+
+**동일 설정**(복사 OFF·tropchem OFF·diag_table land 전용·field_table 원본·`dt_atmos=1800`·5 model-day·climate01 단독)으로 직접 비교:
+
+| | 24 PE (job 8278) | 48 PE (job 8274) | 배수 |
+|---|---|---|---|
+| **Main loop** | **547.2 s** | **387.0 s** | **1.41×** |
+| Update-Land-Fast | 364.6 s | 241.1 s | 1.51× |
+| land_tracer | 44.4 s | 29.0 s | 1.53× |
+| Initialization | 135.3 s | 109.1 s | 1.24× |
+| `Init: atmos_model_init` | 116.0 s | 86.4 s | 1.34× |
+| Total runtime | 692.2 s | 504.3 s | 1.37× |
+| **모델 1년** | **11.1 h** | **7.85 h** | |
+| **30년** | **333 h** | **235 h** | |
+
+- **병렬효율 70%**(1.41/2). CLM5 벤치 77%와 동급 = 정상 스케일링. 메모리 대역폭 포화 징후 없음(단일 잡 기준).
+- layout: 24 PE = `fv_core`/`land_model` 2,2 + `SIS_layout` 6,4 / 48 PE = 2,4 + 6,8.
+- **§13.14의 "48 PE 3.3× 느림"은 완전 철회** — 로그 블록을 결합스텝 1개로 오인한 측정 오류였음(실제 블록당 ~4.8 모델시간).
+- **결론: 48 PE 사용.** climate01 48코어 단독 점유 가능하므로 24를 쓸 이유 없음(30년 기준 +98시간 손해).
+
+**★ 최종 확정 설정 (전부 실측 검증)**: 48 PE(layout 2,4 / SIS 6,8) · 복사 OFF(소스 패치 `coupler_main.F90.radiation_gate.diff`) · `do_tropchem=.false.` · `diag_table.land` · **field_table 원본** · `dt_atmos=1800`/`dt_cpld=3600` · qscomp clamp(`sphum.F90.clamp.lm4P`) · `sst_degk=.false.` · `diag_integral output_interval=20000.0` · `current_date=1981,1,1,3,0,0` + `force_date_from_namelist=.true.`
+→ **7.85 h/model-yr**. 세션 시작 시점(24 PE·복사 ON·AMIP diag 전체, 26.8 h/yr) 대비 **3.4× 개선**.

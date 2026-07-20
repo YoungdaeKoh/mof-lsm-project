@@ -1,0 +1,13 @@
+839c839,843
+<           if (.not.do_concurrent_radiation) then
+---
+>           ! do_atmos gates every other atmospheric routine (dynamics, down, up,
+>           ! state, tracer gather) but was omitted here, so radiation kept running
+>           ! in a data-atmosphere run -- 56% of the main loop computing fields that
+>           ! flux_down_from_atmos then overwrites from data_override.
+>           if (do_atmos .and. .not.do_concurrent_radiation) then
+920c924,925
+<           if (do_concurrent_radiation) then
+---
+>           ! same omission as the serial branch above: gate on do_atmos too
+>           if (do_atmos .and. do_concurrent_radiation) then
