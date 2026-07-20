@@ -3,6 +3,13 @@
 _**완료(2026-06-25): 300년 static-veg 평형 IC `IC_static_300yr` 확보 (§10).** Global 평형 도달, server+로컬 이중보존._
 
 _climate 서버. UFS LND-LM4(gfortran). 빌드·48h 실행은 `PORTING_NOTES.md` 참조. 이 문서는 그 다음 **spin-up 단계** 전체._
+
+**★ 모델 provenance (2026-07-20 소스 실체 확인, 논문 method용):**
+- exe: `/data2/ydkoh/lm4/ufs-weather-model/build/ufs_model` (**ufs-weather-model**, gfortran, 2026-06-22 빌드)
+- Land 컴포넌트: **NOAA-GFDL/LM4-NUOPC-driver** 서브모듈 `LM4-driver` (branch develop)
+  - commit **`513b67312510a15ae178ea5c3eddb0854e41486b`**, `git describe` = **`baseline_change_240904-8-g513b673`** (2024-09-04 baseline +8)
+  - 실제 LM4 코드: `LM4-driver/LM4/` (vegetation/vegn_data.F90 등)
+- **버전 = GFDL LM4.1 계열**(ESM4.1 land, Shevliakova). 소스에 LM4.0/4.1/4.2 backward-compat 플래그 존재(`vegn_data.F90` "reproduce LM4.1" 트리거) → 엄밀히는 LM4.1/4.2 lineage 모던 LM4, 통상 **LM4.1**로 인용. C96 cubed-sphere, CDEPS DATM.
 _**실행법(스크립트·설정·재현)** → [`RUN_GUIDE.md`](RUN_GUIDE.md). 출력 변수 그림용 NC 변환 → `lm4_to_latlon.py`._
 _**핵심 결과(2026-06-23)**: cold-start 캐노피 overshoot = **qscomp clamp로 해결**(§4·§7), **NOLEAP 전환**(§9c), 30년 세그먼트 warm-start 방식으로 평형 spin-up 진행 중(§9d)._
 
@@ -175,3 +182,127 @@ CLM5 SpinupStability 분석([[cesm/CLM5_SPINUP_NOTES §7]])을 LM4에도 적용�
 ### 11.5 다음 (2·3단계)
 - **2단계 WFDE5 forcing 구축**: WFDE5 raw(0.5°, lon −180~180, 552개월)는 있으나 LM4 CDEPS용 mesh/streams 미준비. **ERA5GPCP mesh(lon −179.75~179.75)가 WFDE5와 격자 일치 → 재사용 후보**. WFDE5 변수(Tair/Rainf…) → CDEPS datamode 매핑 필요.
 - **3단계 실행 의도 미정**: (a) 식생·탄소 spin-up(cyclic 반복, 탄소 느려 장기) vs (b) historical(WFDE5 1979-2024 순차). forcing 구성·compute 좌우.
+
+## 12. WFDE5 forcing 테스트런 (2026-07-15)
+
+`lm4_dynveg_test`(GSWP3 1년) 구성을 복제해 **forcing만 WFDE5로 교체**한 `lm4_wfde5_test`. 목적: WFDE5(CLM포맷 연간파일 `YYYY_wfde5.nc`)로 LM4 dynamic-veg 구동 검증. warm-start IC = 동일(`IC_static_300yr`), model start 1981.
+
+### 12.1 datm.streams 변환 (GSWP3 → WFDE5)
+- GSWP3는 **월별 3그룹**(Solar/Precip/TPQW) 파일리스트, WFDE5는 **연 1파일에 7변수 통합**. → 스트림 01/02/03의 `stream_data_files`를 동일 WFDE5 연간파일(1979-2024)로 교체(3스트림이 같은 파일 공유, 각자 변수 추출). `stream_data_variables` 매핑·`mapalgo`·`tInterpAlgo`는 그대로(변수명 동일: FSDS/PRECTmms/TBOT/QBOT/PSRF/WIND/FLDS).
+- years: yearFirst=1979/yearLast=2024/yearAlign=1979 (model year = forcing year). topo 스트림(04)은 불변.
+- WFDE5 time축: 6h 중점(0.125,0.375…=03/09/15/21시), noleap 1460/년. GSWP3(3h 중점)와 호환.
+
+### 12.2 디버깅 (3회 시도)
+- **① `ufs.configure` 누락**: clone 시 config 파일 하나 빠뜨려 ESMF_Initialize 실패. → dynveg config 파일셋 전체 대조 후 복사.
+  - `start_type=continue`이나 mediator restart(ufs.cpl.r) 없음 = **mediator/DATM은 cold-init**, LM4 land만 INPUT/*.res(무날짜)를 IC로 읽음. rpointer는 시작 때 불필요(끝에만 생성).
+- **② ★ WFDE5 land-only fill → init abort (핵심)**: GSWP3 ESMFmesh 재사용이 원인. GSWP3 mesh elementMask=**100% valid**인데 WFDE5는 valid 35.8%(ocean=1e20 fill). bilinear remap이 연안에서 fill을 육지로 섞음 → LM4 init 데이터 read 때 **MPI_ABORT**(FP 트랩 없는 깨끗한 abort, UFS.F90 Initialize). `_FillValue=1e20` 있어도 mesh mask가 valid면 remap이 포함.
+  - **해결 = WFDE5 land-mask mesh**: GSWP3 ESMFmesh 복사 후 elementMask를 WFDE5 valid격자로 교체(각 요소 `centerCoords`로 WFDE5 TBOT valid 직접조회 → flatten순서 무관). `mk_mesh.py` → `/data2/ydkoh/2026_MOF_LSM/Atm_forc/wfde5_landmask_ESMFmesh.nc`. 지리검증(사하라 land·중태평양 ocean·아마존 land) 통과. datm.streams 스트림 01-03의 stream_mesh_file을 이걸로. **CLM5도 WFDE5 CDEPS 먹일 때 동일 mesh 필수.**
+- **③ 성공(Job 2951)**: init 통과, 정상 적분(1981-01-25 확인, ~44분/년 — WFDE5 10.6G 연간파일 I/O로 GSWP3보다 약간 느림). raw 보존 → `history_raw/lm4_wfde5_test/`.
+
+## 13. WFDE5 dynveg 메인 spin-up — 300년(30yr×10 cycle) (2026-07-15)
+
+`lm4_wfde5_spinup`. 검증된 test 구성 상속(dynveg ON·월별출력·WFDE5 land-mask mesh) + 30년 cycle 자동연쇄.
+
+### 13.1 cycle 길이·달력 (★ GSWP3 spin-up과 정확히 일치시킴)
+- **cycle당 `nhours_fcst=262800`** (=30×8760, noleap-hours). LM4는 gregorian(leap)이라 10950일이 **윤년 7일(1984/88/92/96/2000/04/08)만큼 짧아 2010-12-25 종료**. 이게 기존 GSWP3 300yr spin-up(`lm4_spinup`)이 12-25에 끝난 이유. start 1981-01-01.
+- LM4는 **매년 Jan-01 알람으로 restart 자동 생성**(restart_fh 빈칸이어도) → 1982-01-01…2010-01-01(29개) + 무날짜 run-end(2010-12-25).
+- **chain point = 마지막 Jan-01(20100101) 스냅샷** (run-end 12-25 아님). 계절위상 정렬(새 cycle 1월을 이전 cycle 1월 상태에서 시작). `IC_static_300yr`이 20100101인 것이 이 관행의 증거. `lm4_spinup/RESTART`에 1982-2010 Jan-01 + 무날짜 run-end 확인.
+
+### 13.2 체이닝 (self-chaining PBS `spinup_chain.pbs`)
+- cycle N 완주 → ① 완주판정(`RESTART/20100101.000000.cana.res.tile1.nc` 존재?) → ② raw보존(monthly history + 20100101 chain restart → `history_raw/lm4_wfde5_spinup/cycleNN/`) → ③ 다음 IC 스테이징(`20100101.*.res` → `INPUT/`, 날짜strip, 9종: cana/glac/lake/land/landuse/snow/soil/vegn1/vegn2) → ④ `qsub -v CYCLE=N+1`.
+- **완주 가드**: 20100101 restart 없으면(walltime kill 등) 연쇄 중단·exit 1. exit code로 판정 안 함(LM4 종료 아티팩트 주의).
+- cycle-1 IC = `IC_static_300yr`(GSWP3 static-veg 평형)에서 pristine 스테이징. dynveg가 목질부·탄소 재평형 시작.
+- forcing: WFDE5 1981-2010 cyclic(yearFirst=1981/Last=2010/Align=1981), 각 cycle이 date 1981 리셋이라 동일 30년 반복.
+- **walltime**: ~44분/년×30 ≈ 22h < 24h(여유 적음). cycle 1 실제 완주시간 보고 필요시 2×15yr 분할 검토. raw보존은 [[lsm-spinup-raw-preservation]].
+
+### 13.3 ★★ 크래시 디버깅 → gustiness 하한 fix (2026-07-16)
+cycle 1이 **1981-02-18(bilinear)·01-31(nn)에 크래시** — `lm4_surface_flux.f90:188`(`escomp` 포화수증기압, t_ca가 NaN/범위이탈). 반복 진단:
+- **forcing 데이터는 깨끗**(NaN/극단값 0). 개별 필드(FLDS·WIND 저값)는 **GSWP3가 더 극단인데 정상작동**이라 전부 기각.
+- **mapalgo bilinear→nn 바꿔도 크래시**(타이밍만 Feb18→Jan31) = unmapped 문제 아님.
+- **dt_atmos 900→450 축소도 동일 Jan-31 크래시** = 수치누적 아님, **모델날짜 고정**(forcing이 ~30일간 한랭셀을 몰고감).
+- **발산점 특정**(Jan-30 `cana.res` temp): 몽골(104E,44.5N)·동부티벳(97E,31N) 등 **한랭 대륙점**. Jan-30 최저 206K(정상)→Jan-31 1스텝 NaN 발산.
+- **근본원인 = `&surface_flux_nml`의 gustiness 하한 부재**: 한랭 안정조건(표면<대기)에서 유효풍속 하한이 없어 **난류교환→0, 지표-대기 decoupling → 복사냉각 런어웨이 → t_ca NaN**. GSWP3는 이 임계 안 넘었고 WFDE5(약간 다른 한랭 forcing)는 넘음.
+- **★ gustiness 두 방식 (코드 확인)**: `alt_gustiness=.TRUE.` → `w_atm=max(풍속, gust_const)` (무풍셀만 max로 올림, targeted). `alt_gustiness=.FALSE.` → `w_atm=sqrt(풍속²+w_gust²)`, `w_gust=max(driver_gust, gust_min)` (전셀 quadrature). driver `atmos_prescr_nml gustiness=5.0`(기본)이 alt_gustiness=.TRUE.땐 dormant.
+- **FIX 이력**: ① 첫 시도 `alt_gustiness=.FALSE.`+gust_min=1.0 → driver의 5.0을 활성화해 **전지구 5 m/s quadrature 하한**(막았지만 무풍역 과결합). ② **최종 = `alt_gustiness=.TRUE.` + `gust_const=3.0`** (targeted 3 m/s max-하한, 무풍셀만 보정). 원래 gust_const=1.0은 부족(크래시), 3.0은 디버그 45일 완주로 충분 확인. `gust_to_use='computed'`는 CDEPS와 비호환(ustar/bstar 없음)이라 탈락.
+- **진단 함정 기록**: FMS diag_manager는 crash 시 버퍼를 flush 안 해 land_month/land_day가 time=0(빈 파일) → **발산셀 특정은 restart(cana.res/soil.res)로**. diag 출력 의존 금지.
+- **디버그 방법**: `lm4_wfde5_debug`(단발 PBS, nhours 짧게, 크래시 직전서 멈춰 restart 확보). [[lsm-spinup-raw-preservation]]
+
+### 13.4 2차 크래시 → 탄소보존 tolerance 완화 (2026-07-16)
+gustiness fix 후 **1981-12-31(연말)까지 통과**하고 연 전환에서 다시 크래시:
+```
+FATAL update_land_model_fast_0d: conservation of carbon is violated;
+before=276.4987 after=276.4988 diff=6.6e-6  time=1982-01-01 00:00:00
+```
+- input.nml(협력자 설정)에 `do_check_conservation=.true.`, `carbon_cons_tol=1e-6`, `water_cons_tol=1e-8`. 위반량 6.6e-6 > 1e-6 → FATAL. 상대오차 **2e-8 = 순수 roundoff**(탄소질량 276 대비). 1e-6 절대tol은 비현실적으로 타이트.
+- **GSWP3 1년 테스트가 통과한 이유**: nhours=8760이 **1982-01-01에 정확히 run-end** → 그 시점 fast-update(탄소체크) 미실행. 30년 런은 진행해서 밟음 = **WFDE5 무관, 다년 dynveg 런의 일반 이슈**.
+- **FIX**: `carbon_cons_tol=1e-3`, `water_cons_tol=1e-3`(roundoff 위, 실제 누출은 여전히 감지). `&land_debug_nml` 아님 — 별도 nml(land_debug.F90의 protected 변수, input.nml 162-164줄에 이미 설정돼 값만 교체). (대안: `do_check_conservation=.false.`=코드 기본값, 안전망 제거라 미채택.)
+- **확인**: 두 fix(gustiness+tol)로 **연경계·표면플럭스 둘 다 통과**, 30년 cycle 완주 확인(land_month 359개월, 20100101 chain-restart). 페이스 ~30분/년 → 30년 ≈ 15h.
+
+### 13.5 최종 config + gustiness 정제 (2026-07-16)
+- 첫 완주 cycle 1은 **5 m/s(quadrature)** 였으나 무풍역 과결합 → **gust_const=3.0(targeted)로 정제**하기로. cycle 1 완주본은 `history_raw/.../cycle01_5ms_deprecated`로 보존.
+- **최종 production config** (Job 2965~, IC_static_300yr pristine 재시작, 10 cycle 전부 동일):
+  - `&surface_flux_nml`: `alt_gustiness=.TRUE.`, `gust_const=3.0` (3 m/s 무풍하한)
+  - 탄소/수분 보존: `carbon_cons_tol=1e-3`, `water_cons_tol=1e-3`
+  - 나머지: WFDE5 1981-2010 land-mask mesh + nn, dynveg ON, nhours_fcst=262800, 월별출력, 자동연쇄.
+- **교훈**: ① 1년 테스트는 연경계 체크·다주 drift를 안 밟을 수 있음(다년 검증 필수). ② forcing 바꾸면 잠복 이슈(한랭 불안정·보존 roundoff) 발현. ③ 진단 함정: FMS diag는 crash 시 flush 안 함 → restart로 디버그.
+
+### 13.6 ★★ 연속(continuous) 300년 런 + 심층토양 진단 — forcing loop-back 열충격 (2026-07-19)
+**연속법**: 모델날짜를 1981→2264로 계속 전진(날짜 리셋 없음), DATM이 forcing만 1981-2010 반복(`yearAlign=1981`). run dir `/data2/ydkoh/lm4/RUN/lm4_wfde5_cont`, C96 dynveg, 크래시로 7개 세그먼트(start-date 파일명 1981/2020/2080/2086/2145/2204/2263 = spin-up yr 1/40/100/106/165/224/283)로 쪼개짐. Job 8255가 최종 세그먼트(yr283→300) 실행 중.
+
+**심층토양 T(2 m, zfull_soil idx 12) 진단 — 결론이 뒤집힘:**
+- **★ 압축 전 "연속법이 심층 스파이크를 제거한다"는 결론은 틀렸다.** 그건 **restart 날짜 착시**(restart별 다른 계절: Jan차가움 vs Dec따뜻함, 2m 위상지연)에서 나온 flawed 추출이었음.
+- **올바른 추출**: land_month의 `time`(`days since 1981-01-01`, **GREGORIAN**)을 달력디코딩→실제 연도로 연평균 그룹핑. 이전 `tv//365`는 **윤일 표류**로 ~120년 후 월 경계를 넘겨 12월/1월을 섞음(가짜 스파이크). (land_area는 이 diag에서 전부 0 → C96 준등면적이라 **무가중 셀평균** 사용, [[lsm-landmean-comparability]].)
+- **진짜 결과**: 심층T가 **매 30년 forcing 되감기(모델연 ≡ 1981 mod 30 = spin-up yr 1·31·61·91·…·271)에서 ~+6 K 스파이크** 후 ~2년 감쇠. 광역 승온(격자 70%가 +2K↑, 중앙값 +7.8K, max 308K로 **폭주 아님**)이라 수치불안정 아님.
+- **★ 원인 = 날짜 리셋이 아니라 forcing 되감기 불연속(WFDE5 Dec-2010→Jan-1981)**. 증거: 연속런(날짜 리셋 無, 세그먼트 경계는 40·100·106…로 30년과 무관)인데도 리셋런(yr1·31·61·91 스파이크)과 **동일 위상·동일 크기**(연속 276.5K vs 리셋 277.0K)로 스파이크. 리셋의 날짜 리셋이 마침 forcing wrap과 겹쳐 그동안 원인이 가려졌던 것.
+- **베이스라인(30년 중 29년)은 수렴 우수**: yr10=270.49 → yr50/110/200=270.61 → yr280=270.50, 무가중셀평균 baseline **270.82 K, non-wrap std 0.73 K**. 즉 심층토양 물리상태는 yr~10에 평형, 이후 forcing 반복에 의한 주기적 톱니만 얹힘.
+- **함의**: cyclic-forcing offline spin-up의 **본질적 아티팩트** — 연속/리셋 선택과 무관. 진단·비교 시 wrap 연도(≡1 mod 30) 제외하거나 명시. 심층T는 수렴지표로 약함(경계조건·forcing 톱니에 지배) → **자유 예후변수(토양수분·탄소풀)로 판정**([[lsm-spinup-ice-mask-convergence]] 정신과 동일).
+- 추출/그림: `lm4/scripts/lm4_extract.py`(서버, anaconda), `lm4/scripts/plot_lm4_cont_vs_reset.py`, `lm4/data/cont_deepT_annual_v2.csv`, `figures/lm4_cont_vs_reset_deepT.png`.
+
+**JJA 평균 수렴 진단 (8변수, 무가중 셀평균, 2026-07-20):**
+- 추출 `lm4/scripts/lm4_jja.py`(JJA=6-8월, gregorian 디코딩) → `lm4/data/jja_spinup_cont.csv`, 그림 `lm4/scripts/plot_lm4_jja_cont.py` → `figures/lm4_jja_cont_spinup.png`.
+- **모든 변수의 30년 진동 = forcing 반복(1981-2010)이지 표류 아님.** 수렴은 주기평균 안정으로 판정.
+- **~150년에 평형**: NEP −1.23→**−0.012**(→0, dynveg 탄소평형 결정신호), btot 1.135→1.122(−0.001/yr), colwater/sens/evap/deep-T 베이스라인 모두 last-30yr 기울기≈0.
+- **soilC만 slow pool로 느림**: 385→266 kg C/m²(초반 집중), last-30yr −0.033/yr(연 0.01%)로 감속·거의 정착. 완전평형엔 수백~수천년(BGC 공통 → CLM5는 AD로 우회).
+- deep-T 30년 스파이크는 forcing-wrap 열충격이 JJA 잔열로 보이는 것. [[lsm-cyclic-forcing-wrap-shock]]
+
+**★ C96 좌표 복구 (grid-safety, 2026-07-20) — land 출력의 geolat/geolon이 전부 0일 때:**
+- 이 run의 `land_month`·`land_static`의 `geolat_t/geolon_t`·`land_area`가 **전부 0**(diag 미기록). 가짜좌표 금지.
+- 복구법: `grid_index`(CF `compress="grid_yt grid_xt"`, **0-based**, C96면 max 9214=95×96+94) → **j=idx//96, i=idx%96** → **`INPUT/C96_grid.tile{t}.nc`의 supergrid x/y(193×193)에서 셀중심 `[2j+1, 2i+1]`** = 실제 lon/lat. lon>180이면 −360.
+- 검증: 좌표 없이 산점도 → 대륙 모양·위도 그래디언트 확인(열대 292K > 극 238K) 후 지도화. 통과.
+- 스크립트: `lm4/scripts/lm4_seasmap.py`(값 추출), `lm4/scripts/lm4_coords.py`(좌표복구), `lm4/scripts/lm4_maps.py`(Cartopy). 데이터 `lm4/data/seasmap_last30.npz`. 그림 `figures/lm4_seasmap_{soilT_top,soilT_deep,sens,evap,LAI}.png`(마지막30년 yr271-300 계절평균).
+
+### 13.7 ★★★ dynveg 식생이 거의 안 만들어짐 = `vegn_to_use='uniform'` 오설정 (2026-07-20)
+**증상**: 마지막30년 grid-mean LAI가 습윤열대(Amazon 2.1·해양성 동남아 1.2)만 있고 **Congo·동아시아·유럽·Taiga(양쪽)·Sahel 전부 0**(현실 MODIS/GIMMS는 2~6). Sahara만 맞게 0. btot 1.1·LAI 0.29로 전지구 과소.
+**원인 (소스 확인)**: `&vegn_data_nml vegn_to_use='uniform'`. `vegn_data.F90:231-238` 정의 — 'uniform'=**"global constant vegetation, e.g. to reproduce MCM"**(전지구 상수 1개 타입, index `vegn_index_constant=1`). 즉 경쟁 없는 최퇴화 모드. **이 값은 UFS regtest 템플릿 `tests/parm/input_datm_lm4.nml.IN:339`에서 상속**(48h 기술검증용, 과학설정 아님).
+- 옵션 3종: **`'multi-tile'`**(격자당 다중 PFT 공존=진짜 areal 경쟁) · **`'single-tile'`**(기본값, 격자당 지역별 지배 PFT 1개) · `'uniform'`(상수). `init_cover_field`(land_io.F90:95)가 single/multi 모두 `INPUT/cover_type.nc`를 읽음 — **그 파일 이미 존재**(→common_LM4/cover_type.nc). single-tile은 셀별 최대frac PFT만 남김.
+- **"1000년 더 돌려도 안 됨"**: btot 30yrRM 1.19→1.18·LAI 0.295→0.293 **~150년부터 flat 평형**. 희박식생이 이 config의 평형이라 시간으론 안 늘어남. **fix=모드 변경 후 새 dynveg spin-up**(cover_type.nc 기반). LM4 multi-tile은 정식 지원(JULES의 areal 미해결과 무관).
+- vegn restart: tile=1·cohort=1(uniform 결과). 식생 fraction 별도 변수 출력엔 없음(grid-mean만).
+
+### 13.8 ★★★ multi-tile 전환 시도 → offline lm4P(LM4.2) 방향 전환 (2026-07-20)
+**multi-tile(`vegn_to_use='multi-tile'`, cover_type.nc=11PFT분율) cold-start 시도 = 실패:**
+- **full cold-start**(start_type=startup, .res 전부 제거): cover map cold-start는 성공하나 **soil이 첫 스텝 NaN**(`soil: Advection: conservation of Energy violated; before=NaN, time=1981-01-01`). 원인: 이 UFS-LM4 config는 **soil을 진짜 cold-start한 적이 없음**(static run도 start_type=continue+regtest restart warm-start). soil_nml에 init_temp=288·init_w=150은 있으나 full cold-start 경로가 NaN.
+- **하이브리드**(IC_static soil/cana/snow/glac/lake/land warm-start, vegn만 cold-start): soil NaN은 피했으나 **24분+ 0개월 stall**. 근본 문제 = **LM4는 soil·veg가 같은 tile 구조 공유** → warm `land.res`(단일타일 구조)에 multi-tile veg가 갇힘. soil.res만 가져오고 나머지 cold-start도 **tile_index 불일치**로 불가.
+- 결론: **multi-tile은 land+soil 동시 cold-start 필수인데 그게 NaN** → offline LM4.1(land_lad2)로는 벽.
+
+**★ 해결 방향 = KIOST-ESM2의 lm4P(LM4.2)를 offline로:**
+- **KIOST-ESM2/AMIP INPUT에 평형 multi-tile 식생 restart 실재**(C96, `vegn1.res` **tile=13, tile_index=15085, cohort=61, cohort_index=162058** = 다중 PFT 경쟁 평형, 400년+ 결합 spin-up).
+- **단 offline LM4.1(NOAA `land_lad2` branch)로는 못 읽음** — 버전/포맷 불일치: KIOST=lm4P(LM4.2, **질소순환·균근·식물수리·7species**, vegn2 ~180var), offline=LM4.1(5species, N cycle 없음, ~65var, `Anlayer_acm/bl_previous/lai_light_max` 요구하나 KIOST엔 없음). soil.res도 litter_C 풀 차이.
+- **→ 올바른 경로**: **lm4P(LM4.2)를 offline(data-atmosphere)로 빌드·구동**. ESM4.5 소스 `src/coupler/simple/coupler_main.F90`에 **`do_land` 스위치 존재** → FMS coupler로 land-only 구동 가능. 그러면 (a) 버전일치로 KIOST 평형 restart warm-start(cold-start 회피), (b) offline이라 대기피드백 없이 순수 지면성능 평가(AMIP은 결합이라 부적합), (c) 진짜 ESM land(multi-tile veg+BGC) 사용.
+- KIOST restart 경로: `/home/ydkoh/KIOST-ESM2{,_AMIP}/INPUT/{vegn1,vegn2,soil,land,...}.res.tile*.nc` (04010101).
+
+**★ Phase 1 결론 (2026-07-20): offline lm4P = "NUOPC driver의 LM4 소스 스왑"(Route A)이 유력:**
+- **lm4P도 land_lad2** (`lm4P/land_version.inc`에 `#define _USE_LAND_LAD2_`). offline LM4-driver의 LM4(NOAA `land_lad2` branch, LM4.1)와 **같은 land_lad2 코드베이스의 다른 버전**(LM4.2).
+- **`land_model_init` 시그니처 완전 동일**(`cplr2land,land2cplr,time_init,time,dt_fast,dt_slow`) → NUOPC cap(`lm4_cap.F90`: land_model_init/update_land_model_fast/slow) 그대로 작동 기대.
+- 소스 차이 작음: lm4P 55개 .F90 = land_lad2 51개 **+7개**(`nitrogen_sources·vegn_fire·soil_util·vegn/soil_accessors·transition_io·vegn_util` = LM4.2의 N cycle·fire·util).
+- **→ Route A = `LM4-driver/LM4`를 lm4P 소스로 교체 + `lm4_src_files.cmake`에 7파일 추가 + 재빌드.** 우리 CDEPS/WFDE5/C96/gfortran 인프라 재사용. FMS coupler 통째 신축(Route B)보다 훨씬 작음.
+- **Phase 2+**(다음 집중작업): ① lm4P 소스 스왑·빌드(컴파일 이슈 해결) → ② KIOST 평형 restart(version 일치) warm-start → ③ WFDE5 offline 짧은 테스트(multi-tile 식생 확인) → ④ 본 spin-up/평가. 리스크: lm4P의 추가 모듈 의존성·cap 세부 인자 차이·N cycle 입력자료(ndep 등).
+
+### 13.9 Route A 스왑 시도 → 두 벽 확인 → Route A/B 갈림길 (2026-07-20, 미결)
+**Route A(UFS CMake에 lm4P 스왑) 진행분 (clone: `/data2/ydkoh/lm4/ufs-weather-model-lm4p`, 원본 미변경):**
+- clone 완료(669M, .git/build 제외), `LM4-driver/LM4`를 lm4P로 rsync 덮음(원본 백업 `LM4.lad2_orig`), NOAA glue 4개 보존, `lm4_src_files.cmake`에 lm4P 7파일 추가.
+- **벽 1 (빌드환경)**: `cmake`가 **ESMF 8.8.0 못 찾음**(`FindESMF.cmake`). `spack load /evn6nxf`만으론 부족 → **`export ESMFMKFILE=/data2/ydkoh/spack-stack/spack/opt/spack/linux-sapphirerapids/esmf-8.8.0-3cfkk4a.../lib/esmf.mk`** 필요(원본 build CMakeCache에서 확인). 쉬운 수정.
+- **벽 2 (브랜치 갈라짐, 더 근본)**: NOAA `land_lad2`와 lm4P가 diverge. land_lad2 전용 4파일(`land_chksum`·`predefined_tiles/tiling_input{,_types}`·`read_remap_cohort_data_new.inc`=**offline 타일 초기화 glue**)이 lm4P엔 없어 유지했으나, 공통 모듈을 lm4P로 덮어서 **glue↔lm4P API 불일치 컴파일 에러 예상**(빌드가 ESMF에서 먼저 멈춰 미도달).
+- **★ 전략 재고 (사용자 지적)**: **KIOST-ESM2는 GFDL FMS-make(Intel, mkmf)로 lm4P를 네이티브 빌드** 완료(smoke test OK). UFS CMake(gfortran) 빌드와 별개 시스템(둘 다 FMS 라이브러리 사용).
+  - **Route A** = UFS CMake 스왑: CDEPS/WFDE5/DATM offline 인프라 재사용(forcing 해결됨) BUT 브랜치 통합 컴파일 반복 + ESMF 환경.
+  - **Route B** = GFDL FMS-make로 lm4P + `coupler/simple`(`do_land` 스위치) land-only + data-atmosphere: **lm4P 네이티브(스왑·divergence 없음)** + KIOST 빌드 이미 됨 BUT offline data-atmosphere forcing 드라이버 새로 구성.
+  - **결정 미정** — 다음 세션 첫 작업 = Route 선택 후 착수. (Fable 5로 잠깐 전환했다 Opus로 복귀.)

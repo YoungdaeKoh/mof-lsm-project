@@ -1,0 +1,26 @@
+#!/bin/bash
+#PBS -N clm5_bgcad
+#PBS -q workq
+#PBS -l select=1:ncpus=48:mpiprocs=48:host=climate01
+#PBS -l walltime=24:00:00
+#PBS -j oe
+#PBS -o /home/ydkoh/CESM/cases/clm5_bgccrop_ad/adrun.log
+#
+# CLM5.0 BGC-CROP Accelerated Decomposition (AD) spin-up, cold start.
+# spinup_state=2 (CLM5 AD). ~38 min/model-year, STOP_N=20yr -> ~13h/chunk. AD 목표 ~200yr.
+# 이후 chunk는 ./xmlchange CONTINUE_RUN=TRUE 후 재제출. AD 종료 후 CLM_ACCELERATED_SPINUP=off로 post-AD.
+# BATCH_SYSTEM=none이라 --no-batch. 성패는 "MODEL EXECUTION HAS FINISHED"+restart로 판단(exit=1은 CIME잡음).
+set -u
+export PERL5LIB=/home/ydkoh/perl5/lib/perl5${PERL5LIB:+:$PERL5LIB}   # compute node엔 bigint 없음
+cd /home/ydkoh/CESM/cases/clm5_bgccrop_ad || exit 1
+echo "=== AD START $(date) on $(hostname) ==="
+./case.submit --no-batch
+echo "=== MODEL PHASE DONE $(date) ==="
+# raw 보존 (rsync --delete 없음)
+RUN=/data2/ydkoh/cesm2_output/clm5_bgccrop_ad/run
+ARCH=/home/ydkoh/CESM/spinup_raw/clm5_GSWP3_BGCAD
+mkdir -p "$ARCH"
+shopt -s nullglob
+rsync -a "$RUN"/*.clm2.r.*.nc "$RUN"/*.clm2.h0.*.nc "$RUN"/rpointer.* "$ARCH/" 2>/dev/null
+shopt -u nullglob
+echo "=== archived -> $ARCH ($(ls $ARCH/*.clm2.r.*.nc 2>/dev/null|wc -l) restart) END $(date) ==="

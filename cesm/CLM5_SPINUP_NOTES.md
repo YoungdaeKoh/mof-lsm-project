@@ -126,6 +126,18 @@ CESM machine `climate00`은 `BATCH_SYSTEM: none` → `case.submit`이 **로그�
 | **LM4/GFDL** | 정형 tolerance **없음**. carbon lifetime cap(500yr)+가속치환+장기적분(piControl 800년+) | (탄소 평형 중심) | — |
 | **Noah-MP** | HRLDAS 공식 수렴 기준 문서 **없음** | 관행: soil moisture/temp 안정까지 | — |
 
+### 7e. ★ BGC-AD 케이스 실제 셋업 + 실측 속도 (2026-07-20)
+LM4 dynveg spin-up과 **공정비교**용 CLM5 탄소 spin-up. SP 다음 단계(동적 탄소).
+- **케이스 `clm5_bgc_ad`** (crop 없음): compset **longname** `2000_DATM%GSWP3v1_CLM50%BGC_SICE_SOCN_MOSART_CISM2%NOEVOLVE_SWAV`로 생성. **주의: 2000+GSWP3 non-crop alias가 없음**(비-crop은 CRU forcing만; `I2000Clm50BgcCru`) → longname에서 `BGC-CROP`→`BGC`만 바꿔 GSWP3v1 DATM 템플릿 유지. `create_newcase --compset "<longname>" --res f09_g17 --machine climate00 --run-unsupported`.
+- **config**: `CLM_ACCELERATED_SPINUP=on`(→ `spinup_state=2`, CLM5 AD), `CLM_FORCE_COLDSTART=on`, `CLM_BLDNML_OPTS=-bgc bgc`(crop 없음 → `use_cn=.true. use_crop=.false.`), NTASKS=48, NO_LEAP, RUN_STARTDATE=0001-01-01, DATM 1981/2010/align 1981. WFDE5는 crop 케이스의 `user_datm.streams.txt.CLMGSWP3v1.{Solar,Precip,TPQW}` 3개 복사(WFDE5 domain `domain.lnd.360x720_wfde5.nc` + 1981-2010 절대경로 내장; **LND_DOMAIN은 f09 기본 유지**, DATM이 WFDE5 0.5°→f09 매핑).
+- **입력자료**: non-crop fsurdat = `surfdata_0.9x1.25_hist_16pfts_...c190214.nc`(16-pft, 동료 공유분 디스크에 존재). BGC 공통(ndep/lightning/popdens/finundated)은 crop용 다운로드분 재사용. `check_input_data` 0 누락. 빌드 474초.
+- **★ 실측 속도 (climate01 48PE, 유휴, daily dt 안정)**:
+  - BGC-**CROP**-AD: 41초/model-day = **249분/년** (200yr ≈ 35일)
+  - **순수 BGC-AD: 24.6초/day = 150분/년** (200yr ≈ **21일**) — **crop 제거로 40% 절감**(추정 15-30%보다 큼)
+  - SP는 35분/년 → BGC는 SP의 ~4.3배(CN순환+수직토양분해가 지배; crop은 그 위 40%만).
+- **노드 정합(정정)**: climate01·climate02는 **동일 하드웨어**(48코어 257GB). 이전 "climate02가 4.4배 느리다"는 **잘못된 측정**(sample1 빈 model date로 progress 오산)이었음. 실제 느림은 **타 사용자 부하 경합**일 때만. [[climate01-only-for-jobs]]
+- **다음**: 청킹 = walltime 24h ÷ 150분/년 ≈ 잡당 9년 → self-chaining PBS 또는 수동 청크. AD 200년(또는 TOTECOSYSC ≤1 수렴까지) → post-AD(`CLM_ACCELERATED_SPINUP=off`).
+
 - **결론: CLM5-SP 가이드를 다중 LSM 공통 수렴 기준으로 채택.** 근거:
   1. 유일하게 **정량 threshold + 판정 변수 + 진단도구**를 문서화한 표준.
   2. JULES 내장 기준(smcl/t_soil, 전 격자)과 **변수·방향 일치**(오히려 JULES가 더 엄격 → CLM 통과하면 JULES 관점서도 안전 방향).
