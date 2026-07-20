@@ -513,3 +513,26 @@ restart 헤더 직접 비교(둘 다 C96 tile1):
 
 **★ 최종 확정 설정 (전부 실측 검증)**: 48 PE(layout 2,4 / SIS 6,8) · 복사 OFF(소스 패치 `coupler_main.F90.radiation_gate.diff`) · `do_tropchem=.false.` · `diag_table.land` · **field_table 원본** · `dt_atmos=1800`/`dt_cpld=3600` · qscomp clamp(`sphum.F90.clamp.lm4P`) · `sst_degk=.false.` · `diag_integral output_interval=20000.0` · `current_date=1981,1,1,3,0,0` + `force_date_from_namelist=.true.`
 → **7.85 h/model-yr**. 세션 시작 시점(24 PE·복사 ON·AMIP diag 전체, 26.8 h/yr) 대비 **3.4× 개선**.
+
+### 13.20 ★★ KIOST 400년 초기장의 식생 상태 — 역학은 spin-up 됐으나 종 조성은 고정 (2026-07-20)
+
+warm-start 하는 KIOST 평형 restart가 "역학식생까지 평형인가"를 namelist·소스로 확인. **결합런과 우리 offline 런의 식생 스위치는 완전히 동일**(아래 행번호는 각각 `~/KIOST-ESM2/input.nml` / `lm4_offline_1yr/input.nml`).
+
+| 스위치 | 값 | 의미 | 상태 |
+|---|---|---|---|
+| `use_static_veg` | `.FALSE.` | 식생 고정 아님 | 켜짐 |
+| `do_cohort_dynamics` | `.TRUE.` | 코호트 생장·경쟁 | **400년 구동됨** |
+| `do_patch_disturbance` | `.TRUE.` | 교란·사망 | **400년 구동됨** |
+| `do_phenology` | `.TRUE.` | 계절 위상 | **400년 구동됨** |
+| **`do_biogeography`** | **`.FALSE.`** | **기후에 따른 종 전환** | **꺼짐** (lm4P 기본값은 `.TRUE.`, KIOST가 명시적으로 끔) |
+
+- **`do_biogeography`의 실체**(`vegn_dynamics.F90:2231 vegn_biogeography`): 매년(`year1/=year0`) 각 코호트에 대해 `update_species(cc, vegn%t_ann, vegn%t_cold, vegn%p_ann*seconds_per_year, vegn%ncm, vegn%landuse)` 호출 → **연평균기온·한랭월기온·연강수·성장월수에 따라 코호트의 species를 교체**. 끄면 **종 조성이 초기 `cover_type.nc`에서 동결**되고, 기존 종 안에서 생물량·수고·LAI·코호트 구조만 진화.
+- **결론**: tile=13 / cohort=57 구조와 생물량은 **진짜 역학식생 평형**. 단 **"어떤 PFT가 어디 사는가"는 spin-up 된 것이 아니라 처방된 것.**
+- **우리 spin-up엔 오히려 유리**: 종 조성이 고정이라 warm-start transient가 짧음(조정 대상 = 생물량·물·에너지). 1차년도 진단 목표(지면-대기 결합·물수지·플럭스)에도 무해.
+- **★ 한계 (Phase 2 직결)**: 식생 재분포 질문("온난화로 타이가가 북상하는가", 역학식생 과제)은 `do_biogeography=.TRUE.`가 필수이고 **그건 새 spin-up이 필요**. 지금 결과로는 답할 수 없음.
+
+**★ `vegn_to_use = 'uniform'`이 아직 namelist에 남아 있음 (결합런·offline 동일).** §13.7이 지목한 그 설정. **단 이건 cold-start 초기화 경로에서만 작동**하고, restart를 읽는 warm start에서는 무시됨 — 우리 출력이 tile 13/cohort 57로 나온 것이 증거. **cold start를 하는 순간 다시 uniform 함정(식생 희박)에 빠지므로**, 향후 cold start가 필요해지면 `'multi-tile'`로 바꿀 것.
+
+**결정 (2026-07-20): 1차년도 spin-up·진단은 `do_biogeography=.FALSE.` 유지.**
+왜: 끄면 종 조성이 `cover_type.nc`(관측 기반 지면피복)에 고정되어, 플럭스·물수지 편차를 **모델 물리 탓으로 해석**할 수 있음. 켜면 모델이 스스로 종을 정하는데 역학 biogeography는 관측에서 벗어나는 게 흔해, "이 편차가 물리 때문인가 식생 분포가 틀려서인가"를 구분할 수 없게 됨 — 진단 프레임워크의 목적을 훼손. 다수 기관이 같은 이유로 끔.
+Phase 2 역학식생 실험은 **이 30년 offline 평형을 초기장으로 삼아 biogeography만 켜서 이어달리면 됨**(처음부터 재실행 불필요). 그 실험에서는 "식생 분포가 관측에서 얼마나 벗어나는가"가 곧 결과 = LM4 biogeography 성능 평가.

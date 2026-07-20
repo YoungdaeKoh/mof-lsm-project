@@ -145,3 +145,51 @@ LM4 dynveg spin-up과 **공정비교**용 CLM5 탄소 spin-up. SP 다음 단계(
 - **공통 판정 규칙(채택)**: ① 표층 flux(현열·잠열)·표층 토양수분·soil T(≤1.5 m) 의 cycle 간 |Δ| 가 무시 가능 → 수렴. ② TWS/심층수/심층열은 "느린 저수지"로 별도 취급, global·flux 진단엔 무영향 시 완료로 간주(LM4 사하라 판례). ③ 각 모델은 자기 격자에서 돌리고 비교는 remap 후.
 
 상세: `notes/lsm_spinup_criteria.html` ([[lsm-landmean-comparability]], [[lsm-spinup-ice-mask-convergence]])
+
+### 7f. ★★ CESM mpirun이 PBS 노드 할당을 무시한다 (2026-07-20, job 8279)
+
+**증상**: `#PBS -l select=1:...:host=climate02`로 제출했는데 **climate02는 load 0.00**, `cesm.exe`는 **climate01에서** 48랭크로 실행. 같은 시각 climate01에 LM4 잡(48랭크)이 돌고 있어 **96랭크가 48코어를 나눠 씀** → 둘 다 심각한 성능 저하(LM4 CPU 99% → 15%).
+
+**원인**: `env_mach_specific.xml`의 mpirun 인자가 **고정 hostfile**을 참조.
+```xml
+<arg name="num_tasks"> -hostfile /home/ydkoh/mvapich2.hosts -np {{ total_tasks }}</arg>
+```
+`~/mvapich2.hosts` 내용이 `climate01:48` → PBS가 어느 노드를 주든 mpirun은 이 파일만 보고 climate01로 보냄. `BATCH_SYSTEM=none`(§8 기록)의 연장 부작용인데, **노드 할당까지 무시된다는 건 새로 발견**.
+
+**해결**: 케이스 전용 hostfile을 PBS 할당에서 생성.
+- `env_mach_specific.xml` → `-hostfile /home/ydkoh/CESM/cases/clm5_bgc_ad/mpi.hosts`
+- PBS 스크립트 선두에 `sort -u "$PBS_NODEFILE" | awk '{print $1":48"}' > "$CASE/mpi.hosts"`
+- **공용 `~/mvapich2.hosts`는 미변경**(타 CESM 케이스 영향 방지).
+- 확인: `mpi.hosts` = `climate02:48`, climate02에 cesm.exe 48개 / climate01에 0개.
+
+**★ 진단법**: 잡이 `R`이고 로그도 갱신되는데 지정 노드가 한가하면, **로그 파일명의 머신명은 CESM `--machine` 값일 뿐 실제 실행 노드가 아님**. 각 노드에서 `ps -u <user> -o args`로 `cesm.exe`를 직접 찾을 것. `pgrep -c -u ydkoh cesm.exe`가 빠름.
+
+**교훈**: LM4(FMS) 실행 스크립트는 `mpirun -hostfile $PBS_NODEFILE`로 PBS를 따르는데 CESM만 고정 파일을 씀. **다중 모델을 병렬로 돌릴 때는 각 모델이 노드 할당을 어떻게 정하는지 먼저 확인할 것.** [[climate01-only-for-jobs]] (climate02는 2026-07-20 기준 유휴 — 상시 점유라는 기존 기록은 갱신 필요)
+
+### 7g. AD 실행 확인 + post-AD 전환 시 `finidat` 함정 (2026-07-20, job 8281)
+
+**AD 정상 가동 확인** (`run/lnd_in`, `lnd.log.8281`):
+- `spinup_state = 2` (가속분해 활성) · `use_cn = .true.` · `use_crop = .false.`
+- `CLM_ACCELERATED_SPINUP=on`, `CONTINUE_RUN=TRUE`, `STOP_N=9`(첫 청크만 9년, 이후 10년 — restart를 0011/0021/… 10년 경계에 정렬)
+- 로그: `Reading restart pointer file....` → `Reading restart file clm5_bgc_ad.clm2.r.0002-01-01-00000.nc` = **warm start 정상**
+- 노드: climate02 (§7f의 hostfile 수정 적용). 강제장: **WFDE5** (`user_datm.streams.txt.CLMGSWP3v1.*` → `/data2/ydkoh/2026_MOF_LSM/Atm_forc/1_CLM_WFDE5/{year}_wfde5.nc`, domain `domain.lnd.360x720_wfde5.nc`) = LM4 offline과 **동일 원자료**.
+
+**★ 함정: `CLM_FORCE_COLDSTART=off`로 바꾸면 `finidat`에 기본값이 채워짐.**
+- 현재 값: `/data1/CESM2_INPUT/.../clmi.I2000Clm50BgcCrop.2011-01-01.**1.9x2.5**_gx1v7_...nc`
+- **격자(1.9×2.5 vs 우리 0.9×1.25)도 구성(BgcCrop vs Bgc)도 불일치** (§7의 기존 기록과 동일 문제).
+- `CONTINUE_RUN=TRUE`인 동안은 rpointer를 읽으므로 **무해**. 하지만 **post-AD 전환 시 `CONTINUE_RUN=FALSE` + `finidat`으로 AD 최종 restart를 지정하게 되므로, 그때 이 기본값을 반드시 덮어쓸 것.** 안 덮으면 엉뚱한 격자 파일을 읽음.
+
+**post-AD 전환 절차 (AD 완료 후)**
+```bash
+cd ~/CESM/cases && ./create_clone --case clm5_bgc_pad --clone clm5_bgc_ad
+cd clm5_bgc_pad
+./xmlchange CLM_ACCELERATED_SPINUP=off     # spinup_state=0; CLM이 restart 읽을 때 토양 C/N 풀을 정상 배율로 환산
+./xmlchange CLM_FORCE_COLDSTART=off
+./xmlchange CONTINUE_RUN=FALSE
+./xmlchange RUN_STARTDATE=0001-01-01
+echo "finidat = '/data2/ydkoh/cesm2_output/clm5_bgc_ad/run/clm5_bgc_ad.clm2.r.0201-01-01-00000.nc'" >> user_nl_clm
+# ↑ 반드시 명시. 안 하면 위의 1.9x2.5 기본값이 남음
+```
+clone을 쓰는 이유: AD 케이스와 그 결과를 보존하기 위함.
+
+**수렴 판정**: 97% 격자에서 `TOTECOSYSC` 표류 ≤ 1 gC/m²/yr (§7의 채택 기준). 200년을 채우는 게 목적이 아니라 수렴이 목적이므로, 조기 수렴 시 중단 가능.

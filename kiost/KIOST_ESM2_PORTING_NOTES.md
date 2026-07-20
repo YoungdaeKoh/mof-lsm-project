@@ -310,3 +310,23 @@ run dir `/home/ydkoh/KIOST-ESM2_AMIP/`. 3가지 조치:
 - **본인 data_table 주석이 이미 정답을 적어둠**: `# tosbcs in degC (ice_spec sst_degk=.false.)`. 즉 주석과 namelist가 불일치.
 - **수정 = `sst_degk = .false.`** (한 줄). 서버 `~/KIOST-ESM2_AMIP/input.nml:949`. 아직 미적용 — 적용 시 백업 후 1일 스모크 재실행하고 SST min/max를 물리범위(−2~35 °C)로 검증할 것.
 - **교훈**: rc=0 · RESTART 개수 · abort 0 은 **물리 검증이 아니다**. 처방 경계장은 반드시 min/max·영역평균을 찍어볼 것 (grid-safety 정신과 동일).
+
+## 13. AMIP 생산런 계산자원 실측 — 이 하드웨어로는 불가 (2026-07-20)
+
+AMIP 스모크(24 PE, 1 model-day, job 2933)의 FMS 클록: `Total 1026.4 s / Initialization 261.8 / **Main loop 751.0** / Termination 13.5`.
+
+| | 24 PE | 48 PE (1.4× 스케일 추정) |
+|---|---|---|
+| 모델 1일 | 751 s | ~533 s |
+| **모델 1년** | **76.1 h** | **~54 h** |
+| 10년 | 761 h (32일) | 540 h (22일) |
+| 30년 | 2,283 h (95일) | **1,620 h (67일)** |
+
+- **offline lm4P(7.85 h/model-yr @48PE, `lm4/LM4_SPINUP_NOTES.md` §13.19)의 약 7배.**
+- 표준 AMIP(1979-2014, 36년)은 **67일 연속 가동** 필요. 원 KIOST config는 **720 PE**였고 우리는 24로 축소해 검증만 한 상태. [[climate01-only-for-jobs]]대로 **climate01 단일 노드 48코어가 상한**(climate00=로그인, climate02=타 사용자 점유)이라 2노드 확장 불가.
+
+**★ 결정 (2026-07-20): AMIP 생산런은 자체 수행하지 않고 결과를 받아오는 방향.**
+왜: 같은 기간을 offline의 7배 비용으로 돌리는데, 대기 되먹임이 섞여 지면 물리만 떼어 진단하기도 어려움. 1차년도 진단 목적에는 offline이 우월하고 실제로 그렇게 진행 중.
+AMIP이 실제 필요한 지점은 **결합강도의 atmospheric leg**(마일스톤 2·3년차). offline로는 terrestrial leg(Dirmeyer TCI = σ(SM)×d(LH)/d(SM), 지면 변수만으로 계산 가능)까지만 나옴.
+대안 우선순위: ① **CMIP7 공개 산출물 활용** — 마일스톤 3년차 문구가 "CMIP7 지면-대기 상호작용 진단"이지 "AMIP 실험 수행"이 아니므로 애초 설계가 이쪽일 가능성 ② 외부 계산자원(720 PE급)에서 수행 후 결과 수령 ③ 자체 수행 시 5~10년으로 기간 제한(270~540 h).
+**진도보고서에 "AMIP 검증 완료, 생산런은 계산자원 확보 필요"로 기록** — 향후 자원 요청 근거.
