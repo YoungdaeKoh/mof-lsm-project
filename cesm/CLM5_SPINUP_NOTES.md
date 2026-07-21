@@ -193,3 +193,10 @@ echo "finidat = '/data2/ydkoh/cesm2_output/clm5_bgc_ad/run/clm5_bgc_ad.clm2.r.02
 clone을 쓰는 이유: AD 케이스와 그 결과를 보존하기 위함.
 
 **수렴 판정**: 97% 격자에서 `TOTECOSYSC` 표류 ≤ 1 gC/m²/yr (§7의 채택 기준). 200년을 채우는 게 목적이 아니라 수렴이 목적이므로, 조기 수렴 시 중단 가능.
+
+### 7h. AD 출력 = 연별 확정 (2026-07-21)
+
+**결정: AD spin-up은 연별 출력 유지** (`hist_nhtfrq=-8760`, `hist_mfilt=20`, `hist_empty_htapes=.true.`, `hist_fincl1='TOTECOSYSC','TOTECOSYSN','TOTSOMC','TOTSOMN','TOTVEGC','TOTVEGN','TLAI','GPP','CPOOL','NPP','TWS'`).
+- 왜: AD 수렴 판정 기준이 "TOTECOSYSC **연간** 표류 ≤ 1 gC/m²/yr" → 연평균 비교가 자연스러움. 월별로 하면 200년×12로 12배 용량인데 계절변동은 수렴 판정에 미사용.
+- **월별은 post-AD 생산런(WFDE5 1981-2010)에서** — 계절순환(유출·LAI·플럭스)을 LM4·관측과 비교할 때. LM4 offline이 지금 월별(`land_month`)인 건 그게 이미 생산런 성격이기 때문(위상이 다름).
+- 검증(job 8281, year 0008): h0 1파일에 연별 8레코드 누적(mfilt=20 → 20년/파일). TOTECOSYSC 1224 · TOTSOMC 279 · TOTVEGC 621 · TLAI 1.32 gC/m². **값이 낮은 건 정상** — AD가 풀을 키우는 중, 상승 궤적이 곧 수렴 신호.
