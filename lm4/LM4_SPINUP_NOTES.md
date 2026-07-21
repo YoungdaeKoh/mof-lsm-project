@@ -553,3 +553,5 @@ Phase 2 역학식생 실험은 **이 30년 offline 평형을 초기장으로 삼
 2. **FRE-NCtools 빌드**: 48 PE 속도 유지, 단 mppnccombine + **combine-ncc**(land 압축포맷 전용) 빌드 필요.
 3. **분산 restart 직접 read**: INPUT의 stale 결합본 제거 후 분산 조각만 두고 read. 매 세그먼트 동일 48 PE/layout이라 이론상 가능하나, io_layout=1,1인데 2조각인 모순 미해결 → 검증에 8h 런 필요, 리스크.
 - **권고: 옵션 1(24 PE)**. 도구 빌드·검증 리스크 없이 즉시 굴러감. 98h 손해는 combine 빌드·디버그 시간과 상쇄. forcing·config·clamp·guard는 그대로 재사용.
+
+**★ 왜 24 PE는 결합, 48 PE는 분산인가 (근본 원인, 소스 확인)**: `io_layout=1,1`은 **정형 격자(대기·해양)에만** 적용됨. LM4 land는 **비정형 격자(UG, compressed land-tile)**라 별도 파라미터 `npes_io_group`(land_model_nml, KIOST config에 **=8** 설정됨)로 I/O 그룹을 나눔. `land_data.F90:408-409`: `ug_io_layout = mpp_get_io_domain_UG_layout(ug_domain); append_io_id = (ug_io_layout>1)` — 이 값이 1보다 크면 `.0001` 접미사(분산)가 붙음. UG 도메인은 **육지점 보유 PE만** 포함하므로 실제 조각 수는 PE 배치에 의존: 24 PE(2,2)→ug_io_layout=1→결합, 48 PE(2,4)→ug_io_layout=2→분산. **즉 io_layout이 같아도 land restart 형식이 갈린 건 io_layout이 애초에 land에 적용 안 되기 때문.** → **가능성(미검증): `npes_io_group`을 전체 PE수(48) 이상으로 키우면 48 PE에서도 ug_io_layout=1(결합)이 나올 수 있음** → 48 PE 속도 유지 + combine 도구 불필요. 단 diag 형식·I/O 성능 영향 있어 세그먼트 1회 검증 필요. **PE 수를 바꿀 때는 반드시 land restart 형식을 재확인할 것.**
