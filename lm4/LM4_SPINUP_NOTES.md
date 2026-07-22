@@ -555,3 +555,11 @@ Phase 2 역학식생 실험은 **이 30년 offline 평형을 초기장으로 삼
 - **권고: 옵션 1(24 PE)**. 도구 빌드·검증 리스크 없이 즉시 굴러감. 98h 손해는 combine 빌드·디버그 시간과 상쇄. forcing·config·clamp·guard는 그대로 재사용.
 
 **★ 왜 24 PE는 결합, 48 PE는 분산인가 (근본 원인, 소스 확인)**: `io_layout=1,1`은 **정형 격자(대기·해양)에만** 적용됨. LM4 land는 **비정형 격자(UG, compressed land-tile)**라 별도 파라미터 `npes_io_group`(land_model_nml, KIOST config에 **=8** 설정됨)로 I/O 그룹을 나눔. `land_data.F90:408-409`: `ug_io_layout = mpp_get_io_domain_UG_layout(ug_domain); append_io_id = (ug_io_layout>1)` — 이 값이 1보다 크면 `.0001` 접미사(분산)가 붙음. UG 도메인은 **육지점 보유 PE만** 포함하므로 실제 조각 수는 PE 배치에 의존: 24 PE(2,2)→ug_io_layout=1→결합, 48 PE(2,4)→ug_io_layout=2→분산. **즉 io_layout이 같아도 land restart 형식이 갈린 건 io_layout이 애초에 land에 적용 안 되기 때문.** → **가능성(미검증): `npes_io_group`을 전체 PE수(48) 이상으로 키우면 48 PE에서도 ug_io_layout=1(결합)이 나올 수 있음** → 48 PE 속도 유지 + combine 도구 불필요. 단 diag 형식·I/O 성능 영향 있어 세그먼트 1회 검증 필요. **PE 수를 바꿀 때는 반드시 land restart 형식을 재확인할 것.**
+
+### 13.22 2년치(1981-82) 진단 그림 — spin-up 정상 확인 (2026-07-22)
+
+첫 2 세그먼트 월별 출력으로 시계열+맵. 스크립트 `lm4/scripts/lm4p_spinup_{extract_monthly,extract_maps,plot_timeseries,plot_maps}.py`. 서버에서 전지구 육지평균 CSV·맵 npz 추출(무가중 셀평균, C96 준등면적) → 로컬 작도. 좌표는 §13.6 supergrid 복원 재사용.
+- **계절순환 정확·재현성 좋음**: 증발산·GPP·LAI 북반구 여름 최대, SWE 겨울 최대. 맵 격자검증 통과(LAI 아마존/콩고/동남아 짙음, 사막 0; 토양수분 사막 건조).
+- **★ 느린 풀 안정 = KIOST 평형 warm-start 확인**: tot_soil_C 7.40-7.49 kg C/m²(±1%), col_water 3405-3433 kg/m²(±0.8%) — 계절 톱니만, 표류 거의 없음.
+- **★ 함정 1: 22개월(24 아님)** — 세그먼트가 Jan 1 03:00 시작이라 **각 해 1월이 부분월로 diag에서 누락**. WFDE5 레코드가 03/09/15/21이라 03시 시작 불가피. spin-up 궤적엔 무관하나 **계절 climatology 만들 때 1월 부재 처리 필요**.
+- **함정 2: 맵 극지 부채꼴 산점 아티팩트**(runoff/sens) — C96 극 조밀 + 빙하타일. 값 아닌 표시 문제, 본토 패턴 정상. runoff는 육지 값이 작아(mean 0.05 mm/day) vmax=4에서 거의 흰색 → 육지만 보려면 vmax 낮출 것.
