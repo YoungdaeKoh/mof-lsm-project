@@ -563,3 +563,26 @@ Phase 2 역학식생 실험은 **이 30년 offline 평형을 초기장으로 삼
 - **★ 느린 풀 안정 = KIOST 평형 warm-start 확인**: tot_soil_C 7.40-7.49 kg C/m²(±1%), col_water 3405-3433 kg/m²(±0.8%) — 계절 톱니만, 표류 거의 없음.
 - **★ 함정 1: 22개월(24 아님)** — 세그먼트가 Jan 1 03:00 시작이라 **각 해 1월이 부분월로 diag에서 누락**. WFDE5 레코드가 03/09/15/21이라 03시 시작 불가피. spin-up 궤적엔 무관하나 **계절 climatology 만들 때 1월 부재 처리 필요**.
 - **함정 2: 맵 극지 부채꼴 산점 아티팩트**(runoff/sens) — C96 극 조밀 + 빙하타일. 값 아닌 표시 문제, 본토 패턴 정상. runoff는 육지 값이 작아(mean 0.05 mm/day) vmax=4에서 거의 흰색 → 육지만 보려면 vmax 낮출 것.
+
+### 13.23 GIMMS LAI4g grid-verify 통과 (2026-07-22)
+`/Volumes/data02/LAI/GIMMS_LAI4g_V1.2_1982_2020.nc` — LM4 LAI 평가용. 5검사 전부 통과:
+- 좌표: lat **오름차순** −90→90, lon **0-360**, 0.5°(361×720). time = days since **1979-01-01**(index0 = 1982-01, 468개월 = 1982-2020). **JJA 1982 = time index 5,6,7**.
+- **원본배열 플롯(무좌표)**: 아마존/콩고/동남아 짙음, 사막·빙설 마스킹, 위도 그래디언트 정상 = 실제 대륙. 깨진 자료 아님.
+- 값: LAI 0-6.6, **_FillValue=65535** → `>100` 가드로 마스킹. valid JJA 17.9%(식생지만; 사막·빙설은 제품이 마스킹, 정상). tropics 3.05 > boreal 2.50.
+- 스크립트 `lm4/scripts/gridverify_gimms.py`, 검증그림 `figures/_gridverify_gimms.png`.
+
+### 13.24 LAI 다년 비교 + PFT 분해 + runoff 변수 정정 (2026-07-22)
+
+**★ 정정: §13.22의 "1월 누락"은 틀림 — 실제는 12월 누락.** 세그먼트가 364d21h로 다음 해 Jan 1 00:00에 끝나 12월 flush 전 종료. land_month에 1~11월 존재, 12월 부재. JJA엔 무관.
+
+**★★ runoff 변수 함정**: §13.22 그림에서 "runoff"로 쓴 `frunf`는 **고체(빙설) 유출**("total rate of solid runoff")이라 육지가 거의 0(흰색)이었음. **총 유출은 `runf`**. 성분 분해도 있음: `soil_rbf`(baseflow)·`soil_rie`(침투초과)·`soil_rsn`(포화)·`hrunf`(현열). 과제 핵심 "지면→해양 결합 매개(담수유출)"엔 `runf` 또는 하천 라우팅(river.F90) 사용. **runoff 그림 재작성 필요**.
+
+**LAI vs GIMMS LAI4g (JJA)**: 단일해(1982) + 5년평균(1982-1986). GIMMS 1982부터라 공통기간 1982-1986. 스크립트 `lm4/scripts/{extract_lm4_lai_jja,extract_lm4_lai_years,plot_lai_compare,plot_lai_compare_5yr}.py`, 그림 `figures/lm4_vs_gimms_lai_jja{1982,_5yr}.png`.
+- 5년평균 **공간상관 0.66, bias +0.69**. 공간패턴 좋음(r 안정 0.63-0.65), 계통편차 = **열대 LM4 과대, 아북극 LM4 과소** = [[CRESCENDO 다중LSM 평가]]의 공통 편향과 일치(커뮤니티 공통 난제, LM4 고유 결함 아님).
+- **★ LAI 아직 상승 중**: 전지구 JJA LAI 2.37(1982)→2.50(1986), +5.5%. GIMMS는 2.11에서 평평 → bias가 매년 벌어짐(+0.61→+0.75). **느린 풀(토양탄소·목재)은 평형이나 잎(LAI)은 결합→offline 전환 후 아직 조정 중.** LAI 안정엔 ~10년 필요 추정.
+- **사막 처리 차이**: LM4는 사막도 0에 가까운 작은 양수(사하라 0.01), **GIMMS는 극건조 사막 마스킹(NaN)**. bias는 GIMMS 유효(식생)격자에서만 계산 → 사막 오염 없음. 반건조(호주내륙)는 둘 다 값 있음(LM4 0.31 vs GIMMS 0.27).
+
+**PFT 분해** (`land_month_by_species`, species=7): prioria(열대상록), picea(가문비), larix(낙엽송), acer(단풍), c4grass, c3grass, default. 종별 `lai`(time,species,grid_index)로 PFT share = lai_sp/total. 스크립트 `lm4/scripts/{extract_pft,plot_pft}.py`, 그림 `figures/lm4_pft_composition.png`.
+- 고LAI 지역별 우점 PFT(물리적 타당): **Amazon prioria 52%·c3grass 39% / Congo·SE Asia prioria 83-84% / Boreal N.Am picea 60% / Siberia c3grass 50%·picea 38% / E-US acer 77%**. 전지구 잎면적 share: c3grass 39%·prioria 32%·picea 15%·acer 10%.
+
+**논문**(reference/papers/, Notion 문헌DB 등록): Shevliakova 2024 JAMES(LM4.1 공식), Weng 2015 BG(PPA 원전), Weng 2019 BG(경쟁·N/CO2), CRESCENDO 2025 BG(다중LSM LAI 방법론+공통편향).

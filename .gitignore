@@ -55,3 +55,7 @@ KIOST-ESM2/
 *.tar.gz
 *.tar.gz.enc
 *.enc
+
+# Copyrighted reference papers (kept local, not in git)
+reference/**/*.pdf
+reference/*.pdf
