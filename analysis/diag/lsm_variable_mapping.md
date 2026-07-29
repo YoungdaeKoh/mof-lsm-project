@@ -51,7 +51,7 @@
 
 | CMIP | 물리량 | LM4 (native) | LM4 (cmip) | CLM5 | Noah-MP | JULES |
 |---|---|---|---|---|---|---|
-| `mrro` | **총 유출** ※ | **`runf`** ※ | `mrro` ※ | `TOTRUNOFF` | `SFCRNOFF`+`UGDRNOFF` | `runoff` |
+| `mrro` | **총 유출** ※ | **`runf`** ※ | `mrro` ※ | `TOTRUNOFF`(=`QRUNOFF`) ※ | `SFCRNOFF`+`UGDRNOFF` **(누적 mm!)** ※ | `runoff` ※ |
 | `mrros` | 지표 유출 | `soil_rie`(침투초과)+`soil_rsn`(포화) | `mrros` | `QOVER` | `SFCRNOFF` | **`surf_roff`** |
 | (지하) | 지하 배수 | `soil_rbf`(baseflow) | — | `QDRAI` | `UGDRNOFF` | **`sub_surf_roff`** |
 | `mrtws` | 총 육수저장 | `water_soil`+`water_lake` | `mrtws` | `TWS` | — (계산 필요) | — (계산 필요) |
@@ -68,8 +68,33 @@ mrro = lrunf_ie + lrunf_sn + lrunf_bf + lrunf_nu ! soil.F90:2996 — 액체만, 
 
 - **해양 담수 총량**(과제 핵심)에는 빙설 융해수가 들어가야 하므로 **`runf` 계열**.
 - **ILAMB·CMIP 표준 비교**에는 `mrro`를 쓰되 **빙설·빙하 기여 제외**를 명시.
-- **다른 3개 모델도 같은 함정이 있을 수 있으나 미검증**: CLM5 `TOTRUNOFF`, Noah-MP `SFCRNOFF+UGDRNOFF`, JULES `runoff`가 각각 빙하·호수·고체 유출을 포함하는지 **모델별로 확인 후** 표를 확정할 것. 확인 전에는 이 행으로 모델 간 유출 비교를 하지 말 것.
 - 검사 도구: `lm4/scripts/cmp_native_vs_cmip_streams.py`. 상세 `lm4/LM4_LAI_CODE_TRACE.md` §10.
+
+### ※※ 4개 모델 총유출 정의 대조 (2026-07-29, 전부 소스 확인)
+
+| 모델 | 변수 | 단위 | 실제 정의 | 근거 |
+|---|---|---|---|---|
+| **LM4** | `runf` | kg/(m²s) | `snow_lrunf+snow_frunf+subs_lrunf` — **고체 포함**, 빙하·호수 타일 포함 | `land_model.F90:2550` |
+| | `mrro` | kg/(m²s) | `lrunf_ie+lrunf_sn+lrunf_bf+lrunf_nu` — 액체만, soil 타일만 | `soil.F90:2996` |
+| | `frunf` | | 고체(빙설) 유출 단독 | §13.24 |
+| **CLM5** | `TOTRUNOFF` | mm/s | **`QRUNOFF`의 별칭일 뿐** (진단패키지가 그대로 읽음) | `lnd_diag/shared/lnd_func.ncl:159-161` |
+| | `QRUNOFF` | mm/s | "total **liquid** runoff not including correction for land use change" | `WaterfluxType.F90:326` |
+| | `QSNWCPICE` | mm H2O/s | "excess **solid** h2o due to snow capping" — **고체 유출 별도 변수** | `WaterfluxType.F90:453` |
+| | `QRGWL` | mm/s | 빙하(액체)·습지·호수 유출, **QSNWCPICE의 융해분 포함** | `variable_master4.3.ncl` |
+| **Noah-MP** | `SFCRNOFF` | **mm (누적)** | "Accumulatetd surface runoff" | LDASOUT 헤더 |
+| | `UGDRNOFF` | **mm (누적)** | "Accumulated underground runoff" | LDASOUT 헤더 |
+| **JULES** | `runoff` | kg/(m²s) | `sub_surf_roff_gb + surf_roff_gb` — 격자평균 두 성분 합 | `extract_var.inc:978-980` |
+
+**★★ 함정 3개 (전부 조용히 틀린 답을 준다)**
+
+1. **Noah-MP는 유량률이 아니라 누적값(mm)이다.** `ACSNOM`(융설)도 마찬가지. **시간차분 후 Δt로 나눠야** 다른 모델(mm/s)과 같은 양이 된다. 안 하면 단위부터 다른데 숫자는 그럴듯하게 나온다.
+2. **고체(빙설) 유출을 별도 변수로 내는 건 LM4(`frunf`)와 CLM5(`QSNWCPICE`)뿐이다.** Noah-MP(HRLDAS offline)·JULES에는 그 개념이 없다 — Noah-MP는 빙하 역학이 없어 빙상 SWE가 상한까지 쌓이기만 하고([[lsm-spinup-ice-mask-convergence]]), **빙상 담수 기여가 구조적으로 결여**된다.
+3. **"총 유출"의 타일 범위가 제각각**이다. LM4 `mrro`는 soil 타일만, LM4 `runf`·CLM `QRUNOFF`는 빙하·호수 포함, JULES는 전 타일 격자평균.
+
+**★ 모델 간 비교 시 지킬 규칙**
+- 4모델 공통 최대공약수는 **"액체 총유출"**: LM4 `runf − frunf`(또는 `mrro`, 단 타일범위 주의) · CLM `QRUNOFF` · Noah-MP `d(SFCRNOFF+UGDRNOFF)/dt` · JULES `runoff`.
+- **해양 담수 총량**을 볼 때는 고체가 필요하므로 LM4 `runf`, CLM `QRUNOFF+QSNWCPICE`. **Noah-MP·JULES는 이 비교에 참여 불가**(변수 부재).
+- **빙상 격자는 마스크할 것.** 모델마다 빙하 물리 자체가 달라 그대로 평균 내면 물리 차이가 아니라 구현 유무를 비교하게 된다.
 
 **하천 라우팅 정리**:
 1. **CLM5** — MOSART(별도 ROF 컴포넌트)가 이미 출력 중. `areatotal`(유역 상류면적)까지 포함.
