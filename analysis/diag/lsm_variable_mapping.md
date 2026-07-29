@@ -49,8 +49,10 @@
 | — | **고체(빙설) 유출** | **`frunf`** | — | `QRGWL`(부분) | — | — |
 | — | **하천 방류** | **없음** | 없음 | MOSART 별도 | 없음(라우팅 미탑재) | 없음 |
 
-**★ 확인된 구멍 2개** (T3-1·T3-2와 동일):
-1. **하천 방류는 4개 모델 어디에도 지금 출력이 없습니다.** CLM5만 MOSART로 가능(별도 컴포넌트). LM4는 `river.F90`이 있으나 현재 diag_table에 river 스트림 미정의. **GRDC 검증을 하려면 이걸 먼저 켜야 합니다.**
+**★ 하천 방류 (2026-07-29 갱신 — 최초 판단은 오판이었음)**:
+1. **CLM5는 이미 출력 중**입니다 — `clm5_bgc_ad.mosart.h0.*`에 `RIVER_DISCHARGE_OVER_LAND_LIQ`·`DIRECT_DISCHARGE_TO_OCEAN_LIQ`·`TOTAL_DISCHARGE_TO_OCEAN_*`·`areatotal`(유역 상류면적).
+2. **LM4도 river 모듈이 계속 돌고 있었고**(`INPUT/river.res.tile1~6.nc` + `&river_nml`), diag_table에만 안 걸려 있었습니다. **2026-07-29에 `river_month`/`river_daily` 추가 → 1997 세그먼트부터 출력.** 핵심 필드 `dis_liq`(해양 액체방류), `rv_Qavg`(**m³/s**, GRDC와 동일 단위). 상세 `LM4_SPINUP_NOTES.md` §13.28.
+3. Noah-MP(HRLDAS)·JULES는 라우팅 미탑재 — 격자 runoff까지만.
 2. **고체 유출은 LM4만 별도 변수(`frunf`)를 냅니다.** 담수 총량을 모델 간 같은 정의로 맞추려면 성분 정의를 문서에 못박아야 함(§13.24 오인 전례).
 
 ---

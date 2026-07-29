@@ -627,3 +627,36 @@ Phase 2 역학식생 실험은 **이 30년 offline 평형을 초기장으로 삼
 **★ CLM5 BGC-AD는 Sp 벤치(35.3분/년, `CLM5_SPINUP_NOTES.md` §5)의 약 4배 느림.** BGC(탄소·질소) 비용. 200년을 다 채우기보다 **TOTECOSYSC 표류 ≤1 gC/m²/yr 도달 시 조기 종료** 판단이 현실적.
 
 **남은 작업 (우선순위)**: ① 평가용 **토양수분·토양온도 관측 DB** 미착수(1차년도 점검기준 명시 항목, 최대 갭) — ERA5-Land/ESA CCI SM/GLEAM ② runoff 그림 `runf`로 재작성(§13.24) ③ FluxCom·GRDC 확보 ④ 30년 완주 후 후반 10~15년으로 진단 기간 확정(§13.25).
+
+### 13.28 ★★ river 모듈은 처음부터 돌고 있었다 — 출력만 안 걸려 있었음 (2026-07-29)
+
+**발단**: 다중 LSM 변수 매핑(`analysis/diag/lsm_variable_mapping.md`) 중 "하천 방류가 4개 모델 어디에도 없다"고 판단 → 오판이었음. 확인 결과 **CLM5는 MOSART가 이미 방류를 출력 중**이었고(`clm5_bgc_ad.mosart.h0.*`에 `RIVER_DISCHARGE_OVER_LAND_LIQ`·`DIRECT_DISCHARGE_TO_OCEAN_LIQ`·`TOTAL_DISCHARGE_TO_OCEAN_*`·`areatotal`), **LM4도 river 모듈이 활성**이었음.
+
+**LM4 river가 살아있다는 증거** (추측 아님):
+- `INPUT/river.res.tile1~6.nc` (하천 상태 restart, KIOST 평형에서 warm-start) + `river_data.tile*.nc`(하천망) + `river_iron.nc`
+- `input.nml`에 `&river_nml`(dt_slow=86400, DHG 하폭수리기하 계수)·`&river_physics_nml` 설정됨
+- **즉 물은 하천망을 따라 흘러 바다로 나가고 있었고, 그 값을 파일에 안 썼을 뿐.** `diag_table`의 river 항목 수 = **0**이었음.
+
+**소스에서 확인한 river 진단 필드** (`src/lm4P/river/river.F90` `register_diag_field`, 모듈명 `river`):
+
+| 필드 | 설명 | 단위 |
+|---|---|---|
+| **`dis_liq`** | **liquid discharge to ocean** | kg/(m² s) |
+| `dis_ice` | ice discharge to ocean | kg/(m² s) |
+| `dis_heat` | 열 방류 | |
+| **`rv_Qavg`** | long-time average vol. flow | **m³/s** |
+| `rv_o_<tr>` / `rv_i_` / `rv_s_` 등 | 하천 유출/유입/저류 (tracer: `h2o`·`ice`·`het`) | |
+| `rv_depth`·`rv_width`·`rv_veloc` | 하천 수심·폭·유속 | |
+
+- **★ `rv_Qavg`가 m³/s** → **GRDC 관측 유량과 단위 변환 없이 직접 비교 가능.**
+- 격자: 6타일이면 `grid_xt`/`grid_yt` + `geolon_t`/`geolat_t` aux (land 스트림과 동일 C96) → 기존 land 분석 좌표 그대로 재사용 가능.
+
+**조치 (2026-07-29 적용)**: `diag_table`에 `river_month`(8필드)·`river_daily`(4필드) 스트림 추가. 서버 원본은 `diag_table.bak_20260729`로 백업. 편집은 scp→로컬→scp 패턴.
+- **재컴파일·잡 중단 불필요**: FMS는 세그먼트마다 실행파일을 새로 띄우며 diag_table을 재독. → **1997 세그먼트부터 자동 반영**, 진행 중이던 1996 세그먼트엔 영향 없음.
+- 일별을 같이 건 이유: GRDC가 대개 일유량이고 홍수 첨두는 월평균에서 소실됨.
+
+**★ 출력 구성이 세그먼트 중간에 바뀐 상태**: 1981-1996 = river 출력 없음 / 1997-2010 = 있음. **§13.25 결론(진단 기간 = 후반 10~15년)과 겹쳐서 실질 손실은 거의 없음.** 다만 전 기간 시계열을 그리면 1997에서 계열이 시작되므로 그림 캡션에 명시할 것.
+
+**미검증 (다음 세션 확인)**: 1997 세그먼트 산출물에 `19970101.river_month.tile*.nc`·`river_daily`가 실제로 생기는지. 필드명 오타가 있으면 FMS가 경고만 내고 조용히 건너뛰므로 **파일 존재 + 변수 목록을 반드시 눈으로 확인할 것.**
+
+**교훈**: "출력에 없다 ≠ 모델이 계산 안 한다." 진단 변수 부재를 보면 **먼저 소스의 `register_diag_field`와 restart/INPUT을 확인**할 것. 매핑표를 출력 헤더만으로 만들면 이런 착각을 한다.
