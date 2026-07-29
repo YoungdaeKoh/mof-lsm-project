@@ -51,13 +51,25 @@
 
 | CMIP | 물리량 | LM4 (native) | LM4 (cmip) | CLM5 | Noah-MP | JULES |
 |---|---|---|---|---|---|---|
-| `mrro` | **총 유출** | **`runf`** | `mrro` | `TOTRUNOFF` | `SFCRNOFF`+`UGDRNOFF` | `runoff` |
+| `mrro` | **총 유출** ※ | **`runf`** ※ | `mrro` ※ | `TOTRUNOFF` | `SFCRNOFF`+`UGDRNOFF` | `runoff` |
 | `mrros` | 지표 유출 | `soil_rie`(침투초과)+`soil_rsn`(포화) | `mrros` | `QOVER` | `SFCRNOFF` | **`surf_roff`** |
 | (지하) | 지하 배수 | `soil_rbf`(baseflow) | — | `QDRAI` | `UGDRNOFF` | **`sub_surf_roff`** |
 | `mrtws` | 총 육수저장 | `water_soil`+`water_lake` | `mrtws` | `TWS` | — (계산 필요) | — (계산 필요) |
 | — | **고체(빙설) 유출** | **`frunf`** | — | `QRGWL`(부분) | — | — |
 | — | **하천 방류(해양)** | **`dis_liq`·`dis_ice`** | — | `DIRECT_/TOTAL_DISCHARGE_TO_OCEAN_LIQ` | 없음 | 없음 |
 | — | **하천 유량** | **`rv_Qavg`** (m³/s) | — | `RIVER_DISCHARGE_OVER_LAND_LIQ` | 없음 | 없음 |
+
+**※ 이 행의 셀들은 서로 같은 양이 아니다 (2026-07-29 실측).** LM4 안에서만도 native `runf`와 CMIP `mrro`가 **37% 다르다**(1995 전지구 평균 8.504e-6 vs 5.340e-6, 공간상관 0.918, 격자 수는 동일하므로 마스크 아님).
+
+```fortran
+runf = snow_lrunf + snow_frunf + subs_lrunf   ! land_model.F90:2550 — 고체유출 포함, 빙하·호수 타일 포함
+mrro = lrunf_ie + lrunf_sn + lrunf_bf + lrunf_nu ! soil.F90:2996 — 액체만, soil 타일만
+```
+
+- **해양 담수 총량**(과제 핵심)에는 빙설 융해수가 들어가야 하므로 **`runf` 계열**.
+- **ILAMB·CMIP 표준 비교**에는 `mrro`를 쓰되 **빙설·빙하 기여 제외**를 명시.
+- **다른 3개 모델도 같은 함정이 있을 수 있으나 미검증**: CLM5 `TOTRUNOFF`, Noah-MP `SFCRNOFF+UGDRNOFF`, JULES `runoff`가 각각 빙하·호수·고체 유출을 포함하는지 **모델별로 확인 후** 표를 확정할 것. 확인 전에는 이 행으로 모델 간 유출 비교를 하지 말 것.
+- 검사 도구: `lm4/scripts/cmp_native_vs_cmip_streams.py`. 상세 `lm4/LM4_LAI_CODE_TRACE.md` §10.
 
 **하천 라우팅 정리**:
 1. **CLM5** — MOSART(별도 ROF 컴포넌트)가 이미 출력 중. `areatotal`(유역 상류면적)까지 포함.
