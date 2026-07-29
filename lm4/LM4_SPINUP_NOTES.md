@@ -586,3 +586,44 @@ Phase 2 역학식생 실험은 **이 30년 offline 평형을 초기장으로 삼
 - 고LAI 지역별 우점 PFT(물리적 타당): **Amazon prioria 52%·c3grass 39% / Congo·SE Asia prioria 83-84% / Boreal N.Am picea 60% / Siberia c3grass 50%·picea 38% / E-US acer 77%**. 전지구 잎면적 share: c3grass 39%·prioria 32%·picea 15%·acer 10%.
 
 **논문**(reference/papers/, Notion 문헌DB 등록): Shevliakova 2024 JAMES(LM4.1 공식), Weng 2015 BG(PPA 원전), Weng 2019 BG(경쟁·N/CO2), CRESCENDO 2025 BG(다중LSM LAI 방법론+공통편향).
+
+### 13.25 12년치(1981-1992) spin-up 궤적 — 느린 풀 평형, LAI·유출은 아직 조정 중 (2026-07-27, 박제 2026-07-29)
+
+`lm4_spinup30` 첫 12 세그먼트 월별 land-mean. 데이터 `lm4/data/monthly_11yr.csv`(서버 `RUN/lm4_spinup30/monthly_11yr.csv` 복사본), 스크립트 `lm4/scripts/{extract_monthly_11yr,plot_11yr}.py`, 그림 `figures/lm4_spinup_11yr.png`. **132 레코드 = 12년 × 11개월**(§13.24의 12월 누락 그대로) → 연평균은 **Jan-Nov 평균**. 표류 판정엔 무해(매년 동일 계절 샘플).
+
+| 변수 | 1981 | 1992 | Δ (11년) | 연 표류 | 판정 |
+|---|---|---|---|---|---|
+| **bwood** (목재 C) | 1.678 | 1.667 | **−0.7%** | −0.0005 kgC/m²/yr | **평형** |
+| col_water | 3422.6 | 3392.1 | −0.9% | −2.68 kg/m²/yr | 준평형(느린 배수) |
+| theta_sfc | 0.598 | 0.590 | −1.4% | −0.0008 m³/m³/yr | 준평형 |
+| SWE | 85.8 | 84.9 | −1.1% | −0.124 kg/m²/yr | 준평형 |
+| GPP | 1.137 | 1.149 | +1.0% | +0.0022 kgC/m²/yr² | 준평형 |
+| soilC | 7.430 | 7.675 | +3.3% | **+0.021 kgC/m²/yr** | 완만 상승 |
+| **LAI** | 2.075 | 2.271 | **+9.4%** | **+0.0153 /yr** | **미평형** |
+| **runoff (`runf`)** | 0.764 | 0.667 | **−12.7%** | −0.0058 mm/d/yr | **미평형** |
+| soilT_2m | 288.65 | 289.29 | +0.2% | +0.060 K/yr | 상승 中 |
+
+- **★ 계층적 수렴이 뚜렷**: 목재(가장 느린 탄소풀)가 이미 평형인데 **잎(LAI)만 +9.4%로 계속 상승** → KIOST 결합 평형에서 offline WFDE5로 갈아탄 뒤 **엽면적이 새 강제장에 재적응 중**. §13.24의 5년치 추정(+5.5%, "안정에 ~10년")과 일관 — **12년 시점에도 아직 안 멈춤**.
+- **★ runoff −12.7%는 LAI 상승의 귀결로 읽힘**: 잎이 늘면 증산·차단이 늘어 유출이 준다. evap은 −2.4%로 거의 평평한데 runoff만 크게 준 건 **col_water 감소(−30 kg/m²)와 짝** → 물수지가 아직 재분배 중. **1차년도 진단에서 유출을 관측(GRDC)과 비교할 땐 초기 수년을 버리고 후반부를 쓸 것.**
+- **soilT_2m +0.06 K/yr**: 2 m 심층온도가 아직 상승 中. §13.6의 wrap 열충격([[lsm-cyclic-forcing-wrap-shock]])과 별개 — 이 런은 아직 1 cycle 내부라 되감기 미발생.
+- **결론: 30년 중 12년 시점에서 "느린 탄소·물 저장고는 평형, 식생-수문 결합은 조정 中".** 진단용 기간은 **후반 10~15년**(1996~2010)을 권장.
+
+### 13.26 LAI vs GIMMS 재계산 — 공통 1° 격자·datakit native (2026-07-27, 박제 2026-07-29)
+
+§13.24의 비교를 **격자 정합을 제대로 잡아** 다시 계산. 스크립트 `lm4/scripts/{gv_datakit_gimms,lai_metrics_1deg,plot_lai_1deg}.py`, 그림 `figures/lai_1deg_compare.png`.
+- **방법 변경**: GIMMS를 `/Users/youngdaekoh/data2/LAI-DataKit/derived/gimms_lai4g/native0083/consolidated`(**native 1/12°**, 2160×4320, 반월별)에서 읽어 **12×12 픽셀 박스평균으로 1°로 상향**, LM4 C96 점은 각 1° 박스에 binning. 양쪽 유효 격자(GIMMS 유효 = 식생지)에서만 지표 산출.
+- **결과 (JJA 1982-1986, n=12,401 육지 1°셀)**: **r = 0.71 · bias = +0.61 · RMSE = 1.60**.
+- **★ §13.24(0.5°, r 0.66/bias +0.69)와 다른 값이지만 결론은 동일** — 격자·집계 방법이 달라서지 결과가 바뀐 게 아님. 1°로 올리면 소규모 잡음이 평균돼 **r이 오르는 게 정상**. 다른 모델과 비교 표를 만들 땐 **반드시 같은 공통격자·같은 마스크로** 재계산할 것([[lsm-landmean-comparability]]).
+- **편차 구조 재확인**: 차이맵은 **열대(Amazon·Congo·SE Asia) 진한 적색(LM4 과대)**, **북미 boreal·시베리아 청색(LM4 과소)**. 동일 위도대 zonal-mean에서 적도 LM4 ~6.0 vs GIMMS ~4.4, 60-70°N은 LM4가 약간 낮음. = CRESCENDO 공통편향과 일치.
+- **★ 중간산출 npz 미보존**: `lm4_lai_jja_1982_1986.npz`(서버 추출본)·`lai_1deg_1982_1986.npz`가 로컬에 없음 — 작업 cwd에서 실행돼 유실. 재작도하려면 `extract_lm4_lai_years.py`부터 다시 돌려야 함. **다음부터 중간 npz는 `lm4/data/`에 저장할 것**([[lsm-spinup-raw-preservation]]).
+
+### 13.27 진행 상황 스냅샷 (2026-07-29 13:00)
+
+| 잡 | 진도 | 실측 페이스 | 완료 예상 |
+|---|---|---|---|
+| 8305 `lm4_spinup30` (24 PE, WFDE5 1981-2010, dynveg) | **1996 세그먼트 = 16/30년** | 11.1 h/model-yr (§13.19 예측치와 일치) | 8월 초순 |
+| 8306 `clm5_bgc_ad` (48 PE, climate02) | **restart 0092 = 91/200년** | **~2.5 h/model-yr** | 8월 중순 |
+
+**★ CLM5 BGC-AD는 Sp 벤치(35.3분/년, `CLM5_SPINUP_NOTES.md` §5)의 약 4배 느림.** BGC(탄소·질소) 비용. 200년을 다 채우기보다 **TOTECOSYSC 표류 ≤1 gC/m²/yr 도달 시 조기 종료** 판단이 현실적.
+
+**남은 작업 (우선순위)**: ① 평가용 **토양수분·토양온도 관측 DB** 미착수(1차년도 점검기준 명시 항목, 최대 갭) — ERA5-Land/ESA CCI SM/GLEAM ② runoff 그림 `runf`로 재작성(§13.24) ③ FluxCom·GRDC 확보 ④ 30년 완주 후 후반 10~15년으로 진단 기간 확정(§13.25).
