@@ -245,3 +245,22 @@ tpl_name = 'TPQWL','TPQWL','TPQWL','TPQWL','TPQWL','Solr','Prec'   # %vv ← tpl
 - 검증: TBOT 154~328 K, FSDS 0~1400, PRECTmms 0~0.015, 0 K 셀 0.
 
 **다음(JULES 1° 연결):** ① `model_grid.nml` nx=360 ny=180. ② **1° grid_info.nc**(land mask + 좌표) 필요 — 0.5° grid_info 재regrid 또는 표준 1° land mask. ③ drive.nml `%vv` 경로를 1° 파일로. ④ 48-rank MPI(§11) 1° spin-up.
+
+## MPI 재빌드 이후 출력 쓰기 실패 (2026-07-29, 미해결)
+
+`~/jules-vn7.4/build/bin/jules.exe`는 **2026-07-15 MPI(gfortran+mvapich2) 재빌드본**이고, 그 뒤로 성공한 런이 없다. 마지막 정상 출력은 `test_gridded_gf/output/` 2026-06-30 (serial 빌드 시절).
+
+**증상** (`~/JULES_runs/test_out36`, 2일 시험):
+```
+[INFO] init: Initialisation is complete
+[INFO] file_ncdf_open: Opening .../out36test.monthly.2010.nc for writing
+[FATAL ERROR] file_ncdf_open: NetCDF error - NetCDF: Parallel operation on file
+              opened for non-parallel access
+```
+- exe를 직접 실행하면 같은 지점에서 죽고, `mpirun -np 1`로 띄워도 동일.
+- 원인 추정: 링크된 netCDF(`4.6.1_gcc85`)가 **병렬 I/O 없이 빌드**됐는데 MPI 빌드 JULES가 병렬 접근 경로를 탄다.
+- 후보 대응: ① serial(nompi) 빌드를 별도 exe로 복구 ② 병렬 netCDF(pnetcdf/HDF5 parallel) 링크로 재빌드 ③ JULES 쪽 병렬 I/O 스위치 확인.
+
+**★ 단, 출력 변수명 검증은 이 실패와 무관하게 완료됐다.** JULES는 초기화 단계에서 출력 식별자를 검증한다 — `register_output_profile.inc:354`가 `get_var_id()`를 호출하고, 미등록 이름이면 `get_var_id.inc:49`에서 `"Unrecognised variable identifier"`로 즉사한다. **`init: Initialisation is complete`가 찍혔다 = 확장한 35변수 × 2 프로파일 + 일최고/최저 2개가 전부 유효**하다는 뜻(`jules/runs/test_gridded_gf_dgvm/output.nml`).
+
+**함께 확인된 것**: `zw`(지하수면)는 TOPMODEL 전용이라 `l_top=.false.`인 현재 설정에선 사용 불가 → 목록에서 제외함. `l_top=.true.`로 바꾸면 되돌릴 것.

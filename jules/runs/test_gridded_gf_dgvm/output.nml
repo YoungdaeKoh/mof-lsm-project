@@ -25,20 +25,20 @@
   output_main_run = .true.,
   output_period = -1,
 
-  nvars = 36
+  nvars = 35
 
   ! -- T1 vegetation
-  var(1)  = 'lai'              output_type(1)  = 'M'
-  var(2)  = 'canht'            output_type(2)  = 'M'
-  var(3)  = 'cv'               output_type(3)  = 'M'
-  var(4)  = 'gpp_gb'           output_type(4)  = 'M'
-  var(5)  = 'npp_gb'           output_type(5)  = 'M'
-  var(6)  = 'resp_p_gb'        output_type(6)  = 'M'
-  var(7)  = 'resp_s_gb'        output_type(7)  = 'M'
-  var(8)  = 'frac'             output_type(8)  = 'M'
+  var(1 ) = 'lai'              output_type(1 ) = 'M'
+  var(2 ) = 'canht'            output_type(2 ) = 'M'
+  var(3 ) = 'cv'               output_type(3 ) = 'M'
+  var(4 ) = 'gpp_gb'           output_type(4 ) = 'M'
+  var(5 ) = 'npp_gb'           output_type(5 ) = 'M'
+  var(6 ) = 'resp_p_gb'        output_type(6 ) = 'M'
+  var(7 ) = 'resp_s_gb'        output_type(7 ) = 'M'
+  var(8 ) = 'frac'             output_type(8 ) = 'M'
 
   ! -- T1 runoff
-  var(9)  = 'runoff'           output_type(9)  = 'M'
+  var(9 ) = 'runoff'           output_type(9 ) = 'M'
   var(10) = 'surf_roff'        output_type(10) = 'M'
   var(11) = 'sub_surf_roff'    output_type(11) = 'M'
 
@@ -62,18 +62,19 @@
   var(26) = 't_soil'           output_type(26) = 'M'
   var(27) = 'smc_tot'          output_type(27) = 'M'
   var(28) = 'cs'               output_type(28) = 'M'
-  var(29) = 'zw'               output_type(29) = 'M'
+! 'zw' (water table depth) needs TOPMODEL: only add it back when
+! jules_hydrology.nml has l_top = .true. (currently .false.).
 
   ! -- T2 snow
-  var(30) = 'snow_mass_gb'     output_type(30) = 'M'
-  var(31) = 'snow_frac'        output_type(31) = 'M'
-  var(32) = 'snow_depth'       output_type(32) = 'M'
-  var(33) = 'snow_melt_gb'     output_type(33) = 'M'
+  var(29) = 'snow_mass_gb'     output_type(29) = 'M'
+  var(30) = 'snow_frac'        output_type(30) = 'M'
+  var(31) = 'snow_depth'       output_type(31) = 'M'
+  var(32) = 'snow_melt_gb'     output_type(32) = 'M'
 
   ! -- T2 forcing control / surface state
-  var(34) = 't1p5m_gb'         output_type(34) = 'M'
-  var(35) = 'precip'           output_type(35) = 'M'
-  var(36) = 'tstar_gb'         output_type(36) = 'M'
+  var(33) = 't1p5m_gb'         output_type(33) = 'M'
+  var(34) = 'precip'           output_type(34) = 'M'
+  var(35) = 'tstar_gb'         output_type(35) = 'M'
 /
 
 !-----------------------------------------------------------------------------
@@ -87,18 +88,18 @@
   output_main_run = .true.,
   output_period = 86400,
 
-  nvars = 36
+  nvars = 35
 
-  var(1)  = 'lai'              output_type(1)  = 'M'
-  var(2)  = 'canht'            output_type(2)  = 'M'
-  var(3)  = 'cv'               output_type(3)  = 'M'
-  var(4)  = 'gpp_gb'           output_type(4)  = 'M'
-  var(5)  = 'npp_gb'           output_type(5)  = 'M'
-  var(6)  = 'resp_p_gb'        output_type(6)  = 'M'
-  var(7)  = 'resp_s_gb'        output_type(7)  = 'M'
-  var(8)  = 'frac'             output_type(8)  = 'M'
+  var(1 ) = 'lai'              output_type(1 ) = 'M'
+  var(2 ) = 'canht'            output_type(2 ) = 'M'
+  var(3 ) = 'cv'               output_type(3 ) = 'M'
+  var(4 ) = 'gpp_gb'           output_type(4 ) = 'M'
+  var(5 ) = 'npp_gb'           output_type(5 ) = 'M'
+  var(6 ) = 'resp_p_gb'        output_type(6 ) = 'M'
+  var(7 ) = 'resp_s_gb'        output_type(7 ) = 'M'
+  var(8 ) = 'frac'             output_type(8 ) = 'M'
 
-  var(9)  = 'runoff'           output_type(9)  = 'M'
+  var(9 ) = 'runoff'           output_type(9 ) = 'M'
   var(10) = 'surf_roff'        output_type(10) = 'M'
   var(11) = 'sub_surf_roff'    output_type(11) = 'M'
 
@@ -120,16 +121,17 @@
   var(26) = 't_soil'           output_type(26) = 'M'
   var(27) = 'smc_tot'          output_type(27) = 'M'
   var(28) = 'cs'               output_type(28) = 'M'
-  var(29) = 'zw'               output_type(29) = 'M'
+! 'zw' (water table depth) needs TOPMODEL: only add it back when
+! jules_hydrology.nml has l_top = .true. (currently .false.).
 
-  var(30) = 'snow_mass_gb'     output_type(30) = 'M'
-  var(31) = 'snow_frac'        output_type(31) = 'M'
-  var(32) = 'snow_depth'       output_type(32) = 'M'
-  var(33) = 'snow_melt_gb'     output_type(33) = 'M'
+  var(29) = 'snow_mass_gb'     output_type(29) = 'M'
+  var(30) = 'snow_frac'        output_type(30) = 'M'
+  var(31) = 'snow_depth'       output_type(31) = 'M'
+  var(32) = 'snow_melt_gb'     output_type(32) = 'M'
 
-  var(34) = 't1p5m_gb'         output_type(34) = 'M'
-  var(35) = 'precip'           output_type(35) = 'M'
-  var(36) = 'tstar_gb'         output_type(36) = 'M'
+  var(33) = 't1p5m_gb'         output_type(33) = 'M'
+  var(34) = 'precip'           output_type(34) = 'M'
+  var(35) = 'tstar_gb'         output_type(35) = 'M'
 /
 
 !-----------------------------------------------------------------------------
@@ -145,7 +147,7 @@
   output_period = 86400,
 
   nvars = 1
-  var(1) = 't1p5m_gb'          output_type(1) = 'X'
+  var(1 ) = 't1p5m_gb'         output_type(1 ) = 'X'
 /
 
 &JULES_OUTPUT_PROFILE
@@ -155,5 +157,5 @@
   output_period = 86400,
 
   nvars = 1
-  var(1) = 't1p5m_gb'          output_type(1) = 'N'
+  var(1 ) = 't1p5m_gb'         output_type(1 ) = 'N'
 /

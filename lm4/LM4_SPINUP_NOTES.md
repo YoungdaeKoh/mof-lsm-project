@@ -660,3 +660,47 @@ Phase 2 역학식생 실험은 **이 30년 offline 평형을 초기장으로 삼
 **미검증 (다음 세션 확인)**: 1997 세그먼트 산출물에 `19970101.river_month.tile*.nc`·`river_daily`가 실제로 생기는지. 필드명 오타가 있으면 FMS가 경고만 내고 조용히 건너뛰므로 **파일 존재 + 변수 목록을 반드시 눈으로 확인할 것.**
 
 **교훈**: "출력에 없다 ≠ 모델이 계산 안 한다." 진단 변수 부재를 보면 **먼저 소스의 `register_diag_field`와 restart/INPUT을 확인**할 것. 매핑표를 출력 헤더만으로 만들면 이런 착각을 한다.
+
+### 13.29 ★★ LAI가 코드에서 어떻게 만들어지는가 — 전체 추적 (2026-07-29)
+
+**상세 문서: `lm4/LM4_LAI_CODE_TRACE.md`** (파일·행번호·식·소비처·위도의존성까지. 코드를 안 열어도 확인 가능하도록 작성). 아래는 요약.
+
+**★ LAI는 예후변수가 아니다.** 예후변수는 `bl`(잎 탄소, kg C/individual)이고 **LAI = `bl`/`LMA`로 매 스텝 만드는 진단량**. `LMA`(leaf mass per area, 기본 0.036 kg C/m²)는 **종별 상수**(`vegn_data.F90:220`, namelist로 `specific_leaf_area`=1/LMA로도 지정 가능). → **"LAI가 왜 이런가"는 반드시 "`bl`이 왜 이런가"로 내려가야 함.**
+
+| 단계 | 위치 |
+|---|---|
+| 핵심 식 `area = bl/LMA` | `vegn_cohort.F90:567-578` (`leaf_area_from_biomass`) |
+| 코호트 LAI 확정 | `vegetation.F90:2307-2530`, 계산 본체 **2416-2424** |
+| `bl` 성장(배분) | `vegn_dynamics.F90:1710`, 상한 `bl_max`(1692-1701)·`deltaLAI_max`(1690) |
+| `bl` 낙엽 | `vegn_dynamics.F90:2188`, 직후 LAI 재계산 2192 |
+| 개엽/낙엽 스위치 | `vegn_dynamics.F90:2061-2228`, 트리거 **2109-2135** |
+
+- **목표 잎량** `bl_max = LMA × laimax × crownarea × (1-internal_gap_frac)` → **종별 `laimax`가 LAI 천장**. 편차 진단 시 1순위 파라미터.
+- **phenology 트리거**: 상록수는 항상 LEAF_ON. 낙엽수는 `gdd > gdd_crit .and. tc_pheno >= tc_crit .and. .not.drought` → 개엽 / `tc_pheno < tc_crit`(한랭, gdd 리셋) 또는 `drought`(건조, **gdd 리셋 안 함** — 아열대에서 잎이 영영 안 나는 걸 막기 위함, 소스 주석에 명시) → 낙엽.
+- **restart에 LAI는 없다.** `bl`만 저장, 재시작 시 재계산.
+- **소비처**: 복사(`vegn_radiation.F90:199,242,256-258`) · 광합성(`vegn_photosynthesis.F90:276,298`) · **`:380` `stomatal_cond = stomatal_cond*cohort%lai`**. → **기공전도도가 LAI에 정비례** = §13.25의 `LAI +9.4% ↔ runoff −12.7%` 연쇄가 나오는 지점.
+
+**★ 위도별로 다른 식이 아니다.** 코드에 위도 항 자체가 없고 전 지구 동일 식. 위도 효과는 ① 종 분포(`cover_type.nc` 처방, `do_biogeography=.FALSE.`) ② 종별 파라미터(`LMA`·`laimax`·`tc_crit`·`gdd_crit`·`phent`) ③ 국지 기후(`tc_pheno`·`gdd`·토양수분) **세 경로로만 간접 진입**. → §13.26의 아북극 과소편차는 **①/②/③ 중 무엇인지 갈라야** 손잡이가 정해짐(각각 `cover_type.nc` / `laimax`·`LMA` / `gdd_crit`·`tc_crit`).
+
+### 13.30 ★★ native `lai`와 CMIP `lai`는 다른 필드다 — 마스크가 −9% 차이 (2026-07-29)
+
+같은 코호트 상태에서 **두 개의 서로 다른 LAI 진단이 동시에 출력**되고 있음(`vegetation.F90`):
+
+| 스트림 | 송출 코드 | 정의 |
+|---|---|---|
+| native `lai` (`land_month`) | `:2120` `send_cohort_data(..., weight=layerfrac, op=OP_SUM)` | 코호트 LAI를 층분율 가중 합 |
+| CMIP `lai` (`land_month_cmip`) | `:2138` `send_tile_data(sum(nindivs*leafarea))` | 지면 단위면적당 총 잎면적 |
+
+**실측 (1995, 11개월, `lm4/scripts/cmp_lai_native_vs_cmip.py`)**:
+
+| | native | cmip |
+|---|---|---|
+| 유효 육지격자 | 17,306 | **18,704** |
+| 전지구 평균 | **2.2822** | **2.0721** |
+| 공통격자 평균 | 2.2822 | 2.2395 (−1.9%) |
+| 상관 | **0.9977** | 비율 median 0.9990 (p5 0.92) |
+
+1. **값 자체는 거의 동일** (r=0.998). → **§13.24·§13.26의 bias·상관 결론 재계산 불필요.** 우리가 쓴 건 전부 native(`extract_lm4_lai_years.py:35`·`extract_monthly_11yr.py:45`가 `land_month`를 읽음).
+2. **★ 진짜 차이는 마스크**: cmip은 `fill_missing=.TRUE.`(`vegetation.F90:1227`)라 **식생 없는 격자를 0으로 채움** → 격자 1,398개 추가, 전지구 평균이 **2.28 → 2.07 (−9%)**.
+
+**규칙**: 전지구 평균 LAI를 인용할 땐 **스트림·마스크를 반드시 명시**(§13.24의 "2.37→2.50"은 native 기준). GIMMS 비교는 GIMMS 유효격자에서만 계산하므로 영향 없음. **CMIP 아카이브·ILAMB 입력엔 cmip 스트림**을 쓸 것. [[lm4-lai-native-vs-cmip]]
