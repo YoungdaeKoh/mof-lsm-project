@@ -246,7 +246,35 @@ tpl_name = 'TPQWL','TPQWL','TPQWL','TPQWL','TPQWL','Solr','Prec'   # %vv ← tpl
 
 **다음(JULES 1° 연결):** ① `model_grid.nml` nx=360 ny=180. ② **1° grid_info.nc**(land mask + 좌표) 필요 — 0.5° grid_info 재regrid 또는 표준 1° land mask. ③ drive.nml `%vv` 경로를 1° 파일로. ④ 48-rank MPI(§11) 1° spin-up.
 
-## MPI 재빌드 이후 출력 쓰기 실패 (2026-07-29, 미해결)
+## MPI 빌드 + 병렬 netCDF (2026-07-29, 해결)
+
+**결론: `/usr/local/netcdf/4.6.1_intel21_mv234` + `/usr/local/hdf5/1.10.5_intel21_mv234` + mvapich2로 재빌드하면 된다.** 빌드 스크립트 `jules/scripts/build_jules_pnc.sh` (서버 `~/JULES_runs/build_jules_pnc.sh`).
+
+**원인**: JULES는 출력 파일을 열 때 **무조건** MPI communicator를 넘긴다 — `internal_open_output_file.inc:130`이 `mpi_local_comm`을 `file_ts_open`에 전달하고, `file_ncdf_open.inc:87`이 `IOR(nf90_clobber, nf90_netcdf4, nf90_mpiio)`로 생성한다. **런타임 스위치가 없다.** 따라서 MPI 빌드는 병렬 지원 netCDF가 필수인데, 기존 빌드가 가리키던 `/usr/local/netcdf/4.6.1_intel21`은 `nc-config --has-parallel -> no`였다 → 첫 출력 쓰기에서 `"Parallel operation on file opened for non-parallel access"`로 사망.
+
+**시스템에 이미 있는 병렬 스택** (직접 확인):
+
+| | 경로 | 확인 |
+|---|---|---|
+| netCDF | `/usr/local/netcdf/4.6.1_intel21_mv234` | `--has-parallel -> yes` |
+| HDF5 | `/usr/local/hdf5/1.10.5_intel21_mv234` | `libhdf5.settings`에 `Parallel HDF5: yes` |
+| MPI | `/usr/local/mpi/intel21/mvapich2-2.3.4` | netCDF/HDF5가 이걸로 빌드됨 |
+
+**★ 함정 1: `ldd`만 보고 판단하지 말 것.** 새 exe를 그냥 `ldd`하면 **비병렬** `4.6.1_intel21`과 oneAPI MPI를 가리킨다. 병렬/비병렬 netCDF가 **같은 soname**(`libnetcdf.so.13`)을 쓰고, mvapich2와 oneAPI MPI도 **둘 다 `libmpi.so.12`**(MPICH ABI)라서, **`LD_LIBRARY_PATH`에서 먼저 오는 쪽이 이긴다.** 실행 환경과 같은 `LD_LIBRARY_PATH`를 걸고 `ldd`해야 진짜 링크 대상이 보인다.
+
+**★ 함정 2: `nc-config --flibs`가 틀렸다.** mv234 설치의 `--flibs`가 `-L/usr/local/netcdf/4.6.1_intel21/lib`(비병렬)를 가리킨다. gcc85 설치도 같은 문제(intel21 경로를 뱉음). **nc-config 출력을 그대로 빌드에 쓰면 안 되고 경로를 직접 지정할 것.**
+
+**검증 (2일 시험 런, `~/JULES_runs/test_out36`, `mpirun -np 4`)**: rc=0, 22.7초 완주.
+- 프로파일 4개 전부 생성(`monthly`·`daily`·`daily_max`·`daily_min`), 월별 파일에 **좌표 4 + 데이터 35 = 39 변수** 정확히.
+- 값 정상: `ftl_gb` 평균 36.2 W/m²(−230~492), `latent_heat` 38.7(−84~344), `t1p5m_gb` 223~312 K, `snow_frac` 0~1, `frac` 평균 0.1111(=1/9, 지면타입 9개 합=1).
+- **물수지 정합**: `runoff` 9.8135e-5 = `surf_roff` 1.1283e-6 + `sub_surf_roff` 9.7006e-5 → `extract_var.inc:978`의 정의가 출력에서 확인됨.
+- 처리량 참고: 4랭크에서 2일 22.7초(초기화 포함) → 대략 70분/model-yr 수준. serial 81분/월(≈16 h/yr) 대비 크게 개선이나 **정식 벤치는 별도 필요**.
+
+**미해결로 남긴 것**: `zw`(지하수면)는 TOPMODEL 전용이라 `l_top=.false.`인 현재 설정에선 출력 목록에서 제외했다. `l_top=.true.`로 바꾸면 되돌릴 것.
+
+---
+
+## (이력) MPI 재빌드 이후 출력 쓰기 실패 (2026-07-29, 위에서 해결됨)
 
 `~/jules-vn7.4/build/bin/jules.exe`는 **2026-07-15 MPI(gfortran+mvapich2) 재빌드본**이고, 그 뒤로 성공한 런이 없다. 마지막 정상 출력은 `test_gridded_gf/output/` 2026-06-30 (serial 빌드 시절).
 
