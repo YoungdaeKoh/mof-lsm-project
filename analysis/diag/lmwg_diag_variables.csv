@@ -1,0 +1,1542 @@
+set,theme,variable,avg_op,longName,nativeUnits,flux,derived,source_file
+set10,CLM core,TSA,globalMeanNat1,2m air temperature,K,,,set10_clm.txt
+set10,CLM core,PREC,globalMeanDay1,ppt: rain+snow,mm/s,Y,Y,set10_clm.txt
+set10,CLM core,ASA,globalMeanNat0,all-sky albedo:FSR/FSDS,proportion,Y,Y,set10_clm.txt
+set10,CLM core,RNET,globalMeanNat0,net radiation:fsa-fira,W/m^2,Y,Y,set10_clm.txt
+set10,CLM core,LHEAT,globalMeanNat1,latent heat:FCTR+FCEV+FGEV,W/m^2,Y,Y,set10_clm.txt
+set10,CLM core,TOTRUNOFF,globalMeanDay0,Total Liquid Runoff,mm/s,Y,Y,set10_clm.txt
+set10,CLM core,QOVER,globalMeanDay0,surface runoff,mm/s,Y,,set10_clm.txt
+set10,CLM core,QRGWL,globalMeanDay0,"surface runoff at glaciers (liquid only), wetlands, lakes",mm/s,Y,,set10_clm.txt
+set10,CLM core,QRUNOFF_RAIN_TO_SNOW_CONVERSION,globalMeanDay0,liquid runoff from rain-to-snow conversion when this conversion leads to immediate runoff,mm/s,Y,,set10_clm.txt
+set10,CLM core,QDRAI,globalMeanDay0,sub-surface drainage,mm/s,Y,,set10_clm.txt
+set10,CLM core,QFLX_LIQ_DYNBAL,globalMeanDay0,liq dynamic land cover change conversion runoff flux,mm/s,Y,,set10_clm.txt
+set10,CLM core,QFLX_ICE_DYNBAL,globalMeanDay0,ice dynamic land cover change conversion runoff flux,mm/s,Y,,set10_clm.txt
+set10,CLM core,QRUNOFF_ICE,globalMeanDay0,total liquid runoff not incl correction for LULCC (ice landunits only),mm/s,Y,,set10_clm.txt
+set10,CLM core,SNOWDP,globalMeanNat0,snow height,m,,,set10_clm.txt
+set10,CLM core,FSH,globalMeanNat0,sensible heat,W/m^2,Y,,set10_clm.txt
+set10,CLM core,FSH_TO_COUPLER,globalMeanNat0,sensible heat sent to coupler,W/m^2,Y,,set10_clm.txt
+set10,CLM core,FSH_PRECIP_CONVERSION,globalMeanNat0,SHF from conv of rain/snow atm forcing,W/m^2,Y,,set10_clm.txt
+set10,CLM core,FSH_RUNOFF_ICE_TO_LIQ,globalMeanNat0,SHF from conv of ice runoff to liquid,W/m^2,Y,,set10_clm.txt
+set10,CLM core,TV,globalMeanNat0,vegetation temperature,K,,,set10_clm.txt
+set10,CLM core,TG,globalMeanNat0,ground temperature,K,,,set10_clm.txt
+set10,CLM core,FSA,globalMeanNat0,absorbed solar radiation,W/m^2,Y,,set10_clm.txt
+set10,CLM core,FSR,globalMeanNat0,reflected solar radiation,W/m^2,Y,,set10_clm.txt
+set10,CLM core,FIRA,globalMeanNat0,net infrared (longwave) radiation,W/m^2,Y,,set10_clm.txt
+set10,CLM core,FIRE,globalMeanNat0,emitted infrared (longwave) radiation,W/m^2,Y,,set10_clm.txt
+set10,CLM core,FGR,globalMeanNat0,heat flux into snow/soil (includes snow melt),W/m^2,Y,,set10_clm.txt
+set10,CLM core,FSM,globalMeanNat0,snow melt heat flux,W/m^2,Y,,set10_clm.txt
+set10,CLM core,H2OSNO,globalMeanNat0,total snow water equiv (SNOWICE + SNOWLIQ),mm,,,set10_clm.txt
+set10,CLM core,H2OSNO_ICE,globalMeanNat0,total snow water equiv (SNOWICE + SNOWLIQ) over glacier units,mm,,,set10_clm.txt
+set10,CLM core,QSNOMELT,globalMeanDay0,snow melt,mm/s,Y,,set10_clm.txt
+set10,CLM core,QSNOMELT_ICE,globalMeanDay0,snow melt over glacier units,mm/s,Y,,set10_clm.txt
+set10,CLM core,QSNOFRZ,globalMeanDay0,column-integrated snow freezing rate,mm/s,Y,,set10_clm.txt
+set10,CLM core,QSNOFRZ_ICE,globalMeanDay0,column-integrated snow freezing rate (ice landunits only),mm/s,Y,,set10_clm.txt
+set10,CLM core,QSOIL,globalMeanDay0,ground evaporation,mm/s,Y,,set10_clm.txt
+set10,CLM core,QSOIL_ICE,globalMeanDay0,ground evaporation over glacier units,mm/s,Y,,set10_clm.txt
+set10,CLM core,QICE_FRZ,globalMeanDay0,ice growth,mm/s,Y,,set10_clm.txt
+set10,CLM core,QICE_MELT,globalMeanDay0,ice melt,mm/s,Y,,set10_clm.txt
+set10,CLM core,QICE,globalMeanDay0,ice growth/melt,mm/s,Y,,set10_clm.txt
+set10,CLM core,FSNO,globalMeanNat0,fraction of ground covered by snow,unitless,,,set10_clm.txt
+set10,CLM core,SNOWDP,globalMeanNat0,snow height,m,,,set10_clm.txt
+set10,CLM core,RAIN,globalMeanDay0,atmospheric rain,mm/s,Y,,set10_clm.txt
+set10,CLM core,SNOW,globalMeanDay0,atmospheric snow,mm/s,Y,,set10_clm.txt
+set10,CLM core,RAIN_REPARTITIONED,globalMeanDay0,atmospheric rain after repartitioning,mm/s,Y,,set10_clm.txt
+set10,CLM core,SNOW_REPARTITIONED,globalMeanDay0,atmospheric snow after repartitioning,mm/s,Y,,set10_clm.txt
+set10,CLM core,P-E,globalMeanDay0,PREC-ET,mm/s,Y,Y,set10_clm.txt
+set10,CLM core,WIND,globalMeanNat0,atmospheric wind velocity magnitude,m/s,Y,,set10_clm.txt
+set10,CLM core,FLDS,globalMeanNat0,atmospheric longwave radiation,W/m^2,Y,,set10_clm.txt
+set10,CLM core,FSDS,globalMeanNat0,atmospheric incident solar radiation,W/m^2,Y,,set10_clm.txt
+set10,CLM core,Q2M,globalMeanNat0,2m specific humidity,kg/kg,,,set10_clm.txt
+set10,CLM core,RH2M,globalMeanNat0,2m relative humidity,%,,,set10_clm.txt
+set10,CLM core,TSOI,globalMeanNat0,soil temperature,K,,,set10_clm.txt
+set10,CLM core,TWS,globalMeanNat0,total water storage,mm,,,set10_clm.txt
+set10,CLM core,U10,globalMeanNat0,10-m wind,m/s,Y,,set10_clm.txt
+set10,CLM core,PBOT,globalMeanNat0,atm pressure of bottom layer,Pa,,,set10_clm.txt
+set11,CLM core,TSA,globalMeanNat1,2m air temperature,K,,,set11_clm.txt
+set11,CLM core,PREC,globalMeanDay1,ppt: rain+snow,mm/s,Y,Y,set11_clm.txt
+set11,CLM core,ASA,globalMeanNat0,all-sky albedo:FSR/FSDS,proportion,Y,Y,set11_clm.txt
+set11,CLM core,RNET,globalMeanNat0,net radiation:fsa-fira,W/m^2,Y,Y,set11_clm.txt
+set11,CLM core,LHEAT,globalMeanNat1,latent heat:FCTR+FCEV+FGEV,W/m^2,Y,Y,set11_clm.txt
+set11,CLM core,TOTRUNOFF,globalMeanDay0,Total Liquid Runoff,mm/s,Y,Y,set11_clm.txt
+set11,CLM core,QOVER,globalMeanDay0,surface runoff,mm/s,Y,,set11_clm.txt
+set11,CLM core,QRGWL,globalMeanDay0,"surface runoff at glaciers (liquid only), wetlands, lakes",mm/s,Y,,set11_clm.txt
+set11,CLM core,QRUNOFF_RAIN_TO_SNOW_CONVERSION,globalMeanDay0,liquid runoff from rain-to-snow conversion when this conversion leads to immediate runoff,mm/s,Y,,set11_clm.txt
+set11,CLM core,QDRAI,globalMeanDay0,sub-surface drainage,mm/s,Y,,set11_clm.txt
+set11,CLM core,QFLX_LIQ_DYNBAL,globalMeanDay0,liq dynamic land cover change conversion runoff flux,mm/s,Y,,set11_clm.txt
+set11,CLM core,QFLX_ICE_DYNBAL,globalMeanDay0,ice dynamic land cover change conversion runoff flux,mm/s,Y,,set11_clm.txt
+set11,CLM core,QRUNOFF_ICE,globalMeanDay0,total liquid runoff not incl correction for LULCC (ice landunits only),mm/s,Y,,set11_clm.txt
+set11,CLM core,SNOWDP,globalMeanNat0,snow height,m,,,set11_clm.txt
+set11,CLM core,FSH,globalMeanNat0,sensible heat,W/m^2,Y,,set11_clm.txt
+set11,CLM core,FSH_TO_COUPLER,globalMeanNat0,sensible heat sent to coupler,W/m^2,Y,,set11_clm.txt
+set11,CLM core,FSH_PRECIP_CONVERSION,globalMeanNat0,SHF from conv of rain/snow atm forcing,W/m^2,Y,,set11_clm.txt
+set11,CLM core,FSH_RUNOFF_ICE_TO_LIQ,globalMeanNat0,SHF from conv of ice runoff to liquid,W/m^2,Y,,set11_clm.txt
+set11,CLM core,TV,globalMeanNat0,vegetation temperature,K,,,set11_clm.txt
+set11,CLM core,TG,globalMeanNat0,ground temperature,K,,,set11_clm.txt
+set11,CLM core,FSA,globalMeanNat0,absorbed solar radiation,W/m^2,Y,,set11_clm.txt
+set11,CLM core,FSR,globalMeanNat0,reflected solar radiation,W/m^2,Y,,set11_clm.txt
+set11,CLM core,FIRA,globalMeanNat0,net infrared (longwave) radiation,W/m^2,Y,,set11_clm.txt
+set11,CLM core,FIRE,globalMeanNat0,emitted infrared (longwave) radiation,W/m^2,Y,,set11_clm.txt
+set11,CLM core,FGR,globalMeanNat0,heat flux into snow/soil (includes snow melt),W/m^2,Y,,set11_clm.txt
+set11,CLM core,FSM,globalMeanNat0,snow melt heat flux,W/m^2,Y,,set11_clm.txt
+set11,CLM core,H2OSNO,globalMeanNat0,total snow water equiv (SNOWICE + SNOWLIQ),mm,,,set11_clm.txt
+set11,CLM core,H2OSNO_ICE,globalMeanNat0,total snow water equiv (SNOWICE + SNOWLIQ) over glacier units,mm,,,set11_clm.txt
+set11,CLM core,QSNOMELT,globalMeanDay0,snow melt,mm/s,Y,,set11_clm.txt
+set11,CLM core,QSNOMELT_ICE,globalMeanDay0,snow melt over glacier units,mm/s,Y,,set11_clm.txt
+set11,CLM core,QSNOFRZ,globalMeanDay0,column-integrated snow freezing rate,mm/s,Y,,set11_clm.txt
+set11,CLM core,QSNOFRZ_ICE,globalMeanDay0,column-integrated snow freezing rate (ice landunits only),mm/s,Y,,set11_clm.txt
+set11,CLM core,QSOIL,globalMeanDay0,ground evaporation,mm/s,Y,,set11_clm.txt
+set11,CLM core,QSOIL_ICE,globalMeanDay0,ground evaporation over glacier units,mm/s,Y,,set11_clm.txt
+set11,CLM core,QICE_FRZ,globalMeanDay0,ice growth,mm/s,Y,,set11_clm.txt
+set11,CLM core,QICE_MELT,globalMeanDay0,ice melt,mm/s,Y,,set11_clm.txt
+set11,CLM core,QICE,globalMeanDay0,ice growth/melt,mm/s,Y,,set11_clm.txt
+set11,CLM core,FSNO,globalMeanNat0,fraction of ground covered by snow,unitless,,,set11_clm.txt
+set11,CLM core,SNOWDP,globalMeanNat0,snow height,m,,,set11_clm.txt
+set11,CLM core,RAIN,globalMeanDay0,atmospheric rain,mm/s,Y,,set11_clm.txt
+set11,CLM core,SNOW,globalMeanDay0,atmospheric snow,mm/s,Y,,set11_clm.txt
+set11,CLM core,RAIN_REPARTITIONED,globalMeanDay0,atmospheric rain after repartitioning,mm/s,Y,,set11_clm.txt
+set11,CLM core,SNOW_REPARTITIONED,globalMeanDay0,atmospheric snow after repartitioning,mm/s,Y,,set11_clm.txt
+set11,CLM core,P-E,globalMeanDay0,PREC-ET,mm/s,Y,Y,set11_clm.txt
+set11,CLM core,WIND,globalMeanNat0,atmospheric wind velocity magnitude,m/s,Y,,set11_clm.txt
+set11,CLM core,FLDS,globalMeanNat0,atmospheric longwave radiation,W/m^2,Y,,set11_clm.txt
+set11,CLM core,FSDS,globalMeanNat0,atmospheric incident solar radiation,W/m^2,Y,,set11_clm.txt
+set11,CLM core,Q2M,globalMeanNat0,2m specific humidity,kg/kg,,,set11_clm.txt
+set11,CLM core,RH2M,globalMeanNat0,2m relative humidity,%,,,set11_clm.txt
+set11,CLM core,TSOI,globalMeanNat0,soil temperature,K,,,set11_clm.txt
+set11,CLM core,TWS,globalMeanNat0,total water storage,mm,,,set11_clm.txt
+set11,CLM core,U10,globalMeanNat0,10-m wind,m/s,Y,,set11_clm.txt
+set11,CLM core,PBOT,globalMeanNat0,atm pressure of bottom layer,Pa,,,set11_clm.txt
+set1,C13 isotope,C13_NEE,globalTotlAnn,C13 Net Ecosys Exchange of C,gC/m^2/s,Y,,set1_c13.txt
+set1,C13 isotope,C13_NBP,globalTotlAnn,"C13 net biome production, includes fire, landuse and harvest flux",gC/m^2/s,Y,,set1_c13.txt
+set1,C13 isotope,C13_NEP,globalTotlAnn,C13 Net Ecosystem Production,gC/m^2/s,Y,,set1_c13.txt
+set1,C13 isotope,C13_GPP,globalTotlAnn,C13 Gross Primary Production,gC/m^2/s,Y,,set1_c13.txt
+set1,C13 isotope,C13_PSNSUN_TO_CPOOL,globalTotlAnn,C13 GPP from Sunlit Canopy,gC/m^2/s,Y,,set1_c13.txt
+set1,C13 isotope,C13_PSNSHADE_TO_CPOOL,globalTotlAnn,C13 GPP from Shaded Canopy,gC/m^2/s,Y,,set1_c13.txt
+set1,C13 isotope,C13_NPP,globalTotlAnn,C13 Net Primary Production,gC/m^2/s,Y,,set1_c13.txt
+set1,C13 isotope,C13_AGNPP,globalTotlAnn,C13 Aboveground NPP,gC/m^2/s,Y,,set1_c13.txt
+set1,C13 isotope,C13_BGNPP,globalTotlAnn,C13 Belowground NPP,gC/m^2/s,Y,,set1_c13.txt
+set1,C13 isotope,C13_MR,globalTotlAnn,C13 Maintenance Respiration,gC/m^2/s,Y,,set1_c13.txt
+set1,C13 isotope,C13_GR,globalTotlAnn,C13 Total Growth Respiration,gC/m^2/s,Y,,set1_c13.txt
+set1,C13 isotope,C13_AR,globalTotlAnn,C13 Autotrophic Respiration (MR + GR),gC/m^2/s,Y,,set1_c13.txt
+set1,C13 isotope,C13_LITHR,globalTotlAnn,C13 Litter Hetereotrophic Respiration,gC/m^2/s,Y,,set1_c13.txt
+set1,C13 isotope,C13_SOMHR,globalTotlAnn,C13 SOM Hetereotrophic Respiration,gC/m^2/s,Y,,set1_c13.txt
+set1,C13 isotope,C13_HR,globalTotlAnn,C13 Total Hetereotrophic Respiration,gC/m^2/s,Y,,set1_c13.txt
+set1,C13 isotope,C13_RR,globalTotlAnn,C13 Root Respiration (Fine Root MR + Total Root GR),gC/m^2/s,Y,,set1_c13.txt
+set1,C13 isotope,C13_SR,globalTotlAnn,C13 Totl Soil Respiration (HR + Root Resp),gC/m^2/s,Y,,set1_c13.txt
+set1,C13 isotope,C13_ER,globalTotlAnn,C13 Totl Ecosystem Respiration (AR + HR),gC/m^2/s,Y,,set1_c13.txt
+set1,C13 isotope,C13_LEAFC,globalTotlNat,C13 Leaf Carbon,gC/m^2,,,set1_c13.txt
+set1,C13 isotope,C13_SOIL3C,globalTotlNat,C13 Soil Organic Matter C (Slow Pool),gC/m^2,,,set1_c13.txt
+set1,C13 isotope,C13_SOIL4C,globalTotlNat,C13 Soil Organic Matter C (Slowest Pool),gC/m^2,,,set1_c13.txt
+set1,C13 isotope,C13_FROOTC,globalTotlNat,C13 Fine Root CC,gC/m^2,,,set1_c13.txt
+set1,C13 isotope,C13_LIVESTEMC,globalTotlNat,C13 Live Stem C,gC/m^2,,,set1_c13.txt
+set1,C13 isotope,C13_DEADSTEMC,globalTotlNat,C13 Dead Stem Carbon,gC/m^2,,,set1_c13.txt
+set1,C13 isotope,C13_LIVECROOTC,globalTotlNat,C13 Live Coarse Root Carbon,gC/m^2,,,set1_c13.txt
+set1,C13 isotope,C13_DEADCROOTC,globalTotlNat,C13 Dead Coarse Root Carbon,gC/m^2,,,set1_c13.txt
+set1,C13 isotope,C13_CPOOL,globalTotlNat,C13 Temporary Photosynthate C Pool,gC/m^2,,,set1_c13.txt
+set1,C13 isotope,C13_TOTVEGC,globalTotlNat,"C13 Total Vegetation C, Excluding Cpool",gC/m^2,,,set1_c13.txt
+set1,C13 isotope,C13_CWDC,globalTotlNat,C13 Coarse Woody Debris Carbon,gC/m^2,,,set1_c13.txt
+set1,C13 isotope,C13_CWD_C,globalTotlNat,C13 Coarse Woody Debris Carbon,gC/m^2,,,set1_c13.txt
+set1,C13 isotope,C13_TOTLITC,globalTotlNat,C13 Totl Litter Carbon,gC/m^2,,,set1_c13.txt
+set1,C13 isotope,C13_TOTSOMC,globalTotlNat,C13 Total SOM Carbon,gC/m^2,,,set1_c13.txt
+set1,C13 isotope,C13_TOTECOSYSC,globalTotlNat,"C13 Totl Ecosystem C, Incl Veg But Excl Cpool",gC/m^2,,,set1_c13.txt
+set1,C13 isotope,C13_COL_CTRUNC,globalTotlNat,C13 Column-Level Sink for C Truncation,gC/m^2,,,set1_c13.txt
+set1,C13 isotope,C13_PFT_CTRUNC,globalTotlNat,C13 Pft-Level Sink for C Truncation,gC/m^2,,,set1_c13.txt
+set1,C13 isotope,C13_COL_FIRE_CLOSS,globalTotlAnn,C13 Totl Col-Level Fire C Loss,gC/m^2/s,Y,,set1_c13.txt
+set1,C13 isotope,C13_PFT_FIRE_CLOSS,globalTotlAnn,C13 Totl Pft-Level Fire C Loss,gC/m^2/s,Y,,set1_c13.txt
+set1,C13 isotope,C14_NEE,globalTotlAnn,C14 Net Ecosys Exchange of C,gC/m^2/s,Y,,set1_c13.txt
+set1,C13 isotope,C14_NBP,globalTotlAnn,"C14 net biome production, includes fire, landuse and harvest flux",gC/m^2/s,Y,,set1_c13.txt
+set1,C13 isotope,C14_NEP,globalTotlAnn,C14 Net Ecosystem Production,gC/m^2/s,Y,,set1_c13.txt
+set1,C13 isotope,C14_GPP,globalTotlAnn,C14 Gross Primary Production,gC/m^2/s,Y,,set1_c13.txt
+set1,C13 isotope,C14_PSNSUN_TO_CPOOL,globalTotlAnn,C14 GPP from Sunlit Canopy,gC/m^2/s,Y,,set1_c13.txt
+set1,C13 isotope,C14_PSNSHADE_TO_CPOOL,globalTotlAnn,C14 GPP from Shaded Canopy,gC/m^2/s,Y,,set1_c13.txt
+set1,C13 isotope,C14_NPP,globalTotlAnn,C14 Net Primary Production,gC/m^2/s,Y,,set1_c13.txt
+set1,C13 isotope,C14_AGNPP,globalTotlAnn,C14 Aboveground NPP,gC/m^2/s,Y,,set1_c13.txt
+set1,C13 isotope,C14_BGNPP,globalTotlAnn,C14 Belowground NPP,gC/m^2/s,Y,,set1_c13.txt
+set1,C13 isotope,C14_MR,globalTotlAnn,C14 Maintenance Respiration,gC/m^2/s,Y,,set1_c13.txt
+set1,C13 isotope,C14_GR,globalTotlAnn,C14 Total Growth Respiration,gC/m^2/s,Y,,set1_c13.txt
+set1,C13 isotope,C14_AR,globalTotlAnn,C14 Autotrophic Respiration (MR + GR),gC/m^2/s,Y,,set1_c13.txt
+set1,C13 isotope,C14_LITHR,globalTotlAnn,C14 Litter Hetereotrophic Respiration,gC/m^2/s,Y,,set1_c13.txt
+set1,C13 isotope,C14_SOMHR,globalTotlAnn,C14 SOM Hetereotrophic Respiration,gC/m^2/s,Y,,set1_c13.txt
+set1,C13 isotope,C14_HR,globalTotlAnn,C14 Total Hetereotrophic Respiration,gC/m^2/s,Y,,set1_c13.txt
+set1,C13 isotope,C14_RR,globalTotlAnn,C14 Root Respiration (Fine Root MR + Total Root GR),gC/m^2/s,Y,,set1_c13.txt
+set1,C13 isotope,C14_SR,globalTotlAnn,C14 Totl Soil Respiration (HR + Root Resp),gC/m^2/s,Y,,set1_c13.txt
+set1,C13 isotope,C14_ER,globalTotlAnn,C14 Totl Ecosystem Respiration (AR + HR),gC/m^2/s,Y,,set1_c13.txt
+set1,C13 isotope,C14_LEAFC,globalTotlNat,C14 Leaf Carbon,gC/m^2,,,set1_c13.txt
+set1,C13 isotope,C14_SOIL3C,globalTotlNat,C14 Soil Organic Matter C (Slow Pool),gC/m^2,,,set1_c13.txt
+set1,C13 isotope,C14_SOIL4C,globalTotlNat,C14 Soil Organic Matter C (Slowest Pool),gC/m^2,,,set1_c13.txt
+set1,C13 isotope,C14_FROOTC,globalTotlNat,C14 Fine Root CC,gC/m^2,,,set1_c13.txt
+set1,C13 isotope,C14_LIVESTEMC,globalTotlNat,C14 Live Stem C,gC/m^2,,,set1_c13.txt
+set1,C13 isotope,C14_DEADSTEMC,globalTotlNat,C14 Dead Stem Carbon,gC/m^2,,,set1_c13.txt
+set1,C13 isotope,C14_LIVECROOTC,globalTotlNat,C14 Live Coarse Root Carbon,gC/m^2,,,set1_c13.txt
+set1,C13 isotope,C14_DEADCROOTC,globalTotlNat,C14 Dead Coarse Root Carbon,gC/m^2,,,set1_c13.txt
+set1,C13 isotope,C14_CPOOL,globalTotlNat,C14 Temporary Photosynthate C Pool,gC/m^2,,,set1_c13.txt
+set1,C13 isotope,C14_TOTVEGC,globalTotlNat,"C14 Total Vegetation C, Excluding Cpool",gC/m^2,,,set1_c13.txt
+set1,C13 isotope,C14_CWDC,globalTotlNat,C14 Coarse Woody Debris Carbon,gC/m^2,,,set1_c13.txt
+set1,C13 isotope,C14_CWD_C,globalTotlNat,C14 Coarse Woody Debris Carbon,gC/m^2,,,set1_c13.txt
+set1,C13 isotope,C14_TOTLITC,globalTotlNat,C14 Totl Litter Carbon,gC/m^2,,,set1_c13.txt
+set1,C13 isotope,C14_TOTSOMC,globalTotlNat,C14 Total SOM Carbon,gC/m^2,,,set1_c13.txt
+set1,C13 isotope,C14_TOTECOSYSC,globalTotlNat,"C14 Totl Ecosystem C, Incl Veg But Excl Cpool",gC/m^2,,,set1_c13.txt
+set1,C13 isotope,C14_COL_CTRUNC,globalTotlNat,C14 Column-Level Sink for C Truncation,gC/m^2,,,set1_c13.txt
+set1,C13 isotope,C14_PFT_CTRUNC,globalTotlNat,C14 Pft-Level Sink for C Truncation,gC/m^2,,,set1_c13.txt
+set1,C13 isotope,C14_COL_FIRE_CLOSS,globalTotlAnn,C14 Totl Col-Level Fire C Loss,gC/m^2/s,Y,,set1_c13.txt
+set1,C13 isotope,C14_PFT_FIRE_CLOSS,globalTotlAnn,C14 Totl Pft-Level Fire C Loss,gC/m^2/s,Y,,set1_c13.txt
+set1,CASA,SURFMETC,globalTotlNat,Total Metabolized Litter C,gC/m^2,,Y,set1_casa.txt
+set1,CASA,SURFSTRC,globalTotlNat,Total Structural Litter C,gC/m^2,,Y,set1_casa.txt
+set1,CASA,SOILMETC,globalTotlNat,Total Metabolized Structural Soil C,gC/m^2,,Y,set1_casa.txt
+set1,CASA,SOILSTRC,globalTotlNat,Total Structural Soil C,gC/m^2,,Y,set1_casa.txt
+set1,CASA,SURFMIC,globalTotlNat,Total Microbial Litter C,gC/m^2,,Y,set1_casa.txt
+set1,CASA,SOILMIC,globalTotlNat,Total Microbial Soil C,gC/m^2,,Y,set1_casa.txt
+set1,CASA,SLOWC,globalTotlNat,Total Slow C Pool,gC/m^2,,Y,set1_casa.txt
+set1,CASA,PASSIVEC,globalTotlNat,Total Passive C Pool,gC/m^2,,Y,set1_casa.txt
+set1,CASA,RESP_LEAFC,globalTotlNat,Respired Leaf C,gC/m^2,,Y,set1_casa.txt
+set1,CASA,RESP_WOODC,globalTotlNat,Respired Wood C,gC/m^2,,Y,set1_casa.txt
+set1,CASA,RESP_FROOTC,globalTotlNat,Respired Fine Root C,gC/m^2,,Y,set1_casa.txt
+set1,CASA,RESP_SURFMETC,globalTotlNat,Respired Metabolized Litter C,gC/m^2,,Y,set1_casa.txt
+set1,CASA,RESP_SURFSTRC,globalTotlNat,Respired Structural Litter C,gC/m^2,,Y,set1_casa.txt
+set1,CASA,RESP_SOILMETC,globalTotlNat,Respired Metabolized Soil C,gC/m^2,,Y,set1_casa.txt
+set1,CASA,RESP_SOILSTRC,globalTotlNat,Respired Structural Soil C,gC/m^2,,Y,set1_casa.txt
+set1,CASA,RESP_CWDC,globalTotlNat,Respired Coarse Woody Debris C,gC/m^2,,Y,set1_casa.txt
+set1,CASA,RESP_SURFMIC,globalTotlNat,Respired Microbial Litter C,gC/m^2,,Y,set1_casa.txt
+set1,CASA,RESP_SOILMIC,globalTotlNat,Respired Microbial Soil C,gC/m^2,,Y,set1_casa.txt
+set1,CASA,RESP_SLOWC,globalTotlNat,Respired Slow C Pool,gC/m^2,,Y,set1_casa.txt
+set1,CASA,RESP_PASSIVEC,globalTotlNat,Respired Passive C Pool,gC/m^2,,Y,set1_casa.txt
+set1,CASA,CLOSS_LEAF,globalTotlNat,Leaf C Loss,gC/m^2,,Y,set1_casa.txt
+set1,CASA,CLOSS_WOOD,globalTotlNat,Wood C Loss,gC/m^2,,Y,set1_casa.txt
+set1,CASA,CLOSS_FROOT,globalTotlNat,Fine Root C Loss,gC/m^2,,Y,set1_casa.txt
+set1,CASA,CLOSS_SURFMET,globalTotlNat,Metabolized Litter C Loss,gC/m^2,,Y,set1_casa.txt
+set1,CASA,CLOSS_SURFSTR,globalTotlNat,Structural Litter C Loss,gC/m^2,,Y,set1_casa.txt
+set1,CASA,CLOSS_SOILMET,globalTotlNat,Metabolized Structural Soil C Loss,gC/m^2,,Y,set1_casa.txt
+set1,CASA,CLOSS_SOILSTR,globalTotlNat,Structural Soil C Loss,gC/m^2,,Y,set1_casa.txt
+set1,CASA,CLOSS_CWD,globalTotlNat,Coarse Woody Debris C Loss,gC/m^2,,Y,set1_casa.txt
+set1,CASA,CLOSS_SURFMIC,globalTotlNat,Microbial Litter C Loss,gC/m^2,,Y,set1_casa.txt
+set1,CASA,CLOSS_SOILMIC,globalTotlNat,Microbial Soil C Loss,gC/m^2,,Y,set1_casa.txt
+set1,CASA,CLOSS_SLOW,globalTotlNat,Slow C Pool Loss,gC/m^2,,Y,set1_casa.txt
+set1,CASA,CLOSS_PASSIVE,globalTotlNat,Passive C Pool Loss,gC/m^2,,Y,set1_casa.txt
+set1,CASA,CFLUX,globalTotlAnn,Total C Flux,gC/m^2/s,Y,,set1_casa.txt
+set1,CASA,CO2FLUX,globalTotlAnn,Net CO2 Flux,gC/m^2/s,Y,,set1_casa.txt
+set1,CASA,PET,globalTotlAnn,Potential ET,mm/s,Y,,set1_casa.txt
+set1,CASA,EXCESSC,globalTotlAnn,Excess C,gC/m^2/s,Y,,set1_casa.txt
+set1,CASA,PLAI,globalMeanNat,Prognostic LAI,m^2/m^2,,,set1_casa.txt
+set1,CASA,DEGDAY,globalMeanNat,Accumulated Degree Days,C,,,set1_casa.txt
+set1,CASA,TDAYAVG,globalMeanNat,Daily Averaged T,C,,,set1_casa.txt
+set1,CASA,STRESST,globalMeanNat,Temperature stress fcn for leaf loss,unitless,,,set1_casa.txt
+set1,CASA,STRESSW,globalMeanNat,Water stress fcn for leaf loss,unitless,,,set1_casa.txt
+set1,CASA,STRESSCD,globalMeanNat,Cold+drought stress fcn for leaf loss,unitless,,,set1_casa.txt
+set1,CASA,LGROW,globalMeanNat,Growing season index (0 or 1),,,,set1_casa.txt
+set1,CASA,ISEABEG,globalMeanNat,Index for start of growing season,,,,set1_casa.txt
+set1,CASA,NSTEPBEG,globalMeanNat,Nstep at start of growing season,,,,set1_casa.txt
+set1,CASA,BGTEMP,globalMeanNat,Temperature Dependence,unitless,,,set1_casa.txt
+set1,CASA,XSCPOOL,globalMeanNat,total excess C,g/m^2,,,set1_casa.txt
+set1,CASA,WLIM,globalMeanNat,water limitation used in bgmoist (atmp factor),unitless,,,set1_casa.txt
+set1,CASA,SOILT,globalMeanNat,Soil temperature: top 30cm,C,,,set1_casa.txt
+set1,CASA,SMOIST,globalMeanNat,Soil moisture: top 30cm,mm3/mm3,,,set1_casa.txt
+set1,CASA,WATOPT,globalMeanNat,watopt for entire column,mm3/mm3,,,set1_casa.txt
+set1,CASA,WATDRY,globalMeanNat,watdry for entire column,mm3/mm3,,,set1_casa.txt
+set1,CASA,LIVEFR_LEAFC,globalMeanNat,Live Fraction Leaf C,gC/m^2,,Y,set1_casa.txt
+set1,CASA,LIVEFR_WOODC,globalMeanNat,Live Fraction Wood C,gC/m^2,,Y,set1_casa.txt
+set1,CASA,LIVEFR_FROOTC,globalMeanNat,Live Fraction Froot C,gC/m^2,,Y,set1_casa.txt
+set1,CLM/CLAMP,GROUND,globalMeanNat,heat flux into soil,W/m2,Y,,set1_clm-clamp.txt
+set1,CLM/CLAMP,LATENT,globalMeanNat,Latent Heat Flux,W/m2,Y,,set1_clm-clamp.txt
+set1,CLM/CLAMP,SENSIBLE,globalMeanNat,Sensible Heat Flux,W/m2,Y,,set1_clm-clamp.txt
+set1,CLM/CLAMP,SENSIBLE_GND,globalMeanNat,Sensible Heat Flux from Ground,W/m2,Y,,set1_clm-clamp.txt
+set1,CLM/CLAMP,SENSIBLE_VEG,globalMeanNat,Sensible Heat Flux from Vegetation,W/m2,Y,,set1_clm-clamp.txt
+set1,CLM/CLAMP,REL_HUM,globalMeanNat,Relative Humidity at 2m,kg/kg,,,set1_clm-clamp.txt
+set1,CLM/CLAMP,SPEC_HUM_2M,globalMeanNat,Specific Humidity at 2m,kg/kg,,,set1_clm-clamp.txt
+set1,CLM/CLAMP,SPEC_HUM,globalMeanNat,Atmospheric Specific Humidity,kg/kg,,,set1_clm-clamp.txt
+set1,CLM/CLAMP,RAIN,globalMeanDay,atmospheric rain,mm/s,Y,,set1_clm-clamp.txt
+set1,CLM/CLAMP,SNOW,globalMeanDay,atmospheric snow,mm/s,Y,,set1_clm-clamp.txt
+set1,CLM/CLAMP,BTRAN,globalMeanNat,transpiration beta factor,unitless,,Y,set1_clm-clamp.txt
+set1,CLM/CLAMP,CANOPY_EVAPORATION,globalMeanDay,Canopy Evaporation,mm/s,Y,,set1_clm-clamp.txt
+set1,CLM/CLAMP,DRAINAGE,globalMeanDay,Subsurface Drainage,mm/s,Y,,set1_clm-clamp.txt
+set1,CLM/CLAMP,ET,globalMeanDay,Evapotranspiration,mm/s,Y,,set1_clm-clamp.txt
+set1,CLM/CLAMP,INTERCEPTION,globalMeanDay,Canopy Interception,mm/s,Y,,set1_clm-clamp.txt
+set1,CLM/CLAMP,RUNOFF,globalMeanDay,Surface Runoff,mm/s,Y,,set1_clm-clamp.txt
+set1,CLM/CLAMP,SNOW_DEPTH,globalMeanNat,Snow depth,mm,,,set1_clm-clamp.txt
+set1,CLM/CLAMP,SOIL_EVAPORATION,globalMeanDay,Soil Evaporation,mm/s,Y,,set1_clm-clamp.txt
+set1,CLM/CLAMP,SOIL_ICE,globalMeanNat,Soil Ice in each soil layer,kg/m2,,,set1_clm-clamp.txt
+set1,CLM/CLAMP,SOIL_LIQUID,globalMeanNat,Soil Liquid Water,kg/m2,,,set1_clm-clamp.txt
+set1,CLM/CLAMP,SOIL_PSI,globalMeanNat,Soil Water Potential,MPa,,,set1_clm-clamp.txt
+set1,CLM/CLAMP,TOTAL_SOIL_ICE,globalMeanNat,Total soil ice,kg/m2,,,set1_clm-clamp.txt
+set1,CLM/CLAMP,TOTAL_SOIL_LIQUID,globalMeanNat,total soil liquid water,kg/m2,,,set1_clm-clamp.txt
+set1,CLM/CLAMP,TRANSPIRATION,globalMeanDay,Transpiration,mm/s,Y,,set1_clm-clamp.txt
+set1,CLM/CLAMP,VOL_SOIL_WATER,globalMeanNat,Volumetric Soil Water,mm3/mm3,Y,,set1_clm-clamp.txt
+set1,CLM/CLAMP,ALL_SKY_ALBEDO,globalMeanNat,All-Sky Albedo,proportion,Y,,set1_clm-clamp.txt
+set1,CLM/CLAMP,BLACK_SKY_ALBEDO,globalMeanNat,Surface Black-Sky Albedo,proportion,,,set1_clm-clamp.txt
+set1,CLM/CLAMP,IRDOWN,globalMeanNat,Downward Infrared Radiation,W/m2,Y,,set1_clm-clamp.txt
+set1,CLM/CLAMP,IRUP,globalMeanNat,Upward Infrared Radiation,W/m2,Y,,set1_clm-clamp.txt
+set1,CLM/CLAMP,LAISHA,globalMeanNat,Shaded Projected Leaf Area Index,m^2/m^2,,,set1_clm-clamp.txt
+set1,CLM/CLAMP,LAISUN,globalMeanNat,Sunlit Projected Leaf Area Index,m2/m2,,,set1_clm-clamp.txt
+set1,CLM/CLAMP,NETIR,globalMeanNat,Net Infrared (longwave) Radiation,W/m2,Y,,set1_clm-clamp.txt
+set1,CLM/CLAMP,NETRAD,globalMeanNat,Net radiation,W/m2,Y,,set1_clm-clamp.txt
+set1,CLM/CLAMP,REFLECT,globalMeanNat,Total Reflected Solar Radiation,W/m2,Y,,set1_clm-clamp.txt
+set1,CLM/CLAMP,SNOW_FRACTION,globalMeanNat,Snow Fraction,unitless,,,set1_clm-clamp.txt
+set1,CLM/CLAMP,SOLAR,globalMeanNat,Total Incident Solar Radiation,W/m2,Y,,set1_clm-clamp.txt
+set1,CLM/CLAMP,SOLAR_AB,globalMeanNat,Total Absorbed Solar Radiation,W/m2,Y,,set1_clm-clamp.txt
+set1,CLM/CLAMP,SOLAR_ABG,globalMeanNat,Solar Radiation Absorbed by Ground,W/m2,Y,,set1_clm-clamp.txt
+set1,CLM/CLAMP,SOLAR_ABV,globalMeanNat,Solar Rad Absorbed by Vegetation,W/m2,Y,,set1_clm-clamp.txt
+set1,CLM/CLAMP,DEGREE_DAYS,globalMeanNat,Accumulated degree days,K,,,set1_clm-clamp.txt
+set1,CLM/CLAMP,TREFMNAV,globalMeanNat,daily minimum of average 2m temperature,K,Y,,set1_clm-clamp.txt
+set1,CLM/CLAMP,TREFMXAV,globalMeanNat,daily maximum of average 2m temperature,K,Y,,set1_clm-clamp.txt
+set1,CLM/CLAMP,TSA2M,globalMeanNat,2m Air Temperature,K,,,set1_clm-clamp.txt
+set1,CLM/CLAMP,TSOIL,globalMeanNat,soil temperature,K,,,set1_clm-clamp.txt
+set1,CLM/CLAMP,TVEG,globalMeanNat,Vegetation Temperature,K,,,set1_clm-clamp.txt
+set1,CLM/CLAMP,ELAI,globalMeanNat,exposed one-sided leaf area index,m2/m2,,,set1_clm-clamp.txt
+set1,CLM/CLAMP,ESAI,globalMeanNat,exposed one-sided stem area index,m2/m2,,,set1_clm-clamp.txt
+set1,CLM/CLAMP,TLAI,globalMeanNat,total one-sided leaf area index,m2/m2,,,set1_clm-clamp.txt
+set1,CLM/CLAMP,TSAI,globalMeanNat,total one-sided stem area index,m2/m2,,,set1_clm-clamp.txt
+set1,CLM/CLAMP,PHOTOSYNTHESIS,globalMeanDay,Photosynthesis,umol/m2s,Y,,set1_clm-clamp.txt
+set1,CLM/CLAMP,RSSHA,globalMeanNat,shaded leaf stomatal resistance,s/m,,,set1_clm-clamp.txt
+set1,CLM/CLAMP,RSSUN,globalMeanNat,Sunlit leaf stomatal resistance,s/m,,,set1_clm-clamp.txt
+set1,CLM core,TSA,globalMeanNat,2m air temperature,K,,,set1_clm.txt
+set1,CLM core,PREC,globalMeanDay,ppt: rain+snow,mm/s,Y,Y,set1_clm.txt
+set1,CLM core,TOTRUNOFF,globalMeanDay,Total Liquid Runoff,mm/s,Y,Y,set1_clm.txt
+set1,CLM core,TSOI,globalMeanNat,soil temperature,K,,,set1_clm.txt
+set1,CLM core,FPSN,globalTotlAnn,photosynthesis,umol/m^2/s,Y,,set1_clm.txt
+set1,CLM core,ELAI,globalMeanNat,exposed one-sided leaf area index,m2/m2,,,set1_clm.txt
+set1,CLM core,ESAI,globalMeanNat,exposed one-sided stem area index,m2/m2,,,set1_clm.txt
+set1,CLM core,TLAI,globalMeanNat,total one-sided leaf area index,m2/m2,,,set1_clm.txt
+set1,CLM core,TSAI,globalMeanNat,total one-sided stem area index,m2/m2,,,set1_clm.txt
+set1,CLM core,LAISUN,globalMeanNat,Sunlit Projected Leaf Area Index,m2/m2,,,set1_clm.txt
+set1,CLM core,LAISHA,globalMeanNat,Shaded Projected Leaf Area Index,m^2/m^2,,,set1_clm.txt
+set1,CLM core,BTRAN,globalMeanNat,transpiration beta factor,unitless,,Y,set1_clm.txt
+set1,CLM core,QINFL,globalMeanDay,infiltration,mm/s,Y,,set1_clm.txt
+set1,CLM core,QOVER,globalMeanDay,surface runoff,mm/s,Y,,set1_clm.txt
+set1,CLM core,QIRRIG,globalMeanDay,,,,,set1_clm.txt
+set1,CLM core,QRGWL,globalMeanDay,"surface runoff at glaciers (liquid only), wetlands, lakes",mm/s,Y,,set1_clm.txt
+set1,CLM core,QDRAI,globalMeanDay,sub-surface drainage,mm/s,Y,,set1_clm.txt
+set1,CLM core,QINTR,globalMeanDay,interception,mm/s,Y,,set1_clm.txt
+set1,CLM core,QSOIL,globalMeanDay,ground evaporation,mm/s,Y,,set1_clm.txt
+set1,CLM core,QVEGT,globalMeanDay,canopy transpiration,mm/s,Y,,set1_clm.txt
+set1,CLM core,FSH,globalMeanNat,sensible heat,W/m^2,Y,,set1_clm.txt
+set1,CLM core,FSH_TO_COUPLER,globalMeanNat,sensible heat sent to coupler,W/m^2,Y,,set1_clm.txt
+set1,CLM core,FSH_PRECIP_CONVERSION,globalMeanNat,SHF from conv of rain/snow atm forcing,W/m^2,Y,,set1_clm.txt
+set1,CLM core,FSH_RUNOFF_ICE_TO_LIQ,globalMeanNat,SHF from conv of ice runoff to liquid,W/m^2,Y,,set1_clm.txt
+set1,CLM core,CPL_ENERGY_BAL,globalMeanNat,Coupler Energy Balance (Global Area),W/m2,Y,Y,set1_clm.txt
+set1,CLM core,SOILLIQ,globalMeanNat,soil liquid water,kg/m^2,,,set1_clm.txt
+set1,CLM core,SOILICE,globalMeanNat,soil ice,kg/m^2,,,set1_clm.txt
+set1,CLM core,SOILPSI,globalMeanNat,soil water potential in each soil layer,MPa,,,set1_clm.txt
+set1,CLM core,SNOWLIQ,globalMeanNat,snow liquid water,kg/m^2,,,set1_clm.txt
+set1,CLM core,SNOWICE,globalMeanNat,snow ice,kg/m^2,,,set1_clm.txt
+set1,CLM core,FSNO,globalMeanNat,fraction of ground covered by snow,unitless,,,set1_clm.txt
+set1,CLM core,H2OSNO,globalMeanNat,total snow water equiv (SNOWICE + SNOWLIQ),mm,,,set1_clm.txt
+set1,CLM core,TOTSOILLIQ,globalMeanNat,total soil liquid water,kg/m^2,,Y,set1_clm.txt
+set1,CLM core,TOTSOILICE,globalMeanNat,total soil ice,kg/m^2,,Y,set1_clm.txt
+set1,CLM core,WA,globalMeanNat,water in the unconfined aquifer,mm,,,set1_clm.txt
+set1,CLM core,ZWT,globalMeanNat,water table depth,m,,,set1_clm.txt
+set1,CLM core,QCHARGE,globalMeanDay,aquifer recharge rate,mm/s,,,set1_clm.txt
+set1,CLM core,FCOV,globalMeanNat,fractional area with water table at surface,unitless [0-1],,,set1_clm.txt
+set1,CLM core,CO2_PPMV,globalMeanNat,CO2 concentration,ppmv,,Y,set1_clm.txt
+set1,CLM core,TWS,globalMeanNat,total water storage,mm,,,set1_clm.txt
+set1,CLM core,VOLR,globalMeanNat,river channel total water storage,m3,,,set1_clm.txt
+set1,CLM core,DSTDEP,globalTotlAnn,total dust deposition (dry+wet) from atmosphere,kg/m2/s,Y,,set1_clm.txt
+set1,CLM core,DSTFLXT,globalTotlAnn,total surface dust emission,kg/m2/s,Y,,set1_clm.txt
+set1,CLM core,OCDEP,globalTotlAnn,total OC deposition (dry+wet) from atmosphere,kg/m2/s,Y,,set1_clm.txt
+set1,CLM core,BCDEP,globalTotlAnn,total BC deposition (dry+wet) from atmosphere,kg/m2/s,Y,,set1_clm.txt
+set1,CLM core,FSDSND,globalMeanNat,direct nir incident solar radiation,W/m^2,Y,,set1_clm.txt
+set1,CLM core,FSDSVD,globalMeanNat,direct vis incident solar radiation,W/m^2,Y,,set1_clm.txt
+set1,CLM core,FSDSNI,globalMeanNat,diffuse nir incident solar radiation,W/m^2,Y,,set1_clm.txt
+set1,CLM core,FSDSVI,globalMeanNat,diffuse vis incident solar radiation,W/m^2,Y,,set1_clm.txt
+set1,CLM core,RAIN_FROM_ATM,globalMeanDay,atmospheric rain (pre-downscaling),mm/s,Y,,set1_clm.txt
+set1,CLM core,SNOW_FROM_ATM,globalMeanDay,atmospheric snow (pre-downscaling),mm/s,Y,,set1_clm.txt
+set1,CLM core,FLDS_NOT_DOWNSCALED,globalMeanNat,atmospheric longwave radiation (pre-downscaling),W/m^2,Y,,set1_clm.txt
+set1,CLM core,ZBOT,globalMeanNat,atmospheric reference height,m,,,set1_clm.txt
+set1,CLM core,Tair_from_atm,globalMeanNat,atmospheric air temperature (pre-downscaling),K,,,set1_clm.txt
+set1,CLM core,Thair_from_atm,globalMeanNat,atmospheric air potential temperature (pre-downscaling),K,,,set1_clm.txt
+set1,CLM core,QBOT_NOT_DOWNSCALED,globalMeanNat,atmospheric specific humidity (pre-downscaling),kg/kg,,,set1_clm.txt
+set1,CLM core,PBOT_NOT_DOWNSCALED,globalMeanNat,atm pressure of bottom layer (pre-downscaling),Pa,,,set1_clm.txt
+set1,CLM core,Rho_from_atm,globalMeanNat,atmospheric density of bottom layer (pre-downscaling),kg/m3,,,set1_clm.txt
+set1,CLM core,UWIND,globalMeanNat,atmospheric uwind velocity magnitude,m/s,Y,,set1_clm.txt
+set1,CLM core,VWIND,globalMeanNat,atmospheric vwind velocity magnitude,m/s,Y,,set1_clm.txt
+set1,CLM core,BCPHIDRY,globalTotlAnn,BC deposition (phidry) from atmosphere,kg/m2/s,Y,,set1_clm.txt
+set1,CLM core,BCPHODRY,globalTotlAnn,BC deposition (phodry) from atmosphere,kg/m2/s,Y,,set1_clm.txt
+set1,CLM core,BCPHIWET,globalTotlAnn,BC deposition (phiwet) from atmosphere,kg/m2/s,Y,,set1_clm.txt
+set1,CLM core,OCPHIDRY,globalTotlAnn,OC deposition (phidry) from atmosphere,kg/m2/s,Y,,set1_clm.txt
+set1,CLM core,OCPHODRY,globalTotlAnn,OC deposition (phodry) from atmosphere,kg/m2/s,Y,,set1_clm.txt
+set1,CLM core,OCPHIWET,globalTotlAnn,OC deposition (phiwet) from atmosphere,kg/m2/s,Y,,set1_clm.txt
+set1,CLM core,DSTWET1,globalTotlAnn,dust deposition (wet1) from atmosphere,kg/m2/s,Y,,set1_clm.txt
+set1,CLM core,DSTDRY1,globalTotlAnn,dust deposition (dry1) from atmosphere,kg/m2/s,Y,,set1_clm.txt
+set1,CLM core,DSTWET2,globalTotlAnn,dust deposition (wet2) from atmosphere,kg/m2/s,Y,,set1_clm.txt
+set1,CLM core,DSTDRY2,globalTotlAnn,dust deposition (dry2) from atmosphere,kg/m2/s,Y,,set1_clm.txt
+set1,CLM core,DSTWET3,globalTotlAnn,dust deposition (wet3) from atmosphere,kg/m2/s,Y,,set1_clm.txt
+set1,CLM core,DSTDRY3,globalTotlAnn,dust deposition (dry3) from atmosphere,kg/m2/s,Y,,set1_clm.txt
+set1,CLM core,DSTWET4,globalTotlAnn,dust deposition (wet4) from atmosphere,kg/m2/s,Y,,set1_clm.txt
+set1,CLM core,DSTDRY4,globalTotlAnn,dust deposition (dry4) from atmosphere,kg/m2/s,Y,,set1_clm.txt
+set1,CLM core,ATM_TOPO,globalMeanNat,atmospheric surface height,m,,,set1_clm.txt
+set1,CN/CLAMP,AGNPP,globalTotlAnn,above ground net primary production,gC/m^2/s,Y,,set1_cn-clamp.txt
+set1,CN/CLAMP,AR,globalTotlAnn,autotrophic respiration (MR + GR),gC/m^2/s,Y,,set1_cn-clamp.txt
+set1,CN/CLAMP,BGNPP,globalTotlAnn,below ground net primary production,gC/m^2/s,Y,,set1_cn-clamp.txt
+set1,CN/CLAMP,BIOGENIC_CO,globalMeanAnn,Biogenic CO Flux,uG/m2/h,Y,,set1_cn-clamp.txt
+set1,CN/CLAMP,CWDC,globalTotlNat,coarse woody debris carbon,gC/m^2,,,set1_cn-clamp.txt
+set1,CN/CLAMP,CWDC_HR,globalTotlAnn,Coarse Woody Debris C Hetereotrophic respiration,gC/m2s,Y,,set1_cn-clamp.txt
+set1,CN/CLAMP,CWDC_LOSS,globalTotlAnn,Coarse Woody Debris C Loss,gC/m2s,Y,,set1_cn-clamp.txt
+set1,CN/CLAMP,FROOTC,globalTotlNat,fine root carbon,gC/m^2,,,set1_cn-clamp.txt
+set1,CN/CLAMP,FROOTC_ALLOC,globalTotlAnn,Fine root C allocation,gC/m2s,Y,,set1_cn-clamp.txt
+set1,CN/CLAMP,FROOTC_LOSS,globalTotlAnn,Fine root C Loss,gC/m2s,Y,,set1_cn-clamp.txt
+set1,CN/CLAMP,GPP,globalTotlAnn,gross primary production,gC/m^2/s,Y,,set1_cn-clamp.txt
+set1,CN/CLAMP,GROSS_NMIN,globalTotlAnn,gross N mineralization,gN/m^2/s,Y,,set1_cn-clamp.txt
+set1,CN/CLAMP,HR,globalTotlAnn,total hetereotrophic respiration,gC/m^2/s,Y,,set1_cn-clamp.txt
+set1,CN/CLAMP,ISOPRENE,globalMeanAnn,Isoprene Flux,uG/m2/h,Y,,set1_cn-clamp.txt
+set1,CN/CLAMP,LEAFC,globalTotlNat,leaf carbon,gC/m^2,,,set1_cn-clamp.txt
+set1,CN/CLAMP,LEAFC_ALLOC,globalTotlAnn,Leaf C Allocation,gC/m2s,Y,,set1_cn-clamp.txt
+set1,CN/CLAMP,LEAFC_LOSS,globalTotlAnn,Leaf C Loss,gC/m2s,Y,,set1_cn-clamp.txt
+set1,CN/CLAMP,LITTERC,globalTotlNat,Total Litter C,gC/m2,,,set1_cn-clamp.txt
+set1,CN/CLAMP,LITTERC_HR,globalTotlAnn,Litter Hetereotrophic Respiration,gC/m2s,Y,,set1_cn-clamp.txt
+set1,CN/CLAMP,LITTERC_LOSS,globalTotlAnn,Litter C Loss,gC/m2s,Y,,set1_cn-clamp.txt
+set1,CN/CLAMP,MONOTERPENE,globalMeanAnn,Monoterpene Flux,uG/m2/h,Y,,set1_cn-clamp.txt
+set1,CN/CLAMP,NEE,globalTotlAnn,net ecosys exchange of C,gC/m^2/s,Y,,set1_cn-clamp.txt
+set1,CN/CLAMP,NEP,globalTotlAnn,net ecosystem production,gC/m^2/s,Y,,set1_cn-clamp.txt
+set1,CN/CLAMP,NET_NMIN,globalTotlAnn,net N mineralization,gN/m^2/s,Y,,set1_cn-clamp.txt
+set1,CN/CLAMP,NPP,globalTotlAnn,net primary production,gC/m^2/s,Y,,set1_cn-clamp.txt
+set1,CN/CLAMP,OTHER_VOC,globalMeanAnn,Other VOC Flux,uG/m2/h,Y,,set1_cn-clamp.txt
+set1,CN/CLAMP,OR_VOC,globalMeanAnn,Other Reactive VOC Flux,uG/m2/h,Y,,set1_cn-clamp.txt
+set1,CN/CLAMP,SOILC,globalTotlNat,soil organic matter C (fast pool),gC/m2,,,set1_cn-clamp.txt
+set1,CN/CLAMP,SOILC_HR,globalTotlAnn,Soil C hetereotrophic respiration,gC/m2s,Y,,set1_cn-clamp.txt
+set1,CN/CLAMP,SOILC_LOSS,globalTotlAnn,Soil C Loss,gC/m2s,Y,,set1_cn-clamp.txt
+set1,CN/CLAMP,VOCFLXT,globalMeanAnn,Total VOC flux into Atmosphere,uG/m2/h,Y,,set1_cn-clamp.txt
+set1,CN/CLAMP,WOODC,globalTotlNat,Live+Dead Stem C,gC/m2,,Y,set1_cn-clamp.txt
+set1,CN/CLAMP,WOODC_ALLOC,globalTotlAnn,Wood C Allocation,gC/m2s,Y,,set1_cn-clamp.txt
+set1,CN/CLAMP,WOODC_LOSS,globalTotlAnn,Wood C Loss,gC/m2s,Y,,set1_cn-clamp.txt
+set1,CN (carbon-nitrogen),NEE,globalTotlAnn,net ecosys exchange of C,gC/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),NEP,globalTotlAnn,net ecosystem production,gC/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),NBP,globalTotlAnn,"net biome production, includes fire, landuse and harvest flux",gC/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),GPP,globalTotlAnn,gross primary production,gC/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),CUE,globalMeanNat,carbon use efficiency,NPP/GPP,Y,Y,set1_cn.txt
+set1,CN (carbon-nitrogen),BTRAN2,globalMeanNat,root zone soil moisture factor,unitless,,,set1_cn.txt
+set1,CN (carbon-nitrogen),PSNSUN_TO_CPOOL,globalTotlAnn,GPP from Sunlit Canopy,gC/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),PSNSHADE_TO_CPOOL,globalTotlAnn,GPP from Shaded Canopy,gC/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),NPP,globalTotlAnn,net primary production,gC/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),AGNPP,globalTotlAnn,above ground net primary production,gC/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),BGNPP,globalTotlAnn,below ground net primary production,gC/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),MR,globalTotlAnn,maintenance respiration,gC/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),GR,globalTotlAnn,total growth respiration,gC/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),AR,globalTotlAnn,autotrophic respiration (MR + GR),gC/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),LITHR,globalTotlAnn,litter hetereotrophic respiration,gC/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),SOMHR,globalTotlAnn,SOM hetereotrophic respiration,gC/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),HR,globalTotlAnn,total hetereotrophic respiration,gC/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),RR,globalTotlAnn,root respiration (fine root MR + total root GR),gC/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),SR,globalTotlAnn,total soil respiration (HR + root resp),gC/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),ER,globalTotlAnn,total ecosystem respiration (AR + HR),gC/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),FINUNDATED,globalMeanNat,Fractional inundated of veg col,unitless,,,set1_cn.txt
+set1,CN (carbon-nitrogen),FCH4,globalTotlAnn,Gridcell surface CH4 flux,kgC/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),FCH4TOCO2,globalTotlAnn,Gridcell oxidation of CH4 to CO2,gC/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),FCH4_DFSAT,globalTotlAnn,CH4 additional flux,kgC/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),CH4PROD,globalTotlAnn,Gridcell total CH4 production,gC/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),CH4_SURF_AERE_SAT,globalTotlAnn,aerenchyma sfc CH4 flx-inundated area,mol/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),CH4_SURF_AERE_UNSAT,globalTotlAnn,aerenchyma sfc CH4 flx-non-inundated area,mol/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),CH4_SURF_DIFF_SAT,globalTotlAnn,diffusive sfc CH4 flx-inundated/lake area,mol/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),CH4_SURF_DIFF_UNSAT,globalTotlAnn,diffusive sfc CH4 flx-non-inundated area,mol/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),CH4_SURF_EBUL_SAT,globalTotlAnn,ebullition sfc CH4 flx-inundated/lake area,mol/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),CH4_SURF_EBUL_UNSAT,globalTotlAnn,ebullition sfc CH4 flx-non-inundated area,mol/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),LEAFC,globalTotlNat,leaf carbon,gC/m^2,,,set1_cn.txt
+set1,CN (carbon-nitrogen),LEAFN,globalTotlNat,leaf nitrogen,gN/m^2,,,set1_cn.txt
+set1,CN (carbon-nitrogen),LEAFCN,globalMeanNat,leaf carbon/nitrogen,gC/gN,,Y,set1_cn.txt
+set1,CN (carbon-nitrogen),SOIL3C,globalTotlNat,Soil organic matter C (slow pool),gC/m^2,,,set1_cn.txt
+set1,CN (carbon-nitrogen),SOIL4C,globalTotlNat,Soil organic matter C (slowest pool),gC/m^2,,,set1_cn.txt
+set1,CN (carbon-nitrogen),FROOTC,globalTotlNat,fine root carbon,gC/m^2,,,set1_cn.txt
+set1,CN (carbon-nitrogen),LIVESTEMC,globalTotlNat,live stem C,gC/m^2,,,set1_cn.txt
+set1,CN (carbon-nitrogen),DEADSTEMC,globalTotlNat,dead stem carbon,gC/m^2,,,set1_cn.txt
+set1,CN (carbon-nitrogen),LIVECROOTC,globalTotlNat,live coarse root carbon,gC/m^2,,,set1_cn.txt
+set1,CN (carbon-nitrogen),DEADCROOTC,globalTotlNat,dead coarse root carbon,gC/m^2,,,set1_cn.txt
+set1,CN (carbon-nitrogen),CPOOL,globalTotlNat,temporary photosynthate C pool,gC/m^2,,,set1_cn.txt
+set1,CN (carbon-nitrogen),XSMRPOOL,globalTotlNat,Temporary Photosynthate C Pool,gC/m^2,,,set1_cn.txt
+set1,CN (carbon-nitrogen),TOTVEGC,globalTotlNat,"total vegetation C, excluding cpool",gC/m^2,,,set1_cn.txt
+set1,CN (carbon-nitrogen),TOTVEGN,globalTotlNat,total vegetation N,gN/m^2,,,set1_cn.txt
+set1,CN (carbon-nitrogen),TOTVEGCN,globalMeanNat,total vegetation C/N,gC/gN,,Y,set1_cn.txt
+set1,CN (carbon-nitrogen),CWDC,globalTotlNat,coarse woody debris carbon,gC/m^2,,,set1_cn.txt
+set1,CN (carbon-nitrogen),CWD_C,globalTotlNat,coarse woody debris carbon,gC/m^2,,,set1_cn.txt
+set1,CN (carbon-nitrogen),TOTLITC,globalTotlNat,total litter carbon,gC/m^2,,,set1_cn.txt
+set1,CN (carbon-nitrogen),TOTLITC_1m,globalTotlNat,total litter carbon to 1m depth,gC/m^2,,,set1_cn.txt
+set1,CN (carbon-nitrogen),TOTLITN,globalTotlNat,total litter N,gN/m^2,,,set1_cn.txt
+set1,CN (carbon-nitrogen),TOTLITN_1m,globalTotlNat,total litter N to 1m depth,gN/m^2,,,set1_cn.txt
+set1,CN (carbon-nitrogen),TOTSOMC,globalTotlNat,total SOM carbon,gC/m^2,,,set1_cn.txt
+set1,CN (carbon-nitrogen),TOTSOMC_1m,globalTotlNat,total SOM carbon to 1 meter depth,gC/m^2,,,set1_cn.txt
+set1,CN (carbon-nitrogen),TOTSOMN,globalTotlNat,total soil organic matter N,gN/m^2,,,set1_cn.txt
+set1,CN (carbon-nitrogen),TOTSOMN_1m,globalTotlNat,total soil organic matter N to 1m depth,gN/m^2,,,set1_cn.txt
+set1,CN (carbon-nitrogen),TOTECOSYSC,globalTotlNat,"total ecosystem C, incl veg but excl cpool",gC/m^2,,,set1_cn.txt
+set1,CN (carbon-nitrogen),TOTCOLC,globalTotlNat,"total column C, incl veg and cpool",gC/m^2,,,set1_cn.txt
+set1,CN (carbon-nitrogen),COL_CTRUNC,globalTotlNat,column-level sink for C truncation,gC/m^2,,,set1_cn.txt
+set1,CN (carbon-nitrogen),PFT_CTRUNC,globalTotlNat,pft-level sink for C truncation,gC/m^2,,,set1_cn.txt
+set1,CN (carbon-nitrogen),FPG,globalMeanNat,fraction of potential GPP,proportion,,,set1_cn.txt
+set1,CN (carbon-nitrogen),FPI,globalMeanNat,fraction of potential immobilization,proportion,,,set1_cn.txt
+set1,CN (carbon-nitrogen),TOTECOSYSN,globalTotlNat,total ecosystem N,gN/m^2,,,set1_cn.txt
+set1,CN (carbon-nitrogen),NDEP_TO_SMINN,globalTotlAnn,nitrogen deposition,gN/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),FERT,globalTotlAnn,fertilizer added,gN/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),FERT_TO_SMINN,globalTotlAnn,fertilizer to soil mineral N,gN/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),NFERTILIZATION,globalTotlAnn,fertilizer added,gN/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),NFIX_TO_SMINN,globalTotlAnn,nitrogen fixation,gN/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),NAM,globalTotlAnn,AM-associated N uptake flux,gN/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),NECM,globalTotlAnn,ECM-associated N uptake flux,gN/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),NFIX,globalTotlAnn,Symbiotic BNF uptake flux,gN/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),NRETRANS,globalTotlAnn,Retranslocated N uptake flux,gN/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),NPP_NUPTAKE,globalTotlAnn,total carbon used by N uptake in FUN,gC/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),NUPTAKE_FRACTION,globalMeanNat,NPP_NUPTAKE/(NPP_NUPTAKE+NPP),unitless,Y,Y,set1_cn.txt
+set1,CN (carbon-nitrogen),FFIX_TO_SMINN,globalTotlAnn,free living N fixation to soil mineral N,gN/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),NPP_NFIX,globalTotlAnn,Symbiotic BNF uptake used C,gC/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),NPP_NACTIVE,globalTotlAnn,Mycorrhizal N uptake used C,gC/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),NPP_NRETRANS,globalTotlAnn,retranslocated N uptake flux,gC/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),SUPPLEMENT_TO_SMINN,globalTotlAnn,supplement to mineral nitrogen,gN/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),SMINN_LEACHED,globalTotlAnn,Nitrogen Leached,gN/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),SMIN_NO3_LEACHED,globalTotlAnn,Soil NO3 pool loss to leaching,gN/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),SMIN_NO3_RUNOFF,globalTotlAnn,Soil NO3 pool loss to runoff,gN/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),SMINN,globalTotlNat,soil mineral N,gN/m^2,,,set1_cn.txt
+set1,CN (carbon-nitrogen),SMINN_TO_NPOOL,globalTotlAnn,Mineral N to NPool,gN/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),COL_NTRUNC,globalTotlNat,column-level sink for N truncation,gN/m^2,,,set1_cn.txt
+set1,CN (carbon-nitrogen),PFT_NTRUNC,globalTotlNat,pft-level sink for N truncation,gN/m^2,,,set1_cn.txt
+set1,CN (carbon-nitrogen),RETRANSN,globalTotlNat,plant pool of retranslocated N,gN/m^2,,,set1_cn.txt
+set1,CN (carbon-nitrogen),RETRANSN_TO_NPOOL,globalTotlAnn,Retranslocated N to NPool,gN/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),POTENTIAL_IMMOB,globalTotlAnn,Potential Immobilization,gN/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),ACTUAL_IMMOB,globalTotlAnn,Actual Immobilization,gN/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),GROSS_NMIN,globalTotlAnn,gross N mineralization,gN/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),NET_NMIN,globalTotlAnn,net N mineralization,gN/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),NDEPLOY,globalTotlAnn,total N deployed in new growth,gN/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),DENIT,globalTotlAnn,Total Denitrification,gN/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),SOIL3N,globalTotlNat,soil organic matter N (slow pool),gN/m^2,,,set1_cn.txt
+set1,CN (carbon-nitrogen),SOIL4N,globalTotlNat,Soil organic matter N (slowest pool),gN/m^2,,,set1_cn.txt
+set1,CN (carbon-nitrogen),COL_FIRE_CLOSS,globalTotlAnn,total column-level fire C loss,gC/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),PFT_FIRE_CLOSS,globalTotlAnn,total pft-level fire C loss,gC/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),COL_FIRE_NLOSS,globalTotlAnn,total column-level fire N loss,gN/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),PFT_FIRE_NLOSS,globalTotlAnn,total pft-level fire N loss,gN/m^2/s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),FAREA_BURNED,globalMeanAnn,fractional area burned,proportion/s,,,set1_cn.txt
+set1,CN (carbon-nitrogen),BAF_CROP,globalMeanAnn,fractional area burned - crop,proportion/s,,,set1_cn.txt
+set1,CN (carbon-nitrogen),CWDC_HR,globalTotlAnn,Coarse Woody Debris C Hetereotrophic respiration,gC/m2s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),CWDC_LOSS,globalTotlAnn,Coarse Woody Debris C Loss,gC/m2s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),FROOTC_ALLOC,globalTotlAnn,Fine root C allocation,gC/m2s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),FROOTC_LOSS,globalTotlAnn,Fine root C Loss,gC/m2s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),LEAFC_ALLOC,globalTotlAnn,Leaf C Allocation,gC/m2s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),LEAFC_LOSS,globalTotlAnn,Leaf C Loss,gC/m2s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),LITTERC,globalTotlNat,Total Litter C,gC/m2,,,set1_cn.txt
+set1,CN (carbon-nitrogen),LITTERC_HR,globalTotlAnn,Litter Hetereotrophic Respiration,gC/m2s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),LITTERC_LOSS,globalTotlAnn,Litter C Loss,gC/m2s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),SOILC,globalTotlNat,soil organic matter C (fast pool),gC/m2,,,set1_cn.txt
+set1,CN (carbon-nitrogen),SOILC_HR,globalTotlAnn,Soil C hetereotrophic respiration,gC/m2s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),SOILC_LOSS,globalTotlAnn,Soil C Loss,gC/m2s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),WOODC,globalTotlNat,Live+Dead Stem C,gC/m2,,Y,set1_cn.txt
+set1,CN (carbon-nitrogen),WOODC_ALLOC,globalTotlAnn,Wood C Allocation,gC/m2s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),WOODC_LOSS,globalTotlAnn,Wood C Loss,gC/m2s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),WOOD_HARVESTC,globalTotlAnn,Wood Harvest C (to prod pools),gC/m2s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),WOOD_HARVESTN,globalTotlAnn,Wood Harvest N (to prod pools),gN/m2s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),TOT_WOODPRODC_LOSS,globalTotlAnn,Total C loss from wood prod pools,gC/m2s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),TOT_WOODPRODN_LOSS,globalTotlAnn,Total N loss from wood prod pools,gN/m2s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),PROD10C_LOSS,globalTotlAnn,C loss from 10-yr wood prod pool,gC/m2s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),PROD10N_LOSS,globalTotlAnn,N loss from 10-yr wood prod pool,gN/m2s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),PROD100C_LOSS,globalTotlAnn,C loss from 100-yr wood prod pool,gC/m2s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),PROD100N_LOSS,globalTotlAnn,N loss from 100-yr wood prod pool,gN/m2s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),DWT_PROD10C_GAIN,globalTotlAnn,LCC-driven addition to 10-yr wood prod pool,gC/m2s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),DWT_PROD10N_GAIN,globalTotlAnn,LCC-driven addition to 10-yr wood prod pool,gN/m2s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),DWT_PROD100C_GAIN,globalTotlAnn,LCC-driven addition to 100-yr wood prod pool,gC/m2s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),DWT_PROD100N_GAIN,globalTotlAnn,LCC-driven addition to 100-yr wood prod pool,gN/m2s,Y,,set1_cn.txt
+set1,CN (carbon-nitrogen),DWT_CONV_CFLUX,globalTotlAnn,conversion C flux (immediate loss to atm),gC/m2s,Y,,set1_cn.txt
+set2,C13 isotope,C13_NEE,globalMeanDay0,C13 Net Ecosys Exchange of C,gC/m^2/s,Y,,set2_c13.txt
+set2,C13 isotope,C13_NBP,globalMeanDay0,"C13 net biome production, includes fire, landuse and harvest flux",gC/m^2/s,Y,,set2_c13.txt
+set2,C13 isotope,C13_NEP,globalMeanDay0,C13 Net Ecosystem Production,gC/m^2/s,Y,,set2_c13.txt
+set2,C13 isotope,C13_GPP,globalMeanDay0,C13 Gross Primary Production,gC/m^2/s,Y,,set2_c13.txt
+set2,C13 isotope,C13_PSNSUN_TO_CPOOL,globalMeanDay0,C13 GPP from Sunlit Canopy,gC/m^2/s,Y,,set2_c13.txt
+set2,C13 isotope,C13_PSNSHADE_TO_CPOOL,globalMeanDay0,C13 GPP from Shaded Canopy,gC/m^2/s,Y,,set2_c13.txt
+set2,C13 isotope,C13_NPP,globalMeanDay0,C13 Net Primary Production,gC/m^2/s,Y,,set2_c13.txt
+set2,C13 isotope,C13_AGNPP,globalMeanDay0,C13 Aboveground NPP,gC/m^2/s,Y,,set2_c13.txt
+set2,C13 isotope,C13_BGNPP,globalMeanDay0,C13 Belowground NPP,gC/m^2/s,Y,,set2_c13.txt
+set2,C13 isotope,C13_MR,globalMeanDay0,C13 Maintenance Respiration,gC/m^2/s,Y,,set2_c13.txt
+set2,C13 isotope,C13_GR,globalMeanDay0,C13 Total Growth Respiration,gC/m^2/s,Y,,set2_c13.txt
+set2,C13 isotope,C13_AR,globalMeanDay0,C13 Autotrophic Respiration (MR + GR),gC/m^2/s,Y,,set2_c13.txt
+set2,C13 isotope,C13_LITHR,globalMeanDay0,C13 Litter Hetereotrophic Respiration,gC/m^2/s,Y,,set2_c13.txt
+set2,C13 isotope,C13_SOMHR,globalMeanDay0,C13 SOM Hetereotrophic Respiration,gC/m^2/s,Y,,set2_c13.txt
+set2,C13 isotope,C13_HR,globalMeanDay0,C13 Total Hetereotrophic Respiration,gC/m^2/s,Y,,set2_c13.txt
+set2,C13 isotope,C13_RR,globalMeanDay0,C13 Root Respiration (Fine Root MR + Total Root GR),gC/m^2/s,Y,,set2_c13.txt
+set2,C13 isotope,C13_SR,globalMeanDay0,C13 Totl Soil Respiration (HR + Root Resp),gC/m^2/s,Y,,set2_c13.txt
+set2,C13 isotope,C13_ER,globalMeanDay0,C13 Totl Ecosystem Respiration (AR + HR),gC/m^2/s,Y,,set2_c13.txt
+set2,C13 isotope,C13_LEAFC,globalMeanNat0,C13 Leaf Carbon,gC/m^2,,,set2_c13.txt
+set2,C13 isotope,C13_SOIL3C,globalMeanNat0,C13 Soil Organic Matter C (Slow Pool),gC/m^2,,,set2_c13.txt
+set2,C13 isotope,C13_SOIL4C,globalMeanNat0,C13 Soil Organic Matter C (Slowest Pool),gC/m^2,,,set2_c13.txt
+set2,C13 isotope,C13_FROOTC,globalMeanNat0,C13 Fine Root CC,gC/m^2,,,set2_c13.txt
+set2,C13 isotope,C13_LIVESTEMC,globalMeanNat0,C13 Live Stem C,gC/m^2,,,set2_c13.txt
+set2,C13 isotope,C13_DEADSTEMC,globalMeanNat0,C13 Dead Stem Carbon,gC/m^2,,,set2_c13.txt
+set2,C13 isotope,C13_LIVECROOTC,globalMeanNat0,C13 Live Coarse Root Carbon,gC/m^2,,,set2_c13.txt
+set2,C13 isotope,C13_DEADCROOTC,globalMeanNat0,C13 Dead Coarse Root Carbon,gC/m^2,,,set2_c13.txt
+set2,C13 isotope,C13_CPOOL,globalMeanNat0,C13 Temporary Photosynthate C Pool,gC/m^2,,,set2_c13.txt
+set2,C13 isotope,C13_TOTVEGC,globalMeanNat0,"C13 Total Vegetation C, Excluding Cpool",gC/m^2,,,set2_c13.txt
+set2,C13 isotope,C13_CWDC,globalMeanNat0,C13 Coarse Woody Debris Carbon,gC/m^2,,,set2_c13.txt
+set2,C13 isotope,C13_CWD_C,globalMeanNat0,C13 Coarse Woody Debris Carbon,gC/m^2,,,set2_c13.txt
+set2,C13 isotope,C13_TOTLITC,globalMeanNat0,C13 Totl Litter Carbon,gC/m^2,,,set2_c13.txt
+set2,C13 isotope,C13_TOTSOMC,globalMeanNat0,C13 Total SOM Carbon,gC/m^2,,,set2_c13.txt
+set2,C13 isotope,C13_TOTECOSYSC,globalMeanNat0,"C13 Totl Ecosystem C, Incl Veg But Excl Cpool",gC/m^2,,,set2_c13.txt
+set2,C13 isotope,C13_COL_FIRE_CLOSS,globalMeanAnn0,C13 Totl Col-Level Fire C Loss,gC/m^2/s,Y,,set2_c13.txt
+set2,C13 isotope,C13_PFT_FIRE_CLOSS,globalMeanAnn0,C13 Totl Pft-Level Fire C Loss,gC/m^2/s,Y,,set2_c13.txt
+set2,C13 isotope,C14_NEE,globalMeanDay0,C14 Net Ecosys Exchange of C,gC/m^2/s,Y,,set2_c13.txt
+set2,C13 isotope,C14_NBP,globalMeanDay0,"C14 net biome production, includes fire, landuse and harvest flux",gC/m^2/s,Y,,set2_c13.txt
+set2,C13 isotope,C14_NEP,globalMeanDay0,C14 Net Ecosystem Production,gC/m^2/s,Y,,set2_c13.txt
+set2,C13 isotope,C14_GPP,globalMeanDay0,C14 Gross Primary Production,gC/m^2/s,Y,,set2_c13.txt
+set2,C13 isotope,C14_PSNSUN_TO_CPOOL,globalMeanDay0,C14 GPP from Sunlit Canopy,gC/m^2/s,Y,,set2_c13.txt
+set2,C13 isotope,C14_PSNSHADE_TO_CPOOL,globalMeanDay0,C14 GPP from Shaded Canopy,gC/m^2/s,Y,,set2_c13.txt
+set2,C13 isotope,C14_NPP,globalMeanDay0,C14 Net Primary Production,gC/m^2/s,Y,,set2_c13.txt
+set2,C13 isotope,C14_AGNPP,globalMeanDay0,C14 Aboveground NPP,gC/m^2/s,Y,,set2_c13.txt
+set2,C13 isotope,C14_BGNPP,globalMeanDay0,C14 Belowground NPP,gC/m^2/s,Y,,set2_c13.txt
+set2,C13 isotope,C14_MR,globalMeanDay0,C14 Maintenance Respiration,gC/m^2/s,Y,,set2_c13.txt
+set2,C13 isotope,C14_GR,globalMeanDay0,C14 Total Growth Respiration,gC/m^2/s,Y,,set2_c13.txt
+set2,C13 isotope,C14_AR,globalMeanDay0,C14 Autotrophic Respiration (MR + GR),gC/m^2/s,Y,,set2_c13.txt
+set2,C13 isotope,C14_LITHR,globalMeanDay0,C14 Litter Hetereotrophic Respiration,gC/m^2/s,Y,,set2_c13.txt
+set2,C13 isotope,C14_SOMHR,globalMeanDay0,C14 SOM Hetereotrophic Respiration,gC/m^2/s,Y,,set2_c13.txt
+set2,C13 isotope,C14_HR,globalMeanDay0,C14 Total Hetereotrophic Respiration,gC/m^2/s,Y,,set2_c13.txt
+set2,C13 isotope,C14_RR,globalMeanDay0,C14 Root Respiration (Fine Root MR + Total Root GR),gC/m^2/s,Y,,set2_c13.txt
+set2,C13 isotope,C14_SR,globalMeanDay0,C14 Totl Soil Respiration (HR + Root Resp),gC/m^2/s,Y,,set2_c13.txt
+set2,C13 isotope,C14_ER,globalMeanDay0,C14 Totl Ecosystem Respiration (AR + HR),gC/m^2/s,Y,,set2_c13.txt
+set2,C13 isotope,C14_LEAFC,globalMeanNat0,C14 Leaf Carbon,gC/m^2,,,set2_c13.txt
+set2,C13 isotope,C14_SOIL3C,globalMeanNat0,C14 Soil Organic Matter C (Slow Pool),gC/m^2,,,set2_c13.txt
+set2,C13 isotope,C14_SOIL4C,globalMeanNat0,C14 Soil Organic Matter C (Slowest Pool),gC/m^2,,,set2_c13.txt
+set2,C13 isotope,C14_FROOTC,globalMeanNat0,C14 Fine Root CC,gC/m^2,,,set2_c13.txt
+set2,C13 isotope,C14_LIVESTEMC,globalMeanNat0,C14 Live Stem C,gC/m^2,,,set2_c13.txt
+set2,C13 isotope,C14_DEADSTEMC,globalMeanNat0,C14 Dead Stem Carbon,gC/m^2,,,set2_c13.txt
+set2,C13 isotope,C14_LIVECROOTC,globalMeanNat0,C14 Live Coarse Root Carbon,gC/m^2,,,set2_c13.txt
+set2,C13 isotope,C14_DEADCROOTC,globalMeanNat0,C14 Dead Coarse Root Carbon,gC/m^2,,,set2_c13.txt
+set2,C13 isotope,C14_CPOOL,globalMeanNat0,C14 Temporary Photosynthate C Pool,gC/m^2,,,set2_c13.txt
+set2,C13 isotope,C14_TOTVEGC,globalMeanNat0,"C14 Total Vegetation C, Excluding Cpool",gC/m^2,,,set2_c13.txt
+set2,C13 isotope,C14_CWDC,globalMeanNat0,C14 Coarse Woody Debris Carbon,gC/m^2,,,set2_c13.txt
+set2,C13 isotope,C14_CWD_C,globalMeanNat0,C14 Coarse Woody Debris Carbon,gC/m^2,,,set2_c13.txt
+set2,C13 isotope,C14_TOTLITC,globalMeanNat0,C14 Totl Litter Carbon,gC/m^2,,,set2_c13.txt
+set2,C13 isotope,C14_TOTSOMC,globalMeanNat0,C14 Total SOM Carbon,gC/m^2,,,set2_c13.txt
+set2,C13 isotope,C14_TOTECOSYSC,globalMeanNat0,"C14 Totl Ecosystem C, Incl Veg But Excl Cpool",gC/m^2,,,set2_c13.txt
+set2,C13 isotope,C14_COL_FIRE_CLOSS,globalMeanAnn0,C14 Totl Col-Level Fire C Loss,gC/m^2/s,Y,,set2_c13.txt
+set2,C13 isotope,C14_PFT_FIRE_CLOSS,globalMeanAnn0,C14 Totl Pft-Level Fire C Loss,gC/m^2/s,Y,,set2_c13.txt
+set2,CASA,SURFMETC,globalMeanNat0,Total Metabolized Litter C,gC/m^2,,Y,set2_casa.txt
+set2,CASA,SURFSTRC,globalMeanNat0,Total Structural Litter C,gC/m^2,,Y,set2_casa.txt
+set2,CASA,SOILMETC,globalMeanNat0,Total Metabolized Structural Soil C,gC/m^2,,Y,set2_casa.txt
+set2,CASA,SOILSTRC,globalMeanNat0,Total Structural Soil C,gC/m^2,,Y,set2_casa.txt
+set2,CASA,SURFMIC,globalMeanNat0,Total Microbial Litter C,gC/m^2,,Y,set2_casa.txt
+set2,CASA,SOILMIC,globalMeanNat0,Total Microbial Soil C,gC/m^2,,Y,set2_casa.txt
+set2,CASA,SLOWC,globalMeanNat0,Total Slow C Pool,gC/m^2,,Y,set2_casa.txt
+set2,CASA,PASSIVEC,globalMeanNat0,Total Passive C Pool,gC/m^2,,Y,set2_casa.txt
+set2,CASA,RESP_LEAFC,globalMeanNat0,Respired Leaf C,gC/m^2,,Y,set2_casa.txt
+set2,CASA,RESP_WOODC,globalMeanNat0,Respired Wood C,gC/m^2,,Y,set2_casa.txt
+set2,CASA,RESP_FROOTC,globalMeanNat0,Respired Fine Root C,gC/m^2,,Y,set2_casa.txt
+set2,CASA,RESP_SURFMETC,globalMeanNat0,Respired Metabolized Litter C,gC/m^2,,Y,set2_casa.txt
+set2,CASA,RESP_SURFSTRC,globalMeanNat0,Respired Structural Litter C,gC/m^2,,Y,set2_casa.txt
+set2,CASA,RESP_SOILMETC,globalMeanNat0,Respired Metabolized Soil C,gC/m^2,,Y,set2_casa.txt
+set2,CASA,RESP_SOILSTRC,globalMeanNat0,Respired Structural Soil C,gC/m^2,,Y,set2_casa.txt
+set2,CASA,RESP_CWDC,globalMeanNat0,Respired Coarse Woody Debris C,gC/m^2,,Y,set2_casa.txt
+set2,CASA,RESP_SURFMIC,globalMeanNat0,Respired Microbial Litter C,gC/m^2,,Y,set2_casa.txt
+set2,CASA,RESP_SOILMIC,globalMeanNat0,Respired Microbial Soil C,gC/m^2,,Y,set2_casa.txt
+set2,CASA,RESP_SLOWC,globalMeanNat0,Respired Slow C Pool,gC/m^2,,Y,set2_casa.txt
+set2,CASA,RESP_PASSIVEC,globalMeanNat0,Respired Passive C Pool,gC/m^2,,Y,set2_casa.txt
+set2,CASA,CLOSS_LEAF,globalMeanNat0,Leaf C Loss,gC/m^2,,Y,set2_casa.txt
+set2,CASA,CLOSS_WOOD,globalMeanNat0,Wood C Loss,gC/m^2,,Y,set2_casa.txt
+set2,CASA,CLOSS_FROOT,globalMeanNat0,Fine Root C Loss,gC/m^2,,Y,set2_casa.txt
+set2,CASA,CLOSS_SURFMET,globalMeanNat0,Metabolized Litter C Loss,gC/m^2,,Y,set2_casa.txt
+set2,CASA,CLOSS_SURFSTR,globalMeanNat0,Structural Litter C Loss,gC/m^2,,Y,set2_casa.txt
+set2,CASA,CLOSS_SOILMET,globalMeanNat0,Metabolized Structural Soil C Loss,gC/m^2,,Y,set2_casa.txt
+set2,CASA,CLOSS_SOILSTR,globalMeanNat0,Structural Soil C Loss,gC/m^2,,Y,set2_casa.txt
+set2,CASA,CLOSS_CWD,globalMeanNat0,Coarse Woody Debris C Loss,gC/m^2,,Y,set2_casa.txt
+set2,CASA,CLOSS_SURFMIC,globalMeanNat0,Microbial Litter C Loss,gC/m^2,,Y,set2_casa.txt
+set2,CASA,CLOSS_SOILMIC,globalMeanNat0,Microbial Soil C Loss,gC/m^2,,Y,set2_casa.txt
+set2,CASA,CLOSS_SLOW,globalMeanNat0,Slow C Pool Loss,gC/m^2,,Y,set2_casa.txt
+set2,CASA,CLOSS_PASSIVE,globalMeanNat0,Passive C Pool Loss,gC/m^2,,Y,set2_casa.txt
+set2,CASA,CFLUX,globalMeanDay0,Total C Flux,gC/m^2/s,Y,,set2_casa.txt
+set2,CASA,CO2FLUX,globalMeanDay0,Net CO2 Flux,gC/m^2/s,Y,,set2_casa.txt
+set2,CASA,PET,globalMeanDay0,Potential ET,mm/s,Y,,set2_casa.txt
+set2,CASA,EXCESSC,globalMeanDay0,Excess C,gC/m^2/s,Y,,set2_casa.txt
+set2,CASA,PLAI,globalMeanNat0,Prognostic LAI,m^2/m^2,,,set2_casa.txt
+set2,CASA,DEGDAY,globalMeanNat0,Accumulated Degree Days,C,,,set2_casa.txt
+set2,CASA,TDAYAVG,globalMeanNat0,Daily Averaged T,C,,,set2_casa.txt
+set2,CASA,STRESST,globalMeanNat0,Temperature stress fcn for leaf loss,unitless,,,set2_casa.txt
+set2,CASA,STRESSW,globalMeanNat0,Water stress fcn for leaf loss,unitless,,,set2_casa.txt
+set2,CASA,STRESSCD,globalMeanNat0,Cold+drought stress fcn for leaf loss,unitless,,,set2_casa.txt
+set2,CASA,LGROW,globalMeanNat0,Growing season index (0 or 1),,,,set2_casa.txt
+set2,CASA,ISEABEG,globalMeanNat0,Index for start of growing season,,,,set2_casa.txt
+set2,CASA,NSTEPBEG,globalMeanNat0,Nstep at start of growing season,,,,set2_casa.txt
+set2,CASA,BGTEMP,globalMeanNat0,Temperature Dependence,unitless,,,set2_casa.txt
+set2,CASA,XSCPOOL,globalMeanNat0,total excess C,g/m^2,,,set2_casa.txt
+set2,CASA,WLIM,globalMeanNat0,water limitation used in bgmoist (atmp factor),unitless,,,set2_casa.txt
+set2,CASA,SOILT,globalMeanNat0,Soil temperature: top 30cm,C,,,set2_casa.txt
+set2,CASA,SMOIST,globalMeanNat0,Soil moisture: top 30cm,mm3/mm3,,,set2_casa.txt
+set2,CASA,WATOPT,globalMeanNat0,watopt for entire column,mm3/mm3,,,set2_casa.txt
+set2,CASA,WATDRY,globalMeanNat0,watdry for entire column,mm3/mm3,,,set2_casa.txt
+set2,CASA,LIVEFR_LEAFC,globalMeanNat0,Live Fraction Leaf C,gC/m^2,,Y,set2_casa.txt
+set2,CASA,LIVEFR_WOODC,globalMeanNat0,Live Fraction Wood C,gC/m^2,,Y,set2_casa.txt
+set2,CASA,LIVEFR_FROOTC,globalMeanNat0,Live Fraction Froot C,gC/m^2,,Y,set2_casa.txt
+set2,CLM/CLAMP,TSA2M,globalMeanNat0,2m Air Temperature,K,,,set2_clm-clamp.txt
+set2,CLM/CLAMP,RAIN,globalMeanDay0,atmospheric rain,mm/s,Y,,set2_clm-clamp.txt
+set2,CLM/CLAMP,RUNOFF,globalMeanDay0,Surface Runoff,mm/s,Y,,set2_clm-clamp.txt
+set2,CLM/CLAMP,ALL_SKY_ALBEDO,globalMeanNat0,All-Sky Albedo,proportion,Y,,set2_clm-clamp.txt
+set2,CLM/CLAMP,GROUND,globalMeanNat0,heat flux into soil,W/m2,Y,,set2_clm-clamp.txt
+set2,CLM/CLAMP,NETIR,globalMeanNat0,Net Infrared (longwave) Radiation,W/m2,Y,,set2_clm-clamp.txt
+set2,CLM/CLAMP,NETRAD,globalMeanNat0,Net radiation,W/m2,Y,,set2_clm-clamp.txt
+set2,CLM/CLAMP,LATENT,globalMeanNat0,Latent Heat Flux,W/m2,Y,,set2_clm-clamp.txt
+set2,CLM/CLAMP,SENSIBLE,globalMeanNat0,Sensible Heat Flux,W/m2,Y,,set2_clm-clamp.txt
+set2,CLM/CLAMP,SENSIBLE_GND,globalMeanNat0,Sensible Heat Flux from Ground,W/m2,Y,,set2_clm-clamp.txt
+set2,CLM/CLAMP,SENSIBLE_VEG,globalMeanNat0,Sensible Heat Flux from Vegetation,W/m2,Y,,set2_clm-clamp.txt
+set2,CLM/CLAMP,REL_HUM,globalMeanNat0,Relative Humidity at 2m,kg/kg,,,set2_clm-clamp.txt
+set2,CLM/CLAMP,SPEC_HUM_2M,globalMeanNat0,Specific Humidity at 2m,kg/kg,,,set2_clm-clamp.txt
+set2,CLM/CLAMP,SPEC_HUM,globalMeanNat0,Atmospheric Specific Humidity,kg/kg,,,set2_clm-clamp.txt
+set2,CLM/CLAMP,SNOW,globalMeanDay0,atmospheric snow,mm/s,Y,,set2_clm-clamp.txt
+set2,CLM/CLAMP,BTRAN,globalMeanNat0,transpiration beta factor,unitless,,Y,set2_clm-clamp.txt
+set2,CLM/CLAMP,CANOPY_EVAPORATION,globalMeanDay0,Canopy Evaporation,mm/s,Y,,set2_clm-clamp.txt
+set2,CLM/CLAMP,DRAINAGE,globalMeanDay0,Subsurface Drainage,mm/s,Y,,set2_clm-clamp.txt
+set2,CLM/CLAMP,ET,globalMeanDay0,Evapotranspiration,mm/s,Y,,set2_clm-clamp.txt
+set2,CLM/CLAMP,INTERCEPTION,globalMeanDay0,Canopy Interception,mm/s,Y,,set2_clm-clamp.txt
+set2,CLM/CLAMP,SNOW_DEPTH,globalMeanNat0,Snow depth,mm,,,set2_clm-clamp.txt
+set2,CLM/CLAMP,SOIL_EVAPORATION,globalMeanDay0,Soil Evaporation,mm/s,Y,,set2_clm-clamp.txt
+set2,CLM/CLAMP,SOIL_ICE,globalMeanNat0,Soil Ice in each soil layer,kg/m2,,,set2_clm-clamp.txt
+set2,CLM/CLAMP,SOIL_LIQUID,globalMeanNat0,Soil Liquid Water,kg/m2,,,set2_clm-clamp.txt
+set2,CLM/CLAMP,SOIL_PSI,globalMeanNat0,Soil Water Potential,MPa,,,set2_clm-clamp.txt
+set2,CLM/CLAMP,TOTAL_SOIL_ICE,globalMeanNat0,Total soil ice,kg/m2,,,set2_clm-clamp.txt
+set2,CLM/CLAMP,TOTAL_SOIL_LIQUID,globalMeanNat0,total soil liquid water,kg/m2,,,set2_clm-clamp.txt
+set2,CLM/CLAMP,TRANSPIRATION,globalMeanDay0,Transpiration,mm/s,Y,,set2_clm-clamp.txt
+set2,CLM/CLAMP,VOL_SOIL_WATER,globalMeanNat0,Volumetric Soil Water,mm3/mm3,Y,,set2_clm-clamp.txt
+set2,CLM/CLAMP,BLACK_SKY_ALBEDO,globalMeanNat0,Surface Black-Sky Albedo,proportion,,,set2_clm-clamp.txt
+set2,CLM/CLAMP,IRDOWN,globalMeanNat0,Downward Infrared Radiation,W/m2,Y,,set2_clm-clamp.txt
+set2,CLM/CLAMP,IRUP,globalMeanNat0,Upward Infrared Radiation,W/m2,Y,,set2_clm-clamp.txt
+set2,CLM/CLAMP,LAISHA,globalMeanNat0,Shaded Projected Leaf Area Index,m^2/m^2,,,set2_clm-clamp.txt
+set2,CLM/CLAMP,LAISUN,globalMeanNat0,Sunlit Projected Leaf Area Index,m2/m2,,,set2_clm-clamp.txt
+set2,CLM/CLAMP,REFLECT,globalMeanNat0,Total Reflected Solar Radiation,W/m2,Y,,set2_clm-clamp.txt
+set2,CLM/CLAMP,SNOW_FRACTION,globalMeanNat0,Snow Fraction,unitless,,,set2_clm-clamp.txt
+set2,CLM/CLAMP,SOLAR,globalMeanNat0,Total Incident Solar Radiation,W/m2,Y,,set2_clm-clamp.txt
+set2,CLM/CLAMP,SOLAR_AB,globalMeanNat0,Total Absorbed Solar Radiation,W/m2,Y,,set2_clm-clamp.txt
+set2,CLM/CLAMP,SOLAR_ABG,globalMeanNat0,Solar Radiation Absorbed by Ground,W/m2,Y,,set2_clm-clamp.txt
+set2,CLM/CLAMP,SOLAR_ABV,globalMeanNat0,Solar Rad Absorbed by Vegetation,W/m2,Y,,set2_clm-clamp.txt
+set2,CLM/CLAMP,DEGREE_DAYS,globalMeanNat0,Accumulated degree days,K,,,set2_clm-clamp.txt
+set2,CLM/CLAMP,TREFMNAV,globalMeanNat0,daily minimum of average 2m temperature,K,Y,,set2_clm-clamp.txt
+set2,CLM/CLAMP,TREFMXAV,globalMeanNat0,daily maximum of average 2m temperature,K,Y,,set2_clm-clamp.txt
+set2,CLM/CLAMP,TSOIL,globalMeanNat0,soil temperature,K,,,set2_clm-clamp.txt
+set2,CLM/CLAMP,TVEG,globalMeanNat0,Vegetation Temperature,K,,,set2_clm-clamp.txt
+set2,CLM/CLAMP,ELAI,globalMeanNat0,exposed one-sided leaf area index,m2/m2,,,set2_clm-clamp.txt
+set2,CLM/CLAMP,ESAI,globalMeanNat0,exposed one-sided stem area index,m2/m2,,,set2_clm-clamp.txt
+set2,CLM/CLAMP,TLAI,globalMeanNat0,total one-sided leaf area index,m2/m2,,,set2_clm-clamp.txt
+set2,CLM/CLAMP,TSAI,globalMeanNat0,total one-sided stem area index,m2/m2,,,set2_clm-clamp.txt
+set2,CLM/CLAMP,PHOTOSYNTHESIS,globalMeanDay0,Photosynthesis,umol/m2s,Y,,set2_clm-clamp.txt
+set2,CLM/CLAMP,RSSHA,globalMeanNat0,shaded leaf stomatal resistance,s/m,,,set2_clm-clamp.txt
+set2,CLM/CLAMP,RSSUN,globalMeanNat0,Sunlit leaf stomatal resistance,s/m,,,set2_clm-clamp.txt
+set2,CLM core,TSA,globalMeanNat0,2m air temperature,K,,,set2_clm.txt
+set2,CLM core,PREC,globalMeanDay0,ppt: rain+snow,mm/s,Y,Y,set2_clm.txt
+set2,CLM core,ASA,globalMeanNat0,all-sky albedo:FSR/FSDS,proportion,Y,Y,set2_clm.txt
+set2,CLM core,RNET,globalMeanNat0,net radiation:fsa-fira,W/m^2,Y,Y,set2_clm.txt
+set2,CLM core,LHEAT,globalMeanNat0,latent heat:FCTR+FCEV+FGEV,W/m^2,Y,Y,set2_clm.txt
+set2,CLM core,TOTRUNOFF,globalMeanDay0,Total Liquid Runoff,mm/s,Y,Y,set2_clm.txt
+set2,CLM core,SNOWDP,globalMeanNat0,snow height,m,,,set2_clm.txt
+set2,CLM core,FPSN,globalMeanDay0,photosynthesis,umol/m^2/s,Y,,set2_clm.txt
+set2,CLM core,FSH,globalMeanNat0,sensible heat,W/m^2,Y,,set2_clm.txt
+set2,CLM core,FSH_V,globalMeanNat0,sensible heat from vegetation,W/m^2,Y,,set2_clm.txt
+set2,CLM core,FSH_G,globalMeanNat0,sensible heat from ground,W/m^2,Y,,set2_clm.txt
+set2,CLM core,FSH_TO_COUPLER,globalMeanNat0,sensible heat sent to coupler,W/m^2,Y,,set2_clm.txt
+set2,CLM core,FSH_PRECIP_CONVERSION,globalMeanNat0,SHF from conv of rain/snow atm forcing,W/m^2,Y,,set2_clm.txt
+set2,CLM core,FSH_RUNOFF_ICE_TO_LIQ,globalMeanNat0,SHF from conv of ice runoff to liquid,W/m^2,Y,,set2_clm.txt
+set2,CLM core,CPL_ENERGY_BAL,globalMeanNat0,Coupler Energy Balance (Global Area),W/m2,Y,Y,set2_clm.txt
+set2,CLM core,TV,globalMeanNat0,vegetation temperature,K,,,set2_clm.txt
+set2,CLM core,TG,globalMeanNat0,ground temperature,K,,,set2_clm.txt
+set2,CLM core,FSA,globalMeanNat0,absorbed solar radiation,W/m^2,Y,,set2_clm.txt
+set2,CLM core,SABV,globalMeanNat0,solar rad absorbed by vegetation,W/m^2,Y,,set2_clm.txt
+set2,CLM core,SABG,globalMeanNat0,solar rad absorbed by ground,W/m^2,Y,,set2_clm.txt
+set2,CLM core,FSR,globalMeanNat0,reflected solar radiation,W/m^2,Y,,set2_clm.txt
+set2,CLM core,FIRA,globalMeanNat0,net infrared (longwave) radiation,W/m^2,Y,,set2_clm.txt
+set2,CLM core,FIRE,globalMeanNat0,emitted infrared (longwave) radiation,W/m^2,Y,,set2_clm.txt
+set2,CLM core,FCTR,globalMeanNat0,canopy transpiration,W/m^2,Y,,set2_clm.txt
+set2,CLM core,FCEV,globalMeanNat0,canopy evaporation,W/m^2,Y,,set2_clm.txt
+set2,CLM core,FGEV,globalMeanNat0,ground evaporation,W/m^2,Y,,set2_clm.txt
+set2,CLM core,FGR,globalMeanNat0,heat flux into snow/soil (includes snow melt),W/m^2,Y,,set2_clm.txt
+set2,CLM core,FSM,globalMeanNat0,snow melt heat flux,W/m^2,Y,,set2_clm.txt
+set2,CLM core,FGNET,globalMeanNat0,net ground heat flux:fgr-fsm,W/m^2,Y,Y,set2_clm.txt
+set2,CLM core,TAUX,globalMeanNat0,zonal surface stress,kg/m/s^2,Y,,set2_clm.txt
+set2,CLM core,TAUY,globalMeanNat0,meridional surface stress,kg/m/s^2,Y,,set2_clm.txt
+set2,CLM core,ELAI,globalMeanNat0,exposed one-sided leaf area index,m2/m2,,,set2_clm.txt
+set2,CLM core,ESAI,globalMeanNat0,exposed one-sided stem area index,m2/m2,,,set2_clm.txt
+set2,CLM core,TLAI,globalMeanNat0,total one-sided leaf area index,m2/m2,,,set2_clm.txt
+set2,CLM core,TSAI,globalMeanNat0,total one-sided stem area index,m2/m2,,,set2_clm.txt
+set2,CLM core,LAISUN,globalMeanNat0,Sunlit Projected Leaf Area Index,m2/m2,,,set2_clm.txt
+set2,CLM core,LAISHA,globalMeanNat0,Shaded Projected Leaf Area Index,m^2/m^2,,,set2_clm.txt
+set2,CLM core,BTRAN,globalMeanNat0,transpiration beta factor,unitless,,Y,set2_clm.txt
+set2,CLM core,H2OSNO,globalMeanNat0,total snow water equiv (SNOWICE + SNOWLIQ),mm,,,set2_clm.txt
+set2,CLM core,H2OCAN,globalMeanNat0,intercepted water,mm,,,set2_clm.txt
+set2,CLM core,SNOWLIQ,globalMeanNat0,snow liquid water,kg/m^2,,,set2_clm.txt
+set2,CLM core,SNOWICE,globalMeanNat0,snow ice,kg/m^2,,,set2_clm.txt
+set2,CLM core,QINFL,globalMeanDay0,infiltration,mm/s,Y,,set2_clm.txt
+set2,CLM core,QOVER,globalMeanDay0,surface runoff,mm/s,Y,,set2_clm.txt
+set2,CLM core,QRGWL,globalMeanDay0,"surface runoff at glaciers (liquid only), wetlands, lakes",mm/s,Y,,set2_clm.txt
+set2,CLM core,QDRAI,globalMeanDay0,sub-surface drainage,mm/s,Y,,set2_clm.txt
+set2,CLM core,QINTR,globalMeanDay0,interception,mm/s,Y,,set2_clm.txt
+set2,CLM core,QDRIP,globalMeanDay0,throughfall,mm/s,Y,,set2_clm.txt
+set2,CLM core,QSNOMELT,globalMeanDay0,snow melt,mm/s,Y,,set2_clm.txt
+set2,CLM core,QSOIL,globalMeanDay0,ground evaporation,mm/s,Y,,set2_clm.txt
+set2,CLM core,QVEGE,globalMeanDay0,canopy evaporation,mm/s,Y,,set2_clm.txt
+set2,CLM core,QVEGT,globalMeanDay0,canopy transpiration,mm/s,Y,,set2_clm.txt
+set2,CLM core,ERRSOI,globalMeanNat0,soil/lake energy conservation error,W/m^2,Y,,set2_clm.txt
+set2,CLM core,ERRSEB,globalMeanNat0,surface energy conservation error,W/m^2,Y,,set2_clm.txt
+set2,CLM core,FSNO,globalMeanNat0,fraction of ground covered by snow,unitless,,,set2_clm.txt
+set2,CLM core,ERRSOL,globalMeanNat0,solar radiation conservation error,W/m^2,Y,,set2_clm.txt
+set2,CLM core,ERRH2O,globalMeanNat0,total water conservation error,mm,,,set2_clm.txt
+set2,CLM core,RAIN,globalMeanDay0,atmospheric rain,mm/s,Y,,set2_clm.txt
+set2,CLM core,SNOW,globalMeanDay0,atmospheric snow,mm/s,Y,,set2_clm.txt
+set2,CLM core,TBOT,globalMeanNat0,atmospheric air temperature,K,,,set2_clm.txt
+set2,CLM core,TLAKE,globalMeanNat0,lake temperature,K,,,set2_clm.txt
+set2,CLM core,WIND,globalMeanNat0,atmospheric wind velocity magnitude,m/s,Y,,set2_clm.txt
+set2,CLM core,THBOT,globalMeanNat0,atmospheric air potential temperature,K,,,set2_clm.txt
+set2,CLM core,QBOT,globalMeanNat0,atmospheric specific humidity,kg/kg,,,set2_clm.txt
+set2,CLM core,ZBOT,globalMeanNat0,atmospheric reference height,m,,,set2_clm.txt
+set2,CLM core,FLDS,globalMeanNat0,atmospheric longwave radiation,W/m^2,Y,,set2_clm.txt
+set2,CLM core,FSDS,globalMeanNat0,atmospheric incident solar radiation,W/m^2,Y,,set2_clm.txt
+set2,CLM core,FSDSND,globalMeanNat0,direct nir incident solar radiation,W/m^2,Y,,set2_clm.txt
+set2,CLM core,FSDSNDLN,globalMeanNat0,direct nir incident solar radiation at local noon,W/m^2,Y,,set2_clm.txt
+set2,CLM core,FSDSNI,globalMeanNat0,diffuse nir incident solar radiation,W/m^2,Y,,set2_clm.txt
+set2,CLM core,FSDSVD,globalMeanNat0,direct vis incident solar radiation,W/m^2,Y,,set2_clm.txt
+set2,CLM core,FSDSVDLN,globalMeanNat0,direct vis incident solar radiation at local noon,W/m^2,Y,,set2_clm.txt
+set2,CLM core,FSDSVI,globalMeanNat0,diffuse vis incident solar radiation,W/m^2,Y,,set2_clm.txt
+set2,CLM core,FSRND,globalMeanNat0,direct nir reflected solar radiation,W/m^2,Y,,set2_clm.txt
+set2,CLM core,FSRNDLN,globalMeanNat0,direct nir reflected solar radiation at local noon,W/m^2,Y,,set2_clm.txt
+set2,CLM core,FSRNI,globalMeanNat0,diffuse nir reflected solar radiation,W/m^2,Y,,set2_clm.txt
+set2,CLM core,FSRVD,globalMeanNat0,direct vis reflected solar radiation,W/m^2,Y,,set2_clm.txt
+set2,CLM core,FSRVDLN,globalMeanNat0,direct vis reflected solar radiation at local noon,W/m^2,Y,,set2_clm.txt
+set2,CLM core,FSRVI,globalMeanNat0,diffuse vis reflected solar radiation,W/m^2,Y,,set2_clm.txt
+set2,CLM core,Q2M,globalMeanNat0,2m specific humidity,kg/kg,,,set2_clm.txt
+set2,CLM core,RH2M,globalMeanNat0,2m relative humidity,%,,,set2_clm.txt
+set2,CLM core,TREFMNAV,globalMeanNat0,daily minimum of average 2m temperature,K,Y,,set2_clm.txt
+set2,CLM core,TREFMXAV,globalMeanNat0,daily maximum of average 2m temperature,K,Y,,set2_clm.txt
+set2,CLM core,VBSA,globalMeanNat0,visible black-sky albedo,proportion,,Y,set2_clm.txt
+set2,CLM core,NBSA,globalMeanNat0,near-IR black-sky albedo,proportion,,Y,set2_clm.txt
+set2,CLM core,VWSA,globalMeanNat0,visible white-sky albedo,proportion,Y,Y,set2_clm.txt
+set2,CLM core,NWSA,globalMeanNat0,near-IR white-sky albedo,proportion,Y,Y,set2_clm.txt
+set2,CLM core,SOILLIQ,globalMeanNat0,soil liquid water,kg/m^2,,,set2_clm.txt
+set2,CLM core,SOILICE,globalMeanNat0,soil ice,kg/m^2,,,set2_clm.txt
+set2,CLM core,H2OSOI,globalMeanNat0,volumetric soil water,mm3/mm3,Y,,set2_clm.txt
+set2,CLM core,TSOI,globalMeanNat0,soil temperature,K,,,set2_clm.txt
+set2,CLM core,EVAPFRAC,globalMeanNat0,LHEAT/(LHEAT+FSH),unitless,Y,Y,set2_clm.txt
+set2,CLM core,XIM,globalMeanNat0,moisture index,+/-1,,Y,set2_clm.txt
+set2,CLM core,P-E,globalMeanDay0,PREC-ET,mm/s,Y,Y,set2_clm.txt
+set2,CLM core,WA,globalMeanNat0,water in the unconfined aquifer,mm,,,set2_clm.txt
+set2,CLM core,ZWT,globalMeanNat0,water table depth,m,,,set2_clm.txt
+set2,CLM core,TWS,globalMeanNat0,total water storage,mm,,,set2_clm.txt
+set2,CLM core,VOLR,globalMeanNat0,river channel total water storage,m3,,,set2_clm.txt
+set2,CLM core,QCHARGE,globalMeanDay0,aquifer recharge rate,mm/s,,,set2_clm.txt
+set2,CLM core,FCOV,globalMeanNat0,fractional area with water table at surface,unitless [0-1],,,set2_clm.txt
+set2,CLM core,PCO2,globalMeanNat0,partial pressure of CO2,Pa,,,set2_clm.txt
+set2,CLM core,DSTDEP,globalMeanDay0,total dust deposition (dry+wet) from atmosphere,kg/m2/s,Y,,set2_clm.txt
+set2,CLM core,DSTFLXT,globalMeanDay0,total surface dust emission,kg/m2/s,Y,,set2_clm.txt
+set2,CLM core,OCDEP,globalMeanDay0,total OC deposition (dry+wet) from atmosphere,kg/m2/s,Y,,set2_clm.txt
+set2,CLM core,BCDEP,globalMeanDay0,total BC deposition (dry+wet) from atmosphere,kg/m2/s,Y,,set2_clm.txt
+set2,CLM core,U10,globalMeanNat0,10-m wind,m/s,Y,,set2_clm.txt
+set2,CLM core,PCT_BSOIL_PFT,globalMeanNat0,Percent Bare Soil on Natural Veg Landunit,%,,Y,set2_clm.txt
+set2,CLM core,PCT_TREE_PFT,globalMeanNat0,Percent Tree on Natural Veg Landunit,%,,Y,set2_clm.txt
+set2,CLM core,PCT_GRASS_PFT,globalMeanNat0,Percent Grass on Natural Veg Landunit,%,,Y,set2_clm.txt
+set2,CLM core,PCT_SHRUB_PFT,globalMeanNat0,Percent Shrub on Natural Veg Landunit,%,,Y,set2_clm.txt
+set2,CLM core,PCT_CROP_PFT,globalMeanNat0,Percent Crop on Natural Veg Landunit or Gridcell (CropModel),%,,Y,set2_clm.txt
+set2,CLM core,ZETA,globalMeanNat0,dimensionless stability parameter,unitless,,,set2_clm.txt
+set2,CLM core,RAIN_FROM_ATM,globalMeanDay0,atmospheric rain (pre-downscaling),mm/s,Y,,set2_clm.txt
+set2,CLM core,SNOW_FROM_ATM,globalMeanDay0,atmospheric snow (pre-downscaling),mm/s,Y,,set2_clm.txt
+set2,CLM core,FLDS_NOT_DOWNSCALED,globalMeanNat0,atmospheric longwave radiation (pre-downscaling),W/m^2,Y,,set2_clm.txt
+set2,CLM core,Tair_from_atm,globalMeanNat0,atmospheric air temperature (pre-downscaling),K,,,set2_clm.txt
+set2,CLM core,Thair_from_atm,globalMeanNat0,atmospheric air potential temperature (pre-downscaling),K,,,set2_clm.txt
+set2,CLM core,QBOT_NOT_DOWNSCALED,globalMeanNat0,atmospheric specific humidity (pre-downscaling),kg/kg,,,set2_clm.txt
+set2,CLM core,PBOT_NOT_DOWNSCALED,globalMeanNat0,atm pressure of bottom layer (pre-downscaling),Pa,,,set2_clm.txt
+set2,CLM core,Rho_from_atm,globalMeanNat0,atmospheric density of bottom layer (pre-downscaling),kg/m3,,,set2_clm.txt
+set2,CLM core,UWIND,globalMeanNat0,atmospheric uwind velocity magnitude,m/s,Y,,set2_clm.txt
+set2,CLM core,VWIND,globalMeanNat0,atmospheric vwind velocity magnitude,m/s,Y,,set2_clm.txt
+set2,CLM core,BCPHIDRY,globalMeanDay0,BC deposition (phidry) from atmosphere,kg/m2/s,Y,,set2_clm.txt
+set2,CLM core,BCPHODRY,globalMeanDay0,BC deposition (phodry) from atmosphere,kg/m2/s,Y,,set2_clm.txt
+set2,CLM core,BCPHIWET,globalMeanDay0,BC deposition (phiwet) from atmosphere,kg/m2/s,Y,,set2_clm.txt
+set2,CLM core,OCPHIDRY,globalMeanDay0,OC deposition (phidry) from atmosphere,kg/m2/s,Y,,set2_clm.txt
+set2,CLM core,OCPHODRY,globalMeanDay0,OC deposition (phodry) from atmosphere,kg/m2/s,Y,,set2_clm.txt
+set2,CLM core,OCPHIWET,globalMeanDay0,OC deposition (phiwet) from atmosphere,kg/m2/s,Y,,set2_clm.txt
+set2,CLM core,DSTWET1,globalMeanDay0,dust deposition (wet1) from atmosphere,kg/m2/s,Y,,set2_clm.txt
+set2,CLM core,DSTDRY1,globalMeanDay0,dust deposition (dry1) from atmosphere,kg/m2/s,Y,,set2_clm.txt
+set2,CLM core,DSTWET2,globalMeanDay0,dust deposition (wet2) from atmosphere,kg/m2/s,Y,,set2_clm.txt
+set2,CLM core,DSTDRY2,globalMeanDay0,dust deposition (dry2) from atmosphere,kg/m2/s,Y,,set2_clm.txt
+set2,CLM core,DSTWET3,globalMeanDay0,dust deposition (wet3) from atmosphere,kg/m2/s,Y,,set2_clm.txt
+set2,CLM core,DSTDRY3,globalMeanDay0,dust deposition (dry3) from atmosphere,kg/m2/s,Y,,set2_clm.txt
+set2,CLM core,DSTWET4,globalMeanDay0,dust deposition (wet4) from atmosphere,kg/m2/s,Y,,set2_clm.txt
+set2,CLM core,DSTDRY4,globalMeanDay0,dust deposition (dry4) from atmosphere,kg/m2/s,Y,,set2_clm.txt
+set2,CLM core,ATM_TOPO,globalMeanNat0,atmospheric surface height,m,,,set2_clm.txt
+set2,CN/CLAMP,AGNPP,globalMeanDay0,above ground net primary production,gC/m^2/s,Y,,set2_cn-clamp.txt
+set2,CN/CLAMP,AR,globalMeanDay0,autotrophic respiration (MR + GR),gC/m^2/s,Y,,set2_cn-clamp.txt
+set2,CN/CLAMP,BGNPP,globalMeanDay0,below ground net primary production,gC/m^2/s,Y,,set2_cn-clamp.txt
+set2,CN/CLAMP,BIOGENIC_CO,globalMeanDay0,Biogenic CO Flux,uG/m2/h,Y,,set2_cn-clamp.txt
+set2,CN/CLAMP,CWDC,globalMeanNat0,coarse woody debris carbon,gC/m^2,,,set2_cn-clamp.txt
+set2,CN/CLAMP,CWDC_HR,globalMeanDay0,Coarse Woody Debris C Hetereotrophic respiration,gC/m2s,Y,,set2_cn-clamp.txt
+set2,CN/CLAMP,CWDC_LOSS,globalMeanDay0,Coarse Woody Debris C Loss,gC/m2s,Y,,set2_cn-clamp.txt
+set2,CN/CLAMP,FROOTC,globalMeanNat0,fine root carbon,gC/m^2,,,set2_cn-clamp.txt
+set2,CN/CLAMP,FROOTC_ALLOC,globalMeanDay0,Fine root C allocation,gC/m2s,Y,,set2_cn-clamp.txt
+set2,CN/CLAMP,FROOTC_LOSS,globalMeanDay0,Fine root C Loss,gC/m2s,Y,,set2_cn-clamp.txt
+set2,CN/CLAMP,GPP,globalMeanDay0,gross primary production,gC/m^2/s,Y,,set2_cn-clamp.txt
+set2,CN/CLAMP,GROSS_NMIN,globalMeanAnn0,gross N mineralization,gN/m^2/s,Y,,set2_cn-clamp.txt
+set2,CN/CLAMP,HR,globalMeanDay0,total hetereotrophic respiration,gC/m^2/s,Y,,set2_cn-clamp.txt
+set2,CN/CLAMP,ISOPRENE,globalMeanDay0,Isoprene Flux,uG/m2/h,Y,,set2_cn-clamp.txt
+set2,CN/CLAMP,LEAFC,globalMeanNat0,leaf carbon,gC/m^2,,,set2_cn-clamp.txt
+set2,CN/CLAMP,LEAFC_ALLOC,globalMeanDay0,Leaf C Allocation,gC/m2s,Y,,set2_cn-clamp.txt
+set2,CN/CLAMP,LEAFC_LOSS,globalMeanDay0,Leaf C Loss,gC/m2s,Y,,set2_cn-clamp.txt
+set2,CN/CLAMP,LITTERC,globalMeanNat0,Total Litter C,gC/m2,,,set2_cn-clamp.txt
+set2,CN/CLAMP,LITTERC_HR,globalMeanDay0,Litter Hetereotrophic Respiration,gC/m2s,Y,,set2_cn-clamp.txt
+set2,CN/CLAMP,LITTERC_LOSS,globalMeanDay0,Litter C Loss,gC/m2s,Y,,set2_cn-clamp.txt
+set2,CN/CLAMP,MONOTERPENE,globalMeanDay0,Monoterpene Flux,uG/m2/h,Y,,set2_cn-clamp.txt
+set2,CN/CLAMP,NEE,globalMeanDay0,net ecosys exchange of C,gC/m^2/s,Y,,set2_cn-clamp.txt
+set2,CN/CLAMP,NEP,globalMeanDay0,net ecosystem production,gC/m^2/s,Y,,set2_cn-clamp.txt
+set2,CN/CLAMP,NET_NMIN,globalMeanAnn0,net N mineralization,gN/m^2/s,Y,,set2_cn-clamp.txt
+set2,CN/CLAMP,NPP,globalMeanDay0,net primary production,gC/m^2/s,Y,,set2_cn-clamp.txt
+set2,CN/CLAMP,OTHER_VOC,globalMeanDay0,Other VOC Flux,uG/m2/h,Y,,set2_cn-clamp.txt
+set2,CN/CLAMP,OR_VOC,globalMeanDay0,Other Reactive VOC Flux,uG/m2/h,Y,,set2_cn-clamp.txt
+set2,CN/CLAMP,SOILC,globalMeanNat0,soil organic matter C (fast pool),gC/m2,,,set2_cn-clamp.txt
+set2,CN/CLAMP,SOILC_HR,globalMeanDay0,Soil C hetereotrophic respiration,gC/m2s,Y,,set2_cn-clamp.txt
+set2,CN/CLAMP,SOILC_LOSS,globalMeanDay0,Soil C Loss,gC/m2s,Y,,set2_cn-clamp.txt
+set2,CN/CLAMP,VOCFLXT,globalMeanDay0,Total VOC flux into Atmosphere,uG/m2/h,Y,,set2_cn-clamp.txt
+set2,CN/CLAMP,WOODC,globalMeanNat0,Live+Dead Stem C,gC/m2,,Y,set2_cn-clamp.txt
+set2,CN/CLAMP,WOODC_ALLOC,globalMeanDay0,Wood C Allocation,gC/m2s,Y,,set2_cn-clamp.txt
+set2,CN/CLAMP,WOODC_LOSS,globalMeanDay0,Wood C Loss,gC/m2s,Y,,set2_cn-clamp.txt
+set2,CN (carbon-nitrogen),NEE,globalMeanDay0,net ecosys exchange of C,gC/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),NEP,globalMeanDay0,net ecosystem production,gC/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),NBP,globalMeanDay0,"net biome production, includes fire, landuse and harvest flux",gC/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),GPP,globalMeanDay0,gross primary production,gC/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),HTOP,globalMeanNat0,canopy top height,m,,,set2_cn.txt
+set2,CN (carbon-nitrogen),CUE,globalMeanNat0,carbon use efficiency,NPP/GPP,Y,Y,set2_cn.txt
+set2,CN (carbon-nitrogen),BTRAN2,globalMeanNat0,root zone soil moisture factor,unitless,,,set2_cn.txt
+set2,CN (carbon-nitrogen),PSNSUN_TO_CPOOL,globalMeanDay0,GPP from Sunlit Canopy,gC/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),PSNSHADE_TO_CPOOL,globalMeanDay0,GPP from Shaded Canopy,gC/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),NPP,globalMeanDay0,net primary production,gC/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),AGNPP,globalMeanDay0,above ground net primary production,gC/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),BGNPP,globalMeanDay0,below ground net primary production,gC/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),MR,globalMeanDay0,maintenance respiration,gC/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),GR,globalMeanDay0,total growth respiration,gC/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),GRAINC,globalMeanNat0,grain C (does not equal yield),gC/m^2,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),GRAINC_TO_FOOD,globalMeanDay0,grain C to food,gC/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),GRAINC_TO_SEED,globalMeanDay0,grain C to seed,gC/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),AR,globalMeanDay0,autotrophic respiration (MR + GR),gC/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),LITHR,globalMeanDay0,litter hetereotrophic respiration,gC/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),SOMHR,globalMeanDay0,SOM hetereotrophic respiration,gC/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),HR,globalMeanDay0,total hetereotrophic respiration,gC/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),RR,globalMeanDay0,root respiration (fine root MR + total root GR),gC/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),SR,globalMeanDay0,total soil respiration (HR + root resp),gC/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),ER,globalMeanDay0,total ecosystem respiration (AR + HR),gC/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),FINUNDATED,globalMeanNat0,Fractional inundated of veg col,unitless,,,set2_cn.txt
+set2,CN (carbon-nitrogen),FCH4,globalMeanAnn0,Gridcell surface CH4 flux,kgC/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),FCH4TOCO2,globalMeanAnn0,Gridcell oxidation of CH4 to CO2,gC/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),FCH4_DFSAT,globalMeanAnn0,CH4 additional flux,kgC/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),CH4PROD,globalMeanAnn0,Gridcell total CH4 production,gC/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),CH4_SURF_AERE_SAT,globalMeanAnn0,aerenchyma sfc CH4 flx-inundated area,mol/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),CH4_SURF_AERE_UNSAT,globalMeanAnn0,aerenchyma sfc CH4 flx-non-inundated area,mol/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),CH4_SURF_DIFF_SAT,globalMeanAnn0,diffusive sfc CH4 flx-inundated/lake area,mol/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),CH4_SURF_DIFF_UNSAT,globalMeanAnn0,diffusive sfc CH4 flx-non-inundated area,mol/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),CH4_SURF_EBUL_SAT,globalMeanAnn0,ebullition sfc CH4 flx-inundated/lake area,mol/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),CH4_SURF_EBUL_UNSAT,globalMeanAnn0,ebullition sfc CH4 flx-non-inundated area,mol/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),LEAFC,globalMeanNat0,leaf carbon,gC/m^2,,,set2_cn.txt
+set2,CN (carbon-nitrogen),LEAFN,globalMeanNat0,leaf nitrogen,gN/m^2,,,set2_cn.txt
+set2,CN (carbon-nitrogen),LEAFCN,globalMeanNat0,leaf carbon/nitrogen,gC/gN,,Y,set2_cn.txt
+set2,CN (carbon-nitrogen),FROOTC,globalMeanNat0,fine root carbon,gC/m^2,,,set2_cn.txt
+set2,CN (carbon-nitrogen),LIVESTEMC,globalMeanNat0,live stem C,gC/m^2,,,set2_cn.txt
+set2,CN (carbon-nitrogen),DEADSTEMC,globalMeanNat0,dead stem carbon,gC/m^2,,,set2_cn.txt
+set2,CN (carbon-nitrogen),LIVECROOTC,globalMeanNat0,live coarse root carbon,gC/m^2,,,set2_cn.txt
+set2,CN (carbon-nitrogen),DEADCROOTC,globalMeanNat0,dead coarse root carbon,gC/m^2,,,set2_cn.txt
+set2,CN (carbon-nitrogen),CPOOL,globalMeanNat0,temporary photosynthate C pool,gC/m^2,,,set2_cn.txt
+set2,CN (carbon-nitrogen),SOIL3C,globalMeanNat0,Soil organic matter C (slow pool),gC/m^2,,,set2_cn.txt
+set2,CN (carbon-nitrogen),SOIL4C,globalMeanNat0,Soil organic matter C (slowest pool),gC/m^2,,,set2_cn.txt
+set2,CN (carbon-nitrogen),XSMRPOOL,globalMeanNat0,Temporary Photosynthate C Pool,gC/m^2,,,set2_cn.txt
+set2,CN (carbon-nitrogen),TOTVEGC,globalMeanNat0,"total vegetation C, excluding cpool",gC/m^2,,,set2_cn.txt
+set2,CN (carbon-nitrogen),TOTVEGN,globalMeanNat0,total vegetation N,gN/m^2,,,set2_cn.txt
+set2,CN (carbon-nitrogen),TOTVEGCN,globalMeanNat0,total vegetation C/N,gC/gN,,Y,set2_cn.txt
+set2,CN (carbon-nitrogen),CWDC,globalMeanNat0,coarse woody debris carbon,gC/m^2,,,set2_cn.txt
+set2,CN (carbon-nitrogen),CWD_C,globalMeanNat0,coarse woody debris carbon,gC/m^2,,,set2_cn.txt
+set2,CN (carbon-nitrogen),TOTLITC,globalMeanNat0,total litter carbon,gC/m^2,,,set2_cn.txt
+set2,CN (carbon-nitrogen),TOTLITC_1m,globalMeanNat0,total litter carbon to 1m depth,gC/m^2,,,set2_cn.txt
+set2,CN (carbon-nitrogen),TOTSOMC,globalMeanNat0,total SOM carbon,gC/m^2,,,set2_cn.txt
+set2,CN (carbon-nitrogen),TOTSOMC_1m,globalMeanNat0,total SOM carbon to 1 meter depth,gC/m^2,,,set2_cn.txt
+set2,CN (carbon-nitrogen),TOTLITN,globalMeanNat0,total litter N,gN/m^2,,,set2_cn.txt
+set2,CN (carbon-nitrogen),TOTLITN_1m,globalMeanNat0,total litter N to 1m depth,gN/m^2,,,set2_cn.txt
+set2,CN (carbon-nitrogen),TOTSOMN,globalMeanNat0,total soil organic matter N,gN/m^2,,,set2_cn.txt
+set2,CN (carbon-nitrogen),TOTSOMN_1m,globalMeanNat0,total soil organic matter N to 1m depth,gN/m^2,,,set2_cn.txt
+set2,CN (carbon-nitrogen),TOTECOSYSC,globalMeanNat0,"total ecosystem C, incl veg but excl cpool",gC/m^2,,,set2_cn.txt
+set2,CN (carbon-nitrogen),TOTCOLC,globalMeanNat0,"total column C, incl veg and cpool",gC/m^2,,,set2_cn.txt
+set2,CN (carbon-nitrogen),FPG,globalMeanNat0,fraction of potential GPP,proportion,,,set2_cn.txt
+set2,CN (carbon-nitrogen),FPI,globalMeanNat0,fraction of potential immobilization,proportion,,,set2_cn.txt
+set2,CN (carbon-nitrogen),NDEP_TO_SMINN,globalMeanAnn0,nitrogen deposition,gN/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),FERT,globalMeanAnn0,fertilizer added,gN/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),FERT_TO_SMINN,globalMeanAnn0,fertilizer to soil mineral N,gN/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),NFERTILIZATION,globalMeanAnn0,fertilizer added,gN/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),POTENTIAL_IMMOB,globalMeanAnn0,Potential Immobilization,gN/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),ACTUAL_IMMOB,globalMeanAnn0,Actual Immobilization,gN/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),GROSS_NMIN,globalMeanAnn0,gross N mineralization,gN/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),NET_NMIN,globalMeanAnn0,net N mineralization,gN/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),NDEPLOY,globalMeanAnn0,total N deployed in new growth,gN/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),RETRANSN_TO_NPOOL,globalMeanAnn0,Retranslocated N to NPool,gN/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),SMINN_TO_NPOOL,globalMeanAnn0,Mineral N to NPool,gN/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),DENIT,globalMeanAnn0,Total Denitrification,gN/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),SOIL3N,globalMeanNat0,soil organic matter N (slow pool),gN/m^2,,,set2_cn.txt
+set2,CN (carbon-nitrogen),SOIL4N,globalMeanNat0,Soil organic matter N (slowest pool),gN/m^2,,,set2_cn.txt
+set2,CN (carbon-nitrogen),NFIX_TO_SMINN,globalMeanAnn0,nitrogen fixation,gN/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),NAM,globalMeanAnn0,AM-associated N uptake flux,gN/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),NECM,globalMeanAnn0,ECM-associated N uptake flux,gN/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),NFIX,globalMeanAnn0,Symbiotic BNF uptake flux,gN/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),NRETRANS,globalMeanAnn0,Retranslocated N uptake flux,gN/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),NPP_NUPTAKE,globalMeanAnn0,total carbon used by N uptake in FUN,gC/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),NUPTAKE_FRACTION,globalMeanNat0,NPP_NUPTAKE/(NPP_NUPTAKE+NPP),unitless,Y,Y,set2_cn.txt
+set2,CN (carbon-nitrogen),FFIX_TO_SMINN,globalMeanAnn0,free living N fixation to soil mineral N,gN/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),NPP_NFIX,globalMeanAnn0,Symbiotic BNF uptake used C,gC/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),NPP_NACTIVE,globalMeanAnn0,Mycorrhizal N uptake used C,gC/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),NPP_NRETRANS,globalMeanAnn0,retranslocated N uptake flux,gC/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),SUPPLEMENT_TO_SMINN,globalMeanAnn0,supplement to mineral nitrogen,gN/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),SMINN_LEACHED,globalMeanAnn0,Nitrogen Leached,gN/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),SMIN_NO3_LEACHED,globalMeanAnn0,Soil NO3 pool loss to leaching,gN/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),SMIN_NO3_RUNOFF,globalMeanAnn0,Soil NO3 pool loss to runoff,gN/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),SMINN,globalMeanNat0,soil mineral N,gN/m^2,,,set2_cn.txt
+set2,CN (carbon-nitrogen),RETRANSN,globalMeanNat0,plant pool of retranslocated N,gN/m^2,,,set2_cn.txt
+set2,CN (carbon-nitrogen),COL_FIRE_CLOSS,globalMeanAnn0,total column-level fire C loss,gC/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),PFT_FIRE_CLOSS,globalMeanAnn0,total pft-level fire C loss,gC/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),COL_FIRE_NLOSS,globalMeanAnn0,total column-level fire N loss,gN/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),PFT_FIRE_NLOSS,globalMeanAnn0,total pft-level fire N loss,gN/m^2/s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),FAREA_BURNED,globalMeanAnn0,fractional area burned,proportion/s,,,set2_cn.txt
+set2,CN (carbon-nitrogen),BAF_CROP,globalMeanAnn0,fractional area burned - crop,proportion/s,,,set2_cn.txt
+set2,CN (carbon-nitrogen),CWDC_HR,globalMeanDay0,Coarse Woody Debris C Hetereotrophic respiration,gC/m2s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),CWDC_LOSS,globalMeanDay0,Coarse Woody Debris C Loss,gC/m2s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),FROOTC_ALLOC,globalMeanDay0,Fine root C allocation,gC/m2s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),FROOTC_LOSS,globalMeanDay0,Fine root C Loss,gC/m2s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),LEAFC_ALLOC,globalMeanDay0,Leaf C Allocation,gC/m2s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),LEAFC_LOSS,globalMeanDay0,Leaf C Loss,gC/m2s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),LITTERC,globalMeanNat0,Total Litter C,gC/m2,,,set2_cn.txt
+set2,CN (carbon-nitrogen),LITTERC_HR,globalMeanDay0,Litter Hetereotrophic Respiration,gC/m2s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),LITTERC_LOSS,globalMeanDay0,Litter C Loss,gC/m2s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),SOILC,globalMeanNat0,soil organic matter C (fast pool),gC/m2,,,set2_cn.txt
+set2,CN (carbon-nitrogen),SOILC_HR,globalMeanDay0,Soil C hetereotrophic respiration,gC/m2s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),SOILC_LOSS,globalMeanDay0,Soil C Loss,gC/m2s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),WOODC,globalMeanNat0,Live+Dead Stem C,gC/m2,,Y,set2_cn.txt
+set2,CN (carbon-nitrogen),WOODC_ALLOC,globalMeanDay0,Wood C Allocation,gC/m2s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),WOODC_LOSS,globalMeanDay0,Wood C Loss,gC/m2s,Y,,set2_cn.txt
+set2,CN (carbon-nitrogen),ALTMAX,globalMeanNat1,maximum annual active layer thickness,m,,,set2_cn.txt
+set2,CN (carbon-nitrogen),LNFM,globalMeanDay1,lightning frequency,counts/km^2/hr,Y,,set2_cn.txt
+set3,Albedo,VBSA,globalMeanNat,visible black-sky albedo,proportion,,Y,set3_albedo.txt
+set3,Albedo,NBSA,globalMeanNat,near-IR black-sky albedo,proportion,,Y,set3_albedo.txt
+set3,Albedo,VWSA,globalMeanNat,visible white-sky albedo,proportion,Y,Y,set3_albedo.txt
+set3,Albedo,NWSA,globalMeanNat,near-IR white-sky albedo,proportion,Y,Y,set3_albedo.txt
+set3,Albedo,ASA,globalMeanNat,all-sky albedo:FSR/FSDS,proportion,Y,Y,set3_albedo.txt
+set3,CLAMP fluxes,NEE,globalMeanDay,net ecosys exchange of C,gC/m^2/s,Y,,set3_clampFlx.txt
+set3,CLAMP fluxes,GPP,globalMeanDay,gross primary production,gC/m^2/s,Y,,set3_clampFlx.txt
+set3,CLAMP fluxes,NPP,globalMeanDay,net primary production,gC/m^2/s,Y,,set3_clampFlx.txt
+set3,CLAMP fluxes,AR,globalMeanDay,autotrophic respiration (MR + GR),gC/m^2/s,Y,,set3_clampFlx.txt
+set3,CLAMP fluxes,HR,globalMeanDay,total hetereotrophic respiration,gC/m^2/s,Y,,set3_clampFlx.txt
+set3,CLAMP fluxes,NEP,globalMeanDay,net ecosystem production,gC/m^2/s,Y,,set3_clampFlx.txt
+set3,C/N fluxes,NEE,globalMeanDay,net ecosys exchange of C,gC/m^2/s,Y,,set3_cnFlx.txt
+set3,C/N fluxes,GPP,globalMeanDay,gross primary production,gC/m^2/s,Y,,set3_cnFlx.txt
+set3,C/N fluxes,NPP,globalMeanDay,net primary production,gC/m^2/s,Y,,set3_cnFlx.txt
+set3,C/N fluxes,AR,globalMeanDay,autotrophic respiration (MR + GR),gC/m^2/s,Y,,set3_cnFlx.txt
+set3,C/N fluxes,HR,globalMeanDay,total hetereotrophic respiration,gC/m^2/s,Y,,set3_cnFlx.txt
+set3,C/N fluxes,ER,globalMeanDay,total ecosystem respiration (AR + HR),gC/m^2/s,Y,,set3_cnFlx.txt
+set3,C/N fluxes,FCH4,globalMeanDay,Gridcell surface CH4 flux,kgC/m^2/s,Y,,set3_cnFlx.txt
+set3,C/N fluxes,SMINN_LEACHED,globalMeanDay,Nitrogen Leached,gN/m^2/s,Y,,set3_cnFlx.txt
+set3,C/N fluxes,SMIN_NO3_LEACHED,globalMeanDay,Soil NO3 pool loss to leaching,gN/m^2/s,Y,,set3_cnFlx.txt
+set3,C/N fluxes,SMIN_NO3_RUNOFF,globalMeanDay,Soil NO3 pool loss to runoff,gN/m^2/s,Y,,set3_cnFlx.txt
+set3,C/N land fluxes,TSA,globalMeanNat,2m air temperature,K,,,set3_cn_landFlx.txt
+set3,C/N land fluxes,PREC,globalMeanDay,ppt: rain+snow,mm/s,Y,Y,set3_cn_landFlx.txt
+set3,C/N land fluxes,TOTRUNOFF,globalMeanDay,Total Liquid Runoff,mm/s,Y,Y,set3_cn_landFlx.txt
+set3,C/N land fluxes,SNOWDP,globalMeanNat,snow height,m,,,set3_cn_landFlx.txt
+set3,C/N land fluxes,LHEAT,globalMeanNat,latent heat:FCTR+FCEV+FGEV,W/m^2,Y,Y,set3_cn_landFlx.txt
+set3,C/N land fluxes,GPP,globalMeanDay,gross primary production,gC/m^2/s,Y,,set3_cn_landFlx.txt
+set3,C/N land fluxes,TLAI,globalMeanNat,total one-sided leaf area index,m2/m2,,,set3_cn_landFlx.txt
+set3,C/N land fluxes,TOTSOILLIQICE,globalMeanNat,soil moisture storage (liq+ice),kg/m^2,,Y,set3_cn_landFlx.txt
+set3,Fire fluxes,COL_FIRE_CLOSS,globalMeanDay,total column-level fire C loss,gC/m^2/s,Y,,set3_fireFlx.txt
+set3,Fire fluxes,COL_FIRE_NLOSS,globalMeanDay,total column-level fire N loss,gN/m^2/s,Y,,set3_fireFlx.txt
+set3,Fire fluxes,PFT_FIRE_CLOSS,globalMeanDay,total pft-level fire C loss,gC/m^2/s,Y,,set3_fireFlx.txt
+set3,Fire fluxes,PFT_FIRE_NLOSS,globalMeanDay,total pft-level fire N loss,gN/m^2/s,Y,,set3_fireFlx.txt
+set3,Fire fluxes,FAREA_BURNED,globalMeanDay,fractional area burned,proportion/s,,,set3_fireFlx.txt
+set3,Fire fluxes,BAF_CROP,globalMeanDay,fractional area burned - crop,proportion/s,,,set3_fireFlx.txt
+set3,Hydrology,WA,globalMeanNat,water in the unconfined aquifer,mm,,,set3_hydro.txt
+set3,Hydrology,ZWT,globalMeanNat,water table depth,m,,,set3_hydro.txt
+set3,Hydrology,QCHARGE,globalMeanDay,aquifer recharge rate,mm/s,,,set3_hydro.txt
+set3,Hydrology,FCOV,globalMeanNat,fractional area with water table at surface,unitless [0-1],,,set3_hydro.txt
+set3,Hydrology,TWS,globalMeanNat,total water storage,mm,,,set3_hydro.txt
+set3,Land fluxes,TSA,globalMeanNat,2m air temperature,K,,,set3_landFlx.txt
+set3,Land fluxes,PREC,globalMeanDay,ppt: rain+snow,mm/s,Y,Y,set3_landFlx.txt
+set3,Land fluxes,TOTRUNOFF,globalMeanDay,Total Liquid Runoff,mm/s,Y,Y,set3_landFlx.txt
+set3,Land fluxes,SNOWDP,globalMeanNat,snow height,m,,,set3_landFlx.txt
+set3,Land fluxes,LHEAT,globalMeanNat,latent heat:FCTR+FCEV+FGEV,W/m^2,Y,Y,set3_landFlx.txt
+set3,Land fluxes,FPSN,globalMeanDay,photosynthesis,umol/m^2/s,Y,,set3_landFlx.txt
+set3,Land fluxes,TLAI,globalMeanNat,total one-sided leaf area index,m2/m2,,,set3_landFlx.txt
+set3,Land fluxes,TOTSOILLIQICE,globalMeanNat,soil moisture storage (liq+ice),kg/m^2,,Y,set3_landFlx.txt
+set3,Moisture+energy fluxes,PREC,globalMeanDay,ppt: rain+snow,mm/s,Y,Y,set3_moistEnergyFlx.txt
+set3,Moisture+energy fluxes,RNET,globalMeanNat,net radiation:fsa-fira,W/m^2,Y,Y,set3_moistEnergyFlx.txt
+set3,Moisture+energy fluxes,ET,globalMeanDay,Evapotranspiration,mm/s,Y,,set3_moistEnergyFlx.txt
+set3,Radiative fluxes,FSDS,globalMeanNat,atmospheric incident solar radiation,W/m^2,Y,,set3_radFlx.txt
+set3,Radiative fluxes,ALBEDO,globalMeanNat,all-sky albedo:FSR/FSDS,proportion,Y,Y,set3_radFlx.txt
+set3,Radiative fluxes,FSA,globalMeanNat,absorbed solar radiation,W/m^2,Y,,set3_radFlx.txt
+set3,Radiative fluxes,FLDS,globalMeanNat,atmospheric longwave radiation,W/m^2,Y,,set3_radFlx.txt
+set3,Radiative fluxes,FIRE,globalMeanNat,emitted infrared (longwave) radiation,W/m^2,Y,,set3_radFlx.txt
+set3,Radiative fluxes,FIRA,globalMeanNat,net infrared (longwave) radiation,W/m^2,Y,,set3_radFlx.txt
+set3,Radiative fluxes,RNET,globalMeanNat,net radiation:fsa-fira,W/m^2,Y,Y,set3_radFlx.txt
+set3,Snow,SNOWDP,globalMeanNat,snow height,m,,,set3_snow.txt
+set3,Snow,FSNO,globalMeanNat,fraction of ground covered by snow,unitless,,,set3_snow.txt
+set3,Snow,H2OSNO,globalMeanNat,total snow water equiv (SNOWICE + SNOWLIQ),mm,,,set3_snow.txt
+set3,Turbulent fluxes,RNET,globalMeanNat,net radiation:fsa-fira,W/m^2,Y,Y,set3_turbFlx.txt
+set3,Turbulent fluxes,FSH,globalMeanNat,sensible heat,W/m^2,Y,,set3_turbFlx.txt
+set3,Turbulent fluxes,LHEAT,globalMeanNat,latent heat:FCTR+FCEV+FGEV,W/m^2,Y,Y,set3_turbFlx.txt
+set3,Turbulent fluxes,FCTR,globalMeanNat,canopy transpiration,W/m^2,Y,,set3_turbFlx.txt
+set3,Turbulent fluxes,FCEV,globalMeanNat,canopy evaporation,W/m^2,Y,,set3_turbFlx.txt
+set3,Turbulent fluxes,FGEV,globalMeanNat,ground evaporation,W/m^2,Y,,set3_turbFlx.txt
+set3,Turbulent fluxes,FGR,globalMeanNat,heat flux into snow/soil (includes snow melt),W/m^2,Y,,set3_turbFlx.txt
+set3,Turbulent fluxes,BTRAN,globalMeanNat,transpiration beta factor,unitless,,Y,set3_turbFlx.txt
+set3,Turbulent fluxes,EVAPFRAC,globalMeanNat,LHEAT/(LHEAT+FSH),unitless,Y,Y,set3_turbFlx.txt
+set5,C13 isotope,C13_NEE,globalTotlAnn,C13 Net Ecosys Exchange of C,gC/m^2/s,Y,,set5_c13.txt
+set5,C13 isotope,C13_NBP,globalTotlAnn,"C13 net biome production, includes fire, landuse and harvest flux",gC/m^2/s,Y,,set5_c13.txt
+set5,C13 isotope,C13_NEP,globalTotlAnn,C13 Net Ecosystem Production,gC/m^2/s,Y,,set5_c13.txt
+set5,C13 isotope,C13_GPP,globalTotlAnn,C13 Gross Primary Production,gC/m^2/s,Y,,set5_c13.txt
+set5,C13 isotope,C13_PSNSUN_TO_CPOOL,globalTotlAnn,C13 GPP from Sunlit Canopy,gC/m^2/s,Y,,set5_c13.txt
+set5,C13 isotope,C13_PSNSHADE_TO_CPOOL,globalTotlAnn,C13 GPP from Shaded Canopy,gC/m^2/s,Y,,set5_c13.txt
+set5,C13 isotope,C13_NPP,globalTotlAnn,C13 Net Primary Production,gC/m^2/s,Y,,set5_c13.txt
+set5,C13 isotope,C13_AGNPP,globalTotlAnn,C13 Aboveground NPP,gC/m^2/s,Y,,set5_c13.txt
+set5,C13 isotope,C13_BGNPP,globalTotlAnn,C13 Belowground NPP,gC/m^2/s,Y,,set5_c13.txt
+set5,C13 isotope,C13_MR,globalTotlAnn,C13 Maintenance Respiration,gC/m^2/s,Y,,set5_c13.txt
+set5,C13 isotope,C13_GR,globalTotlAnn,C13 Total Growth Respiration,gC/m^2/s,Y,,set5_c13.txt
+set5,C13 isotope,C13_AR,globalTotlAnn,C13 Autotrophic Respiration (MR + GR),gC/m^2/s,Y,,set5_c13.txt
+set5,C13 isotope,C13_LITHR,globalTotlAnn,C13 Litter Hetereotrophic Respiration,gC/m^2/s,Y,,set5_c13.txt
+set5,C13 isotope,C13_SOMHR,globalTotlAnn,C13 SOM Hetereotrophic Respiration,gC/m^2/s,Y,,set5_c13.txt
+set5,C13 isotope,C13_HR,globalTotlAnn,C13 Total Hetereotrophic Respiration,gC/m^2/s,Y,,set5_c13.txt
+set5,C13 isotope,C13_RR,globalTotlAnn,C13 Root Respiration (Fine Root MR + Total Root GR),gC/m^2/s,Y,,set5_c13.txt
+set5,C13 isotope,C13_SR,globalTotlAnn,C13 Totl Soil Respiration (HR + Root Resp),gC/m^2/s,Y,,set5_c13.txt
+set5,C13 isotope,C13_ER,globalTotlAnn,C13 Totl Ecosystem Respiration (AR + HR),gC/m^2/s,Y,,set5_c13.txt
+set5,C13 isotope,C13_LEAFC,globalTotlNat,C13 Leaf Carbon,gC/m^2,,,set5_c13.txt
+set5,C13 isotope,C13_SOIL3C,globalTotlNat,C13 Soil Organic Matter C (Slow Pool),gC/m^2,,,set5_c13.txt
+set5,C13 isotope,C13_SOIL4C,globalTotlNat,C13 Soil Organic Matter C (Slowest Pool),gC/m^2,,,set5_c13.txt
+set5,C13 isotope,C13_FROOTC,globalTotlNat,C13 Fine Root CC,gC/m^2,,,set5_c13.txt
+set5,C13 isotope,C13_LIVESTEMC,globalTotlNat,C13 Live Stem C,gC/m^2,,,set5_c13.txt
+set5,C13 isotope,C13_DEADSTEMC,globalTotlNat,C13 Dead Stem Carbon,gC/m^2,,,set5_c13.txt
+set5,C13 isotope,C13_LIVECROOTC,globalTotlNat,C13 Live Coarse Root Carbon,gC/m^2,,,set5_c13.txt
+set5,C13 isotope,C13_DEADCROOTC,globalTotlNat,C13 Dead Coarse Root Carbon,gC/m^2,,,set5_c13.txt
+set5,C13 isotope,C13_CPOOL,globalTotlNat,C13 Temporary Photosynthate C Pool,gC/m^2,,,set5_c13.txt
+set5,C13 isotope,C13_TOTVEGC,globalTotlNat,"C13 Total Vegetation C, Excluding Cpool",gC/m^2,,,set5_c13.txt
+set5,C13 isotope,C13_CWDC,globalTotlNat,C13 Coarse Woody Debris Carbon,gC/m^2,,,set5_c13.txt
+set5,C13 isotope,C13_CWD_C,globalTotlNat,C13 Coarse Woody Debris Carbon,gC/m^2,,,set5_c13.txt
+set5,C13 isotope,C13_TOTLITC,globalTotlNat,C13 Totl Litter Carbon,gC/m^2,,,set5_c13.txt
+set5,C13 isotope,C13_TOTSOMC,globalTotlNat,C13 Total SOM Carbon,gC/m^2,,,set5_c13.txt
+set5,C13 isotope,C13_TOTECOSYSC,globalTotlNat,"C13 Totl Ecosystem C, Incl Veg But Excl Cpool",gC/m^2,,,set5_c13.txt
+set5,C13 isotope,C13_COL_CTRUNC,globalTotlNat,C13 Column-Level Sink for C Truncation,gC/m^2,,,set5_c13.txt
+set5,C13 isotope,C13_PFT_CTRUNC,globalTotlNat,C13 Pft-Level Sink for C Truncation,gC/m^2,,,set5_c13.txt
+set5,C13 isotope,C13_COL_FIRE_CLOSS,globalTotlAnn,C13 Totl Col-Level Fire C Loss,gC/m^2/s,Y,,set5_c13.txt
+set5,C13 isotope,C13_PFT_FIRE_CLOSS,globalTotlAnn,C13 Totl Pft-Level Fire C Loss,gC/m^2/s,Y,,set5_c13.txt
+set5,C13 isotope,C14_NEE,globalTotlAnn,C14 Net Ecosys Exchange of C,gC/m^2/s,Y,,set5_c13.txt
+set5,C13 isotope,C14_NBP,globalTotlAnn,"C14 net biome production, includes fire, landuse and harvest flux",gC/m^2/s,Y,,set5_c13.txt
+set5,C13 isotope,C14_NEP,globalTotlAnn,C14 Net Ecosystem Production,gC/m^2/s,Y,,set5_c13.txt
+set5,C13 isotope,C14_GPP,globalTotlAnn,C14 Gross Primary Production,gC/m^2/s,Y,,set5_c13.txt
+set5,C13 isotope,C14_PSNSUN_TO_CPOOL,globalTotlAnn,C14 GPP from Sunlit Canopy,gC/m^2/s,Y,,set5_c13.txt
+set5,C13 isotope,C14_PSNSHADE_TO_CPOOL,globalTotlAnn,C14 GPP from Shaded Canopy,gC/m^2/s,Y,,set5_c13.txt
+set5,C13 isotope,C14_NPP,globalTotlAnn,C14 Net Primary Production,gC/m^2/s,Y,,set5_c13.txt
+set5,C13 isotope,C14_AGNPP,globalTotlAnn,C14 Aboveground NPP,gC/m^2/s,Y,,set5_c13.txt
+set5,C13 isotope,C14_BGNPP,globalTotlAnn,C14 Belowground NPP,gC/m^2/s,Y,,set5_c13.txt
+set5,C13 isotope,C14_MR,globalTotlAnn,C14 Maintenance Respiration,gC/m^2/s,Y,,set5_c13.txt
+set5,C13 isotope,C14_GR,globalTotlAnn,C14 Total Growth Respiration,gC/m^2/s,Y,,set5_c13.txt
+set5,C13 isotope,C14_AR,globalTotlAnn,C14 Autotrophic Respiration (MR + GR),gC/m^2/s,Y,,set5_c13.txt
+set5,C13 isotope,C14_LITHR,globalTotlAnn,C14 Litter Hetereotrophic Respiration,gC/m^2/s,Y,,set5_c13.txt
+set5,C13 isotope,C14_SOMHR,globalTotlAnn,C14 SOM Hetereotrophic Respiration,gC/m^2/s,Y,,set5_c13.txt
+set5,C13 isotope,C14_HR,globalTotlAnn,C14 Total Hetereotrophic Respiration,gC/m^2/s,Y,,set5_c13.txt
+set5,C13 isotope,C14_RR,globalTotlAnn,C14 Root Respiration (Fine Root MR + Total Root GR),gC/m^2/s,Y,,set5_c13.txt
+set5,C13 isotope,C14_SR,globalTotlAnn,C14 Totl Soil Respiration (HR + Root Resp),gC/m^2/s,Y,,set5_c13.txt
+set5,C13 isotope,C14_ER,globalTotlAnn,C14 Totl Ecosystem Respiration (AR + HR),gC/m^2/s,Y,,set5_c13.txt
+set5,C13 isotope,C14_LEAFC,globalTotlNat,C14 Leaf Carbon,gC/m^2,,,set5_c13.txt
+set5,C13 isotope,C14_SOIL3C,globalTotlNat,C14 Soil Organic Matter C (Slow Pool),gC/m^2,,,set5_c13.txt
+set5,C13 isotope,C14_SOIL4C,globalTotlNat,C14 Soil Organic Matter C (Slowest Pool),gC/m^2,,,set5_c13.txt
+set5,C13 isotope,C14_FROOTC,globalTotlNat,C14 Fine Root CC,gC/m^2,,,set5_c13.txt
+set5,C13 isotope,C14_LIVESTEMC,globalTotlNat,C14 Live Stem C,gC/m^2,,,set5_c13.txt
+set5,C13 isotope,C14_DEADSTEMC,globalTotlNat,C14 Dead Stem Carbon,gC/m^2,,,set5_c13.txt
+set5,C13 isotope,C14_LIVECROOTC,globalTotlNat,C14 Live Coarse Root Carbon,gC/m^2,,,set5_c13.txt
+set5,C13 isotope,C14_DEADCROOTC,globalTotlNat,C14 Dead Coarse Root Carbon,gC/m^2,,,set5_c13.txt
+set5,C13 isotope,C14_CPOOL,globalTotlNat,C14 Temporary Photosynthate C Pool,gC/m^2,,,set5_c13.txt
+set5,C13 isotope,C14_TOTVEGC,globalTotlNat,"C14 Total Vegetation C, Excluding Cpool",gC/m^2,,,set5_c13.txt
+set5,C13 isotope,C14_CWDC,globalTotlNat,C14 Coarse Woody Debris Carbon,gC/m^2,,,set5_c13.txt
+set5,C13 isotope,C14_CWD_C,globalTotlNat,C14 Coarse Woody Debris Carbon,gC/m^2,,,set5_c13.txt
+set5,C13 isotope,C14_TOTLITC,globalTotlNat,C14 Totl Litter Carbon,gC/m^2,,,set5_c13.txt
+set5,C13 isotope,C14_TOTSOMC,globalTotlNat,C14 Total SOM Carbon,gC/m^2,,,set5_c13.txt
+set5,C13 isotope,C14_TOTECOSYSC,globalTotlNat,"C14 Totl Ecosystem C, Incl Veg But Excl Cpool",gC/m^2,,,set5_c13.txt
+set5,C13 isotope,C14_COL_CTRUNC,globalTotlNat,C14 Column-Level Sink for C Truncation,gC/m^2,,,set5_c13.txt
+set5,C13 isotope,C14_PFT_CTRUNC,globalTotlNat,C14 Pft-Level Sink for C Truncation,gC/m^2,,,set5_c13.txt
+set5,C13 isotope,C14_COL_FIRE_CLOSS,globalTotlAnn,C14 Totl Col-Level Fire C Loss,gC/m^2/s,Y,,set5_c13.txt
+set5,C13 isotope,C14_PFT_FIRE_CLOSS,globalTotlAnn,C14 Totl Pft-Level Fire C Loss,gC/m^2/s,Y,,set5_c13.txt
+set5,CASA,SURFMETC,globalTotlNat,Total Metabolized Litter C,gC/m^2,,Y,set5_casa.txt
+set5,CASA,SURFSTRC,globalTotlNat,Total Structural Litter C,gC/m^2,,Y,set5_casa.txt
+set5,CASA,SOILMETC,globalTotlNat,Total Metabolized Structural Soil C,gC/m^2,,Y,set5_casa.txt
+set5,CASA,SOILSTRC,globalTotlNat,Total Structural Soil C,gC/m^2,,Y,set5_casa.txt
+set5,CASA,SURFMIC,globalTotlNat,Total Microbial Litter C,gC/m^2,,Y,set5_casa.txt
+set5,CASA,SOILMIC,globalTotlNat,Total Microbial Soil C,gC/m^2,,Y,set5_casa.txt
+set5,CASA,SLOWC,globalTotlNat,Total Slow C Pool,gC/m^2,,Y,set5_casa.txt
+set5,CASA,PASSIVEC,globalTotlNat,Total Passive C Pool,gC/m^2,,Y,set5_casa.txt
+set5,CASA,RESP_LEAFC,globalTotlNat,Respired Leaf C,gC/m^2,,Y,set5_casa.txt
+set5,CASA,RESP_WOODC,globalTotlNat,Respired Wood C,gC/m^2,,Y,set5_casa.txt
+set5,CASA,RESP_FROOTC,globalTotlNat,Respired Fine Root C,gC/m^2,,Y,set5_casa.txt
+set5,CASA,RESP_SURFMETC,globalTotlNat,Respired Metabolized Litter C,gC/m^2,,Y,set5_casa.txt
+set5,CASA,RESP_SURFSTRC,globalTotlNat,Respired Structural Litter C,gC/m^2,,Y,set5_casa.txt
+set5,CASA,RESP_SOILMETC,globalTotlNat,Respired Metabolized Soil C,gC/m^2,,Y,set5_casa.txt
+set5,CASA,RESP_SOILSTRC,globalTotlNat,Respired Structural Soil C,gC/m^2,,Y,set5_casa.txt
+set5,CASA,RESP_CWDC,globalTotlNat,Respired Coarse Woody Debris C,gC/m^2,,Y,set5_casa.txt
+set5,CASA,RESP_SURFMIC,globalTotlNat,Respired Microbial Litter C,gC/m^2,,Y,set5_casa.txt
+set5,CASA,RESP_SOILMIC,globalTotlNat,Respired Microbial Soil C,gC/m^2,,Y,set5_casa.txt
+set5,CASA,RESP_SLOWC,globalTotlNat,Respired Slow C Pool,gC/m^2,,Y,set5_casa.txt
+set5,CASA,RESP_PASSIVEC,globalTotlNat,Respired Passive C Pool,gC/m^2,,Y,set5_casa.txt
+set5,CASA,CLOSS_LEAF,globalTotlNat,Leaf C Loss,gC/m^2,,Y,set5_casa.txt
+set5,CASA,CLOSS_WOOD,globalTotlNat,Wood C Loss,gC/m^2,,Y,set5_casa.txt
+set5,CASA,CLOSS_FROOT,globalTotlNat,Fine Root C Loss,gC/m^2,,Y,set5_casa.txt
+set5,CASA,CLOSS_SURFMET,globalTotlNat,Metabolized Litter C Loss,gC/m^2,,Y,set5_casa.txt
+set5,CASA,CLOSS_SURFSTR,globalTotlNat,Structural Litter C Loss,gC/m^2,,Y,set5_casa.txt
+set5,CASA,CLOSS_SOILMET,globalTotlNat,Metabolized Structural Soil C Loss,gC/m^2,,Y,set5_casa.txt
+set5,CASA,CLOSS_SOILSTR,globalTotlNat,Structural Soil C Loss,gC/m^2,,Y,set5_casa.txt
+set5,CASA,CLOSS_CWD,globalTotlNat,Coarse Woody Debris C Loss,gC/m^2,,Y,set5_casa.txt
+set5,CASA,CLOSS_SURFMIC,globalTotlNat,Microbial Litter C Loss,gC/m^2,,Y,set5_casa.txt
+set5,CASA,CLOSS_SOILMIC,globalTotlNat,Microbial Soil C Loss,gC/m^2,,Y,set5_casa.txt
+set5,CASA,CLOSS_SLOW,globalTotlNat,Slow C Pool Loss,gC/m^2,,Y,set5_casa.txt
+set5,CASA,CLOSS_PASSIVE,globalTotlNat,Passive C Pool Loss,gC/m^2,,Y,set5_casa.txt
+set5,CASA,CFLUX,globalTotlAnn,Total C Flux,gC/m^2/s,Y,,set5_casa.txt
+set5,CASA,CO2FLUX,globalTotlAnn,Net CO2 Flux,gC/m^2/s,Y,,set5_casa.txt
+set5,CASA,PET,globalTotlAnn,Potential ET,mm/s,Y,,set5_casa.txt
+set5,CASA,EXCESSC,globalTotlAnn,Excess C,gC/m^2/s,Y,,set5_casa.txt
+set5,CASA,PLAI,globalMeanNat,Prognostic LAI,m^2/m^2,,,set5_casa.txt
+set5,CASA,DEGDAY,globalMeanNat,Accumulated Degree Days,C,,,set5_casa.txt
+set5,CASA,TDAYAVG,globalMeanNat,Daily Averaged T,C,,,set5_casa.txt
+set5,CASA,STRESST,globalMeanNat,Temperature stress fcn for leaf loss,unitless,,,set5_casa.txt
+set5,CASA,STRESSW,globalMeanNat,Water stress fcn for leaf loss,unitless,,,set5_casa.txt
+set5,CASA,STRESSCD,globalMeanNat,Cold+drought stress fcn for leaf loss,unitless,,,set5_casa.txt
+set5,CASA,LGROW,globalMeanNat,Growing season index (0 or 1),,,,set5_casa.txt
+set5,CASA,ISEABEG,globalMeanNat,Index for start of growing season,,,,set5_casa.txt
+set5,CASA,NSTEPBEG,globalMeanNat,Nstep at start of growing season,,,,set5_casa.txt
+set5,CASA,BGTEMP,globalMeanNat,Temperature Dependence,unitless,,,set5_casa.txt
+set5,CASA,XSCPOOL,globalMeanNat,total excess C,g/m^2,,,set5_casa.txt
+set5,CASA,WLIM,globalMeanNat,water limitation used in bgmoist (atmp factor),unitless,,,set5_casa.txt
+set5,CASA,SOILT,globalMeanNat,Soil temperature: top 30cm,C,,,set5_casa.txt
+set5,CASA,SMOIST,globalMeanNat,Soil moisture: top 30cm,mm3/mm3,,,set5_casa.txt
+set5,CASA,WATOPT,globalMeanNat,watopt for entire column,mm3/mm3,,,set5_casa.txt
+set5,CASA,WATDRY,globalMeanNat,watdry for entire column,mm3/mm3,,,set5_casa.txt
+set5,CASA,LIVEFR_LEAFC,globalMeanNat,Live Fraction Leaf C,gC/m^2,,Y,set5_casa.txt
+set5,CASA,LIVEFR_WOODC,globalMeanNat,Live Fraction Wood C,gC/m^2,,Y,set5_casa.txt
+set5,CASA,LIVEFR_FROOTC,globalMeanNat,Live Fraction Froot C,gC/m^2,,Y,set5_casa.txt
+set5,CLM/CLAMP,GROUND,globalMeanNat,heat flux into soil,W/m2,Y,,set5_clm-clamp.txt
+set5,CLM/CLAMP,LATENT,globalMeanNat,Latent Heat Flux,W/m2,Y,,set5_clm-clamp.txt
+set5,CLM/CLAMP,SENSIBLE,globalMeanNat,Sensible Heat Flux,W/m2,Y,,set5_clm-clamp.txt
+set5,CLM/CLAMP,SENSIBLE_GND,globalMeanNat,Sensible Heat Flux from Ground,W/m2,Y,,set5_clm-clamp.txt
+set5,CLM/CLAMP,SENSIBLE_VEG,globalMeanNat,Sensible Heat Flux from Vegetation,W/m2,Y,,set5_clm-clamp.txt
+set5,CLM/CLAMP,REL_HUM,globalMeanNat,Relative Humidity at 2m,kg/kg,,,set5_clm-clamp.txt
+set5,CLM/CLAMP,SPEC_HUM_2M,globalMeanNat,Specific Humidity at 2m,kg/kg,,,set5_clm-clamp.txt
+set5,CLM/CLAMP,SPEC_HUM,globalMeanNat,Atmospheric Specific Humidity,kg/kg,,,set5_clm-clamp.txt
+set5,CLM/CLAMP,RAIN,globalMeanDay,atmospheric rain,mm/s,Y,,set5_clm-clamp.txt
+set5,CLM/CLAMP,SNOW,globalMeanDay,atmospheric snow,mm/s,Y,,set5_clm-clamp.txt
+set5,CLM/CLAMP,BTRAN,globalMeanNat,transpiration beta factor,unitless,,Y,set5_clm-clamp.txt
+set5,CLM/CLAMP,CANOPY_EVAPORATION,globalMeanDay,Canopy Evaporation,mm/s,Y,,set5_clm-clamp.txt
+set5,CLM/CLAMP,DRAINAGE,globalMeanDay,Subsurface Drainage,mm/s,Y,,set5_clm-clamp.txt
+set5,CLM/CLAMP,ET,globalMeanDay,Evapotranspiration,mm/s,Y,,set5_clm-clamp.txt
+set5,CLM/CLAMP,INTERCEPTION,globalMeanDay,Canopy Interception,mm/s,Y,,set5_clm-clamp.txt
+set5,CLM/CLAMP,RUNOFF,globalMeanDay,Surface Runoff,mm/s,Y,,set5_clm-clamp.txt
+set5,CLM/CLAMP,SNOW_DEPTH,globalMeanNat,Snow depth,mm,,,set5_clm-clamp.txt
+set5,CLM/CLAMP,SOIL_EVAPORATION,globalMeanDay,Soil Evaporation,mm/s,Y,,set5_clm-clamp.txt
+set5,CLM/CLAMP,SOIL_ICE,globalMeanNat,Soil Ice in each soil layer,kg/m2,,,set5_clm-clamp.txt
+set5,CLM/CLAMP,SOIL_LIQUID,globalMeanNat,Soil Liquid Water,kg/m2,,,set5_clm-clamp.txt
+set5,CLM/CLAMP,SOIL_PSI,globalMeanNat,Soil Water Potential,MPa,,,set5_clm-clamp.txt
+set5,CLM/CLAMP,TOTAL_SOIL_ICE,globalMeanNat,Total soil ice,kg/m2,,,set5_clm-clamp.txt
+set5,CLM/CLAMP,TOTAL_SOIL_LIQUID,globalMeanNat,total soil liquid water,kg/m2,,,set5_clm-clamp.txt
+set5,CLM/CLAMP,TRANSPIRATION,globalMeanDay,Transpiration,mm/s,Y,,set5_clm-clamp.txt
+set5,CLM/CLAMP,VOL_SOIL_WATER,globalMeanNat,Volumetric Soil Water,mm3/mm3,Y,,set5_clm-clamp.txt
+set5,CLM/CLAMP,ALL_SKY_ALBEDO,globalMeanNat,All-Sky Albedo,proportion,Y,,set5_clm-clamp.txt
+set5,CLM/CLAMP,BLACK_SKY_ALBEDO,globalMeanNat,Surface Black-Sky Albedo,proportion,,,set5_clm-clamp.txt
+set5,CLM/CLAMP,IRDOWN,globalMeanNat,Downward Infrared Radiation,W/m2,Y,,set5_clm-clamp.txt
+set5,CLM/CLAMP,IRUP,globalMeanNat,Upward Infrared Radiation,W/m2,Y,,set5_clm-clamp.txt
+set5,CLM/CLAMP,LAISHA,globalMeanNat,Shaded Projected Leaf Area Index,m^2/m^2,,,set5_clm-clamp.txt
+set5,CLM/CLAMP,LAISUN,globalMeanNat,Sunlit Projected Leaf Area Index,m2/m2,,,set5_clm-clamp.txt
+set5,CLM/CLAMP,NETIR,globalMeanNat,Net Infrared (longwave) Radiation,W/m2,Y,,set5_clm-clamp.txt
+set5,CLM/CLAMP,NETRAD,globalMeanNat,Net radiation,W/m2,Y,,set5_clm-clamp.txt
+set5,CLM/CLAMP,REFLECT,globalMeanNat,Total Reflected Solar Radiation,W/m2,Y,,set5_clm-clamp.txt
+set5,CLM/CLAMP,SNOW_FRACTION,globalMeanNat,Snow Fraction,unitless,,,set5_clm-clamp.txt
+set5,CLM/CLAMP,SOLAR,globalMeanNat,Total Incident Solar Radiation,W/m2,Y,,set5_clm-clamp.txt
+set5,CLM/CLAMP,SOLAR_AB,globalMeanNat,Total Absorbed Solar Radiation,W/m2,Y,,set5_clm-clamp.txt
+set5,CLM/CLAMP,SOLAR_ABG,globalMeanNat,Solar Radiation Absorbed by Ground,W/m2,Y,,set5_clm-clamp.txt
+set5,CLM/CLAMP,SOLAR_ABV,globalMeanNat,Solar Rad Absorbed by Vegetation,W/m2,Y,,set5_clm-clamp.txt
+set5,CLM/CLAMP,DEGREE_DAYS,globalMeanNat,Accumulated degree days,K,,,set5_clm-clamp.txt
+set5,CLM/CLAMP,TREFMNAV,globalMeanNat,daily minimum of average 2m temperature,K,Y,,set5_clm-clamp.txt
+set5,CLM/CLAMP,TREFMXAV,globalMeanNat,daily maximum of average 2m temperature,K,Y,,set5_clm-clamp.txt
+set5,CLM/CLAMP,TSA2M,globalMeanNat,2m Air Temperature,K,,,set5_clm-clamp.txt
+set5,CLM/CLAMP,TSOIL,globalMeanNat,soil temperature,K,,,set5_clm-clamp.txt
+set5,CLM/CLAMP,TVEG,globalMeanNat,Vegetation Temperature,K,,,set5_clm-clamp.txt
+set5,CLM/CLAMP,ELAI,globalMeanNat,exposed one-sided leaf area index,m2/m2,,,set5_clm-clamp.txt
+set5,CLM/CLAMP,ESAI,globalMeanNat,exposed one-sided stem area index,m2/m2,,,set5_clm-clamp.txt
+set5,CLM/CLAMP,TLAI,globalMeanNat,total one-sided leaf area index,m2/m2,,,set5_clm-clamp.txt
+set5,CLM/CLAMP,TSAI,globalMeanNat,total one-sided stem area index,m2/m2,,,set5_clm-clamp.txt
+set5,CLM/CLAMP,PHOTOSYNTHESIS,globalMeanDay,Photosynthesis,umol/m2s,Y,,set5_clm-clamp.txt
+set5,CLM/CLAMP,RSSHA,globalMeanNat,shaded leaf stomatal resistance,s/m,,,set5_clm-clamp.txt
+set5,CLM/CLAMP,RSSUN,globalMeanNat,Sunlit leaf stomatal resistance,s/m,,,set5_clm-clamp.txt
+set5,CLM core,TSA,globalMeanNat,2m air temperature,K,,,set5_clm.txt
+set5,CLM core,PREC,globalMeanDay,ppt: rain+snow,mm/s,Y,Y,set5_clm.txt
+set5,CLM core,RAIN,globalMeanDay,atmospheric rain,mm/s,Y,,set5_clm.txt
+set5,CLM core,SNOW,globalMeanDay,atmospheric snow,mm/s,Y,,set5_clm.txt
+set5,CLM core,SNOWDP,globalMeanNat,snow height,m,,,set5_clm.txt
+set5,CLM core,FSNO,globalMeanNat,fraction of ground covered by snow,unitless,,,set5_clm.txt
+set5,CLM core,H2OSNO,globalMeanNat,total snow water equiv (SNOWICE + SNOWLIQ),mm,,,set5_clm.txt
+set5,CLM core,VBSA,globalMeanNat,visible black-sky albedo,proportion,,Y,set5_clm.txt
+set5,CLM core,NBSA,globalMeanNat,near-IR black-sky albedo,proportion,,Y,set5_clm.txt
+set5,CLM core,VWSA,globalMeanNat,visible white-sky albedo,proportion,Y,Y,set5_clm.txt
+set5,CLM core,NWSA,globalMeanNat,near-IR white-sky albedo,proportion,Y,Y,set5_clm.txt
+set5,CLM core,RNET,globalMeanNat,net radiation:fsa-fira,W/m^2,Y,Y,set5_clm.txt
+set5,CLM core,LHEAT,globalMeanNat,latent heat:FCTR+FCEV+FGEV,W/m^2,Y,Y,set5_clm.txt
+set5,CLM core,FSH,globalMeanNat,sensible heat,W/m^2,Y,,set5_clm.txt
+set5,CLM core,FSH_TO_COUPLER,globalMeanNat,sensible heat sent to coupler,W/m^2,Y,,set5_clm.txt
+set5,CLM core,FSH_PRECIP_CONVERSION,globalMeanNat,SHF from conv of rain/snow atm forcing,W/m^2,Y,,set5_clm.txt
+set5,CLM core,FSH_RUNOFF_ICE_TO_LIQ,globalMeanNat,SHF from conv of ice runoff to liquid,W/m^2,Y,,set5_clm.txt
+set5,CLM core,CPL_ENERGY_BAL,globalMeanNat,Coupler Energy Balance (Global Area),W/m2,Y,Y,set5_clm.txt
+set5,CLM core,FSDS,globalMeanNat,atmospheric incident solar radiation,W/m^2,Y,,set5_clm.txt
+set5,CLM core,FSA,globalMeanNat,absorbed solar radiation,W/m^2,Y,,set5_clm.txt
+set5,CLM core,FLDS,globalMeanNat,atmospheric longwave radiation,W/m^2,Y,,set5_clm.txt
+set5,CLM core,FIRE,globalMeanNat,emitted infrared (longwave) radiation,W/m^2,Y,,set5_clm.txt
+set5,CLM core,FCTR,globalMeanNat,canopy transpiration,W/m^2,Y,,set5_clm.txt
+set5,CLM core,FCEV,globalMeanNat,canopy evaporation,W/m^2,Y,,set5_clm.txt
+set5,CLM core,FGEV,globalMeanNat,ground evaporation,W/m^2,Y,,set5_clm.txt
+set5,CLM core,FGR,globalMeanNat,heat flux into snow/soil (includes snow melt),W/m^2,Y,,set5_clm.txt
+set5,CLM core,FSM,globalMeanNat,snow melt heat flux,W/m^2,Y,,set5_clm.txt
+set5,CLM core,TLAI,globalMeanNat,total one-sided leaf area index,m2/m2,,,set5_clm.txt
+set5,CLM core,TSAI,globalMeanNat,total one-sided stem area index,m2/m2,,,set5_clm.txt
+set5,CLM core,LAISUN,globalMeanNat,Sunlit Projected Leaf Area Index,m2/m2,,,set5_clm.txt
+set5,CLM core,LAISHA,globalMeanNat,Shaded Projected Leaf Area Index,m^2/m^2,,,set5_clm.txt
+set5,CLM core,FPSN,globalTotlAnn,photosynthesis,umol/m^2/s,Y,,set5_clm.txt
+set5,CLM core,ET,globalMeanDay,Evapotranspiration,mm/s,Y,,set5_clm.txt
+set5,CLM core,QOVER,globalMeanDay,surface runoff,mm/s,Y,,set5_clm.txt
+set5,CLM core,QIRRIG,globalMeanDay,,,,,set5_clm.txt
+set5,CLM core,QDRAI,globalMeanDay,sub-surface drainage,mm/s,Y,,set5_clm.txt
+set5,CLM core,QRGWL,globalMeanDay,"surface runoff at glaciers (liquid only), wetlands, lakes",mm/s,Y,,set5_clm.txt
+set5,CLM core,WA,globalMeanNat,water in the unconfined aquifer,mm,,,set5_clm.txt
+set5,CLM core,ZWT,globalMeanNat,water table depth,m,,,set5_clm.txt
+set5,CLM core,TWS,globalMeanNat,total water storage,mm,,,set5_clm.txt
+set5,CLM core,VOLR,globalMeanNat,river channel total water storage,m3,,,set5_clm.txt
+set5,CLM core,QCHARGE,globalMeanDay,aquifer recharge rate,mm/s,,,set5_clm.txt
+set5,CLM core,FCOV,globalMeanNat,fractional area with water table at surface,unitless [0-1],,,set5_clm.txt
+set5,CLM core,CO2_PPMV,globalMeanNat,CO2 concentration,ppmv,,Y,set5_clm.txt
+set5,CLM core,DSTDEP,globalTotlAnn,total dust deposition (dry+wet) from atmosphere,kg/m2/s,Y,,set5_clm.txt
+set5,CLM core,DSTFLXT,globalTotlAnn,total surface dust emission,kg/m2/s,Y,,set5_clm.txt
+set5,CLM core,OCDEP,globalTotlAnn,total OC deposition (dry+wet) from atmosphere,kg/m2/s,Y,,set5_clm.txt
+set5,CLM core,BCDEP,globalTotlAnn,total BC deposition (dry+wet) from atmosphere,kg/m2/s,Y,,set5_clm.txt
+set5,CN/CLAMP,AGNPP,globalTotlAnn,above ground net primary production,gC/m^2/s,Y,,set5_cn-clamp.txt
+set5,CN/CLAMP,AR,globalTotlAnn,autotrophic respiration (MR + GR),gC/m^2/s,Y,,set5_cn-clamp.txt
+set5,CN/CLAMP,BGNPP,globalTotlAnn,below ground net primary production,gC/m^2/s,Y,,set5_cn-clamp.txt
+set5,CN/CLAMP,BIOGENIC_CO,globalMeanNat,Biogenic CO Flux,uG/m2/h,Y,,set5_cn-clamp.txt
+set5,CN/CLAMP,CWDC,globalTotlNat,coarse woody debris carbon,gC/m^2,,,set5_cn-clamp.txt
+set5,CN/CLAMP,CWDC_HR,globalTotlAnn,Coarse Woody Debris C Hetereotrophic respiration,gC/m2s,Y,,set5_cn-clamp.txt
+set5,CN/CLAMP,CWDC_LOSS,globalTotlAnn,Coarse Woody Debris C Loss,gC/m2s,Y,,set5_cn-clamp.txt
+set5,CN/CLAMP,FROOTC,globalTotlNat,fine root carbon,gC/m^2,,,set5_cn-clamp.txt
+set5,CN/CLAMP,FROOTC_ALLOC,globalTotlAnn,Fine root C allocation,gC/m2s,Y,,set5_cn-clamp.txt
+set5,CN/CLAMP,FROOTC_LOSS,globalTotlAnn,Fine root C Loss,gC/m2s,Y,,set5_cn-clamp.txt
+set5,CN/CLAMP,GPP,globalTotlAnn,gross primary production,gC/m^2/s,Y,,set5_cn-clamp.txt
+set5,CN/CLAMP,GROSS_NMIN,globalTotlAnn,gross N mineralization,gN/m^2/s,Y,,set5_cn-clamp.txt
+set5,CN/CLAMP,HR,globalTotlAnn,total hetereotrophic respiration,gC/m^2/s,Y,,set5_cn-clamp.txt
+set5,CN/CLAMP,ISOPRENE,globalMeanNat,Isoprene Flux,uG/m2/h,Y,,set5_cn-clamp.txt
+set5,CN/CLAMP,LEAFC,globalTotlNat,leaf carbon,gC/m^2,,,set5_cn-clamp.txt
+set5,CN/CLAMP,LEAFC_ALLOC,globalTotlAnn,Leaf C Allocation,gC/m2s,Y,,set5_cn-clamp.txt
+set5,CN/CLAMP,LEAFC_LOSS,globalTotlAnn,Leaf C Loss,gC/m2s,Y,,set5_cn-clamp.txt
+set5,CN/CLAMP,LITTERC,globalTotlNat,Total Litter C,gC/m2,,,set5_cn-clamp.txt
+set5,CN/CLAMP,LITTERC_HR,globalTotlAnn,Litter Hetereotrophic Respiration,gC/m2s,Y,,set5_cn-clamp.txt
+set5,CN/CLAMP,LITTERC_LOSS,globalTotlAnn,Litter C Loss,gC/m2s,Y,,set5_cn-clamp.txt
+set5,CN/CLAMP,MONOTERPENE,globalMeanNat,Monoterpene Flux,uG/m2/h,Y,,set5_cn-clamp.txt
+set5,CN/CLAMP,NEE,globalTotlAnn,net ecosys exchange of C,gC/m^2/s,Y,,set5_cn-clamp.txt
+set5,CN/CLAMP,NEP,globalTotlAnn,net ecosystem production,gC/m^2/s,Y,,set5_cn-clamp.txt
+set5,CN/CLAMP,NET_NMIN,globalTotlAnn,net N mineralization,gN/m^2/s,Y,,set5_cn-clamp.txt
+set5,CN/CLAMP,NPP,globalTotlAnn,net primary production,gC/m^2/s,Y,,set5_cn-clamp.txt
+set5,CN/CLAMP,OTHER_VOC,globalMeanNat,Other VOC Flux,uG/m2/h,Y,,set5_cn-clamp.txt
+set5,CN/CLAMP,OR_VOC,globalMeanNat,Other Reactive VOC Flux,uG/m2/h,Y,,set5_cn-clamp.txt
+set5,CN/CLAMP,SOILC,globalTotlNat,soil organic matter C (fast pool),gC/m2,,,set5_cn-clamp.txt
+set5,CN/CLAMP,SOILC_HR,globalTotlAnn,Soil C hetereotrophic respiration,gC/m2s,Y,,set5_cn-clamp.txt
+set5,CN/CLAMP,SOILC_LOSS,globalTotlAnn,Soil C Loss,gC/m2s,Y,,set5_cn-clamp.txt
+set5,CN/CLAMP,VOCFLXT,globalMeanNat,Total VOC flux into Atmosphere,uG/m2/h,Y,,set5_cn-clamp.txt
+set5,CN/CLAMP,WOODC,globalTotlNat,Live+Dead Stem C,gC/m2,,Y,set5_cn-clamp.txt
+set5,CN/CLAMP,WOODC_ALLOC,globalTotlAnn,Wood C Allocation,gC/m2s,Y,,set5_cn-clamp.txt
+set5,CN/CLAMP,WOODC_LOSS,globalTotlAnn,Wood C Loss,gC/m2s,Y,,set5_cn-clamp.txt
+set5,CN (carbon-nitrogen),NEE,globalTotlAnn,net ecosys exchange of C,gC/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),NEP,globalTotlAnn,net ecosystem production,gC/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),NBP,globalTotlAnn,"net biome production, includes fire, landuse and harvest flux",gC/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),GPP,globalTotlAnn,gross primary production,gC/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),CUE,globalMeanNat,carbon use efficiency,NPP/GPP,Y,Y,set5_cn.txt
+set5,CN (carbon-nitrogen),PSNSUN_TO_CPOOL,globalTotlAnn,GPP from Sunlit Canopy,gC/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),PSNSHADE_TO_CPOOL,globalTotlAnn,GPP from Shaded Canopy,gC/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),NPP,globalTotlAnn,net primary production,gC/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),AGNPP,globalTotlAnn,above ground net primary production,gC/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),BGNPP,globalTotlAnn,below ground net primary production,gC/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),MR,globalTotlAnn,maintenance respiration,gC/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),GR,globalTotlAnn,total growth respiration,gC/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),AR,globalTotlAnn,autotrophic respiration (MR + GR),gC/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),LITHR,globalTotlAnn,litter hetereotrophic respiration,gC/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),SOMHR,globalTotlAnn,SOM hetereotrophic respiration,gC/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),HR,globalTotlAnn,total hetereotrophic respiration,gC/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),RR,globalTotlAnn,root respiration (fine root MR + total root GR),gC/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),SR,globalTotlAnn,total soil respiration (HR + root resp),gC/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),ER,globalTotlAnn,total ecosystem respiration (AR + HR),gC/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),FINUNDATED,globalMeanNat,Fractional inundated of veg col,unitless,,,set5_cn.txt
+set5,CN (carbon-nitrogen),FCH4,globalTotlAnn,Gridcell surface CH4 flux,kgC/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),FCH4TOCO2,globalTotlAnn,Gridcell oxidation of CH4 to CO2,gC/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),FCH4_DFSAT,globalTotlAnn,CH4 additional flux,kgC/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),CH4PROD,globalTotlAnn,Gridcell total CH4 production,gC/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),CH4_SURF_AERE_SAT,globalTotlAnn,aerenchyma sfc CH4 flx-inundated area,mol/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),CH4_SURF_AERE_UNSAT,globalTotlAnn,aerenchyma sfc CH4 flx-non-inundated area,mol/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),CH4_SURF_DIFF_SAT,globalTotlAnn,diffusive sfc CH4 flx-inundated/lake area,mol/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),CH4_SURF_DIFF_UNSAT,globalTotlAnn,diffusive sfc CH4 flx-non-inundated area,mol/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),CH4_SURF_EBUL_SAT,globalTotlAnn,ebullition sfc CH4 flx-inundated/lake area,mol/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),CH4_SURF_EBUL_UNSAT,globalTotlAnn,ebullition sfc CH4 flx-non-inundated area,mol/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),LEAFC,globalTotlNat,leaf carbon,gC/m^2,,,set5_cn.txt
+set5,CN (carbon-nitrogen),XSMRPOOL,globalTotlNat,Temporary Photosynthate C Pool,gC/m^2,,,set5_cn.txt
+set5,CN (carbon-nitrogen),SOIL3C,globalTotlNat,Soil organic matter C (slow pool),gC/m^2,,,set5_cn.txt
+set5,CN (carbon-nitrogen),SOIL4C,globalTotlNat,Soil organic matter C (slowest pool),gC/m^2,,,set5_cn.txt
+set5,CN (carbon-nitrogen),FROOTC,globalTotlNat,fine root carbon,gC/m^2,,,set5_cn.txt
+set5,CN (carbon-nitrogen),LIVESTEMC,globalTotlNat,live stem C,gC/m^2,,,set5_cn.txt
+set5,CN (carbon-nitrogen),DEADSTEMC,globalTotlNat,dead stem carbon,gC/m^2,,,set5_cn.txt
+set5,CN (carbon-nitrogen),LIVECROOTC,globalTotlNat,live coarse root carbon,gC/m^2,,,set5_cn.txt
+set5,CN (carbon-nitrogen),DEADCROOTC,globalTotlNat,dead coarse root carbon,gC/m^2,,,set5_cn.txt
+set5,CN (carbon-nitrogen),CPOOL,globalTotlNat,temporary photosynthate C pool,gC/m^2,,,set5_cn.txt
+set5,CN (carbon-nitrogen),TOTVEGC,globalTotlNat,"total vegetation C, excluding cpool",gC/m^2,,,set5_cn.txt
+set5,CN (carbon-nitrogen),CWDC,globalTotlNat,coarse woody debris carbon,gC/m^2,,,set5_cn.txt
+set5,CN (carbon-nitrogen),CWD_C,globalTotlNat,coarse woody debris carbon,gC/m^2,,,set5_cn.txt
+set5,CN (carbon-nitrogen),TOTLITC,globalTotlNat,total litter carbon,gC/m^2,,,set5_cn.txt
+set5,CN (carbon-nitrogen),TOTLITC_1m,globalTotlNat,total litter carbon to 1m depth,gC/m^2,,,set5_cn.txt
+set5,CN (carbon-nitrogen),TOTSOMC,globalTotlNat,total SOM carbon,gC/m^2,,,set5_cn.txt
+set5,CN (carbon-nitrogen),TOTSOMC_1m,globalTotlNat,total SOM carbon to 1 meter depth,gC/m^2,,,set5_cn.txt
+set5,CN (carbon-nitrogen),TOTLITN,globalTotlNat,total litter N,gN/m^2,,,set5_cn.txt
+set5,CN (carbon-nitrogen),TOTLITN_1m,globalTotlNat,total litter N to 1m depth,gN/m^2,,,set5_cn.txt
+set5,CN (carbon-nitrogen),TOTSOMN,globalTotlNat,total soil organic matter N,gN/m^2,,,set5_cn.txt
+set5,CN (carbon-nitrogen),TOTSOMN_1m,globalTotlNat,total soil organic matter N to 1m depth,gN/m^2,,,set5_cn.txt
+set5,CN (carbon-nitrogen),TOTECOSYSC,globalTotlNat,"total ecosystem C, incl veg but excl cpool",gC/m^2,,,set5_cn.txt
+set5,CN (carbon-nitrogen),TOTCOLC,globalTotlNat,"total column C, incl veg and cpool",gC/m^2,,,set5_cn.txt
+set5,CN (carbon-nitrogen),FPG,globalMeanNat,fraction of potential GPP,proportion,,,set5_cn.txt
+set5,CN (carbon-nitrogen),FPI,globalMeanNat,fraction of potential immobilization,proportion,,,set5_cn.txt
+set5,CN (carbon-nitrogen),NDEP_TO_SMINN,globalTotlAnn,nitrogen deposition,gN/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),FERT,globalTotlAnn,fertilizer added,gN/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),FERT_TO_SMINN,globalTotlAnn,fertilizer to soil mineral N,gN/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),NFERTILIZATION,globalTotlAnn,fertilizer added,gN/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),POTENTIAL_IMMOB,globalTotlAnn,Potential Immobilization,gN/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),ACTUAL_IMMOB,globalTotlAnn,Actual Immobilization,gN/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),GROSS_NMIN,globalTotlAnn,gross N mineralization,gN/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),NET_NMIN,globalTotlAnn,net N mineralization,gN/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),NDEPLOY,globalTotlAnn,total N deployed in new growth,gN/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),RETRANSN_TO_NPOOL,globalTotlAnn,Retranslocated N to NPool,gN/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),SMINN_TO_NPOOL,globalTotlAnn,Mineral N to NPool,gN/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),DENIT,globalTotlAnn,Total Denitrification,gN/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),SOIL3N,globalTotlNat,soil organic matter N (slow pool),gN/m^2,,,set5_cn.txt
+set5,CN (carbon-nitrogen),SOIL4N,globalTotlNat,Soil organic matter N (slowest pool),gN/m^2,,,set5_cn.txt
+set5,CN (carbon-nitrogen),NFIX_TO_SMINN,globalTotlAnn,nitrogen fixation,gN/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),NAM,globalTotlAnn,AM-associated N uptake flux,gN/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),NECM,globalTotlAnn,ECM-associated N uptake flux,gN/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),NFIX,globalTotlAnn,Symbiotic BNF uptake flux,gN/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),NRETRANS,globalTotlAnn,Retranslocated N uptake flux,gN/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),NPP_NUPTAKE,globalTotlAnn,total carbon used by N uptake in FUN,gC/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),NUPTAKE_FRACTION,globalMeanNat,NPP_NUPTAKE/(NPP_NUPTAKE+NPP),unitless,Y,Y,set5_cn.txt
+set5,CN (carbon-nitrogen),FFIX_TO_SMINN,globalTotlAnn,free living N fixation to soil mineral N,gN/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),NPP_NFIX,globalTotlAnn,Symbiotic BNF uptake used C,gC/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),NPP_NACTIVE,globalTotlAnn,Mycorrhizal N uptake used C,gC/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),NPP_NRETRANS,globalTotlAnn,retranslocated N uptake flux,gC/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),SUPPLEMENT_TO_SMINN,globalTotlAnn,supplement to mineral nitrogen,gN/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),SMINN_LEACHED,globalTotlAnn,Nitrogen Leached,gN/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),SMIN_NO3_LEACHED,globalTotlAnn,Soil NO3 pool loss to leaching,gN/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),SMIN_NO3_RUNOFF,globalTotlAnn,Soil NO3 pool loss to runoff,gN/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),SMINN,globalTotlNat,soil mineral N,gN/m^2,,,set5_cn.txt
+set5,CN (carbon-nitrogen),RETRANSN,globalTotlNat,plant pool of retranslocated N,gN/m^2,,,set5_cn.txt
+set5,CN (carbon-nitrogen),COL_CTRUNC,globalTotlNat,column-level sink for C truncation,gC/m^2,,,set5_cn.txt
+set5,CN (carbon-nitrogen),PFT_CTRUNC,globalTotlNat,pft-level sink for C truncation,gC/m^2,,,set5_cn.txt
+set5,CN (carbon-nitrogen),COL_NTRUNC,globalTotlNat,column-level sink for N truncation,gN/m^2,,,set5_cn.txt
+set5,CN (carbon-nitrogen),PFT_NTRUNC,globalTotlNat,pft-level sink for N truncation,gN/m^2,,,set5_cn.txt
+set5,CN (carbon-nitrogen),COL_FIRE_CLOSS,globalTotlAnn,total column-level fire C loss,gC/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),PFT_FIRE_CLOSS,globalTotlAnn,total pft-level fire C loss,gC/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),COL_FIRE_NLOSS,globalTotlAnn,total column-level fire N loss,gN/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),PFT_FIRE_NLOSS,globalTotlAnn,total pft-level fire N loss,gN/m^2/s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),FAREA_BURNED,globalMeanAnn,fractional area burned,proportion/s,,,set5_cn.txt
+set5,CN (carbon-nitrogen),BAF_CROP,globalMeanAnn,fractional area burned - crop,proportion/s,,,set5_cn.txt
+set5,CN (carbon-nitrogen),CWDC_HR,globalTotlAnn,Coarse Woody Debris C Hetereotrophic respiration,gC/m2s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),CWDC_LOSS,globalTotlAnn,Coarse Woody Debris C Loss,gC/m2s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),FROOTC_ALLOC,globalTotlAnn,Fine root C allocation,gC/m2s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),FROOTC_LOSS,globalTotlAnn,Fine root C Loss,gC/m2s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),LEAFC_ALLOC,globalTotlAnn,Leaf C Allocation,gC/m2s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),LEAFC_LOSS,globalTotlAnn,Leaf C Loss,gC/m2s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),LITTERC,globalTotlNat,Total Litter C,gC/m2,,,set5_cn.txt
+set5,CN (carbon-nitrogen),LITTERC_HR,globalTotlAnn,Litter Hetereotrophic Respiration,gC/m2s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),LITTERC_LOSS,globalTotlAnn,Litter C Loss,gC/m2s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),SOILC,globalTotlNat,soil organic matter C (fast pool),gC/m2,,,set5_cn.txt
+set5,CN (carbon-nitrogen),SOILC_HR,globalTotlAnn,Soil C hetereotrophic respiration,gC/m2s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),SOILC_LOSS,globalTotlAnn,Soil C Loss,gC/m2s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),WOODC,globalTotlNat,Live+Dead Stem C,gC/m2,,Y,set5_cn.txt
+set5,CN (carbon-nitrogen),WOODC_ALLOC,globalTotlAnn,Wood C Allocation,gC/m2s,Y,,set5_cn.txt
+set5,CN (carbon-nitrogen),WOODC_LOSS,globalTotlAnn,Wood C Loss,gC/m2s,Y,,set5_cn.txt
+set5,Hydrology (regional),PREC,globalMeanAnn,ppt: rain+snow,mm/s,Y,Y,set5_hydReg.txt
+set5,Hydrology (regional),QVEGE,globalMeanAnn,canopy evaporation,mm/s,Y,,set5_hydReg.txt
+set5,Hydrology (regional),QVEGEP,globalMeanNat,canopy evap:QVEGE/(RAIN+SNOW)*100,%,Y,Y,set5_hydReg.txt
+set5,Hydrology (regional),QVEGT,globalMeanAnn,canopy transpiration,mm/s,Y,,set5_hydReg.txt
+set5,Hydrology (regional),QSOIL,globalMeanAnn,ground evaporation,mm/s,Y,,set5_hydReg.txt
+set5,Hydrology (regional),TOTRUNOFF,globalMeanAnn,Total Liquid Runoff,mm/s,Y,Y,set5_hydReg.txt
+set6,Carbon stocks,TOTECOSYSC,globalTotlNat,"total ecosystem C, incl veg but excl cpool",gC/m^2,,,set6_carbonStock.txt
+set6,Carbon stocks,TOTSOMC_1m,globalTotlNat,total SOM carbon to 1 meter depth,gC/m^2,,,set6_carbonStock.txt
+set6,Carbon stocks,TOTVEGC,globalTotlNat,"total vegetation C, excluding cpool",gC/m^2,,,set6_carbonStock.txt
+set6,Carbon stocks,TOTLITC_1m,globalTotlNat,total litter carbon to 1m depth,gC/m^2,,,set6_carbonStock.txt
+set6,Carbon stocks,CWDC,globalTotlNat,coarse woody debris carbon,gC/m^2,,,set6_carbonStock.txt
+set6,Carbon stocks,LAND_USE_FLUX,globalTotlAnn,total C emitted from land cover conversion and wood product pools,gC/m^2/s,Y,,set6_carbonStock.txt
+set6,Carbon stocks,LEAFCN,globalMeanNat,leaf carbon/nitrogen,gC/gN,,Y,set6_carbonStock.txt
+set6,Carbon stocks,TOTVEGCN,globalMeanNat,total vegetation C/N,gC/gN,,Y,set6_carbonStock.txt
+set6,CLAMP fluxes,NEE,globalMeanDay,net ecosys exchange of C,gC/m^2/s,Y,,set6_clampFlx.txt
+set6,CLAMP fluxes,GPP,globalMeanDay,gross primary production,gC/m^2/s,Y,,set6_clampFlx.txt
+set6,CLAMP fluxes,NPP,globalMeanDay,net primary production,gC/m^2/s,Y,,set6_clampFlx.txt
+set6,CLAMP fluxes,AR,globalMeanDay,autotrophic respiration (MR + GR),gC/m^2/s,Y,,set6_clampFlx.txt
+set6,CLAMP fluxes,HR,globalMeanDay,total hetereotrophic respiration,gC/m^2/s,Y,,set6_clampFlx.txt
+set6,CLAMP fluxes,NEP,globalMeanDay,net ecosystem production,gC/m^2/s,Y,,set6_clampFlx.txt
+set6,C/N fluxes,NEE,globalMeanDay,net ecosys exchange of C,gC/m^2/s,Y,,set6_cnFlx.txt
+set6,C/N fluxes,GPP,globalMeanDay,gross primary production,gC/m^2/s,Y,,set6_cnFlx.txt
+set6,C/N fluxes,NPP,globalMeanDay,net primary production,gC/m^2/s,Y,,set6_cnFlx.txt
+set6,C/N fluxes,AR,globalMeanDay,autotrophic respiration (MR + GR),gC/m^2/s,Y,,set6_cnFlx.txt
+set6,C/N fluxes,HR,globalMeanDay,total hetereotrophic respiration,gC/m^2/s,Y,,set6_cnFlx.txt
+set6,C/N fluxes,ER,globalMeanDay,total ecosystem respiration (AR + HR),gC/m^2/s,Y,,set6_cnFlx.txt
+set6,C/N fluxes,FCH4,globalMeanDay,Gridcell surface CH4 flux,kgC/m^2/s,Y,,set6_cnFlx.txt
+set6,C/N fluxes,CUE,globalMeanNat,carbon use efficiency,NPP/GPP,Y,Y,set6_cnFlx.txt
+set6,C/N fluxes,SMIN_NO3_LEACHED,globalMeanDay,Soil NO3 pool loss to leaching,gN/m^2/s,Y,,set6_cnFlx.txt
+set6,C/N fluxes,NUPTAKE_FRACTION,globalMeanNat,NPP_NUPTAKE/(NPP_NUPTAKE+NPP),unitless,Y,Y,set6_cnFlx.txt
+set6,Fire fluxes,COL_FIRE_CLOSS,globalMeanDay,total column-level fire C loss,gC/m^2/s,Y,,set6_fireFlx.txt
+set6,Fire fluxes,COL_FIRE_NLOSS,globalMeanDay,total column-level fire N loss,gN/m^2/s,Y,,set6_fireFlx.txt
+set6,Fire fluxes,PFT_FIRE_CLOSS,globalMeanDay,total pft-level fire C loss,gC/m^2/s,Y,,set6_fireFlx.txt
+set6,Fire fluxes,PFT_FIRE_NLOSS,globalMeanDay,total pft-level fire N loss,gN/m^2/s,Y,,set6_fireFlx.txt
+set6,Fire fluxes,FAREA_BURNED,globalMeanAnn,fractional area burned,proportion/s,,,set6_fireFlx.txt
+set6,Fire fluxes,BAF_CROP,globalMeanAnn,fractional area burned - crop,proportion/s,,,set6_fireFlx.txt
+set6,Hydrology,WA,globalMeanNat,water in the unconfined aquifer,mm,,,set6_hydro.txt
+set6,Hydrology,ZWT,globalMeanNat,water table depth,m,,,set6_hydro.txt
+set6,Hydrology,QCHARGE,globalMeanDay,aquifer recharge rate,mm/s,,,set6_hydro.txt
+set6,Hydrology,FCOV,globalMeanNat,fractional area with water table at surface,unitless [0-1],,,set6_hydro.txt
+set6,Hydrology,TWS,globalMeanNat,total water storage,mm,,,set6_hydro.txt
+set6,Hydrology,VOLR,globalMeanNat,river channel total water storage,m3,,,set6_hydro.txt
+set6,Land fluxes,TSA,globalMeanNat,2m air temperature,K,,,set6_landFlx.txt
+set6,Land fluxes,PREC,globalMeanDay,ppt: rain+snow,mm/s,Y,Y,set6_landFlx.txt
+set6,Land fluxes,TOTRUNOFF,globalMeanDay,Total Liquid Runoff,mm/s,Y,Y,set6_landFlx.txt
+set6,Land fluxes,SNOWDP,globalMeanNat,snow height,m,,,set6_landFlx.txt
+set6,Radiative fluxes,FSDS,globalMeanNat,atmospheric incident solar radiation,W/m^2,Y,,set6_radFlx.txt
+set6,Radiative fluxes,ALBEDO,globalMeanNat,all-sky albedo:FSR/FSDS,proportion,Y,Y,set6_radFlx.txt
+set6,Radiative fluxes,FSA,globalMeanNat,absorbed solar radiation,W/m^2,Y,,set6_radFlx.txt
+set6,Radiative fluxes,FLDS,globalMeanNat,atmospheric longwave radiation,W/m^2,Y,,set6_radFlx.txt
+set6,Radiative fluxes,FIRE,globalMeanNat,emitted infrared (longwave) radiation,W/m^2,Y,,set6_radFlx.txt
+set6,Radiative fluxes,FIRA,globalMeanNat,net infrared (longwave) radiation,W/m^2,Y,,set6_radFlx.txt
+set6,Radiative fluxes,RNET,globalMeanNat,net radiation:fsa-fira,W/m^2,Y,Y,set6_radFlx.txt
+set6,Radiative fluxes,FSNO,globalMeanNat,fraction of ground covered by snow,unitless,,,set6_radFlx.txt
+set6,Turbulent fluxes,RNET,globalMeanNat,net radiation:fsa-fira,W/m^2,Y,Y,set6_turbFlx.txt
+set6,Turbulent fluxes,FSH,globalMeanNat,sensible heat,W/m^2,Y,,set6_turbFlx.txt
+set6,Turbulent fluxes,LHEAT,globalMeanNat,latent heat:FCTR+FCEV+FGEV,W/m^2,Y,Y,set6_turbFlx.txt
+set6,Turbulent fluxes,FCTR,globalMeanNat,canopy transpiration,W/m^2,Y,,set6_turbFlx.txt
+set6,Turbulent fluxes,FCEV,globalMeanNat,canopy evaporation,W/m^2,Y,,set6_turbFlx.txt
+set6,Turbulent fluxes,FGEV,globalMeanNat,ground evaporation,W/m^2,Y,,set6_turbFlx.txt
+set6,Turbulent fluxes,FGR,globalMeanNat,heat flux into snow/soil (includes snow melt),W/m^2,Y,,set6_turbFlx.txt
+set6,Turbulent fluxes,BTRAN,globalMeanNat,transpiration beta factor,unitless,,Y,set6_turbFlx.txt
+set6,Turbulent fluxes,TLAI,globalMeanNat,total one-sided leaf area index,m2/m2,,,set6_turbFlx.txt
+set8,Annual cycle,CO2,globalMeanNat,CO2 concentration,kgCO2/kgDryAir,,,set8_ann_cycle.txt
+set8,Annual cycle,CO2_LND,globalMeanNat,CO2 Land-Atm Concentration,kgCO2/kgDryAir,,,set8_ann_cycle.txt
+set8,Annual cycle,CO2_OCN,globalMeanNat,CO2 Ocn-Atm Concentration,kgCO2/kgDryAir,,,set8_ann_cycle.txt
+set8,Annual cycle,CO2_FFF,globalMeanNat,CO2 Fossil Fuel Concentration,kgCO2/kgDryAir,,,set8_ann_cycle.txt
+set8,Annual cycle,SFCO2,globalMeanDay,CO2 Surface Flux,kgCO2/m2/s,Y,,set8_ann_cycle.txt
+set8,Annual cycle,SFCO2_FFF,globalMeanDay,CO2 Fossil Fuel Surface Flux,kgCO2/m2/s,Y,,set8_ann_cycle.txt
+set8,Annual cycle,SFCO2_OCN,globalMeanDay,CO2 Ocean Surface Flux,kgCO2/m2/s,Y,,set8_ann_cycle.txt
+set8,Annual cycle,SFCO2_LND,globalMeanDay,CO2 Land Surface Flux,kgCO2/m2/s,Y,,set8_ann_cycle.txt
+set8,Annual cycle (land),NEE,globalMeanAnn,net ecosys exchange of C,gC/m^2/s,Y,,set8_ann_cycle_lnd.txt
+set8,Contours,CO2,globalMeanNat0,CO2 concentration,kgCO2/kgDryAir,,,set8_contour.txt
+set8,Contours,CO2_LND,globalMeanNat0,CO2 Land-Atm Concentration,kgCO2/kgDryAir,,,set8_contour.txt
+set8,Contours,CO2_OCN,globalMeanNat0,CO2 Ocn-Atm Concentration,kgCO2/kgDryAir,,,set8_contour.txt
+set8,Contours,CO2_FFF,globalMeanNat0,CO2 Fossil Fuel Concentration,kgCO2/kgDryAir,,,set8_contour.txt
+set8,Contours,SFCO2,globalMeanDay0,CO2 Surface Flux,kgCO2/m2/s,Y,,set8_contour.txt
+set8,Contours,SFCO2_FFF,globalMeanDay0,CO2 Fossil Fuel Surface Flux,kgCO2/m2/s,Y,,set8_contour.txt
+set8,Contours,SFCO2_OCN,globalMeanDay0,CO2 Ocean Surface Flux,kgCO2/m2/s,Y,,set8_contour.txt
+set8,Contours,SFCO2_LND,globalMeanDay0,CO2 Land Surface Flux,kgCO2/m2/s,Y,,set8_contour.txt
+set8,Contours (DJF-JJA),CO2,globalMeanNat,CO2 concentration,kgCO2/kgDryAir,,,set8_contour_DJF-JJA.txt
+set8,Contours (DJF-JJA),CO2_LND,globalMeanNat,CO2 Land-Atm Concentration,kgCO2/kgDryAir,,,set8_contour_DJF-JJA.txt
+set8,Contours (DJF-JJA),CO2_OCN,globalMeanNat,CO2 Ocn-Atm Concentration,kgCO2/kgDryAir,,,set8_contour_DJF-JJA.txt
+set8,Contours (DJF-JJA),CO2_FFF,globalMeanNat,CO2 Fossil Fuel Concentration,kgCO2/kgDryAir,,,set8_contour_DJF-JJA.txt
+set8,Contours (DJF-JJA),SFCO2,globalMeanDay,CO2 Surface Flux,kgCO2/m2/s,Y,,set8_contour_DJF-JJA.txt
+set8,Contours (DJF-JJA),SFCO2_FFF,globalMeanDay,CO2 Fossil Fuel Surface Flux,kgCO2/m2/s,Y,,set8_contour_DJF-JJA.txt
+set8,Contours (DJF-JJA),SFCO2_OCN,globalMeanDay,CO2 Ocean Surface Flux,kgCO2/m2/s,Y,,set8_contour_DJF-JJA.txt
+set8,Contours (DJF-JJA),SFCO2_LND,globalMeanDay,CO2 Land Surface Flux,kgCO2/m2/s,Y,,set8_contour_DJF-JJA.txt
+set8,Trends,CO2,globalMeanNat,CO2 concentration,kgCO2/kgDryAir,,,set8_trends.txt
+set8,Trends,CO2_LND,globalMeanNat,CO2 Land-Atm Concentration,kgCO2/kgDryAir,,,set8_trends.txt
+set8,Trends,CO2_OCN,globalMeanNat,CO2 Ocn-Atm Concentration,kgCO2/kgDryAir,,,set8_trends.txt
+set8,Trends,CO2_FFF,globalMeanNat,CO2 Fossil Fuel Concentration,kgCO2/kgDryAir,,,set8_trends.txt
+set8,Trends,SFCO2,globalTotlAnn,CO2 Surface Flux,kgCO2/m2/s,Y,,set8_trends.txt
+set8,Trends,SFCO2_FFF,globalTotlAnn,CO2 Fossil Fuel Surface Flux,kgCO2/m2/s,Y,,set8_trends.txt
+set8,Trends,SFCO2_OCN,globalTotlAnn,CO2 Ocean Surface Flux,kgCO2/m2/s,Y,,set8_trends.txt
+set8,Trends,SFCO2_LND,globalTotlAnn,CO2 Land Surface Flux,kgCO2/m2/s,Y,,set8_trends.txt
+set8,Zonal means,CO2,globalMeanNat,CO2 concentration,kgCO2/kgDryAir,,,set8_zonal.txt
+set8,Zonal means,CO2_LND,globalMeanNat,CO2 Land-Atm Concentration,kgCO2/kgDryAir,,,set8_zonal.txt
+set8,Zonal means,CO2_OCN,globalMeanNat,CO2 Ocn-Atm Concentration,kgCO2/kgDryAir,,,set8_zonal.txt
+set8,Zonal means,CO2_FFF,globalMeanNat,CO2 Fossil Fuel Concentration,kgCO2/kgDryAir,,,set8_zonal.txt
+set8,Zonal means,SFCO2,globalMeanAnn,CO2 Surface Flux,kgCO2/m2/s,Y,,set8_zonal.txt
+set8,Zonal means,SFCO2_FFF,globalMeanAnn,CO2 Fossil Fuel Surface Flux,kgCO2/m2/s,Y,,set8_zonal.txt
+set8,Zonal means,SFCO2_OCN,globalMeanAnn,CO2 Ocean Surface Flux,kgCO2/m2/s,Y,,set8_zonal.txt
+set8,Zonal means,SFCO2_LND,globalMeanAnn,CO2 Land Surface Flux,kgCO2/m2/s,Y,,set8_zonal.txt
+set8,Zonal means (land),NEE,globalMeanAnn,net ecosys exchange of C,gC/m^2/s,Y,,set8_zonal_lnd.txt
