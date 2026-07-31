@@ -89,7 +89,7 @@ for win in ("ann", "mjjas"):
 LV = np.array([-0.6, -0.4, -0.25, -0.15, -0.05, 0.05, 0.15, 0.25, 0.4, 0.6])
 LVD = np.array([-0.6, -0.4, -0.25, -0.15, -0.05, 0.05, 0.15, 0.25, 0.4, 0.6])
 proj = ccrs.PlateCarree()
-fig, axes = plt.subplots(2, 3, figsize=(16, 6.8), subplot_kw={"projection": proj},
+fig, axes = plt.subplots(2, 3, figsize=(16, 8.0), subplot_kw={"projection": proj},
                          constrained_layout=True)
 titles = ["LM4+ (model)", "GIMMS LAI4g (obs)", "LM4+ − GIMMS"]
 im_val = im_dif = None
@@ -114,14 +114,16 @@ for r, win in enumerate(("ann", "mjjas")):
         gl.xlabel_style = {"size": 7}
         gl.ylabel_style = {"size": 7}
 
-cb = fig.colorbar(im_val, ax=[axes[1, 0], axes[1, 1]], orientation="horizontal",
-                  ticks=LV, shrink=0.7, pad=0.02, aspect=45)
-cb.ax.tick_params(labelsize=7)
-cb.set_label("LAI trend [m$^2$/m$^2$ per decade]", fontsize=8)
-cb2 = fig.colorbar(im_dif, ax=axes[1, 2], orientation="horizontal",
-                   ticks=LVD, shrink=0.9, pad=0.02, aspect=25)
-cb2.ax.tick_params(labelsize=7)
-cb2.set_label("trend difference [m$^2$/m$^2$ per decade]", fontsize=8)
+# a colourbar under every row, so either row can be cropped out and used alone
+for r_ in range(2):
+    cb = fig.colorbar(im_val, ax=[axes[r_, 0], axes[r_, 1]], orientation="horizontal",
+                      ticks=LV, shrink=0.7, pad=0.02, aspect=45)
+    cb.ax.tick_params(labelsize=7)
+    cb.set_label("LAI trend [m$^2$/m$^2$ per decade]", fontsize=8)
+    cb2 = fig.colorbar(im_dif, ax=axes[r_, 2], orientation="horizontal",
+                       ticks=LVD, shrink=0.9, pad=0.02, aspect=25)
+    cb2.ax.tick_params(labelsize=7)
+    cb2.set_label("trend difference [m$^2$/m$^2$ per decade]", fontsize=8)
 fig.suptitle("LAI trend 1982–1996, common 1° cells — LM4+ offline (WFDE5) vs GIMMS LAI4g",
              fontsize=12)
 fig.savefig("figures/lai_trendmap_vs_gimms.png", dpi=140, bbox_inches="tight")
