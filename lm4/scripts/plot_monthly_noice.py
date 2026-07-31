@@ -105,28 +105,33 @@ np.savetxt(OUT_CSV,
            delimiter=",", header=hdr, comments="", fmt="%.6f")
 
 # --- figure ------------------------------------------------------------------
-fig, axes = plt.subplots(4, 2, figsize=(13, 13), sharex=True)
-for ax, (key, label, unit, _) in zip(axes.ravel(), PANELS):
+fig, axes = plt.subplots(2, 4, figsize=(26, 10.5), sharex=True)
+for n, (ax, (key, label, unit, _)) in enumerate(zip(axes.ravel(), PANELS)):
     v = series[key]
     a = ann[key]
-    ax.plot(t_all, v, "-", color="#9ecae1", lw=0.9, zorder=2, label="monthly")
-    ax.plot(years + 0.5, a, "o-", color="#08519c", ms=4, lw=1.7, zorder=5,
+    ax.plot(t_all, v, "-", color="#9ecae1", lw=1.1, zorder=2, label="monthly")
+    ax.plot(years + 0.5, a, "o-", color="#08519c", ms=5.5, lw=2.2, zorder=5,
             label="annual mean")
-    s = years >= 1990
-    tr = np.polyfit(years[s], a[s], 1)[0] / abs(a[s].mean()) * 100
-    ax.set_title("%s   [%s]   1990– trend %+.2f %%/yr" % (label, unit, tr),
-                 fontsize=9.5, loc="left")
+    # trend numbers stay in the printed table, not on the panels -- they
+    # collided with the curves at this font size
+    ax.set_title("(%s) %s  [%s]" % ("abcdefgh"[n], label, unit),
+                 fontsize=20, loc="left")
     ax.grid(alpha=0.3, lw=0.5)
+    ax.tick_params(labelsize=16)
     ax.xaxis.set_major_locator(MultipleLocator(5))   # 5-year labels
     ax.xaxis.set_minor_locator(MultipleLocator(1))
     ax.set_xlim(years[0], years[-1] + 1)
-axes[0, 0].legend(fontsize=7.5, loc="lower right", framealpha=0.9)
+    lo, hi = ax.get_ylim()
+    if lo < 0 < hi:                                  # zero line where it matters
+        ax.axhline(0.0, color="0.35", lw=2.0, zorder=1)
+        ax.set_ylim(lo, hi)
+axes[0, 0].legend(fontsize=14, loc="upper left", framealpha=0.9)
 for ax in axes[-1]:
-    ax.set_xlabel("year")
+    ax.set_xlabel("year", fontsize=18)
 fig.suptitle("LM4+ offline spin-up (WFDE5, C96, dynamic vegetation) 1981–1996 — ice sheets excluded\n"
-             "17,136 non-ice land points (Antarctica and Greenland removed);  "
+             "17,219 non-ice land points (Antarctica, and Greenland by its outline);  "
              "December estimated except 1990 (re-run)",
-             fontsize=11.5)
+             fontsize=17)
 fig.tight_layout(rect=[0, 0, 1, 0.945])
 fig.savefig(OUT_PNG, dpi=140)
 print("\nwrote %s and %s" % (OUT_PNG, OUT_CSV))

@@ -1,9 +1,12 @@
 """Monthly global land-mean, ice sheets removed, for every archived LM4 year.
 
 Mask, built once and applied to every variable:
-  soil_area > 0        -- drops Antarctica outright (0 points south of 60S)
-  minus a Greenland box -- lat>59, 73W..11W, with Iceland (62.5-67.5N,
-                           25W..12W) carved back out
+  soil_area > 0          -- drops Antarctica outright (0 points south of 60S)
+  minus Greenland itself -- the Natural Earth outline, not a lat/lon box.  The
+                            box used first (lat>59, 73W..11W) reached across
+                            Baffin Bay and removed 87 Canadian Arctic points;
+                            the outline also makes the Iceland exception
+                            unnecessary.  See greenland_mask.py
 
 Needed because lai/water_soil/tot_soil_C ride on soil_area while
 snow/runf/evap_land ride on land_area, so an unmasked figure averages the water
@@ -15,7 +18,9 @@ y1990 is read from the re-run (12 months); every other year has Jan-Nov.
 import glob
 import os
 import numpy as np
-from netCDF4 import Dataset, num2date
+from netCDF4 import Dataset
+from netCDF4 import num2date
+from greenland_mask import in_greenland
 
 MAIN = "/data2/ydkoh/lm4/RUN/lm4_spinup30/archive"
 RERUN = "/data2/ydkoh/lm4/RERUN/wA/archive"
@@ -52,9 +57,7 @@ for t in TILES:
     lat = np.array(d.variables["geolat_t"][:])
     lon = np.array(d.variables["geolon_t"][:])
     d.close()
-    lo = np.where(lon > 180, lon - 360, lon)
-    iceland = (lat > 62.5) & (lat < 67.5) & (lo > -25) & (lo < -12)
-    grn = (lat > 59) & (lo > -73) & (lo < -11) & ~iceland
+    grn = in_greenland(lat, lon)
     ngrn += (soil & grn).sum()
     MASK[t] = soil & ~grn
 print("non-ice land points: %d   (Greenland cut removed %d)"

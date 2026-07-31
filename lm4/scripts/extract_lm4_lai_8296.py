@@ -10,7 +10,9 @@ extract_lm4_lai_years.py.  Saved as npz so the intermediate survives this time
 (NOTES 13.26 lost the previous one to a working directory).
 """
 import numpy as np
-from netCDF4 import Dataset, num2date
+from netCDF4 import Dataset
+from netCDF4 import num2date
+from greenland_mask import in_greenland
 
 RUN = "/data2/ydkoh/lm4/RUN/lm4_spinup30"
 RERUN = "/data2/ydkoh/lm4/RERUN/wA/archive"
@@ -38,9 +40,8 @@ lon = np.concatenate(lon_all)
 lon = np.where(lon > 180, lon - 360, lon)
 print("C96 land points: %d   lat %.1f..%.1f" % (lat.size, lat.min(), lat.max()))
 
-# Greenland cut, Iceland kept -- same mask as the time-series figures
-iceland = (lat > 62.5) & (lat < 67.5) & (lon > -25) & (lon < -12)
-keep = ~((lat > 59) & (lon > -73) & (lon < -11) & ~iceland)
+# Greenland removed by its Natural Earth outline -- same mask as the time series
+keep = ~in_greenland(lat, lon)
 print("after Greenland cut: %d" % keep.sum())
 
 out = {"lat": lat, "lon": lon, "keep": keep, "years": np.array(YEARS)}
