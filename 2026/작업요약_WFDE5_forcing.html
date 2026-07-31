@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WFDE5 forcing — 구축·변환·검증 정리</title>
+<style>
+  :root{ --ink:#1b1f24; --mut:#5b636d; --line:#e3e7ec; --acc:#1f6feb; --warn:#b4451a; --ok:#1a7f45; }
+  *{box-sizing:border-box}
+  body{margin:0;padding:0 20px 80px;font-family:-apple-system,"Apple SD Gothic Neo","Noto Sans KR",Segoe UI,sans-serif;
+       color:var(--ink);line-height:1.7;background:#fff}
+  .wrap{max-width:960px;margin:0 auto}
+  header{padding:44px 0 22px;border-bottom:3px solid var(--ink);margin-bottom:34px}
+  h1{font-size:30px;margin:0 0 8px;letter-spacing:-.5px}
+  .sub{color:var(--mut);font-size:15px}
+  h2{font-size:21px;margin:44px 0 12px;padding-bottom:7px;border-bottom:1px solid var(--line)}
+  h3{font-size:16.5px;margin:26px 0 8px;color:#2b3138}
+  p,li{font-size:15px}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px}
+  th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  th{background:#f5f7f9;font-weight:600}
+  td.num{text-align:right;font-variant-numeric:tabular-nums}
+  code{background:#f2f4f7;padding:1.5px 5px;border-radius:4px;font-size:13px;
+       font-family:"SF Mono",Menlo,Consolas,monospace}
+  pre{background:#f7f9fb;border:1px solid var(--line);border-left:3px solid var(--acc);
+      padding:12px 14px;overflow-x:auto;font-size:13px;border-radius:0 5px 5px 0}
+  .box{border-left:4px solid var(--warn);background:#fff8f4;padding:12px 16px;margin:16px 0;border-radius:0 5px 5px 0}
+  .box.ok{border-left-color:var(--ok);background:#f3fbf6}
+  .box.info{border-left-color:var(--acc);background:#f4f8ff}
+  .box b{color:var(--warn)}
+  .box.ok b{color:var(--ok)}
+  .box.info b{color:var(--acc)}
+  figure{margin:20px 0}
+  img{max-width:100%;border:1px solid var(--line);border-radius:5px}
+  figcaption{font-size:13px;color:var(--mut);margin-top:7px}
+  .tag{display:inline-block;font-size:11.5px;padding:2px 8px;border-radius:11px;background:#eef1f5;color:var(--mut);margin-left:6px}
+  .tag.done{background:#e4f6ec;color:var(--ok)}
+  .tag.todo{background:#fdeee7;color:var(--warn)}
+  footer{margin-top:56px;padding-top:16px;border-top:1px solid var(--line);color:var(--mut);font-size:13px}
+  ul{padding-left:20px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>WFDE5 forcing — 구축 · 변환 · 검증</h1>
+  <div class="sub">
+    해양수산부 KIMST 차세대 해양기후모델 지면-식생모델 진단 (2026–2030) · 1차년도<br>
+    2026-07-31 · 다중 LSM 공통 forcing 정리본. ERA5 판(<code>작업요약_ERA5_CLM_forcing.html</code>)을 대체함.
+  </div>
+</header>
+
+<h2>1. 왜 WFDE5인가</h2>
+<p>
+다중 LSM(<b>CLM5 · LM4+ · Noah-MP · JULES · LIS</b>)의 <b>공통 forcing</b>으로 채택. ERA5를 CRU 관측으로
+bias 보정한 0.5° hourly 지면 forcing이다.
+</p>
+<div class="box info">
+<b>결정적 이유.</b> ERA5를 직접 변환하는 파이프라인에서 <code>area_conserve_remap_Wrap</code> regrid로
+<b>+12 W/m² SW bias</b>가 생겼다. WFDE5는 <b>0.5° native</b>라 regrid 자체가 불필요하므로 이 오차가 원천 차단된다.
+모델 간 비교가 과제의 핵심이므로 <b>모든 LSM이 같은 원자료를 먹는 것</b>이 설계 요구사항이다.
+</div>
+
+<h2>2. 자료 사양</h2>
+<table>
+<tr><th>항목</th><th>값</th></tr>
+<tr><td>버전 / 기간</td><td>v3.0, 1979–2024 (46년)</td></tr>
+<tr><td>해상도</td><td>0.5° (360×720), <b>land-only</b> — 유효격자 35.8 %</td></tr>
+<tr><td>원본 시간</td><td>hourly, 월별 파일 <code>Var_WFDE5_CRU_YYYYMM_v3.0.nc</code></td></tr>
+<tr><td>좌표</td><td>lon <b>−180~180</b> (CLM/GSWP3는 0–360 → 변환 시 flip)</td></tr>
+<tr><td>결측</td><td>ocean = <code>1e20</code> fill (ERA5는 1e36)</td></tr>
+<tr><td>자료형</td><td>float (packed 아님 → cdo 안전)</td></tr>
+<tr><td>용량</td><td>원본 368 zip = 8변수 × 46년, <b>584 GB</b></td></tr>
+<tr><td>8변수</td><td>SWdown · LWdown · Tair · Qair · PSurf · Wind · Rainf · Snowf</td></tr>
+</table>
+
+<h2>3. 다운로드 (CDS 파라미터)</h2>
+<pre>dataset            : derived-near-surface-meteorological-variables
+product            : "wfde5"      ← 누락 시 400 "invalid combination"
+version            : "3_0"        ← 언더스코어. "3.0" / "2.1" 은 400
+reference_dataset  : "cru"        (1979–2024 전체) / cru_and_gpcc (2016까지, precip 정밀)</pre>
+<ul>
+  <li>valid values 조회: <code>ecmwf.datastores.Client(url, key).get_collection(ds).form</code></li>
+  <li><b>3대 분담</b>: 서버(anaconda py3.11 — system py3.6은 cdsapi 불가) / ubuntu(<code>loginctl enable-linger</code> 필수) / mac</li>
+  <li>통합 <code>climate:/data2/ydkoh/WFDE5/</code>, 백업 <code>mac:/Volumes/data02/WFDE5/</code></li>
+</ul>
+<div class="box"><b>truncate 함정.</b> PSurf 1993 zip이 648 MB(정상 ~1810 MB)로 손상. <code>size &gt; 1MB</code> skip guard로는 못 거른다 → 재다운로드.</div>
+
+<h2>4. 전처리 — 6시간 평균</h2>
+<ul>
+  <li><code>cesm/wfde5/wfde5_6h_parallel.sh</code>: zip 해제 → <code>cdo timselmean,6</code> (8병렬) → <code>/data2/ydkoh/WFDE5_6h/{var}/</code></li>
+  <li><b>모든 변수 평균이 맞다</b> — 강수 <code>Rainf</code>도 <code>kg m⁻² s⁻¹</code> = <b>flux</b>이므로 평균.
+      (ERA5 <code>tp</code>는 누적이라 합산이었다)</li>
+  <li>완료: 8변수 × 552개월 = <b>4,416</b> <span class="tag done">완료</span></li>
+</ul>
+
+<h2>5. 모델별 변환</h2>
+
+<h3>5a. CLM5 / LM4 공통 중간포맷 — <code>analysis/wfde5_to_clm5.ncl</code></h3>
+<ul>
+  <li>연 1파일 <code>YYYY_wfde5.nc</code>에 7변수 + <code>LONGXY/LATIXY/EDGE</code> + noleap time</li>
+  <li>출력 <code>/data2/ydkoh/2026_MOF_LSM/Atm_forc/1_CLM_WFDE5/</code> — 연 10.6 GB × 46 ≈ 490 GB</li>
+  <li>매핑: Tair→TBOT · Qair→QBOT · <b>PSurf→PSRF</b>(PBOT 아님) · SWdown→FSDS · LWdown→FLDS · Wind→WIND</li>
+  <li><code>PRECTmms = Rainf + Snowf</code> (둘 다 mm/s, 단위환산 불필요 — 이미 LSM-ready)</li>
+  <li>lon −180~180 → <code>lonFlip</code> → 0–360 (GSWP3 셀과 셀단위 일치)</li>
+  <li>noleap: 원본 <code>proleptic_gregorian</code> → <code>drop_feb29</code> → <b>연 1460 step</b></li>
+  <li><b>CLM5·LM4가 이 파일 하나를 공유</b> (둘 다 CDEPS DATM)</li>
+</ul>
+
+<h3>5b. LM4+ 전용 변환 — <code>lm4/scripts/lm4p_offline_wfde5_to_atm.py</code></h3>
+<p>위 CLM 포맷 → LM4 offline(FMS <code>data_table</code>) 대기 강제장으로. 달력은
+<code>v.calendar = tvar.calendar</code>로 <b>상속</b>되어 모델도 NOLEAP이 된다.</p>
+
+<h2>6. ★ 함정 모음</h2>
+
+<h3>6a. <code>area_conserve_remap</code> 금지 — land-only fill 오염</h3>
+<p>WFDE5는 ocean = 1e20 fill이라 remap이 fill을 전 격자에 섞어 <b>결과가 전부 fill</b>이 된다. ERA5는 전구 완전자료라
+remap이 OK였던 것. WFDE5 grid == GSWP3 0.5°(lonFlip 후 셀 일치)이므로 <b>remap 생략, 직접 대입</b>이 정답.</p>
+<div class="box"><b>서버 사본이 아직 buggy.</b> <code>/data2/ydkoh/2026_MOF_LSM/wfde5_to_clm5.ncl</code>은 옛 remap 버전.
+<b>로컬 git <code>analysis/wfde5_to_clm5.ncl</code>이 검증본</b>이다.</div>
+
+<h3>6b. ★★ CDEPS DATM mesh — GSWP3 mesh 재사용 금지</h3>
+<p>GSWP3 ESMFmesh는 <code>elementMask</code>가 <b>전 격자 valid(100 %)</b>인데 WFDE5는 valid 35.8 %.
+이 mesh로 bilinear remap하면 <b>연안에서 fill(1e20)이 육지로 섞여</b> 모델 init read에서
+<b>MPI_ABORT</b>(FP 트랩 없는 깨끗한 abort, UFS.F90 Initialize). <code>_FillValue</code>가 있어도 mesh mask가 valid면
+remap이 포함시킨다.</p>
+<p><b>해결 = WFDE5 land-mask mesh</b>: GSWP3 mesh 복사 후 <code>elementMask</code>를 WFDE5 valid격자로 교체
+(각 요소 <code>centerCoords</code>로 WFDE5 TBOT valid 직접조회 → flatten 순서 무관).
+→ <code>Atm_forc/wfde5_landmask_ESMFmesh.nc</code>. 지리검증(사하라 land · 중태평양 ocean · 아마존 land) 통과.
+<b>CLM5도 동일 mesh 필수.</b></p>
+
+<h3>6c. 한랭 안정경계층 불안정 — GSWP3엔 없던 것</h3>
+<p>WFDE5가 한랭 대륙점(몽골·티벳·시베리아)에서 지표를 불안정 임계로 몰아 <code>escomp</code> 크래시, t_ca NaN.
+근본원인은 <code>&amp;surface_flux_nml</code>의 <b>gustiness 하한 부재</b>(무풍·안정조건에서 난류교환→0,
+지표-대기 decoupling → 복사냉각 런어웨이).</p>
+<p><b>FIX(namelist만)</b>: <code>alt_gustiness=.TRUE.</code> + <code>gust_const=3.0</code>.
+→ 다른 LSM도 WFDE5로 갈아탈 때 같은 종류 주의.</p>
+
+<h3>6d. 1년 테스트 통과 ≠ 다년 안전</h3>
+<p>gustiness fix 후 <b>연 전환(1982-01-01)에서 탄소보존 FATAL</b>(diff 6.6e-6 = roundoff). GSWP3 1년 테스트는
+run-end가 정확히 1982-01-01이라 그 체크를 <b>밟지 않았다</b>. FIX: <code>carbon_cons_tol=1e-3</code>,
+<code>water_cons_tol=1e-3</code>.</p>
+
+<h3>6e. 03:00 앵커 — 시간축이 모델 달력을 지배</h3>
+<p>WFDE5 레코드가 <b>03/09/15/21 UTC</b>(6h 중점)라 세그먼트가 03:00에서만 시작 가능
+(<code>current_date = Y,1,1,3,0,0</code> + <code>force_date_from_namelist=.true.</code>).
+그 결과 <b>월평균 구간도 03:00에 앵커</b>되어, 세그먼트가 364d21h면 12월 구간이 3시간 모자라
+<b>매년 11개월만 기록</b>되는 문제가 발생했다 → <code>days=365</code>로 수정해 해결(12개월 확보 검증 완료).</p>
+
+<h3>6f. partial-write</h3>
+<p>NCL이 파일 쓰는 중 읽으면 HDF error·0 K·변수누락으로 오판. <b>완성본만 검증</b>
+(<code>HDF5_USE_FILE_LOCKING=FALSE</code> 또는 완료 후 확인).</p>
+
+<h2>7. 모델별 적용 현황</h2>
+<table>
+<tr><th>모델</th><th>forcing</th><th>상태</th></tr>
+<tr><td><b>LM4+</b></td><td>WFDE5</td><td>land-mask mesh + gustiness fix로 구동. <b>1981–1996 완주, 1997 진행 중</b> <span class="tag done">생산런</span></td></tr>
+<tr><td><b>CLM5</b></td><td>WFDE5</td><td><code>user_datm.streams.txt.CLMGSWP3v1.*</code> 3개 교체, domain <code>domain.lnd.360x720_wfde5.nc</code>. <b>LM4와 동일 원자료</b>. BGC-AD spin-up 중</td></tr>
+<tr><td><b>Noah-MP</b></td><td>GSWP3</td><td>1° static-veg 2 cycle 수렴 완료. <b>WFDE5 전환 예정</b> <span class="tag todo">미전환</span></td></tr>
+<tr><td><b>JULES</b></td><td>ERA5</td><td>전구 맵런 완료. <b>WFDE5로 spin-up 1회 추가 계획</b> <span class="tag todo">미전환</span></td></tr>
+</table>
+<div class="box"><b>모델 간 비교 전 필수 작업.</b> 현재 forcing이 통일되어 있지 않다(LM4+·CLM5 = WFDE5, Noah-MP = GSWP3, JULES = ERA5).
+다중 LSM 비교를 하려면 <b>WFDE5로 통일한 재spin-up</b>이 필요하다.</div>
+
+<h2>8. 검증 현황 <span class="tag done">2026-07-31 완료</span></h2>
+
+<h3>8a. 변환 단계</h3>
+<ul>
+  <li>CLM5 변환 1980 1년치: TBOT 197.9–321.3 K, FSDS 0–1093, WIND 0.06–37.7, valid 35.8 %(land) ✓</li>
+  <li>mesh 지리검증: 사하라 land · 중태평양 ocean · 아마존 land ✓</li>
+  <li>46년 전체 변환 완료 (~4분/년, ~490 GB), lon 0.25–359.75로 GSWP3 일치 ✓</li>
+</ul>
+
+<h3>8b. ★ 모델이 실제로 받은 강제장 (LM4+ 1990 연평균)</h3>
+<p>모델 <b>C96 격자점 위에서</b> 비교했다. 원본 0.5°를 그 점들로 이중선형 보간(선형연산이라
+<code>보간(연평균) = 연평균(보간)</code>이 정확히 성립). 출처: <code>land_forcing</code>(t·q·ps·wind),
+<code>land_daily</code>(강수), <code>land_month</code>(복사).</p>
+
+<table>
+<tr><th>변수</th><th>bias</th><th>상대</th><th>r</th><th>원본 공간sd 대비</th></tr>
+<tr><td>기온</td><td class="num">−0.0004 K</td><td class="num">−0.000 %</td><td class="num"><b>1.00000</b></td><td class="num">0.0025 %</td></tr>
+<tr><td>비습</td><td class="num">−4e−5 g/kg</td><td class="num">−0.000 %</td><td class="num"><b>1.00000</b></td><td class="num">0.0007 %</td></tr>
+<tr><td><b>하향단파</b></td><td class="num"><b>+8e−5 W/m²</b></td><td class="num"><b>0.000 %</b></td><td class="num"><b>1.00000</b></td><td class="num">0.0002 %</td></tr>
+<tr><td>하향장파</td><td class="num">−0.148 W/m²</td><td class="num">−0.047 %</td><td class="num">0.99994</td><td class="num">0.20 %</td></tr>
+<tr><td>강수</td><td class="num">−0.0002 mm/day</td><td class="num">−0.008 %</td><td class="num"><b>1.00000</b></td><td class="num">0.008 %</td></tr>
+<tr><td>바람</td><td class="num">−0.013 m/s</td><td class="num">−0.270 %</td><td class="num">0.99998</td><td class="num">0.98 %</td></tr>
+<tr><td>지표기압</td><td class="num">+5.33 hPa</td><td class="num">+0.570 %</td><td class="num">0.98760</td><td class="num">5.9 %</td></tr>
+</table>
+
+<figure>
+  <img src="../figures/forcing_check_native_1990.png" alt="WFDE5 forcing 전달 검증 맵">
+  <figcaption>모델 − 원본, C96 격자점 평가(재binning 없음), 2° 표시격자. 전 패널 동일 ±1 % 상대 눈금 —
+  백지 = 오차 0.03 % 미만. 기온·비습·단파·강수는 사실상 완전 백지.</figcaption>
+</figure>
+
+<div class="box ok">
+<b>단파가 r = 1.00000, bias = +8e−5 W/m².</b> 지면이 받은 SW는 모델이 계산한 복사가 아니라 <b>WFDE5 값 그 자체</b>다
+(<code>flux_down_from_atmos</code>가 data_override로 덮어쓰기 때문). 성능을 위해 복사 게이트를 막아 계산을 끈 것이
+<b>물리적으로 무해했다는 실측 증거</b>가 된다.
+</div>
+
+<div class="box">
+<b>유일한 설정-동작 불일치: 지표기압이 정적이다.</b>
+1990년 ps 시간표준편차 — 모델 <b>0.000 hPa</b> / 원본 3.191 hPa. 모델 ps는 1년 내내 전혀 변하지 않는다.
+<code>data_table</code>에 <code>p_surf</code> 주입 줄이 있는데도, 실제로는 <b>상수 <code>slp=101325</code>와 모델 자기 지형고도</b>에서
+재구성된 값을 쓴다. 영향은 작다(0.57 % → 공기밀도 0.57 % → 플럭스 1 % 미만, 강제자료 자체의 불확실성보다 1~3자릿수 작음).
+원인(<code>do_atmos=.false.</code>에서 override 적용 지점이 건너뛰어지는지)은 소스 확인 필요.
+</div>
+
+<h3>8c. 잔차 두 건은 원인이 규명됨</h3>
+<ul>
+  <li><b>바람</b> — 모델은 매 스텝 <code>√(u²+gust²)</code>를 계산해 평균하는데, 평균한 u에 씌우면 bias가 +1.64 %로 나온다.
+      같은 순서로 계산하면 <b>−0.27 %</b>. 원본을 30분으로 시간보간까지 하면 <b>+0.006 %</b> — 사실상 0.
+      (<code>√</code>가 볼록이라 Jensen 부등식, 부호까지 예측 가능)</li>
+  <li><b>장파 해안선 띠</b> — 모델은 WFDE5 land-mask mesh로 remap하는데 비교는 평범한 이중선형이라 바다측 값을 섞은 것.
+      <b>모델 쪽이 더 엄밀</b>하며, 6b의 대책이 작동 중이라는 증거다.</li>
+</ul>
+
+<h2>9. 경로 요약</h2>
+<table>
+<tr><th>종류</th><th>경로</th></tr>
+<tr><td>원본 zip</td><td><code>climate:/data2/ydkoh/WFDE5/</code> (584 GB) · 백업 <code>mac:/Volumes/data02/WFDE5/</code></td></tr>
+<tr><td>6h 평균</td><td><code>climate:/data2/ydkoh/WFDE5_6h/{var}/</code></td></tr>
+<tr><td>CLM 포맷(공통)</td><td><code>climate:/data2/ydkoh/2026_MOF_LSM/Atm_forc/1_CLM_WFDE5/YYYY_wfde5.nc</code></td></tr>
+<tr><td>LM4 포맷</td><td><code>climate:/data2/ydkoh/lm4/forcing_WFDE5_lm4p/wfde5_atm_YYYY.nc</code> (연 3.8 GB)</td></tr>
+<tr><td>land-mask mesh</td><td><code>climate:/data2/ydkoh/2026_MOF_LSM/Atm_forc/wfde5_landmask_ESMFmesh.nc</code></td></tr>
+<tr><td>변환 스크립트</td><td><code>analysis/wfde5_to_clm5.ncl</code> (★검증본) · <code>lm4/scripts/lm4p_offline_wfde5_to_atm.py</code></td></tr>
+<tr><td>다운로드·전처리</td><td><code>cesm/wfde5/{dl_wfde5_*.py, wfde5_6h_parallel.sh}</code></td></tr>
+<tr><td>검증 스크립트</td><td><code>lm4/scripts/{chk_forcing_native, chk_rad_native, plot_forcing_check_native}.py</code></td></tr>
+</table>
+
+<h2>10. 재현 체크리스트 — 새 모델에 WFDE5 물릴 때</h2>
+<ol>
+  <li>격자가 0.5°와 일치하는가 → 일치하면 <b>remap 금지, 직접 대입</b></li>
+  <li>mesh/domain의 land mask가 <b>WFDE5 valid(35.8 %)</b>를 반영하는가</li>
+  <li>달력을 noleap으로 맞췄는가 (1460 step/년)</li>
+  <li>시작시각이 <b>03:00</b>인가 (레코드 중점)</li>
+  <li>무풍·한랭 조건에서 gustiness 하한이 있는가</li>
+  <li><b>다년(≥2년)</b> 테스트로 연경계 체크를 밟았는가</li>
+  <li>전달 검증은 <b>모델 격자점 위에서</b> — 제3의 격자에 양쪽을 담으면 가짜 차이가 생긴다</li>
+</ol>
+
+<footer>
+출처: <code>cesm/wfde5/README.md</code> · <code>lm4/LM4_SPINUP_NOTES.md</code> §13.42–13.43 ·
+<code>cesm/CLM5_SPINUP_NOTES.md</code> · <code>jules/JULES_PORTING_NOTES.md</code> ·
+memory <code>mof-wfde5-forcing</code> · <code>lsm-wfde5-cold-instability-debug</code><br>
+초안: <code>2026/작업요약_WFDE5_forcing_초안.md</code>
+</footer>
+
+</div>
+</body>
+</html>

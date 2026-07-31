@@ -43,6 +43,9 @@ REGIONS = [
     ("C", "SE Asia",   (-10, 10, 95, 140)),
     ("D", "Australia", (-35, -15, 115, 150)),
     ("E", "Siberia",   (55, 70, 60, 140)),
+    # same East Asia box the CLM5 diagnostics use (analysis/diag/temp_timeseries_region.py)
+    ("F", "East Asia", (20, 50, 100, 145)),
+    ("G", "North America", (30, 55, -125, -70)),
 ]
 
 z = np.load("lm4/data/lm4_lai_1982_1996.npz")
@@ -131,7 +134,7 @@ rows = []
 print("\nMJJAS LAI, common 1-deg cells, cos(lat) weighted")
 print("%-16s %6s | %8s %8s | %8s %8s | %6s"
       % ("region", "cells", "LM4 82-89", "obs", "LM4 90-96", "obs", "bias"))
-fig, axes = plt.subplots(2, 3, figsize=(19, 9))
+fig, axes = plt.subplots(2, 4, figsize=(25, 9))
 for ax, (letter, name, bx) in zip(axes.ravel(), REGIONS):
     a, b, n = series(mask_of(bx))
     bias = a.mean() - b.mean()
@@ -149,6 +152,8 @@ for ax, (letter, name, bx) in zip(axes.ravel(), REGIONS):
     ax.xaxis.set_major_locator(MultipleLocator(5))
     ax.xaxis.set_minor_locator(MultipleLocator(1))
     ax.grid(alpha=0.3, lw=0.5)
+for k in range(len(REGIONS), axes.size):        # 7 regions, 8 slots
+    axes.ravel()[k].axis("off")
 axes[0, 0].legend(fontsize=13, loc="center right")
 fig.suptitle("LAI by region — LM4+ vs GIMMS LAI4g, MJJAS mean on common 1° cells "
              "(boxes: see the locator map)", fontsize=16)

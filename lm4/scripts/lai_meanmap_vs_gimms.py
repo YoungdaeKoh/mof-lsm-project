@@ -83,13 +83,14 @@ np.savetxt("lm4/data/lai_meanmap_scores.csv", np.array(scores), delimiter=",",
 LV = np.array([0, 0.25, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0, 5.0, 6.0])
 LVD = np.array([-3, -2, -1.5, -1, -0.5, -0.2, 0.2, 0.5, 1, 1.5, 2, 3])
 proj = ccrs.PlateCarree()
-fig, axes = plt.subplots(2, 3, figsize=(16, 8.0), subplot_kw={"projection": proj},
+fig, axes = plt.subplots(2, 3, figsize=(19, 9.4), subplot_kw={"projection": proj},
                          constrained_layout=True)
-titles = ["LM4+ (model)", "GIMMS LAI4g (obs)", "LM4+ − GIMMS"]
+titles = ["GIMMS LAI4g (obs)", "LM4+ (model)", "LM4+ − GIMMS"]
 im_val = im_dif = None
 for r_, (label, _) in enumerate(WINDOWS):
     mm, gg, common = rows[label]
-    for c, (fld, lv, cmap) in enumerate(((mm, LV, "YlGn"), (gg, LV, "YlGn"),
+    # observation first: it is the reference the model is judged against
+    for c, (fld, lv, cmap) in enumerate(((gg, LV, "YlGn"), (mm, LV, "YlGn"),
                                          (mm - gg, LVD, "RdBu_r"))):
         ax = axes[r_, c]
         ax.set_extent([-180, 180, -58, 84], crs=proj)
@@ -100,24 +101,24 @@ for r_, (label, _) in enumerate(WINDOWS):
             im_val = m
         else:
             im_dif = m
-        ax.set_title("%s  MJJAS  %s" % (label, titles[c]), fontsize=10)
+        ax.set_title("%s  MJJAS  %s" % (label, titles[c]), fontsize=15)
         gl = ax.gridlines(draw_labels=True, lw=0.3, alpha=0.4)
         gl.top_labels = False
         gl.right_labels = False
-        gl.xlabel_style = {"size": 7}
-        gl.ylabel_style = {"size": 7}
+        gl.xlabel_style = {"size": 11}
+        gl.ylabel_style = {"size": 11}
 
 # a colourbar under every row, so either row can be cropped out and used alone
 for r_ in range(2):
     cb = fig.colorbar(im_val, ax=[axes[r_, 0], axes[r_, 1]], orientation="horizontal",
                       ticks=LV, shrink=0.7, pad=0.02, aspect=45)
-    cb.ax.tick_params(labelsize=7)
-    cb.set_label("LAI [m$^2$/m$^2$]", fontsize=8)
+    cb.ax.tick_params(labelsize=11)
+    cb.set_label("LAI [m$^2$/m$^2$]", fontsize=13)
     cb2 = fig.colorbar(im_dif, ax=axes[r_, 2], orientation="horizontal",
                        ticks=LVD, shrink=0.9, pad=0.02, aspect=25)
-    cb2.ax.tick_params(labelsize=7)
-    cb2.set_label("LAI difference [m$^2$/m$^2$]", fontsize=8)
+    cb2.ax.tick_params(labelsize=11)
+    cb2.set_label("LAI difference [m$^2$/m$^2$]", fontsize=13)
 fig.suptitle("MJJAS mean LAI — LM4+ offline (WFDE5) vs GIMMS LAI4g, common 1° cells",
-             fontsize=12)
+             fontsize=17)
 fig.savefig("figures/lai_meanmap_vs_gimms.png", dpi=140, bbox_inches="tight")
 print("\nwrote figures/lai_meanmap_vs_gimms.png")
