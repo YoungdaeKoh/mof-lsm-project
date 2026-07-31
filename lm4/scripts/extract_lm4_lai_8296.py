@@ -1,0 +1,67 @@
+"""LM4 LAI per year 1982-1996 on the C96 land points, with coordinates.
+
+Two aggregations per year so the observed comparison can be run either way:
+  ann  = Jan-Nov mean  (the archive has no December except 1990, so Jan-Nov is
+                        the only window every year shares)
+  mjjas = May-Sep mean (northern growing season, contains the annual maximum)
+
+Coordinates come from C96_grid corner arrays via grid_index, the same recipe as
+extract_lm4_lai_years.py.  Saved as npz so the intermediate survives this time
+(NOTES 13.26 lost the previous one to a working directory).
+"""
+import numpy as np
+from netCDF4 import Dataset, num2date
+
+RUN = "/data2/ydkoh/lm4/RUN/lm4_spinup30"
+RERUN = "/data2/ydkoh/lm4/RERUN/wA/archive"
+INP = RUN + "/INPUT"
+YEARS = list(range(1982, 1997))
+NX = 96
+FILL = 1e30
+OUT = "/data2/ydkoh/lm4/lm4_lai_1982_1996.npz"
+
+lat_all, lon_all = [], []
+for t in range(1, 7):
+    st = Dataset("%s/archive/y1990/19900101.land_static.tile%d.nc" % (RUN, t))
+    gi = st.variables["grid_index"][:].astype(int)
+    st.close()
+    g = Dataset("%s/C96_grid.tile%d.nc" % (INP, t))
+    X = g.variables["x"][:]
+    Y = g.variables["y"][:]
+    g.close()
+    j = gi // NX
+    i = gi % NX
+    lat_all.append(Y[2 * j + 1, 2 * i + 1])
+    lon_all.append(X[2 * j + 1, 2 * i + 1])
+lat = np.concatenate(lat_all)
+lon = np.concatenate(lon_all)
+lon = np.where(lon > 180, lon - 360, lon)
+print("C96 land points: %d   lat %.1f..%.1f" % (lat.size, lat.min(), lat.max()))
+
+# Greenland cut, Iceland kept -- same mask as the time-series figures
+iceland = (lat > 62.5) & (lat < 67.5) & (lon > -25) & (lon < -12)
+keep = ~((lat > 59) & (lon > -73) & (lon < -11) & ~iceland)
+print("after Greenland cut: %d" % keep.sum())
+
+out = {"lat": lat, "lon": lon, "keep": keep, "years": np.array(YEARS)}
+for y in YEARS:
+    root = RERUN if y == 1990 else RUN + "/archive"
+    ann, mjj = [], []
+    for t in range(1, 7):
+        d = Dataset("%s/y%d/%d0101.land_month.tile%d.nc" % (root, y, y, t))
+        tv = d.variables["time"]
+        mo = np.array([x.month for x in
+                       num2date(tv[:], tv.units, getattr(tv, "calendar", "noleap"))])
+        a = np.ma.filled(d.variables["lai"][:].astype("f8"), np.nan)
+        a[np.abs(a) > FILL] = np.nan
+        ann.append(np.nanmean(a[(mo >= 1) & (mo <= 11), :], axis=0))
+        mjj.append(np.nanmean(a[(mo >= 5) & (mo <= 9), :], axis=0))
+        d.close()
+    out["ann_%d" % y] = np.concatenate(ann)
+    out["mjjas_%d" % y] = np.concatenate(mjj)
+    print("%d  ann=%.4f  mjjas=%.4f"
+          % (y, np.nanmean(out["ann_%d" % y][keep]),
+             np.nanmean(out["mjjas_%d" % y][keep])))
+
+np.savez(OUT, **out)
+print("wrote %s" % OUT)

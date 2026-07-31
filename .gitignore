@@ -59,3 +59,6 @@ KIOST-ESM2/
 # Copyrighted reference papers (kept local, not in git)
 reference/**/*.pdf
 reference/*.pdf
+
+# regenerable GIMMS 1-degree cache (rebuilt by lai_trend_vs_gimms.py in ~5 min)
+lm4/data/gimms_1deg_1982_1996.npz
