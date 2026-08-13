@@ -13,7 +13,8 @@ snow/runf/evap_land ride on land_area, so an unmasked figure averages the water
 panels over a different land than the carbon panels.  The offline model has no
 glacier dynamics, so those columns only accumulate.
 
-y1990 is read from the re-run (12 months); every other year has Jan-Nov.
+y1990 is read from the re-run (12 months).  1997-2010 come from the v2 chain
+and carry all twelve months; 1981-1996 still stop at November.
 """
 import glob
 import os
@@ -26,7 +27,7 @@ MAIN = "/data2/ydkoh/lm4/RUN/lm4_spinup30/archive"
 RERUN = "/data2/ydkoh/lm4/RERUN/wA/archive"
 TILES = [1, 2, 3, 4, 5, 6]
 FILL = 1e30
-OUT = "/data2/ydkoh/lm4/monthly_noice_16yr.csv"
+OUT = "/data2/ydkoh/lm4/monthly_noice_30yr.csv"
 
 VARS = {
     "runoff":    ("runf", None),

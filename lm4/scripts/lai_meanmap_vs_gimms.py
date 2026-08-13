@@ -1,6 +1,6 @@
 """MJJAS-mean LAI maps and bias, LM4+ vs GIMMS LAI4g, on common 1-degree cells.
 
-Two windows: the full common period 1982-1996 and the drift-free 1990-1996.
+Two windows: the full common period 1982-2010 and the drift-free 1990-2010.
 Showing both makes it visible whether the mean-state bias is inherited from the
 spin-up adjustment or is a genuine model bias -- the trend analysis
 (lai_trend_vs_gimms.py) put the drift entirely before 1990.
@@ -8,7 +8,7 @@ spin-up adjustment or is a genuine model bias -- the trend analysis
 Reports the ILAMB-style scores on each window: area-weighted bias, RMSE and the
 spatial correlation over the common cells.
 
-Inputs : lm4/data/lm4_lai_1982_1996.npz, lm4/data/gimms_1deg_1982_1996.npz
+Inputs : lm4/data/lm4_lai_1982_2010.npz, lm4/data/gimms_1deg_1982_2010.npz
 Output : figures/lai_meanmap_vs_gimms.png, lm4/data/lai_meanmap_scores.csv
 """
 import numpy as np
@@ -19,11 +19,11 @@ import cartopy.feature as cfeature
 NLAT, NLON = 180, 360
 lat1 = 89.5 - np.arange(NLAT)
 lon1 = -179.5 + np.arange(NLON)
-WINDOWS = [("1982-1996", np.arange(1982, 1997)),
-           ("1990-1996", np.arange(1990, 1997))]
+WINDOWS = [("1982-2010", np.arange(1982, 2011)),
+           ("1990-2010", np.arange(1990, 2011))]
 
-z = np.load("lm4/data/lm4_lai_1982_1996.npz")
-g = np.load("lm4/data/gimms_1deg_1982_1996.npz")
+z = np.load("lm4/data/lm4_lai_1982_2010.npz")
+g = np.load("lm4/data/gimms_1deg_1982_2010.npz")
 lat, lon, keep = z["lat"], z["lon"], z["keep"]
 ilat = np.clip(((90.0 - lat) / 1.0).astype(int), 0, NLAT - 1)
 ilon = np.clip(((lon + 180.0) / 1.0).astype(int), 0, NLON - 1)

@@ -5,6 +5,10 @@ climate signal rather than initialisation adjustment.  GIMMS LAI4g settles it:
 if the observations are flat over the same years and the same cells while the
 model climbs, the rise is drift.
 
+With the chain now finished to 2010 the comparison answers a second question the
+sixteen-year version could not: over the twenty-one years after the drift ends,
+does the model reproduce the observed greening rate, or only its sign?
+
 Both fields are put on a common 1-degree grid and restricted to cells where both
 are valid in every year, then averaged with cos(lat) weights.
 
@@ -22,8 +26,8 @@ from matplotlib.ticker import MultipleLocator
 
 GIM = ("/Users/youngdaekoh/data2/LAI-DataKit/derived/gimms_lai4g/native0083/"
        "consolidated/GIMMS_LAI4g-consolidated_V1.2_%d%02d%02d.nc")
-NPZ = "lm4/data/lm4_lai_1982_1996.npz"
-YEARS = list(range(1982, 1997))
+NPZ = "lm4/data/lm4_lai_1982_2010.npz"
+YEARS = list(range(1982, 2011))
 NLAT, NLON, R = 180, 360, 12          # 1 deg from 1/12 deg
 
 lat1 = 89.5 - np.arange(NLAT)          # descending, matches GIMMS
@@ -53,7 +57,7 @@ def gimms_year(y, months):
     out[ok] = acc[ok] / cnt[ok]
     return out
 
-CACHE = "lm4/data/gimms_1deg_1982_1996.npz"
+CACHE = "lm4/data/gimms_1deg_1982_2010.npz"
 g_ann, g_mjj = {}, {}
 try:
     c = np.load(CACHE)
@@ -62,7 +66,8 @@ try:
         g_mjj[y] = c["mjjas_%d" % y]
     print("loaded GIMMS 1-degree cache: %s" % CACHE)
 except (FileNotFoundError, KeyError):
-    print("reading GIMMS 1982-1996 (330 files) ...")
+    print("reading GIMMS %d-%d (%d files) ..."
+          % (YEARS[0], YEARS[-1], len(YEARS) * (11 + 5) * 2))
     for y in YEARS:
         g_ann[y] = gimms_year(y, range(1, 12))
         g_mjj[y] = gimms_year(y, range(5, 10))
@@ -113,8 +118,8 @@ for name, gd, md in (("Jan-Nov", g_ann, m_ann), ("MJJAS", g_mjj, m_mjj)):
     print(" year   GIMMS    LM4")
     for i, Y in enumerate(YEARS):
         print("  %d  %6.3f  %6.3f" % (Y, gs[i], ms[i]))
-    for lab, s in (("1982-1989", yy <= 1989), ("1990-1996", yy >= 1990),
-                   ("1982-1996", yy > 0)):
+    for lab, s in (("1982-1989", yy <= 1989), ("1990-2010", yy >= 1990),
+                   ("1982-2010", yy > 0)):
         tg = np.polyfit(yy[s], gs[s], 1)[0]
         tm = np.polyfit(yy[s], ms[s], 1)[0]
         print("  %s trend  GIMMS %+.4f/yr (%+.2f %%/yr)   LM4 %+.4f/yr (%+.2f %%/yr)"
@@ -141,7 +146,7 @@ for ax, name in zip(axes, ("Jan-Nov", "MJJAS")):
         return np.polyfit(yy[s], v[s], 1)[0] / v[s].mean() * 100
     d1, d2 = yy <= 1989, yy >= 1990
     ax.set_title("%-22s%10s%10s\n%-22s%+10.2f%+10.2f\n%-22s%+10.2f%+10.2f"
-                 % ("%s  trend [%%/yr]" % name, "1982-89", "1990-96",
+                 % ("%s  trend [%%/yr]" % name, "1982-89", "1990-2010",
                     "   LM4", tr(ms, d1), tr(ms, d2),
                     "   GIMMS", tr(gs, d1), tr(gs, d2)),
                  fontsize=9, loc="left", family="monospace")

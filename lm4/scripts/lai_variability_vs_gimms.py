@@ -1,13 +1,20 @@
-"""Interannual variability of MJJAS LAI, LM4+ vs GIMMS LAI4g, 1982-1996.
+"""Interannual variability of MJJAS LAI, LM4+ vs GIMMS LAI4g, 1990-2010.
+
+The window matches the trend figure: 1982-89 is spin-up drift, and removing a
+straight line from it does not make it climate variability -- an adjustment is
+not a trend.  The finished chain leaves twenty-one clean years, against the
+fifteen drift-included years this figure used before.
 
 The mean map says how much leaf area there is and the trend map says how it
 drifts; neither says how much it swings from year to year.  That turned out to
 be a first-order error in its own right: the model's detrended interannual
-standard deviation is about 4.5x the observed, so LM4 vegetation wobbles by
-roughly 11 % of its own mean each year where the observations wobble by 4 %.
+standard deviation is 3.6x the observed, so LM4 vegetation wobbles by 11.4 % of
+its own mean each year where the observations wobble by 4.7 %.  (The fifteen-year
+version of this figure put the ratio at 4.5x; part of that was the drift years
+being counted as spread even after a straight line was removed.)
 
-The trend is removed before taking the standard deviation, otherwise the drift
-of 1982-89 would be counted as variability.
+The trend is still removed within the window, so that the residual greening is
+not counted as variability.
 
 Row 1 is the absolute spread, row 2 the coefficient of variation (spread as a
 percentage of the cell mean), the same absolute/normalised pairing the trend
@@ -17,7 +24,7 @@ Caveat worth carrying: satellite LAI is composited and smoothed, so part of the
 gap may be damped observed variability rather than excess model variability.
 Cross-checking against MODIS or GLASS would settle it.
 
-Inputs : lm4/data/lm4_lai_1982_1996.npz, lm4/data/gimms_1deg_1982_1996.npz
+Inputs : lm4/data/lm4_lai_1982_2010.npz, lm4/data/gimms_1deg_1982_2010.npz
 Output : figures/lai_variability_vs_gimms.png, lm4/data/lai_variability_zonal.csv
 """
 import numpy as np
@@ -25,13 +32,13 @@ import matplotlib.pyplot as plt
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 
-YEARS = np.arange(1982, 1997)
+YEARS = np.arange(1990, 2011)
 NLAT, NLON = 180, 360
 lat1 = 89.5 - np.arange(NLAT)
 lon1 = -179.5 + np.arange(NLON)
 
-z = np.load("lm4/data/lm4_lai_1982_1996.npz")
-g = np.load("lm4/data/gimms_1deg_1982_1996.npz")
+z = np.load("lm4/data/lm4_lai_1982_2010.npz")
+g = np.load("lm4/data/gimms_1deg_1982_2010.npz")
 lat, lon, keep = z["lat"], z["lon"], z["keep"]
 ilat = np.clip(((90.0 - lat) / 1.0).astype(int), 0, NLAT - 1)
 ilon = np.clip(((lon + 180.0) / 1.0).astype(int), 0, NLON - 1)
@@ -136,8 +143,9 @@ for r, (name, unit, a, b, sel, lv, lvd) in enumerate(ROWS):
     cb2.ax.tick_params(labelsize=11)
     cb2.set_label("difference [%s]" % unit, fontsize=13)
 
-fig.suptitle("MJJAS LAI interannual variability 1982–1996 (trend removed) — "
-             "LM4+ offline (WFDE5) vs GIMMS LAI4g\n"
+fig.suptitle("MJJAS LAI interannual variability %d–%d (trend removed, drift years "
+             "1982–89 excluded) — LM4+ offline (WFDE5) vs GIMMS LAI4g\n"
+             % (YEARS[0], YEARS[-1]) +
              "top: standard deviation;  bottom: the same as a percentage of each "
              "cell's mean", fontsize=17)
 fig.savefig("figures/lai_variability_vs_gimms.png", dpi=140, bbox_inches="tight")

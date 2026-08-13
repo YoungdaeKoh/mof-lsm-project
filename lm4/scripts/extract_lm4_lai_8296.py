@@ -1,8 +1,11 @@
-"""LM4 LAI per year 1982-1996 on the C96 land points, with coordinates.
+"""LM4 LAI per year 1982-2010 on the C96 land points, with coordinates.
 
 Two aggregations per year so the observed comparison can be run either way:
-  ann  = Jan-Nov mean  (the archive has no December except 1990, so Jan-Nov is
-                        the only window every year shares)
+  ann  = Jan-Nov mean  (1997-2010 do have a December and 1990 does too, but
+                        1982-1996 do not, so Jan-Nov stays the only window all
+                        twenty-nine years share.  Mixing an 11-month mean with a
+                        12-month one would put a step at 1997 that belongs to the
+                        sampling, not to the model.)
   mjjas = May-Sep mean (northern growing season, contains the annual maximum)
 
 Coordinates come from C96_grid corner arrays via grid_index, the same recipe as
@@ -15,16 +18,19 @@ from netCDF4 import num2date
 from greenland_mask import in_greenland
 
 RUN = "/data2/ydkoh/lm4/RUN/lm4_spinup30"
+# cycle 1 was moved aside to archive_c1 when the 1979-2024 production run took
+# over the archive/ name; this script reads the finished cycle, not the new one.
+ARC = RUN + "/archive_c1"
 RERUN = "/data2/ydkoh/lm4/RERUN/wA/archive"
 INP = RUN + "/INPUT"
-YEARS = list(range(1982, 1997))
+YEARS = list(range(1982, 2011))
 NX = 96
 FILL = 1e30
-OUT = "/data2/ydkoh/lm4/lm4_lai_1982_1996.npz"
+OUT = "/data2/ydkoh/lm4/lm4_lai_1982_2010.npz"
 
 lat_all, lon_all = [], []
 for t in range(1, 7):
-    st = Dataset("%s/archive/y1990/19900101.land_static.tile%d.nc" % (RUN, t))
+    st = Dataset("%s/y1990/19900101.land_static.tile%d.nc" % (ARC, t))
     gi = st.variables["grid_index"][:].astype(int)
     st.close()
     g = Dataset("%s/C96_grid.tile%d.nc" % (INP, t))
@@ -46,7 +52,7 @@ print("after Greenland cut: %d" % keep.sum())
 
 out = {"lat": lat, "lon": lon, "keep": keep, "years": np.array(YEARS)}
 for y in YEARS:
-    root = RERUN if y == 1990 else RUN + "/archive"
+    root = RERUN if y == 1990 else ARC
     ann, mjj = [], []
     for t in range(1, 7):
         d = Dataset("%s/y%d/%d0101.land_month.tile%d.nc" % (root, y, y, t))
