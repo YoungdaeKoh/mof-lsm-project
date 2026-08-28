@@ -200,3 +200,53 @@ clone을 쓰는 이유: AD 케이스와 그 결과를 보존하기 위함.
 - 왜: AD 수렴 판정 기준이 "TOTECOSYSC **연간** 표류 ≤ 1 gC/m²/yr" → 연평균 비교가 자연스러움. 월별로 하면 200년×12로 12배 용량인데 계절변동은 수렴 판정에 미사용.
 - **월별은 post-AD 생산런(WFDE5 1981-2010)에서** — 계절순환(유출·LAI·플럭스)을 LM4·관측과 비교할 때. LM4 offline이 지금 월별(`land_month`)인 건 그게 이미 생산런 성격이기 때문(위상이 다름).
 - 검증(job 8281, year 0008): h0 1파일에 연별 8레코드 누적(mfilt=20 → 20년/파일). TOTECOSYSC 1224 · TOTSOMC 279 · TOTVEGC 621 · TLAI 1.32 gC/m². **값이 낮은 건 정상** — AD가 풀을 키우는 중, 상승 궤적이 곧 수렴 신호.
+
+### 7i. ★★ AD 완료 → post-AD 전환 (2026-08-24)
+
+**AD 완료**: 2026-08-23 17:16, **year 0211**(목표 202를 10년 chunk가 넘어섬).
+최종 restart `clm5_bgc_ad.clm2.r.0211-01-01-00000.nc` (1.4 GB).
+
+**전환 절차 실행** — §7g에 적어둔 그대로. 새 케이스 `clm5_bgc_pad`(clone, AD 케이스 보존):
+
+```
+CLM_ACCELERATED_SPINUP=off · CLM_FORCE_COLDSTART=off
+CONTINUE_RUN=FALSE · RUN_STARTDATE=0001-01-01
+user_nl_clm: finidat = '.../clm5_bgc_ad.clm2.r.0211-01-01-00000.nc'
+```
+
+- **★ finidat 함정을 실제로 확인**: 전환 전 `lnd_in`의 기본값이
+  `clmi.I2000Clm50BgcCrop.2011-01-01.**1.9x2.5**_gx1v7_...nc` — 격자(우리 0.9×1.25)도
+  구성(우리 Bgc)도 불일치. `CONTINUE_RUN=FALSE`라 이 값이 **실제로 읽히므로** 반드시 덮어써야 한다.
+  `preview_namelists`로 `spinup_state=0` + finidat 교체를 제출 전에 검증했다.
+- **재빌드 불필요**: `CLM_ACCELERATED_SPINUP`은 런타임 namelist 스위치(`spinup_state`)라
+  AD의 exe를 그대로 쓴다. `EXEROOT`를 AD bld로 돌리고 `BUILD_COMPLETE=TRUE`.
+- **create_clone 경로**: `~/CESM/cases/`에 없고 `~/CESM/cime/scripts/create_clone`.
+- 스크립트 신규: `clm5_bgc_pad_chunk.pbs`(첫 chunk만 `FIRST=1`로 `CONTINUE_RUN=FALSE`,
+  이후 자동 TRUE) · `clm5_bgc_pad_chain.sh`(목표 100년, 연도 미진행 시 중단).
+- **실측 1.79 h/model-year** (AD 2.1보다 빠름 — 가속분해 계산이 빠짐).
+
+### 7j. ★★ post-AD 수렴 판정 — 40년 시점 미수렴, 전지구 평균은 이미 기준 안 (2026-08-27)
+
+판정 도구 `cesm/scripts/clm5_postad_convergence.py`. 기준 = **TOTECOSYSC 표류 ≤ 1 gC/m²/yr가
+97 % 격자**(§7b). 표류는 마지막 N년 연평균의 최소제곱 기울기(첫해–마지막해 차이는 두 해에 좌우됨).
+
+**year 1–40, 마지막 20년 창**:
+
+| 변수 | 평균 | 전지구 표류 | 기준 통과 격자 |
+|---|---|---|---|
+| **TOTECOSYSC** | 21,442 | **−0.50** gC/m²/yr | **51.8 %** |
+| TOTSOMC | 15,858 | +0.29 | 65.9 % |
+| TOTVEGC | 4,171 | −0.09 | 52.7 % |
+| TLAI | 1.78 | ~0 | — |
+| TWS | 7,289 | +0.69 | — |
+
+- **★ 전지구 평균 표류(−0.50)는 이미 기준 안에 있는데 격자별로는 절반이 미달이다.**
+  격자들이 서로 반대 방향으로 움직여 평균에서 상쇄되기 때문. **평균만 봤으면 "수렴"으로
+  오판했을 것** — CLM5-BGC 기준이 평균이 아니라 "97 % 격자"로 정의된 이유가 이것이다.
+- 평균은 면적·육지분율 가중, 97 % 판정은 무가중(기준이 격자 단위 정의).
+- **전망**: 40년에 51.8 %면 100년에도 97 %는 어려울 수 있다. 가이드도 고위도 토양탄소는
+  1000년+ 걸릴 수 있고 완화가 허용된다고 명시(§7b). 100년 시점 값을 보고 미달이면
+  **완화 기준 채택 + 근거 박제**가 현실적.
+- **CLM5는 이미 offline이다**(COMPSET `2000_DATM%GSWP3v1_CLM50%BGC_...`, COMP_ATM=datm,
+  ocn/ice는 stub). post-AD 다음은 추가 스핀업이 아니라 **1979–2024 생산 적분**이며,
+  이는 아직 착수하지 않았다.
