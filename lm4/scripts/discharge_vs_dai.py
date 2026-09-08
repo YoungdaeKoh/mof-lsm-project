@@ -36,14 +36,35 @@ import numpy as np
 import netCDF4 as nc
 import matplotlib.pyplot as plt
 
+import sys
+
 DAI = ("/Volumes/data02/runoff/Dai2025/"
        "coastal-stns-Vol-monthly.updated-Aug2025.nc")
 NPZ = "lm4/data/discharge_1979_2023.npz"
 Y0, Y1 = 1979, 2023
-SEARCH_DEG = 2.0           # radius of the mouth search, degrees
-MAX_DIST = 1.75            # beyond this the match is not the same river;
-                           # a C96 cell is ~1 deg, so this allows the channel to
-                           # sit a cell or so from the gauge's mouth coordinate
+
+# region: (name, lat range, lon range or None, ocean-name prefix or None, n rivers)
+REGIONS = {
+    "eastasia": ("East Asian", (20, 46), (100, 145), None, 10),
+    "arctic":   ("Arctic-draining", (55, 82), None, "ARC", 12),
+}
+WHICH = sys.argv[1] if len(sys.argv) > 1 else "eastasia"
+RNAME, RLAT, RLON, ROCN, NRIV = REGIONS[WHICH]
+# The search radius scales with the river, because the displacement between a
+# gauge's mouth coordinate and the model's outlet cell does.  The Gulf of Ob is
+# 800 km long and the model puts the Ob's outlet at its head, 3.4 deg from where
+# Dai places the mouth; the Huai, two orders of magnitude smaller, sits 0.4 deg
+# from its own channel and must not be allowed to wander as far as the Yangtze.
+# Scaled by drainage area rather than by flow: an estuary's size follows the
+# basin, not how much water people have left in the river.  Scaling by flow
+# would penalise the Yellow River, whose observed volume is a third of natural
+# because of irrigation withdrawal, and push its match out of reach.
+def search_radius(area_km2):
+    return 1.0 + 3.0 * min(1.0, area_km2 / 2.5e6)
+
+
+MIN_FLOW = 50.0            # m3/s; a match onto a cell with less than this is a
+                           # failed match, not a river
 
 # ------------------------------------------------------------------ model ---
 z = np.load(NPZ)
@@ -70,11 +91,13 @@ def txt(var, i):
 n = len(d.dimensions["station"])
 riv = [txt("riv_name", i) for i in range(n)]
 stn = [txt("stn_name", i) for i in range(n)]
+ocn = [txt("ocn_name", i) for i in range(n)]
 lat_m = np.array(d.variables["lat_mou"][:])
 lon_m = np.array(d.variables["lon_mou"][:])
 lon_m = np.where(lon_m > 180, lon_m - 360, lon_m)
 ratio = np.array(d.variables["ratio_m2s"][:])
 vol = np.array(d.variables["vol_stn"][:])
+area_mou = np.array(d.variables["area_mou"][:])
 tt = np.array(d.variables["time"][:]).astype(int)     # YYYYMM
 flow = np.ma.filled(d.variables["FLOW"][:].astype("f8"), np.nan)   # (time,station)
 d.close()
@@ -82,9 +105,16 @@ d.close()
 oyr, omo = tt // 100, tt % 100
 osel = (oyr >= Y0) & (oyr <= Y1)
 
-# East Asian mouths, largest first
-ea = np.where((lat_m >= 20) & (lat_m <= 46) & (lon_m >= 100) & (lon_m <= 145))[0]
-ea = ea[np.argsort(-vol[ea])][:10]
+# the region's mouths, largest first.  The Arctic is selected by the ocean the
+# river drains into rather than by a longitude box, because its basins wrap the
+# pole and a box would cut Siberia in half.
+ok = (lat_m >= RLAT[0]) & (lat_m <= RLAT[1])
+if RLON is not None:
+    ok &= (lon_m >= RLON[0]) & (lon_m <= RLON[1])
+if ROCN is not None:
+    ok &= np.array([o.upper().startswith(ROCN) for o in ocn])
+ea = np.where(ok)[0]
+ea = ea[np.argsort(-vol[ea])][:NRIV]
 
 # --- first pass: find each gauge's model cell -------------------------------
 match = {}
@@ -93,22 +123,23 @@ for i in ea:
     if m.sum() < 60:                              # fewer than five years
         print("skip %-14s observations too short (%d months)" % (riv[i][:12], m.sum()))
         continue
+    rad = search_radius(area_mou[i])
     dist = np.sqrt(((mlat - lat_m[i]) * 1.0) ** 2 +
                    ((mlon - lon_m[i]) * np.cos(np.deg2rad(lat_m[i]))) ** 2)
-    cand = np.where(dist <= SEARCH_DEG, qann, -np.inf)
+    cand = np.where(dist <= rad, qann, -np.inf)
     if not np.isfinite(cand).any():
-        print("skip %-14s no model cell within %.1f deg" % (riv[i][:12], SEARCH_DEG))
+        print("skip %-16s no model cell within %.1f deg" % (riv[i][:14], rad))
         continue
     j = np.unravel_index(np.nanargmax(cand), cand.shape)
-    if dist[j] > MAX_DIST:
-        print("skip %-14s nearest channel is %.2f deg away, not the same river"
-              % (riv[i][:12], dist[j]))
+    if not np.isfinite(qann[j]) or qann[j] < MIN_FLOW:
+        print("skip %-16s no channel within %.1f deg (largest %.0f m3/s)"
+              % (riv[i][:14], rad, qann[j] if np.isfinite(qann[j]) else 0.0))
         continue
     o_clim = np.array([np.nanmean(flow[m & (omo == k + 1), i]) for k in range(12)])
     match.setdefault(j, []).append((i, o_clim * ratio[i], dist[j]))
 
 # --- second pass: gauges sharing a cell are one system ----------------------
-print("\nDai et al. (2025) vs LM4+, %d-%d\n" % (Y0, Y1))
+print("\n%s rivers — Dai et al. (2025) vs LM4+, %d-%d\n" % (RNAME, Y0, Y1))
 print("%-30s %6s %10s %10s %8s %7s" %
       ("river (system)", "dist", "obs m3/s", "model", "model/obs", "r_seas"))
 rows, series = [], []
@@ -126,7 +157,7 @@ for j, members in sorted(match.items(), key=lambda kv: -qann[kv[0]]):
     rows.append([name, len(members), dmin, o_ann, m_ann, m_ann / o_ann, r])
     series.append((tag, o_clim, m_clim, o_ann, m_ann, r))
 
-with open("lm4/data/discharge_vs_dai.csv", "w") as fh:
+with open("lm4/data/discharge_vs_dai_%s.csv" % WHICH, "w") as fh:
     fh.write("river,station,lat_mouth,lon_mouth,dist_deg,obs_m3s,model_m3s,ratio,r_season\n")
     for r_ in rows:
         fh.write("%s,%d,%.3f,%.2f,%.2f,%.4f,%.4f\n" % tuple(r_))
@@ -149,8 +180,17 @@ for ax, (name, o, m, oa, ma, r) in zip(axes.ravel(), series):
 for ax in axes.ravel()[len(series):]:
     ax.axis("off")
 axes[0, 0].legend(fontsize=10)
-fig.suptitle("River discharge at East Asian mouths, %d–%d monthly climatology\n"
+# the sum over the matched systems, which for the Arctic is the freshwater the
+# ocean model would receive from the rivers that dominate its budget
+tot_o = np.sum([oa for _, _, _, oa, _, _ in series])
+tot_m = np.sum([ma for _, _, _, _, ma, _ in series])
+print("\nsum of matched systems:  obs %.0f   model %.0f   model/obs %.2f  m3/s"
+      % (tot_o, tot_m, tot_m / tot_o))
+print("  = %.0f vs %.0f km3/yr" % (tot_o * 3.15576e7 / 1e9, tot_m * 3.15576e7 / 1e9))
+
+fig.suptitle("River discharge at %s river mouths, %d–%d monthly climatology\n"
              "observations are station flow scaled to the mouth by Dai's "
-             "mouth-to-station ratio" % (Y0, Y1), fontsize=14)
-fig.savefig("figures/discharge_vs_dai_eastasia.png", dpi=140)
-print("\nwrote figures/discharge_vs_dai_eastasia.png")
+             "mouth-to-station ratio;  matched total model/obs %.2f"
+             % (RNAME, Y0, Y1, tot_m / tot_o), fontsize=14)
+fig.savefig("figures/discharge_vs_dai_%s.png" % WHICH, dpi=140)
+print("wrote figures/discharge_vs_dai_%s.png" % WHICH)
