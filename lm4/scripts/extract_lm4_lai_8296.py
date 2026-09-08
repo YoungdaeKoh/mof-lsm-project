@@ -20,13 +20,13 @@ from greenland_mask import in_greenland
 RUN = "/data2/ydkoh/lm4/RUN/lm4_spinup30"
 # cycle 1 was moved aside to archive_c1 when the 1979-2024 production run took
 # over the archive/ name; this script reads the finished cycle, not the new one.
-ARC = RUN + "/archive_c1"
+ARC = "/data2/ydkoh/lm4/RUN/lm4p_ctl_1979-2024/archive"
 RERUN = "/data2/ydkoh/lm4/RERUN/wA/archive"
 INP = RUN + "/INPUT"
-YEARS = list(range(1982, 2011))
+YEARS = list(range(1982, 2024))
 NX = 96
 FILL = 1e30
-OUT = "/data2/ydkoh/lm4/lm4_lai_1982_2010.npz"
+OUT = "/data2/ydkoh/lm4/lm4_lai_1982_2023.npz"
 
 lat_all, lon_all = [], []
 for t in range(1, 7):
@@ -52,7 +52,7 @@ print("after Greenland cut: %d" % keep.sum())
 
 out = {"lat": lat, "lon": lon, "keep": keep, "years": np.array(YEARS)}
 for y in YEARS:
-    root = RERUN if y == 1990 else ARC
+    root = ARC          # production run has every year; no re-run substitution
     ann, mjj = [], []
     for t in range(1, 7):
         d = Dataset("%s/y%d/%d0101.land_month.tile%d.nc" % (root, y, y, t))
