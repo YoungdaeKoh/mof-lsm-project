@@ -28,8 +28,19 @@ year_now() {
   sed -E 's/.*\.r\.([0-9]{4})-.*/\1/' "$RUN/rpointer.lnd" 2>/dev/null | head -1
 }
 
+# FIRST=1 means CONTINUE_RUN=FALSE, which makes CLM read finidat and start over
+# at year 0001.  That is right on the very first launch and wrong on every
+# resume: hard-coding it to 1 sent a restarted chain back to the AD restart and
+# threw away the post-AD years already done.  The presence of rpointer is what
+# distinguishes the two cases.
 chunk=0
-FIRST=1
+if [ -f "$RUN/rpointer.lnd" ]; then
+  FIRST=0
+  echo "resuming from $(cat "$RUN/rpointer.lnd")"
+else
+  FIRST=1
+  echo "no rpointer: starting from finidat"
+fi
 while :; do
   chunk=$((chunk + 1))
   [ "$chunk" -le "$MAXCHUNK" ] || { log "ABORT: chunk cap $MAXCHUNK reached"; exit 1; }

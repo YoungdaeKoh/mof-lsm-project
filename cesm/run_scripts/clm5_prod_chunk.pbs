@@ -1,38 +1,36 @@
 #!/bin/bash
-#PBS -N clm5_bgc_pad
+#PBS -N clm5_prod
 #PBS -q workq
 #PBS -l select=1:ncpus=48:mpiprocs=48:host=climate01
 #PBS -j oe
-#PBS -o /home/ydkoh/CESM/cases/clm5_bgc_pad/chunk.log
+#PBS -o /home/ydkoh/CESM/cases/clm5_prod_1979_2023/chunk.log
 #
-# One 10-year chunk of the CLM5-BGC post-AD spin-up (spinup_state=0).
+# One chunk of the CLM5 production run 1979-2023.
 #
-# Differs from the AD script in one place: the first chunk must run with
-# CONTINUE_RUN=FALSE so that CLM reads finidat -- the AD case's final restart at
-# year 0211 -- and rescales the accelerated soil carbon and nitrogen pools back
-# to their normal turnover. Every chunk after that continues from rpointer, so
-# the driver passes FIRST=0 and the run switches to CONTINUE_RUN=TRUE.
+# The driver (clm5_prod_chain.sh) decides how long the chunk is and whether it
+# is the first; this script runs one chunk and archives it.
+#
+# FIRST=1 means CONTINUE_RUN=FALSE, so CLM reads finidat -- the post-AD final
+# restart.  Every later chunk continues from rpointer.
 #
 # case.submit --no-batch exits 1 even on success, so its exit code is not a
 # success test; the driver checks that the restart year advanced instead.
 #
-# climate01, not climate02: another user's LIS is holding ~46 of climate02's 48
-# cores outside PBS, which pbsnodes reports as free with zero assigned. Targeting
-# climate01 makes PBS queue this behind our own job there rather than stacking
-# 94 ranks onto 48 cores on a node it thinks is empty.
+# Node: climate01.  climate00 is the login node and climate02 is often taken by
+# other users, so a single 48-core node is the ceiling here.
 set -u
 export PERL5LIB=/home/ydkoh/perl5/lib/perl5${PERL5LIB:+:$PERL5LIB}
 
-CASE=/home/ydkoh/CESM/cases/clm5_bgc_pad
-RUN=/data2/ydkoh/cesm2_output/clm5_bgc_pad/run
-ARCH=/home/ydkoh/CESM/spinup_raw/clm5_BGC_PAD
+CASE=/home/ydkoh/CESM/cases/clm5_prod_1979_2023
+RUN=/data2/ydkoh/cesm2_output/clm5_prod_1979_2023/run
+ARCH=/home/ydkoh/CESM/spinup_raw/clm5_PROD
 
-CHUNK_N=${CHUNK_N:-10}
+CHUNK_N=${CHUNK_N:-5}
 FIRST=${FIRST:-0}
 
 cd "$CASE" || exit 1
 if [ "$FIRST" = "1" ]; then
-  ./xmlchange CONTINUE_RUN=FALSE           # read finidat, rescale the AD pools
+  ./xmlchange CONTINUE_RUN=FALSE           # read finidat
 else
   ./xmlchange CONTINUE_RUN=TRUE
 fi

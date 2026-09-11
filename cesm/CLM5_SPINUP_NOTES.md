@@ -250,3 +250,110 @@ user_nl_clm: finidat = '.../clm5_bgc_ad.clm2.r.0211-01-01-00000.nc'
 - **CLM5는 이미 offline이다**(COMPSET `2000_DATM%GSWP3v1_CLM50%BGC_...`, COMP_ATM=datm,
   ocn/ice는 stub). post-AD 다음은 추가 스핀업이 아니라 **1979–2024 생산 적분**이며,
   이는 아직 착수하지 않았다.
+
+### 7k. ★★★ post-AD가 줄곧 climate02에서 돌고 있었다 — PBS 할당과 mpirun 목적지가 달랐다 (2026-09-10)
+
+PBS는 `host=climate01`을 예약해 놓았는데 **실제 48 rank는 climate02에 떨어지고 있었다.**
+climate01은 load 0.00으로 놀고, climate02는 타 사용자 load 53–88 위에 우리 잡이 겹쳐 올라갔다.
+
+```
+PBS 할당     climate01/0*48
+mpi.hosts    climate02:48          <-- 실제 목적지
+실제 rank    climate00 0 / climate01 0 / climate02 48
+```
+
+- 원인: `cases/clm5_bgc_pad/env_mach_specific.xml:44` 가
+  `-hostfile /home/ydkoh/CESM/cases/clm5_bgc_ad/mpi.hosts` 를 **하드코딩**.
+  그 파일 내용이 `climate02:48`(2026-08-22 AD 케이스 만들 때 박힘).
+- **불일치가 생긴 시점**: 타 사용자 LIS가 climate02를 PBS 밖에서 점유하는 문제 때문에
+  `clm5_bgc_pad_chunk.pbs` 의 `host=` 를 climate02 → climate01로 바꿨는데,
+  **mpirun hostfile은 같이 안 바꿨다.** 노드를 옮길 때는 **PBS `host=` 와 hostfile
+  두 곳을 같이** 고쳐야 한다 — 한 쪽만 고치면 조용히 갈라진다.
+- 기본값 `~/.cime/config_machines.xml` → `/home/ydkoh/mvapich2.hosts` = `climate01:48`.
+  **나머지 21개 케이스는 전부 기본값을 쓴다**. AD·post-AD 두 케이스만 예외였다.
+- **증상은 성능으로만 드러났다**: 타 사용자 부하가 커지자 연별 소요가
+  1h43m → 3h46m → 4h05m (**2.4배**). 크래시도 경고도 없다.
+- **예전 "1.79 h/model-year" 벤치마크(§7i)도 climate02가 한가할 때 잰 값**이었다.
+  climate01 실측은 **1.70–1.83 h/model-year**로 사실상 같다 — 노드 성능 차이가 아니라
+  **경합 여부**가 변수였다.
+- 조치: `mpi.hosts` → `climate01:48` (백업 `mpi.hosts.bak_climate02`). 수정 후 48 rank
+  climate01 확인.
+- **교훈**: `qstat -n`의 할당 노드를 믿지 말고 **`pgrep -u <user> -c cesm.exe`를 노드마다
+  돌려 rank가 실제로 어디 있는지 확인**할 것. 두 정보가 다를 수 있다.
+  [[climate01-only-for-jobs]]
+
+### 7l. ★★ AD→post-AD 전환 때 탄소풀 역환산이 실제로 됐는지 숫자로 확인 (2026-09-11)
+
+AD는 분해를 가속해 풀을 작게 유지하므로, 빠져나올 때 가속계수를 되돌리지 않으면
+**탄소 고갈 상태에서 post-AD를 시작**하고 스핀업 전체가 헛일이 된다. 로그 메시지는
+restart 경로에서 찍히므로 **산술이 실제로 먹었다는 증거가 아니다.** 도구
+`cesm/scripts/verify_ad_exit_rescaling.py` (면적·육지분율 가중).
+
+```
+spinup_state = 0                      (namelist)
+restart_file_spinup_state = 2         (AD restart에 박힌 값)
+Multiplying stemc and crootc by 10 for exit spinup
+CNRest: taking c12 SOM pools out of AD spinup mode
+```
+
+| 변수 | AD 마지막(0201) | post-AD 첫해(0001) | 배율 |
+|---|---|---|---|
+| **TOTSOMC** | 397 gC/m² | 15,834 | **×39.8** |
+| **TOTECOSYSC** | 1,855 | 21,439 | **×11.6** |
+| TOTVEGC | 905 | 4,164 | ×4.6 |
+
+- TOTVEGC ×4.6은 **죽은목재(×10)가 TOTVEGC에 포함**되고 살아있는 풀은 AD가 안 건드리기
+  때문. 1.0이면 역환산 실패 신호다.
+- 절대값 검증: post-AD 첫해 토양탄소 **2,366 PgC** — 관측 추정 1,500–2,400 PgC와 같은 자리수.
+- 로직 위치: `SoilBiogeochemCarbonStateType.F90:685-694` (`flag=='read'` 이고
+  namelist와 restart의 spinup_state가 다를 때 분기).
+
+### 7m. ★★ 쉘 청크 체인 ≡ 연속 적분인지 검증 — 청크 경계에 흔적 없음 (2026-09-11)
+
+공식 CLM 레시피는 `RESUBMIT`으로 체인하는데 여기선 `BATCH_SYSTEM=none`이라 **쉘로 10년씩
+끊어서** `CONTINUE_RUN=TRUE`로 이어붙인다. 같아야 하지만 **"같아야 한다"는 증거가 아니다** —
+청크 경계가 깨져도 크래시하지 않고 조용히 시계열에 단차만 남긴다.
+
+검증 도구 `cesm/scripts/verify_chunk_continuity.py`. 두 종류 경계를 **반드시 구분**해야 한다:
+
+- **청크 경계** 0093·0102·0112 — 쉘이 멈추고 재제출한 해. 여기 단차 = 체인 고장.
+- **강제장 되감기** 0091·0121 — GSWP3 cycling이 2010 넘어 1981로 돌아가는 해.
+  여기 단차는 예상된 것이고 우리 탓이 아니다. [[lsm-cyclic-forcing-wrap-shock]]
+
+검정량은 **TWS**(연내 반응할 만큼 빠르고, 날씨 잡음만은 아닐 만큼 깊게 적분된 양).
+판정은 "그 해 점프가 주변 해들의 점프 산포에 비해 튀는가".
+
+```
+배경 연간 점프: 평균 +0.411, sd 3.923 mm (n=28, 경계 제외)
+
+청크 0093:  -3.061 mm = 0.8 sd  -> 평범한 해와 구별 안 됨
+청크 0102:  -6.761 mm = 1.7 sd  -> 평범한 해와 구별 안 됨
+되감기 0091: +5.771 mm = 1.5 sd  (예상)
+```
+
+- **기록 전체 최대 점프는 0103년 +9.3 mm (2.4 sd)로, 경계가 아닌 해**에서 나왔다.
+  즉 청크 경계는 배경 변동 안에 완전히 묻힌다 → **쉘 체인은 연속 적분과 동등**.
+- 강제장 정렬도 성립: `YR_START=1981, YR_END=2010, YR_ALIGN=1981`에서 모델연도 1 → 1981
+  (1980이 30으로 나누어떨어져 `ALIGN=1`과 동일하게 동작).
+- 공식 예시와의 **의도적 차이 2건**(둘 다 무해):
+  `RESUBMIT` → 외부 쉘 체인(BATCH_SYSTEM=none 때문, 위에서 동등성 검증),
+  `RUN_TYPE=hybrid` → `startup` + `finidat`(I compset에서는 효과 동일).
+
+### 7n. post-AD 111년 시점 수렴 — 여전히 미수렴, 목표를 200년으로 (2026-09-11)
+
+| 변수 | 평균 | 전지구 표류 | 기준 통과 격자 | 40년 시점(§7j) |
+|---|---|---|---|---|
+| **TOTECOSYSC** | 21,456 | +0.77 gC/m²/yr | **53.0 %** | 51.8 % |
+| TOTSOMC | 15,886 | +0.50 | 64.9 % | 65.9 % |
+| TOTVEGC | 4,177 | +0.30 | 54.1 % | 52.7 % |
+| TLAI | 1.79 | +0.0007 | — | — |
+| TWS | 7,323 | +0.53 | — | — |
+
+- **40년 → 111년에 51.8 % → 53.0 %.** 71년을 더 돌려 1.2 %p. §7j의 전망("100년에도
+  97 %는 어려울 수 있다")이 그대로 맞았다.
+- 전지구 평균 표류는 평균의 **연 0.0036 %**로 이미 무시할 수준 — §7j와 같은 함정이
+  111년에도 유지된다.
+- 체인 목표를 **200년**으로 재설정(`clm5_bgc_pad_chain.sh 200`). 2026-09-11 기준 0116년,
+  climate01에서 1.83 h/yr → 남은 84년 ≈ **154 h (6.4일)**.
+- 200년에도 97 % 미달이면 §7j가 예고한 **완화 기준 채택 + 근거 박제** 경로로 간다.
+  판정에 쓸 값은 이미 다 모여 있다.
