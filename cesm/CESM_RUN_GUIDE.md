@@ -17,6 +17,8 @@ MOF_LSM 과제(2026)에서 실제로 돌려 검증된 것만 적었다. 연구 �
 5. 장기 적분 = 외부 bash 체인(chain.sh)이 10년 청크 qsub 반복        (RESUBMIT 못 씀)
 ```
 
+실험을 **바꾸는** 법(branch·SST·강제장 섭동·눈/비 분배)은 §14.
+
 이 머신에서 CESM이 **표준과 다른 점 4개** — 이것만 알면 나머지는 공식 문서대로다.
 
 | 다른 점 | 왜 | 대응 |
@@ -561,3 +563,120 @@ set RES     = f19_f19
 | `CLM5_SPINUP_NOTES.md` | 실험 이력·판단·수렴 결과 (§3 함정, §7f/7k hostfile, §7g finidat, §7m 청크 검증) |
 | 서버 `~/.cime/config_machines.xml` · `config_compilers.xml` | 머신 정의 (§1.3에 전문) |
 | 서버 `~/CESM2.module.sh` | 대화형 셸용 모듈 로드 (CIME 빌드엔 불필요) |
+
+---
+
+## 14. 실험 설계 레시피 — branch · SST · 강제장 섭동 · 강수 상(相) 분배
+
+§1–13이 "돌리는 법"이면 여기는 "바꾸는 법"이다. 소스 줄 번호는 `release-cesm2.1.5` / `release-clm5.0.37` 기준으로 서버에서 직접 확인한 것(2026-09-15). **이 절의 절차 중 실제로 돌려본 것은 §14.1뿐이다. 나머지는 소스·namelist 정의에서 확인한 방법이며 "미검증"이라 표시했다.**
+
+### 14.1 branch — 기준 런의 특정 시점에서 갈라지기
+
+CIME `RUN_TYPE` 정의(`cime/src/drivers/mct/cime_config/config_component.xml:167`):
+- **startup**: 각 컴포넌트가 자기 초기파일(`finidat` 등)로 출발. 날짜는 `RUN_STARTDATE`.
+- **branch**: 모든 컴포넌트가 **한 세트의 restart**(`RUN_REFCASE`+`RUN_REFDATE`)에서 출발. **`RUN_STARTDATE`는 무시**되고 restart 안의 날짜를 쓴다. 비트 수준으로 기준 런의 연속.
+- **hybrid**: restart에서 초기화하되 날짜를 새로 줄 수 있음(달력을 옮길 때).
+
+섭동 실험은 branch다. 기준 런(예: `F_spinup`)의 0010-11-01에서 갈라져 5년:
+
+```bash
+cd ~/CESM/cime/scripts
+./create_clone --case ~/CESM/cases/F_snow75 --clone ~/CESM/cases/F_spinup --keepexe
+cd ~/CESM/cases/F_snow75
+./xmlchange RUN_TYPE=branch
+./xmlchange RUN_REFCASE=F_spinup,RUN_REFDATE=0010-11-01,RUN_REFTOD=00000
+./xmlchange GET_REFCASE=FALSE          # we copy the restarts ourselves (TRUE looks in DIN_LOC_ROOT/cesm2_init)
+./xmlchange CONTINUE_RUN=FALSE
+./xmlchange STOP_OPTION=nyears,STOP_N=5,REST_OPTION=nyears,REST_N=1
+# restarts of that date + rpointers, every component, into the new run dir
+RUN=/data2/ydkoh/cesm2_output/F_snow75/run; mkdir -p $RUN
+cp /data2/ydkoh/cesm2_output/F_spinup/run/*.r*.0010-11-01-00000.nc $RUN/
+cp /data2/ydkoh/cesm2_output/F_spinup/run/rpointer.* $RUN/     # rpointer must name the 0010-11-01 files; check with cat
+./preview_namelists
+```
+
+- `--keepexe`: 섭동이 namelist만이면 재빌드 없음. **소스 패치(§14.4)가 들어가면 `--keepexe`를 빼고** `SourceMods`를 넣은 뒤 `case.build`.
+- 기준 런이 `REST_N=1,REST_OPTION=nmonths`(§9)였던 이유가 이것이다 — 임의 월에서 branch하려면 그 달의 restart가 있어야 한다.
+- **대조군도 같은 방식으로 만들 것.** 기준 런을 그냥 이어 돌린 5년과 섭동 5년을 비교하면 되지만, 섭동 케이스에 소스 패치가 들어가면 대조군도 같은 exe(factor=1.0)로 다시 돌리는 편이 깨끗하다.
+- I compset(offline CLM)에서는 §7.3처럼 `startup`+`finidat`로 충분하다. branch가 필요한 건 CAM·DOCN·CICE·CPL restart를 한꺼번에 맞춰야 하는 F 케이스다.
+
+### 14.2 SST·해빙 처방 바꾸기 (F 케이스, DOCN prescribed) — 미검증
+
+F2000climo가 실제로 읽는 것 (`F_2000climo` 케이스 `xmlquery`):
+
+| 변수 | 값 |
+|---|---|
+| `DOCN_MODE` | `prescribed` |
+| `SSTICE_DATA_FILENAME` | `/data1/CESM2_INPUT/atm/cam/sst/sst_HadOIBl_bc_1.9x2.5_2000climo_c180511.nc` |
+| `SSTICE_GRID_FILENAME` | `.../atm/cam/ocnfrac/domain.camocn.1.9x2.5_gx1v6_090403.nc` |
+| `SSTICE_YEAR_ALIGN / START / END` | `1 / 0 / 0` = 12개월 기후값을 매년 반복 |
+
+파일 구조: `time=12`, `SST_cpl(time,lat,lon)`·`ice_cov(time,lat,lon)` + 각각의 `_prediddle`(bcgen 시간보간 전 원값) + `date`·`datesec`. f09용 `sst_HadOIBl_bc_0.9x1.25_2000climo_c180511.nc`도 `/data1`에 있다.
+
+**균일 온난화 +ΔT 같은 섭동 (재빌드 불필요):**
+```bash
+cp /data1/CESM2_INPUT/atm/cam/sst/sst_HadOIBl_bc_1.9x2.5_2000climo_c180511.nc /data2/ydkoh/sst/sst_2000climo_p2K.nc
+ncap2 -O -s 'SST_cpl=SST_cpl+2.0; SST_cpl_prediddle=SST_cpl_prediddle+2.0' /data2/ydkoh/sst/sst_2000climo_p2K.nc /data2/ydkoh/sst/sst_2000climo_p2K.nc
+./xmlchange SSTICE_DATA_FILENAME=/data2/ydkoh/sst/sst_2000climo_p2K.nc
+```
+- `ice_cov`는 그대로 두면 "따뜻한 바다 위의 해빙"이 생긴다. SST를 올리면 `ice_cov`도 같이 줄이거나(예: SST_cpl > −1.8 °C인 곳 0), 해빙을 안 건드리는 실험임을 명시할 것. 반대로 해빙만 바꾸는 실험은 `ice_cov`만 편집.
+- `SST_cpl`과 `_prediddle` 둘 다 고쳐 둔다. 모델이 어느 쪽을 쓰는지는 namelist(`sstcyc`, bcgen 옵션)에 따라 달라 둘 다 맞춰 두는 게 안전하다.
+- 4-D 섭동(특정 해역·계절)은 마스크 곱으로 같은 방식.
+
+**연변동 SST(AMIP형):** 기후값 파일 대신 `sst_HadOIBl_bc_<res>_1850_2017_c180507.nc` 같은 시계열 파일이 필요하고 `/data1`엔 없다. `FHIST` compset을 만들면 기본으로 잡히니 `check_input_data --download`로 받는다. 그 뒤 `SSTICE_YEAR_ALIGN=1979,SSTICE_YEAR_START=1979,SSTICE_YEAR_END=2014`, `RUN_STARTDATE=1979-01-01`. 이 머신에선 아직 안 해봤다.
+
+### 14.3 강제장 섭동 (offline I 케이스, DATM)
+
+**방법 A — 파일 전처리 (단순, 투명).** `YYYY_wfde5.nc`를 복사해 변수를 바꾸고(예: `PRECTmms*0.75`) §10.2의 스트림 경로만 새 폴더로. 30년 × 7변수라 디스크가 들지만 무엇을 먹였는지 파일이 증거로 남는다. 실제로 쓴 방식은 이것뿐이다(WFDE5 자체가 그렇게 물렸다).
+
+**방법 B — DATM 내장 anomaly forcing 스트림 (미검증).** DATM에 곱셈 보정 스트림이 있다(`datm_comp_mod.F90:1093–1098`):
+```fortran
+if (sprec_af > 0) then           ! Anomaly.Forcing.Precip, field pr -> prec_af
+   a2x(Faxa_snowc) = a2x(Faxa_snowc) * prec_af
+   a2x(Faxa_snowl) = a2x(Faxa_snowl) * prec_af
+   a2x(Faxa_rainc) = a2x(Faxa_rainc) * prec_af
+   a2x(Faxa_rainl) = a2x(Faxa_rainl) * prec_af
+```
+스트림 이름과 필드 매핑(`namelist_definition_datm.xml`): `Anomaly.Forcing.Precip`(`pr`→`prec_af`), `.Temperature`(`tas`→`tbot_af`), `.Pressure`, `.Humidity`, `.Uwind`, `.Vwind`, `.Shortwave`(`swdn_af`, 4개 SW 성분에 곱), `.Longwave`. 원래 용도는 CMIP 미래 anomaly를 관측 강제장에 얹는 것(기본 파일 `af.pr.ccsm4.rcp45.2006-2300.nc`).
+- 절차: ① `pr`을 담은 작은 nc(격자 자유, 12개월; 상수 0.75면 됨) ② `user_datm.streams.txt.Anomaly.Forcing.Precip`(§10.2 형식, `pr prec_af`) ③ `user_nl_datm`에 `streams` 목록을 기존 5개 + 이것으로 덮어쓰고 `taxmode`·`tintalgo`·`mapalgo`도 6개로 (anomaly 기본 `mapalgo=nearest`).
+- 온도(`tbot_af`)는 곱인지 합인지 소스에서 확인 안 했다. 쓰기 전에 `datm_comp_mod.F90`의 `stbot_af` 적용 줄을 볼 것.
+- **★ 어느 방법이든 DATM 단계의 강수 섭동은 "총강수"를 바꾼다.** CLM5는 받은 강수를 자기 온도로 다시 눈/비로 나누므로(§14.4), **눈만 줄이는 실험은 DATM에서 못 한다.** 지면모델 안에서 해야 한다.
+
+### 14.4 지면모델의 강수 상 분배와 snowfall 섭동 위치
+
+**CLM5 (`release-clm5.0.37`)는 대기가 준 눈/비 구분을 버리고 자기 온도로 다시 나눈다.**
+`src/main/atm2lndMod.F90` `downscale_forcings` L306–330 → `repartition_rain_snow_one_col` L351–382:
+```
+frac_rain = (T_col − all_snow_t) × frac_rain_slope,  0 ≤ frac_rain ≤ 1
+rain = (rain_atm + snow_atm) × frac_rain ;  snow = 나머지
+```
+- 온도는 **컬럼 downscaled `forc_t_c`** (고도 밴드가 있으면 밴드마다 다름).
+- namelist(`user_nl_clm`, 그룹 `atm2lnd_inparm`), 기본값(`namelist_defaults_clm4_5.xml:184–209`):
+
+| 변수 | clm5_0 기본 | 의미 |
+|---|---|---|
+| `repartition_rain_snow` | `.true.` (clm4_5는 `.false.`) | 재분배 on/off |
+| `precip_repartition_nonglc_all_snow_t` | 0 °C | 이하면 전부 눈 (비빙하) |
+| `precip_repartition_nonglc_all_rain_t` | 2 °C | 이상이면 전부 비 |
+| `precip_repartition_glc_all_snow_t` | −2 °C | 빙하 landunit |
+| `precip_repartition_glc_all_rain_t` | 0 °C | |
+
+- 상 변환에 따른 현열은 `sens_heat_from_precip_conversion`으로 에너지 수지에 반영된다(질량·에너지 보존).
+- 따라서 **CAM6+CLM5 결합에서 지면이 보는 snowfall은 CAM 미세물리가 아니라 이 램프가 정한다.** CAM 쪽 눈 비율을 바꾸는 실험은 이 스위치를 끄지 않으면 지면에 도달하지 않는다.
+- **CLM4.0 (CAM4 `F_spinup` 케이스)**: 재분배 없음. `src_clm40/main/lnd_import_export.F90:128–129,184`에서 `forc_snow = Faxa_snowc + Faxa_snowl` 그대로.
+
+**snowfall 섭동 3가지 — 무엇을 바꾸는 실험인지가 다르다**
+
+| 방법 | 바꾸는 것 | 보존 | 손댈 곳 |
+|---|---|---|---|
+| ① 램프 온도 이동 (예: all_snow_t=−1, all_rain_t=1) | 상(눈→비) | 질량·에너지 보존 | `user_nl_clm`, 재빌드 없음 |
+| ② `repartition_rain_snow=.false.` | 대기 미세물리의 상을 그대로 | 보존 | `user_nl_clm` |
+| ③ 눈 질량 × f (−25/−50/−75 %) | 눈 양 | **물이 지면에서 사라짐**(비보존) | 소스 패치 |
+
+③의 패치 위치:
+- **CLM5**: `atm2lndMod.F90`의 재분배 **뒤**(`sens_heat_from_precip_conversion` 호출 직후, L335 부근)에 `forc_snow_c(c) = f * forc_snow_c(c)`. 여기가 "CLM이 정의한 snowfall"이다. import 단계(`lnd_import_export.F90:132–133`)에서 줄이면 줄어든 총량이 다시 온도로 나뉘어 0–2 °C 구간에서는 감소분 일부가 비로 새어 들어간다.
+- **CLM4.0**: `src_clm40/main/lnd_import_export.F90:128–129`의 `forc_snowc/forc_snowl`에 곱하는 것이 유일한 자리.
+- 패치는 `$CASEROOT/SourceMods/src.clm/`에 파일을 복사해 수정 → `case.build`가 그 파일만 다시 컴파일. 케이스마다 factor를 하드코딩하면 케이스 3개 = SourceMods 3벌. 로컬 git `cesm/patches/`에 diff를 남길 것.
+- 결합 F 케이스에서 ③은 대기가 이미 내보낸 물이 지면에서 소멸하므로 **물 수지가 안 닫힌다.** 민감도 실험으로는 통용되지만 논문에 그 사실을 명시해야 한다. 보존형 대안은 "줄인 눈만큼 비로"(= ①과 같은 부류).
+
+**진단 변수 (CLM5 history, `atm2lndType.F90:693–723`)**: `SNOW_FROM_ATM`·`RAIN_FROM_ATM`(대기가 준 값, 재분배 **전**) vs `SNOW`·`RAIN`(재분배 **후** 지면 도달값). 두 쌍의 차이가 곧 §14.4 램프의 효과이고, ③ 패치가 먹혔는지는 `SNOW`로 본다. 그 외 `H2OSNO`, `SNOWDP`, `FSNO`, `QRUNOFF`, `QSNOMELT`. 패치가 들어간 첫 달은 반드시 `SNOW`의 전구 합이 f배가 됐는지 숫자로 확인하고 시작할 것.
