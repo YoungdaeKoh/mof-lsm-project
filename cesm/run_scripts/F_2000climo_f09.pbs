@@ -1,0 +1,45 @@
+#!/bin/bash
+#PBS -N F_f09
+#PBS -q workq
+#PBS -l select=1:ncpus=48:mpiprocs=48:host=climate02
+#PBS -j oe
+#PBS -o /home/ydkoh/CESM/cases/F_2000climo_f09/run.log
+#
+# Two years of F2000climo at f09 on climate02, to measure the cost.
+#
+# climate02 because climate01 is carrying the post-AD spin-up.  climate02 is
+# normally held by another user's LIS outside PBS, which pbsnodes reports as
+# free; it was genuinely idle when this was written, so check the load before
+# trusting the timing:  ssh climate02 uptime
+#
+# The hostfile is written here from $PBS_NODEFILE rather than being a fixed file
+# in $HOME.  A fixed file is how post-AD came to run on climate02 for three weeks
+# while PBS reserved climate01 (CLM5 notes 7k): nothing crashed, the job just
+# slowed down when the node got busy.  Generating it means the launch always goes
+# where the allocation is, and a timing measurement is worth nothing if the ranks
+# are not where you think.
+#
+# case.submit --no-batch exits 1 even on success, so its exit code is not a
+# success test -- check the model date and the restarts.
+#
+# perl bigint and friends exist only on climate00; PERL5LIB points at the
+# user-space copies build-namelist needs at run time.
+set -u
+export PERL5LIB=/home/ydkoh/perl5/lib/perl5${PERL5LIB:+:$PERL5LIB}
+
+CASE=/home/ydkoh/CESM/cases/F_2000climo_f09
+RUN=/data2/ydkoh/cesm2_output/F_2000climo_f09/run
+
+cd "$CASE" || exit 1
+
+# one line per host, "host:nranks", counted from the nodefile itself
+awk '{c[$1]++} END {for (h in c) print h":"c[h]}' "$PBS_NODEFILE" > "$CASE/mpi.hosts"
+echo "=== allocation ($PBS_NODEFILE) -> mpi.hosts ==="
+cat "$CASE/mpi.hosts"
+
+echo "=== START $(date) on $(hostname) ==="
+echo "node load at start: $(uptime | sed 's/.*load/load/')"
+./case.submit --no-batch
+echo "=== MODEL PHASE DONE $(date) ==="
+cat "$RUN/rpointer.atm" 2>/dev/null
+echo "=== END $(date) ==="
