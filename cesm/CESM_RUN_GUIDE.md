@@ -413,7 +413,9 @@ f19: `run_scripts/F_spinup_cam6clm5.csh`(서버 `~/run_scripts/`) · f09: `run_s
 ```tcsh
 set COMPSET = F2000climo
 set RES     = f19_f19            # or f09_f09_mg17
-# ... 골격 (NTASKS=48 필수: default 96) ...
+# ... 골격 (NTASKS=48 필수: default 96) ... case.setup 까지
+# hostfile: PBS 할당을 따르게 (이 줄이 없으면 어느 노드를 예약하든 rank는 climate01로 간다)
+sed -i "s|-hostfile /home/ydkoh/mvapich2.hosts|-hostfile $CCSMROOT/cases/$CNAME/mpi.hosts|" env_mach_specific.xml
 ./xmlchange STOP_N=2,STOP_OPTION=nyears,REST_N=1,REST_OPTION=nyears,CONTINUE_RUN=FALSE
 cat >> user_nl_cam << EOF
  npr_yz = 24,2,2,24
@@ -444,6 +446,21 @@ EOF
 - `check_input_data --download`는 climate00에서 인터넷 됨. `/data1/CESM2_INPUT` 일부 하위폴더는 소유자(타 사용자) 권한으로 쓰기 실패할 수 있음 → 그땐 `cesm/download_inputs.py`로 우회하거나 소유자에게 폴더 생성 요청.
 - 실측: f19 48PE **4.29 h/model-year**. f09는 측정 중(케이스 `F_2000climo_f09`, 예상 30–34 h/yr).
 - F2000climo `timeaddmonths` 에러가 났었다면 PE layout 불일치(96 default vs 48) 문제.
+
+### 8.1 climate02에서 돌리기 — 순서 그대로
+
+```
+1. ssh climate02 uptime                      # load가 0 근처인지. pbsnodes "free"는 못 믿는다 (§4.5)
+2. csh ~/run_scripts/F_f09_cam6clm5.csh      # 생성+빌드 (climate00에서; sed 줄이 들어 있는 스크립트)
+                                             #   f19면 F_spinup_cam6clm5.csh에 위 sed 한 줄을 추가해서 쓸 것
+3. PBS 스크립트에서 host=climate02 확인      # F_2000climo_f09.pbs 는 이미 climate02. 다른 케이스는 §4.2 템플릿 복사 후 CASE·host 수정
+4. qsub ~/run_scripts/F_2000climo_f09.pbs
+5. ssh climate02 pgrep -c -u ydkoh cesm.exe  # 48이어야 함. climate01에서 같은 명령이 0인지도 확인
+```
+
+- `F_f09_cam6clm5.csh` + `F_2000climo_f09.pbs` 조합은 이 순서로 climate02에서 실제 제출·실행된 것이다(2026-09-11).
+- 2년 넘게 돌리려면 §5 체인을 케이스명만 바꿔 복사. F 케이스는 `rpointer.atm`·`rpointer.lnd` 둘 다 생기며 연도 파싱은 `rpointer.lnd`로 하면 된다.
+- 실험 설계(SST 처방 변경, 강제장 섭동, branch)는 이 문서 범위 밖이다. branch는 `RUN_TYPE=branch, RUN_REFCASE, RUN_REFDATE`로 기준 케이스 restart에서 갈라진다(§9 CAM4 적설 실험이 그 예).
 
 ## 9. 레시피 D — CAM4 + CLM4 (`F_spinup.csh`)
 
