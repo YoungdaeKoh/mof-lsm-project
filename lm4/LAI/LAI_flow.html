@@ -1,0 +1,587 @@
+<title>LM4P 역학식생 LAI — 계산 흐름과 조정 가능한 계수</title>
+<style>
+  :root{
+    --ink:#1a1a1a; --mute:#5c5c5c; --rule:#c8c8c8; --soft:#f2f2f0;
+    --code:#f6f6f4; --accent:#1f5c8b; --warn:#8b2f1f;
+  }
+  *{box-sizing:border-box}
+  body{
+    font-family:-apple-system,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;
+    color:var(--ink); background:#fff; line-height:1.62;
+    font-size:10.5pt; margin:0; padding:0;
+  }
+  .page{max-width:182mm; margin:0 auto; padding:0 0 8mm 0}
+  h1{font-size:18pt; line-height:1.3; margin:0 0 2mm; letter-spacing:-.01em}
+  .sub{color:var(--mute); font-size:9.5pt; margin:0 0 7mm; padding-bottom:3mm;
+       border-bottom:1.5px solid var(--ink)}
+  h2{font-size:13pt; margin:9mm 0 3mm; padding-bottom:1.5mm;
+     border-bottom:1px solid var(--ink)}
+  h3{font-size:11pt; margin:6mm 0 2mm; color:var(--accent)}
+  p{margin:0 0 2.5mm}
+  code,.mono{font-family:'SF Mono',Menlo,Consolas,monospace; font-size:9pt}
+  code{background:var(--code); padding:.5mm 1mm; border-radius:2px}
+  pre{background:var(--code); border-left:2.5px solid var(--accent);
+      padding:3mm 4mm; font-family:'SF Mono',Menlo,Consolas,monospace;
+      font-size:8.6pt; line-height:1.5; overflow-x:auto; margin:2.5mm 0;
+      white-space:pre; border-radius:0 3px 3px 0}
+  table{border-collapse:collapse; width:100%; font-size:9pt; margin:3mm 0}
+  tr{page-break-inside:avoid}
+  td code{word-break:break-all}
+  th,td{border:.5px solid var(--rule); padding:1.6mm 2mm; text-align:left;
+        vertical-align:top}
+  th{background:var(--soft); font-weight:600}
+  td.n{font-family:'SF Mono',Menlo,monospace; font-size:8.2pt;
+       word-break:break-all; line-height:1.35}
+  th.stage,td.stage{white-space:nowrap}
+  table{table-layout:fixed}
+  .note{background:var(--soft); border-left:2.5px solid var(--ink);
+        padding:2.5mm 4mm; margin:3mm 0; font-size:9.5pt}
+  .key{background:#fff8e8; border-left:2.5px solid #b8860b;
+       padding:2.5mm 4mm; margin:3mm 0; font-size:9.5pt}
+  .warn{background:#fdf2f0; border-left:2.5px solid var(--warn);
+        padding:2.5mm 4mm; margin:3mm 0; font-size:9.5pt}
+  .brk{page-break-before:always}
+  svg{display:block; margin:4mm auto; max-width:100%}
+  ul,ol{margin:0 0 2.5mm; padding-left:6mm}
+  li{margin-bottom:1.2mm}
+  .cap{font-size:8.5pt; color:var(--mute); text-align:center; margin:1mm 0 4mm}
+  .chk{font-family:'SF Mono',Menlo,monospace; font-size:9pt; color:var(--mute)}
+  @page{size:A4; margin:16mm 14mm}
+  @media print{body{font-size:10pt} .page{max-width:none}}
+</style>
+
+<div class="page">
+
+<h1>LM4P 역학식생 LAI — 계산 흐름과 조정 가능한 계수</h1>
+<p class="sub">
+해수부 KIMST 1.7 · 1차년도 성능진단(식생) 대비 &nbsp;|&nbsp;
+소스 <code>/data2/ydkoh/lm4/esm4p5-lm4p-offline/src/lm4P/</code> &nbsp;|&nbsp;
+생산런 <code>lm4p_ctl_1979-2024</code> (1979–2023, 45년) &nbsp;|&nbsp;
+2026-09-11
+</p>
+
+<div class="key">
+<b>이 문서를 읽는 목적.</b> LAI가 관측보다 높거나 낮게 나올 때 <b>코드의 어느 줄, 어느 계수를 건드려야 하는지</b>
+찾기 위한 것이다. 결론부터: LAI는 예후변수가 아니고 <code>bl</code>(잎 탄소)에서 매 스텝 만들어지는 진단량이며,
+<code>bl</code>은 <b>nsc(비구조탄소 저장고)에서 인출</b>된다. 따라서 손잡이는 세 종류로만 나뉜다 —
+<b>천장</b>(<code>LMA·LAImax</code>), <b>인출속도</b>(<code>f_NSC·growth_resp</code>),
+<b>위상</b>(<code>tc_crit·gdd_crit</code>).
+</div>
+
+<h2>0. 한 장 요약 — 닫힌 되먹임 고리</h2>
+
+<p>가장 중요한 구조적 사실은 <b>LAI가 입력이면서 동시에 출력</b>이라는 점이다.
+LAI가 광합성을 키우고, 광합성이 탄소를 벌어 잎을 더 만들고, 그 잎이 다시 광합성을 키운다.
+이 폭주를 끊는 것이 <code>bl_max</code>(천장)와 <code>alpha_leaf</code>(턴오버)뿐이다.
+<b>LAI 편차를 볼 때 "어디서 과했나"가 아니라 "어느 제동이 덜 걸렸나"를 물어야 하는 이유가 이것이다.</b></p>
+
+<svg viewBox="0 0 740 592" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,'Apple SD Gothic Neo',sans-serif">
+  <defs>
+    <marker id="a" markerWidth="9" markerHeight="9" refX="7.5" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#1a1a1a"/>
+    </marker>
+    <marker id="ar" markerWidth="9" markerHeight="9" refX="7.5" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#8b2f1f"/>
+    </marker>
+  </defs>
+
+  <!-- forcing -->
+  <rect x="250" y="8" width="240" height="30" fill="#f2f2f0" stroke="#1a1a1a" stroke-width="1"/>
+  <text x="370" y="22" text-anchor="middle" font-size="11" font-weight="600">기상 강제장 (WFDE5)</text>
+  <text x="370" y="33" text-anchor="middle" font-size="8.5" fill="#5c5c5c">SW↓ · T · q · wind · precip</text>
+  <line x1="370" y1="38" x2="370" y2="58" stroke="#1a1a1a" marker-end="url(#a)"/>
+
+  <!-- photosynthesis -->
+  <rect x="195" y="58" width="350" height="52" fill="#fff" stroke="#1a1a1a" stroke-width="1.4"/>
+  <text x="205" y="73" font-size="11" font-weight="600">① 광합성</text>
+  <text x="537" y="73" text-anchor="end" font-size="8" fill="#1f5c8b" font-family="monospace">vegn_photosynthesis.F90</text>
+  <text x="205" y="87" font-size="8.6" font-family="monospace">:298 gs_Leuning(... cohort%lai ...)</text>
+  <text x="205" y="99" font-size="8.6" font-family="monospace">:380 stomatal_cond *= lai  → :373 An_op, An_cl</text>
+  <line x1="370" y1="110" x2="370" y2="130" stroke="#1a1a1a" marker-end="url(#a)"/>
+
+  <!-- GPP -->
+  <rect x="195" y="130" width="350" height="40" fill="#fff" stroke="#1a1a1a" stroke-width="1.4"/>
+  <text x="205" y="145" font-size="11" font-weight="600">② GPP</text>
+  <text x="537" y="145" text-anchor="end" font-size="8" fill="#1f5c8b" font-family="monospace">vegn_dynamics.F90</text>
+  <text x="205" y="160" font-size="8.6" font-family="monospace">:1049 gpp = (An_op − An_cl) · mol_C · <tspan font-weight="700">leafarea</tspan></text>
+
+  <line x1="370" y1="170" x2="370" y2="190" stroke="#1a1a1a" marker-end="url(#a)"/>
+
+  <!-- carbon gain -->
+  <rect x="195" y="190" width="350" height="40" fill="#fff" stroke="#1a1a1a" stroke-width="1"/>
+  <text x="205" y="205" font-size="11" font-weight="600">③ 탄소수지 <tspan font-size="8" fill="#5c5c5c">(빠른 스텝)</tspan></text>
+  <text x="205" y="220" font-size="8.6" font-family="monospace">:1060 carbon_gain += (gpp − resp)·dt_fast</text>
+
+  <line x1="370" y1="230" x2="370" y2="252" stroke="#1a1a1a" marker-end="url(#a)"/>
+  <text x="378" y="245" font-size="8.5" fill="#8b2f1f">하루 1회 ← 여기서 시간척도가 바뀐다</text>
+
+  <!-- nsc -->
+  <rect x="195" y="252" width="350" height="52" fill="#fff8e8" stroke="#b8860b" stroke-width="1.6"/>
+  <text x="205" y="267" font-size="11" font-weight="600">④ nsc 저장고</text>
+  <text x="537" y="267" text-anchor="end" font-size="8" fill="#1f5c8b" font-family="monospace">vegn_growth :1310</text>
+  <text x="205" y="281" font-size="8.6" font-family="monospace">:1331 nsc += carbon_gain</text>
+  <text x="205" y="294" font-size="8.6" font-family="monospace" fill="#8b2f1f">:1336 음수면 bl·br·bsw에서 차입 (기아)</text>
+
+  <line x1="370" y1="304" x2="370" y2="324" stroke="#1a1a1a" marker-end="url(#a)"/>
+
+  <!-- allocation -->
+  <rect x="100" y="324" width="540" height="96" fill="#fff" stroke="#1a1a1a" stroke-width="1.4"/>
+  <text x="110" y="339" font-size="11" font-weight="600">⑤ 배분</text>
+  <text x="632" y="339" text-anchor="end" font-size="8" fill="#1f5c8b" font-family="monospace">biomass_allocation_ppa :1484</text>
+
+  <rect x="112" y="348" width="250" height="62" fill="#f2f2f0" stroke="#c8c8c8"/>
+  <text x="120" y="361" font-size="9" font-weight="600">잎·뿌리 &nbsp;G_LFR</text>
+  <text x="120" y="374" font-size="8.3" font-family="monospace">:1654 f_NSC·nsc/(1+GR)</text>
+  <text x="120" y="386" font-size="8.3" font-family="monospace" fill="#8b2f1f">:1658 cap ≤ bl_max − bl</text>
+  <text x="120" y="398" font-size="8.3" font-family="monospace">:1662 deltaBL = split(bl_max,br_max)</text>
+
+  <rect x="378" y="348" width="250" height="62" fill="#f2f2f0" stroke="#c8c8c8"/>
+  <text x="386" y="361" font-size="9" font-weight="600">목재·씨앗 &nbsp;G_WF</text>
+  <text x="386" y="374" font-size="8.3" font-family="monospace">:1639 f_WF·(nsc − nsc_target)</text>
+  <text x="386" y="388" font-size="8.3" font-family="monospace" fill="#5c5c5c">초과분만 쓴다</text>
+  <text x="386" y="401" font-size="8.3" font-family="monospace" fill="#5c5c5c">→ 잎이 우선권을 가진다</text>
+
+  <line x1="237" y1="420" x2="237" y2="444" stroke="#1a1a1a" marker-end="url(#a)"/>
+
+  <!-- bl -->
+  <rect x="112" y="444" width="250" height="36" fill="#fff" stroke="#1a1a1a" stroke-width="1.4"/>
+  <text x="120" y="458" font-size="10.5" font-weight="600">⑥ 예후변수 bl</text>
+  <text x="120" y="472" font-size="8.6" font-family="monospace">:1710 bl += deltaBL</text>
+
+  <line x1="237" y1="480" x2="237" y2="504" stroke="#1a1a1a" marker-end="url(#a)"/>
+
+  <!-- LAI -->
+  <rect x="82" y="504" width="310" height="44" fill="#fff8e8" stroke="#b8860b" stroke-width="2"/>
+  <text x="92" y="519" font-size="11" font-weight="700">⑦ LAI (진단량)</text>
+  <text x="382" y="519" text-anchor="end" font-size="8" fill="#1f5c8b" font-family="monospace">vegn_cohort.F90:567</text>
+  <text x="92" y="537" font-size="9.4" font-family="monospace" font-weight="600">lai = (bl/LMA) / (crownarea·(1−gap))</text>
+
+  <!-- feedback arrow: routed far right so it never crosses a box -->
+  <path d="M237,548 L237,574 L700,574 L700,84 L548,84"
+        fill="none" stroke="#8b2f1f" stroke-width="1.6" stroke-dasharray="5,3"
+        marker-end="url(#ar)"/>
+  <text x="694" y="300" font-size="9.5" fill="#8b2f1f" font-weight="600"
+        text-anchor="middle" transform="rotate(-90 694 300)">되먹임 &nbsp;LAI↑ → GPP↑ → nsc↑ → bl↑</text>
+
+  <!-- brakes -->
+  <rect x="412" y="444" width="228" height="96" fill="#fdf2f0" stroke="#8b2f1f" stroke-width="1"/>
+  <text x="422" y="459" font-size="10" font-weight="600" fill="#8b2f1f">제동 장치 (폭주를 끊는 것)</text>
+  <text x="422" y="474" font-size="8.4" font-family="monospace">천장 bl_max = LMA·LAImax</text>
+  <text x="422" y="486" font-size="8.4" font-family="monospace">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;·crownarea·(1−gap)</text>
+  <text x="422" y="500" font-size="8.4" font-family="monospace">턴오버 :1075 bl·alpha_leaf·dt</text>
+  <text x="422" y="514" font-size="8.4" font-family="monospace">낙엽 :2188 bl −= dead_leaves</text>
+  <text x="422" y="528" font-size="8.4" font-family="monospace">한계잎 :1656 An≤0 → G_LFR=0</text>
+</svg>
+<p class="cap">그림 1. LAI 계산 고리. 실선은 탄소 흐름, 점선은 LAI가 광합성으로 되돌아가는 되먹임.
+행번호는 모두 생산런 소스에서 검증한 값이다.</p>
+
+<div class="note">
+<b>왜 "LAI를 직접 고친다"가 불가능한가.</b> LAI는 상태변수가 아니라 <code>bl/LMA</code>로 매번 계산되는 값이고,
+restart 파일에도 저장되지 않는다(<code>bl</code>만 저장). 그래서 LAI를 바꾸려면 반드시
+<b>① <code>bl</code>을 바꾸거나 ② <code>LMA</code>를 바꾸거나</b> 둘 중 하나다. 전자는 탄소수지 전체를 건드리는 일이고,
+후자는 계수 하나를 바꾸는 일이다 — <b>Kim et al.(2019)이 Q10에 한 것과 같은 급의 개입은 후자에 있다.</b>
+</div>
+
+<h2>1. 단계별 코드 추적</h2>
+
+<table>
+<tr><th style="width:16%">단계</th><th style="width:26%">파일 : 행</th><th style="width:32%">식 / 동작</th><th style="width:26%">들어오는 값 → 나가는 값</th></tr>
+<tr><td>① 기공전도도</td><td class="n">vegn_photosynthesis.F90:298,380</td>
+    <td><code>stomatal_cond *= cohort%lai</code></td>
+    <td>PAR, Tv, VPD, <b>lai</b> → gs</td></tr>
+<tr><td>① 동화율</td><td class="n">vegn_photosynthesis.F90:373-374</td>
+    <td><code>An_op = psyn·spy</code>, <code>An_cl = resp·spy</code></td>
+    <td>gs, CO₂ → An_op, An_cl</td></tr>
+<tr><td>② GPP</td><td class="n">vegn_dynamics.F90:1049</td>
+    <td><code>gpp = (An_op−An_cl)·mol_C·leafarea</code></td>
+    <td>An, <b>leafarea</b> → gpp</td></tr>
+<tr><td>③ 누적</td><td class="n">vegn_dynamics.F90:1060</td>
+    <td><code>carbon_gain += (gpp−resp)·dt_fast_yr</code></td>
+    <td>gpp, resp → carbon_gain</td></tr>
+<tr><td>③ 잎 턴오버</td><td class="n">vegn_dynamics.F90:1075,1080</td>
+    <td><code>deltaBL = bl·alpha_leaf·dt</code> → <code>bl −= deltaBL</code></td>
+    <td>bl, alpha_leaf → bl (감소)</td></tr>
+<tr><td>④ 저장고 입금</td><td class="n">vegn_dynamics.F90:1331</td>
+    <td><code>nsc += carbon_gain</code></td>
+    <td>carbon_gain → nsc</td></tr>
+<tr><td>④ 기아 차입</td><td class="n">vegn_dynamics.F90:1336-1346</td>
+    <td><code>bl = (1−f)·bl</code> 등, 조직에서 빌림</td>
+    <td>nsc&lt;0 → bl 직접 감소</td></tr>
+<tr><td>⑤ nsc 목표</td><td class="n">vegn_dynamics.F90:1546</td>
+    <td><code>nsc_target = NSC2targetbl·LMA·LAImax·crownarea·(1−gap)</code></td>
+    <td>(생산런 설정 <code>from-canopy-blmax</code>)</td></tr>
+<tr><td>⑤ 잎·뿌리 예산</td><td class="n">vegn_dynamics.F90:1654</td>
+    <td><code>G_LFR = f_NSC·nsc/(1+growth_resp)</code></td>
+    <td>nsc → G_LFR &nbsp;<b>(Weng 2015 eq. A7)</b></td></tr>
+<tr><td>⑤ 천장 적용</td><td class="n">vegn_dynamics.F90:1658</td>
+    <td><code>G_LFR = min(bl_max+br_max−bl−br, G_LFR)</code></td>
+    <td>bl_max → G_LFR 상한</td></tr>
+<tr><td>⑤ 한계잎 판정</td><td class="n">vegn_dynamics.F90:1656</td>
+    <td><code>bl&gt;0 .and. An_newleaf_daily≤0</code> → <code>G_LFR=0</code></td>
+    <td>그늘에서 잎 추가를 멈춘다</td></tr>
+<tr><td>⑤ 잎/뿌리 분배</td><td class="n">vegn_dynamics.F90:1662-1665</td>
+    <td><code>deltaBL = (G_LFR·bl_max + bl_max·br − br_max·bl)/(bl_max+br_max)</code></td>
+    <td>G_LFR → deltaBL, deltaBR</td></tr>
+<tr><td>⑥ <b>bl 갱신</b></td><td class="n">vegn_dynamics.F90:1710</td>
+    <td><code>cc%bl = cc%bl + deltaBL</code></td>
+    <td>deltaBL → <b>bl (예후변수)</b></td></tr>
+<tr><td>⑥ 출금</td><td class="n">vegn_dynamics.F90:1716</td>
+    <td><code>nsc −= (ΔBL+ΔBR+…)·(1+growth_resp)</code></td>
+    <td>성장호흡 33.3% 손실 포함</td></tr>
+<tr><td>⑦ <b>LAI</b></td><td class="n">vegn_cohort.F90:567-578</td>
+    <td><code>area = bl/LMA</code> (하층은 <code>bl/(0.5·LMA)</code>)</td>
+    <td>bl, LMA → leafarea</td></tr>
+<tr><td>⑦ LAI 확정</td><td class="n">vegn_dynamics.F90:2192-2193</td>
+    <td><code>lai = leaf_area_from_biomass(...)/(crownarea·(1−gap))</code></td>
+    <td>leafarea → <b>lai</b></td></tr>
+<tr><td>천장(목본)</td><td class="n">vegn_cohort.F90:766-772<br>vegn_dynamics.F90:1839-1851</td>
+    <td><code>BL_c = LMA·LAImax·crownarea·(1−gap)</code><br>
+        <code>bl_max = BL_u + min(topyear/5,1)·(BL_c−BL_u)</code></td>
+    <td>상층 진입 후 5년에 걸쳐 천장 상승</td></tr>
+<tr><td>천장(초본)</td><td class="n">vegn_dynamics.F90:2119</td>
+    <td><code>bl_max = LMA·laimax·crownarea·(1−gap)</code></td>
+    <td>개엽 시 매년 재설정</td></tr>
+<tr><td>위상 트리거</td><td class="n">vegn_dynamics.F90:2109-2135</td>
+    <td><code>gdd&gt;gdd_crit .and. tc_pheno≥tc_crit .and. .not.drought</code></td>
+    <td>→ LEAF_ON / LEAF_OFF</td></tr>
+<tr><td>낙엽</td><td class="n">vegn_dynamics.F90:2186-2188</td>
+    <td><code>bl −= dead_leaves_C</code>, 50%는 nsc로 회수</td>
+    <td>leaf_C_retrans_frac=0.5</td></tr>
+</table>
+
+<h3>호출 주기 — 시간척도가 섞여 있다</h3>
+<pre>vegetation.F90:2198   vegn_carbon_int_ppa    빠른 스텝(30분)   광합성·호흡·턴오버 누적
+vegetation.F90:2770   vegn_growth            <b>하루 1회</b>         nsc 입금 → 배분 → bl 갱신
+vegetation.F90:2774   vegn_starvation_ppa    하루 1회          기아 사망
+vegetation.F90:2776   vegn_phenology_ppa     하루 1회          개엽·낙엽 판정
+vegetation.F90:2755   update_fuel            한 달 1회         연료량
+vegetation.F90:2791   vegn_disturbance       1년 1회           교란·화재</pre>
+<p><b>배분이 하루 1회라는 점이 중요하다.</b> <code>f_NSC</code>의 단위가 <code>1/day</code>인 이유이고,
+LAI가 하루 단위로만 계단식으로 변할 수 있다는 뜻이다. 30분 스텝에서 LAI는 고정이다.</p>
+
+<h2 class="brk">2. 조정 가능한 계수 — 손잡이 목록</h2>
+
+<div class="warn">
+<b>고치는 자리는 소스가 아니라 <code>field_table</code>이다.</b> 종별 파라미터는 FMS field manager로
+읽으므로(<code>vegn_data.F90:1227</code> <code>get_spdata_real</code> → <code>fm_util_get_real</code>),
+런 디렉토리의 <code>field_table</code>(82 KB 텍스트)을 고치면 <b>재컴파일 없이</b> 바뀐다.
+<code>vegn_data.F90</code>의 값은 field_table에 항목이 없을 때만 쓰이는 <b>최후 기본값</b>이다.
+<pre style="margin:2mm 0 0">"species", "land_mod", "picea"
+    LMA =   0.1          &lt;- 여기</pre>
+</div>
+
+<p><b>아래 "기본값"은 소스 기본값이고, 생산런이 실제로 쓴 값은 그 오른쪽이다.</b>
+둘이 다르므로 <b>튜닝의 출발점은 반드시 오른쪽 열</b>이어야 한다.
+"LAI 방향"은 그 값을 <b>키웠을 때</b> LAI가 가는 쪽이다.</p>
+
+<table>
+<tr><th style="width:22%">종 (field_table)</th><th style="width:13%">LMA<br>kgC/m²</th>
+    <th style="width:12%">LAImax</th><th style="width:14%">alpha_leaf</th>
+    <th style="width:39%">대응 PFT · CLM5 <code>slatop</code> 환산 비교</th></tr>
+<tr><td><code>prioria</code></td><td class="n">0.035</td><td class="n">6.0</td><td class="n">0.5</td>
+    <td>열대 상록활엽. SLA 0.029 vs CLM5 0.019 — <b>LM4P 잎이 1.5× 얇다</b></td></tr>
+<tr><td><code>picea</code></td><td class="n">0.100</td><td class="n">5.0</td><td class="n">0.12</td>
+    <td>한대 상록침엽. SLA 0.010 vs CLM5 0.010 — <b>일치</b></td></tr>
+<tr><td><code>larix</code></td><td class="n">0.076</td><td class="n">5.0</td><td class="n">0.12</td>
+    <td>한대 낙엽침엽. <code>tc_crit</code>=278.1 K, <code>gdd_crit</code>=180</td></tr>
+<tr><td><code>acer</code></td><td class="n">0.038</td><td class="n">3.5</td><td class="n">0.12</td>
+    <td>온대 낙엽활엽. SLA 0.026 vs CLM5 0.031 — 근접</td></tr>
+<tr><td><code>C3/C4 grass</code></td><td class="n">0.0266</td><td class="n">2.5</td><td class="n">2.0</td>
+    <td>초본. SLA 0.038 vs CLM5 0.040 — 근접. C3만 <code>tc_crit</code>·<code>gdd_crit</code></td></tr>
+</table>
+
+<div class="key">
+<b>★ 천장에 닿은 격자에서 LMA는 LAI에 아무 영향이 없다 (대수적으로 정확히 소거).</b>
+<code>bl = bl_max</code>를 대입하면
+<code>LAI = (LMA·LAImax·crownarea·(1−gap)) / (LMA·crownarea·(1−gap)) = LAImax</code>.
+하층도 같다(<code>LAImax·understory_lai_factor/LMA_understory_factor</code> = 3.0×0.25/0.5 = 1.5).
+→ <b>LMA가 듣는 곳은 탄소가 모자라 천장에 못 닿은 격자뿐이다.</b> 포화 격자에는 <code>LAImax</code>만 듣는다.
+어느 격자가 어느 쪽인지 알려면 <code>bl_max</code>를 출력해야 한다(§4의 4번).
+</div>
+
+<p>아래는 소스 기본값 기준의 일반 설명이다.</p>
+
+<table>
+<tr><th style="width:21%">계수</th><th style="width:9%">기본값</th><th style="width:10%">선언</th>
+    <th style="width:9%">LAI 방향</th><th style="width:51%">작동 방식과 위험</th></tr>
+<tr><td><code>LMA</code></td><td class="n">0.036<br>kgC/m²</td><td class="n">:220</td>
+    <td><b>↓ 감소</b></td>
+    <td><b>1순위 손잡이.</b> <code>LAI=bl/LMA</code>의 분모에 직접 들어간다. 동시에 <code>bl_max</code>의 분자에도
+    들어가므로 천장도 같이 오른다 — 두 효과가 부분적으로 상쇄되어 순효과는 <b>되먹임 평형에서 결정</b>된다.
+    관측(TRY leaf economics spectrum)에서 한 자리수 이상 변동하는 양인데 코드에선 종별 상수다.</td></tr>
+<tr><td><code>LAImax</code></td><td class="n">3.0</td><td class="n">:321</td>
+    <td>↑ 증가</td>
+    <td><b>천장 그 자체.</b> <code>bl_max</code>에만 들어가고 LAI 식에는 없다. 따라서
+    <b>포화 지역(열대림)에만 듣고 비포화 지역(한대·건조)에는 거의 안 듣는다.</b>
+    편차가 포화 지역에 몰렸는지부터 확인해야 이 손잡이가 의미 있다.</td></tr>
+<tr><td><code>f_NSC</code></td><td class="n">0.1 /day</td><td class="n">:323</td>
+    <td>↑ (속도)</td>
+    <td>nsc에서 잎·뿌리로 하루에 인출하는 비율. <b>Weng et al. 2015 eq. A7.</b>
+    정상상태 LAI는 안 바뀌고 <b>개엽 속도·봄철 상승 기울기</b>가 바뀐다 → 위상 오차용.</td></tr>
+<tr><td><code>growth_resp</code></td><td class="n">0.333</td><td class="n">:333</td>
+    <td>↓ 감소</td>
+    <td>성장에 쓰는 탄소의 33.3%를 호흡으로 버린다. <code>G_LFR</code>의 분모이자 출금(:1716)의 배수.
+    <b>전 탄소풀에 동시에 영향</b>을 주므로 LAI만 고치려고 건드리면 목재·토양탄소가 같이 틀어진다.</td></tr>
+<tr><td><code>alpha_leaf</code></td><td class="n">1.0 /yr</td><td class="n">:208</td>
+    <td>↓ 감소</td>
+    <td>잎 턴오버율(:1075). 상록수의 정상상태 LAI를 직접 정한다.
+    <b>상록/낙엽 중 어디서 편차가 나는지로 이 손잡이와 <code>tc_crit</code> 중 하나를 고른다.</b></td></tr>
+<tr><td><code>tc_crit</code></td><td class="n">283.16 K</td><td class="n">:261</td>
+    <td>위상</td>
+    <td>낙엽 임계온도. 낮추면 생장계절이 길어져 <b>가을 LAI가 늦게 떨어진다.</b></td></tr>
+<tr><td><code>gdd_crit</code></td><td class="n">360.0</td><td class="n">:262</td>
+    <td>위상</td>
+    <td>개엽 적산온도. 낮추면 <b>봄 개엽이 빨라진다.</b>
+    고위도 융설 위상 문제(§13.58)와 직결되는 후보.</td></tr>
+<tr><td><code>internal_gap_frac</code></td><td class="n">0.1</td><td class="n">:254</td>
+    <td>↑ 증가</td>
+    <td><code>bl_max</code>와 LAI 식 <b>양쪽</b>에 <code>(1−gap)</code>로 들어간다. 순효과 해석이 까다로워 1순위로는 부적합.</td></tr>
+<tr><td><code>understory_lai_factor</code></td><td class="n">0.25</td><td class="n">:322</td>
+    <td>↑ 증가</td>
+    <td>하층 코호트의 천장을 상층의 25%로 제한. <b>다층 캐노피 총 LAI</b>를 바꾼다.</td></tr>
+<tr><td><code>LMA_understory_factor</code></td><td class="n">0.5</td><td class="n">:221</td>
+    <td>↑ 증가</td>
+    <td>하층 잎은 절반 두께로 취급(:573) → 같은 탄소로 두 배 면적. 음지적응의 표현.</td></tr>
+<tr><td><code>NSC2targetbl</code></td><td class="n">4.0</td><td class="n">:336</td>
+    <td>간접</td>
+    <td>nsc 목표. 키우면 저장고를 더 채워 <b>목재로 갈 탄소가 줄고</b> 잎 쪽 여유가 늘어난다(:1639 초과분 정의).</td></tr>
+<tr><td><code>deltaLAI_max</code></td><td class="n">1.0<br>m²/m²/day</td><td class="n">dynamics:71</td>
+    <td>속도 상한</td>
+    <td>하루 LAI 증가 상한. <b>단 <code>use_light_saber=.TRUE.</code>일 때만 적용</b>(:1690).</td></tr>
+</table>
+
+<div class="warn">
+<b>생산런에서 꺼져 있는 것.</b> <code>use_light_saber</code> 기본값은 <code>.FALSE.</code>(:325)이므로
+한계잎 판정(:1656)과 <code>deltaLAI_max</code>(:1690)가 <b>작동하지 않는다.</b>
+대신 <code>:1658</code>의 단순 천장만 걸린다. 즉 현재 런의 LAI는
+<b>"빛이 모자라도 천장까지는 잎을 만든다"</b>는 모드다 — 그늘 과대 LAI의 구조적 후보.
+켜려면 <code>&amp;vegn_data_nml use_light_saber=.TRUE.</code>, 단 <code>light_saber_Hmin</code>(:328) 동반 확인.
+</div>
+
+<h2 class="brk">3. Kim et al.(2019) 방식을 LAI에 적용하면</h2>
+
+<p>참고논문 <b>05</b>(Kim, Lee, Seo 2019, <i>J. Climate</i>)가 한 일은 구조 변경이 아니다:</p>
+<pre>기존:  Q10 = 상수 (전지구 단일값)
+개선:  Q10 = f(토양온도, 토양수분)  · 식생형별 다중회귀로 계수 결정
+검증:  전지구 육상 탄소플럭스 개선</pre>
+
+<p>LM4P의 LAI 사슬에서 <b>같은 성격의 상수</b>, 즉 "관측에선 변하는데 코드에선 상수인 것"은 다음 둘이다.</p>
+
+<h3>후보 A — <code>LMA</code>를 기후의 함수로 (크기 오차용)</h3>
+<ul>
+<li><b>왜 LMA인가</b>: LAI 식의 분모에 직접 들어가는 유일한 상수이고(:570), 관측 DB(TRY)에
+  <b>종·기후대별 변동이 잘 정리되어 있다</b>. Q10과 성격이 같다 — 물리적으로 변하는 양을 상수로 둔 것.</li>
+<li><b>구현 지점</b>: <code>vegn_cohort.F90:567-578</code>의 <code>spdata(species)%LMA</code>를
+  코호트 단위 변수로 바꾸고, <code>vegn_data.F90:220</code>의 상수는 기본값으로 남긴다.</li>
+<li><b>주의</b>: <code>bl_max</code>(<code>vegn_cohort.F90:766</code>)에도 LMA가 들어가므로
+  <b>두 곳을 동시에 바꿔야 일관</b>된다. 한쪽만 바꾸면 천장과 진단량이 어긋난다.</li>
+</ul>
+
+<h3>후보 B — <code>gdd_crit</code>·<code>tc_crit</code>을 지역화 (위상 오차용)</h3>
+<ul>
+<li><b>왜</b>: 이미 §13.58에서 <b>북극 하천 융설 위상이 한 달 이르다</b>는 편차를 확인했다.
+  총량은 0.89로 맞는데 위상이 틀린 것은 <b>크기 손잡이로는 못 고치는 오차</b>다.</li>
+<li><b>구현 지점</b>: <code>vegn_dynamics.F90:2109-2135</code>의 트리거.
+  현재 종별 상수 두 개(<code>gdd_crit=360</code>, <code>tc_crit=283.16K</code>)가 전지구 동일하게 적용된다.</li>
+<li><b>관측 대조</b>: GIMMS LAI4g(이미 grid-verify 통과, §13.23)의 <b>개엽일(SOS)</b>을 뽑아
+  모델 <code>gdd</code> 누적과 회귀 → Kim et al.과 같은 구조의 지역화.</li>
+</ul>
+
+<div class="key">
+<b>어느 쪽을 먼저 할지는 편차의 성격이 정한다.</b> 먼저 확인할 것 — LAI 편차가
+<b>(a) 연평균 크기</b>에 있나 <b>(b) 계절 위상</b>에 있나. (a)면 후보 A, (b)면 후보 B다.
+§13.41(LAI 편차의 공간구조)과 §13.26(아북극 과소편차)이 이미 그 재료를 갖고 있으므로,
+<b>새 실험 없이 기존 출력으로 판정 가능하다.</b>
+</div>
+
+<h2>4. 편차를 만났을 때의 점검 순서</h2>
+
+<p>LAI가 관측과 안 맞을 때 계수를 바로 건드리지 말고 아래 순서로 범인을 좁힌다.
+각 단계는 이미 있는 출력으로 답할 수 있다.</p>
+
+<table>
+<tr><th style="width:5%">#</th><th style="width:40%">확인</th><th style="width:30%">갈라지는 결론</th><th style="width:25%">참조</th></tr>
+<tr><td>1</td><td>비교 대상이 <b>같은 정의</b>인가 — native <code>lai</code> vs CMIP <code>lai</code></td>
+    <td>마스크만으로 9% 차이. 여기서 틀리면 아래 전부 무의미</td><td class="n">§13.30</td></tr>
+<tr><td>2</td><td><b>표류가 아닌가</b> — spin-up 잔여 추세인지</td>
+    <td>1981–89 상승은 표류였다. 후반부만 써야 한다</td><td class="n">§13.40, §13.46</td></tr>
+<tr><td>3</td><td>편차가 <b>크기인가 위상인가</b> (연평균 vs 계절순환)</td>
+    <td>크기 → 후보 A / 위상 → 후보 B</td><td class="n">§13.41</td></tr>
+<tr><td>4</td><td><b>포화 지역인가</b> — <code>lai</code>가 <code>LAImax</code>에 붙어 있나</td>
+    <td>붙어 있으면 <code>LAImax</code>가 듣고, 아니면 안 듣는다</td><td class="n">진단 필요</td></tr>
+<tr><td>5</td><td><b>상록인가 낙엽인가</b> (코호트 <code>species</code>·<code>phent</code> 분해)</td>
+    <td>상록 → <code>alpha_leaf</code> / 낙엽 → <code>tc_crit</code></td><td class="n">§13.24 PFT분해</td></tr>
+<tr><td>6</td><td><code>nsc</code>가 <b>제한 요인인가</b> — <code>nsc</code> vs <code>nsc_target</code></td>
+    <td>nsc가 늘 목표 미달이면 탄소공급(광합성) 쪽 문제다</td><td class="n">진단 필요</td></tr>
+</table>
+
+<p class="chk">4·6번은 <code>diag_table</code>에 <code>bl_max</code>(vegetation.F90:1025에 이미 등록됨)와
+<code>nsc</code>를 추가하면 바로 답이 나온다.</p>
+
+<h2>5. 참고문헌 (<code>reference/</code>)</h2>
+<table>
+<tr><th style="width:6%">#</th><th style="width:34%">문헌</th><th style="width:60%">이 사슬에서 쓰이는 곳</th></tr>
+<tr><td>01</td><td>Weng et al. (2015) <i>Biogeosciences</i> 12, 2655–2694 — PPA / BiomeE</td>
+    <td><b>핵심.</b> <code>f_NSC</code>가 <b>eq. A7</b>, <code>f_WF</code>가 <b>eq. A12</b>로
+    소스 주석(:323-324)에 명시. 코호트 배분·PPA 층화의 원전</td></tr>
+<tr><td>02</td><td>Weng et al. (2019) <i>Biogeosciences</i> — 광 경쟁</td>
+    <td>상층/하층 천장 차이(<code>understory_lai_factor</code>), 한계잎 판정의 배경</td></tr>
+<tr><td>03</td><td>Shevliakova et al. (2024) <i>JAMES</i> — LM4.1 모델 기술</td>
+    <td>우리가 돌리는 모델의 공식 기술문서. 인용 시 기준</td></tr>
+<tr><td>04</td><td>CRESCENDO (2025) <i>Biogeosciences</i> — LAI 평가 Part 2</td>
+    <td>다중 모델 LAI 편차의 통상 크기. <b>우리 편차가 특이한지 판단하는 기준선</b></td></tr>
+<tr><td>05</td><td>Kim, Lee &amp; Seo (2019) <i>J. Climate</i> 32 — Q10 재매개화</td>
+    <td><b>방법론 템플릿.</b> 상수 → 관측회귀 함수로 바꾸고 플럭스 개선을 보이는 구성</td></tr>
+<tr><td>06</td><td>Medlyn et al. (2002) <i>Plant Cell Environ</i> 25, 1167–1179</td>
+    <td>광합성 파라미터 온도반응 — <code>vegn_photosynthesis.F90:557</code></td></tr>
+<tr><td>07</td><td>Hoch, Richter &amp; Körner (2003) <i>Plant Cell Environ</i> 26, 1067–1081</td>
+    <td><code>NSC2targetbsw=0.12</code>의 실측 근거 — <code>vegn_data.F90:339</code></td></tr>
+<tr><td>08</td><td>Wilson, Baldocchi &amp; Hanson (2001) <i>Plant Cell Environ</i> 24, 571–583</td>
+    <td>잎 나이와 광합성능 — <code>vegn_photosynthesis.F90:531,571,595</code></td></tr>
+<tr><td>09</td><td>Bernacchi et al. (2001) <i>Plant Cell Environ</i> 24, 253–259</td>
+    <td>Rubisco 온도함수 — <code>vegn_photosynthesis.F90:557</code></td></tr>
+<tr><td>10</td><td>Paulsen &amp; Körner (2014) <i>Alpine Botany</i> 124, 1–12</td>
+    <td>수목한계선 모델 — <code>vegn_data.F90:538</code></td></tr>
+<tr><td>11</td><td>Martínez Cano et al. (2020) <i>Glob Change Biol</i> 26, 4478–4494</td>
+    <td>PPA 알로메트리·수관 경쟁. 03의 Fig 2 설명이 인용</td></tr>
+</table>
+
+<p><b>미확보 2편</b> (둘 다 LAI 사슬의 주변부라 인용만으로 충분):</p>
+<ul>
+<li><b>Farquhar &amp; von Caemmerer (1982)</b> — C3 광합성. <b>단행본 章</b>(Encyclopedia of Plant
+Physiology 12B). 같은 내용이 06·09에 더 최신 형태로 있다. <code>vegn_photosynthesis.F90:524,554</code></li>
+<li><b>Strigul et al. (2008)</b> <i>Ecological Monographs</i> 78, 523–545 — <b>PPA 이론 원전.</b>
+<code>vegn_tile.F90:694-841</code>의 층 배정이 이 논문의 근사. 내용은 01·11에 재서술돼 있다</li>
+</ul>
+
+<h2 class="brk">6. 논문 그림 ↔ 코드 대응</h2>
+
+<p>참고문헌 <b>03</b>(Shevliakova et al. 2024, LM4.1 공식 기술문서)의 Figure 1·2가 이 모델의
+공식 모식도다. 그림의 각 요소가 코드 어디인지 아래에 붙인다. <b>논문 그림을 보며 코드를
+짚을 수 있게 하는 것이 목적</b>이다.</p>
+
+<h3>Figure 2a — 코호트 구조와 PPA 층 (LAI의 본체)</h3>
+
+<p>논문 본문(p.5)의 서술이 코드와 그대로 맞는다:
+<i>"the tallest cohorts form the upper canopy layer, then the next tallest cohorts fill up the
+space in the second layer, and so on... the number of vegetation layers in each LM4.1 tile is an
+<b>emergent dynamic property</b>"</i></p>
+
+<svg viewBox="0 0 720 330" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,'Apple SD Gothic Neo',sans-serif">
+  <defs><marker id="b" markerWidth="8" markerHeight="8" refX="6.5" refY="3" orient="auto">
+    <path d="M0,0 L0,6 L7,3 z" fill="#1a1a1a"/></marker></defs>
+
+  <text x="10" y="16" font-size="10.5" font-weight="600">타일 하나 (수관면적 합 = 1 이 되면 층이 닫힌다)</text>
+
+  <!-- layer 1 -->
+  <rect x="10" y="26" width="420" height="62" fill="#e8f3e4" stroke="#1a1a1a" stroke-width="1.2"/>
+  <text x="18" y="41" font-size="10" font-weight="600">층 1 (상층)</text>
+  <circle cx="70" cy="66" r="17" fill="#2f7a3f" opacity=".75"/>
+  <circle cx="112" cy="66" r="17" fill="#2f7a3f" opacity=".75"/>
+  <circle cx="154" cy="66" r="17" fill="#2f7a3f" opacity=".75"/>
+  <circle cx="196" cy="66" r="17" fill="#4a9a55" opacity=".75"/>
+  <circle cx="238" cy="66" r="17" fill="#4a9a55" opacity=".75"/>
+  <rect x="262" cy="0" y="49" width="34" height="34" fill="#b8860b" opacity=".35" stroke="#b8860b" stroke-dasharray="3,2"/>
+  <text x="279" y="70" font-size="8.5" text-anchor="middle">쪼갬</text>
+  <text x="310" y="58" font-size="8.4" font-family="monospace">frac += nindivs·crownarea</text>
+  <text x="310" y="70" font-size="8.4" font-family="monospace">frac=1 → L=L+1</text>
+  <text x="310" y="82" font-size="8.2" font-family="monospace" fill="#1f5c8b">vegn_tile.F90:800,810</text>
+
+  <!-- layer 2 -->
+  <rect x="10" y="94" width="420" height="52" fill="#f2f6f0" stroke="#1a1a1a" stroke-width="1"/>
+  <text x="18" y="109" font-size="10" font-weight="600">층 2 (하층)</text>
+  <circle cx="80" cy="126" r="11" fill="#7ab77f" opacity=".8"/>
+  <circle cx="110" cy="126" r="11" fill="#7ab77f" opacity=".8"/>
+  <circle cx="140" cy="126" r="11" fill="#7ab77f" opacity=".8"/>
+  <text x="170" y="118" font-size="8.4" font-family="monospace">천장 ×0.25, 잎두께 ×0.5</text>
+  <text x="170" y="130" font-size="8.2" font-family="monospace" fill="#1f5c8b">understory_lai_factor / LMA_understory_factor</text>
+  <text x="170" y="141" font-size="8.2" font-family="monospace" fill="#1f5c8b">vegn_cohort.F90:573,767</text>
+
+  <!-- soil -->
+  <rect x="10" y="152" width="420" height="26" fill="#e8ddc8" stroke="#8a7a5a"/>
+  <text x="18" y="169" font-size="9.5">토양 · 뿌리 (코호트별 br)</text>
+
+  <!-- one cohort detail -->
+  <rect x="450" y="26" width="260" height="152" fill="#fff" stroke="#1a1a1a" stroke-width="1.2"/>
+  <text x="460" y="42" font-size="10.5" font-weight="600">코호트 하나가 들고 있는 것</text>
+  <text x="460" y="59" font-size="8.6" font-family="monospace">species &nbsp;어느 종 (picea, acer…)</text>
+  <text x="460" y="72" font-size="8.6" font-family="monospace">nindivs &nbsp;m²당 몇 그루</text>
+  <text x="460" y="85" font-size="8.6" font-family="monospace">DBH · height · crownarea</text>
+  <text x="460" y="98" font-size="8.6" font-family="monospace">bl br bsw bwood nsc &nbsp;(그루당)</text>
+  <text x="460" y="111" font-size="8.6" font-family="monospace">layer &nbsp;1=상층 2=하층</text>
+  <text x="460" y="124" font-size="8.6" font-family="monospace">topyear &nbsp;상층 체류연수</text>
+  <line x1="460" y1="132" x2="700" y2="132" stroke="#c8c8c8"/>
+  <text x="460" y="146" font-size="8.4" font-family="monospace" fill="#1f5c8b">vegn_cohort.F90 (구조체 정의)</text>
+  <text x="460" y="159" font-size="8.4" font-family="monospace">lai = bl/LMA / (crownarea·(1−gap))</text>
+  <text x="460" y="172" font-size="8.2" font-family="monospace" fill="#8b2f1f">격자 LAI = Σ lai·crownarea·nindivs</text>
+
+  <line x1="220" y1="190" x2="220" y2="208" stroke="#1a1a1a" marker-end="url(#b)"/>
+  <rect x="10" y="208" width="700" height="42" fill="#fff8e8" stroke="#b8860b"/>
+  <text x="20" y="224" font-size="9.5" font-weight="600">★ 층이 여러 겹이라 격자 LAI가 LAImax(5~6)를 훌쩍 넘어 14까지 나온다.</text>
+  <text x="20" y="240" font-size="9" >코호트 하나의 LAI는 천장 이하지만, 층마다 채워 쌓이므로 타일 합은 층수만큼 커진다. 포화 판정을 격자 LAI로 하면 안 되는 이유다.</text>
+
+  <rect x="10" y="262" width="700" height="58" fill="#f2f2f0" stroke="#c8c8c8"/>
+  <text x="20" y="278" font-size="9.5" font-weight="600">층 재배정은 하루 1회</text>
+  <text x="20" y="293" font-size="8.6" font-family="monospace">vegn_dynamics.F90:2223 → vegn_tile.F90:694-841 vegn_relayer_cohorts_ppa</text>
+  <text x="20" y="308" font-size="8.6" font-family="monospace">키 순 정렬 → 수관면적 누적 → 경계에 걸친 코호트는 둘로 쪼갬 (:797) → 꽉 차면 새 층 (:810-812)</text>
+</svg>
+
+<table>
+<tr><th style="width:30%">Figure 2a 요소</th><th style="width:36%">코드</th><th style="width:34%">비고</th></tr>
+<tr><td>캐노피 층 (PPA)</td><td class="n">vegn_tile.F90:694-841</td>
+    <td>수관면적 누적이 1이면 새 층. 층수는 <b>계산 결과</b>지 설정이 아님</td></tr>
+<tr><td>경계에 걸친 나무</td><td class="n">vegn_tile.F90:797</td>
+    <td><code>nindivs = min(n,(1-frac)/crownarea)</code> — 코호트를 둘로 나눔</td></tr>
+<tr><td>상층 진입 후 성장</td><td class="n">vegn_dynamics.F90:1845</td>
+    <td><code>topyear += 1/365</code>, 천장이 5년에 걸쳐 <code>BL_u→BL_c</code></td></tr>
+<tr><td>하층 잎은 얇다</td><td class="n">vegn_cohort.F90:573</td>
+    <td><code>bl/(0.5·LMA)</code> — 같은 탄소로 두 배 면적 (음지적응)</td></tr>
+<tr><td>코호트별 광합성</td><td class="n">vegn_photosynthesis.F90:298,380</td>
+    <td>각 코호트가 자기 <code>lai</code>로 기공전도도를 가짐</td></tr>
+<tr><td>코호트 LAI</td><td class="n">vegn_cohort.F90:567-578</td>
+    <td><code>bl/LMA</code></td></tr>
+<tr><td><b>Fig 2b</b> 교란→새 타일</td><td class="n">vegn_dynamics.F90:1338</td>
+    <td><code>bl=(1-f)·bl</code>, 상층 사망이 타일을 <code>j(A)</code>/<code>1−j(A)</code>로 쪼갬</td></tr>
+</table>
+
+<h3>Figure 1 — 지면-대기 상호작용</h3>
+
+<table>
+<tr><th style="width:30%">Figure 1 요소</th><th style="width:36%">코드</th><th style="width:34%">LAI와의 관계</th></tr>
+<tr><td>solar radiation / albedo</td><td class="n">vegn_radiation.F90:199,242,256-262</td>
+    <td><code>vegn_lai = cohort%lai</code>가 직접 들어감 — <b>LAI가 알베도를 정한다</b></td></tr>
+<tr><td>CO₂ (광합성)</td><td class="n">vegn_photosynthesis.F90:373-374</td>
+    <td><code>An_op</code>, <code>An_cl</code> → GPP (dynamics:1049)</td></tr>
+<tr><td>evaporation / 증산</td><td class="n">vegn_photosynthesis.F90:380</td>
+    <td><code>stomatal_cond *= lai</code> — <b>증산이 LAI에 정비례</b></td></tr>
+<tr><td>sensible heat</td><td class="n">vegn_photosynthesis.F90:322,340</td>
+    <td>코호트별 <code>leafarea</code>로 환산</td></tr>
+<tr><td>roughness</td><td class="n">vegetation.F90</td>
+    <td>코호트 <code>height</code>에서 — 목재 성장의 결과</td></tr>
+<tr><td>soil carbon &amp; nutrients</td><td class="n">soil.F90 · CORPSE</td>
+    <td>낙엽(<code>dynamics:2188</code>)이 리터로 들어감</td></tr>
+<tr><td>fire / carbonaceous aerosols</td><td class="n">vegn_disturbance.F90</td>
+    <td>연 1회 (<code>vegetation.F90:2791</code>)</td></tr>
+<tr><td>unmanaged / cropland / forestry</td><td class="n">transitions.F90</td>
+    <td>LUH2 토지이용. 생산런이 2023에서 멈춘 이유(§13.54)</td></tr>
+</table>
+
+<div class="key">
+<b>논문 본문이 코드 추적을 확인해 준다.</b> Shevliakova et al. (2024) p.3:
+<i>"the biomass pools of cohorts' leaves, roots, sapwood, and wood ... are updated <b>daily</b>"</i> ·
+<i>"stomatal conductance ... updated on the atmospheric physics time step (i.e., <b>30 min</b>)"</i>.
+§1의 호출 주기 표(빠른 스텝 = 광합성, 하루 1회 = 배분·LAI 갱신)와 정확히 일치한다.
+</div>
+
+<div class="note">
+<b>검증 이력.</b> 이 문서의 모든 파일·행번호는 2026-09-11에 생산런 소스
+<code>/data2/ydkoh/lm4/esm4p5-lm4p-offline/src/lm4P/</code>에서 직접 확인했다.
+같은 lm4P 소스의 클론이 <code>ufs-weather-model-lm4p</code>에도 있으나,
+<code>ufs-weather-model</code>의 <code>vegn_dynamics.F90</code>은 633줄짜리 <b>PPA 없는 구버전</b>이므로
+행번호가 전혀 맞지 않는다. 생산런 exe는
+<code>esm4p5-lm4p-offline/exec/fms_esm4.5_compile_v3_1007_fix.x</code>(KIOST-ESM2 계열)다.
+생산런 식생은 <code>tile 15→20, cohort 63→67</code>로 <b>다중 PFT 경쟁이 실제로 작동</b>한다
+(namelist의 <code>vegn_to_use='uniform'</code>은 cold start 경로에만 해당, §13.7·§13.34).
+</div>
+
+</div>

@@ -1,11 +1,16 @@
-"""LM4 LAI per year 1982-2010 on the C96 land points, with coordinates.
+"""LM4 LAI per year 1982-2023 on the C96 land points, with coordinates.
+
+History: written for cycle 1 (lm4_spinup30, 1982-2010 -- hence "8296" in the
+file name, kept so that NOTES 13.3x references still resolve).  Since 2026-09
+it reads the production run lm4p_ctl_1979-2024 instead, which has every year
+1982-2023 complete, and YEARS/OUT below reflect that.
 
 Two aggregations per year so the observed comparison can be run either way:
-  ann  = Jan-Nov mean  (1997-2010 do have a December and 1990 does too, but
-                        1982-1996 do not, so Jan-Nov stays the only window all
-                        twenty-nine years share.  Mixing an 11-month mean with a
-                        12-month one would put a step at 1997 that belongs to the
-                        sampling, not to the model.)
+  ann  = Jan-Nov mean  (a cycle-1 constraint: 1997-2010 had a December and 1990
+                        did too, but 1982-1996 did not, so Jan-Nov was the only
+                        window all years shared.  The production run has every
+                        December, but the window is kept so that "ann" means
+                        the same thing across both runs and in the notes.)
   mjjas = May-Sep mean (northern growing season, contains the annual maximum)
 
 Coordinates come from C96_grid corner arrays via grid_index, the same recipe as

@@ -158,7 +158,9 @@ for j, members in sorted(match.items(), key=lambda kv: -qann[kv[0]]):
     series.append((tag, o_clim, m_clim, o_ann, m_ann, r))
 
 with open("lm4/data/discharge_vs_dai_%s.csv" % WHICH, "w") as fh:
-    fh.write("river,station,lat_mouth,lon_mouth,dist_deg,obs_m3s,model_m3s,ratio,r_season\n")
+    # one row per matched C96 cell: n_gauges = Dai stations merged into it,
+    # dist_deg = the closest of those gauges to the cell
+    fh.write("river,n_gauges,dist_deg,obs_m3s,model_m3s,ratio,r_season\n")
     for r_ in rows:
         fh.write("%s,%d,%.3f,%.2f,%.2f,%.4f,%.4f\n" % tuple(r_))
 

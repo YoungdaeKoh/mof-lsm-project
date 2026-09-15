@@ -1,4 +1,4 @@
-river,station,lat_mouth,lon_mouth,dist_deg,obs_m3s,model_m3s,ratio,r_season
+river,n_gauges,dist_deg,obs_m3s,model_m3s,ratio,r_season
 Yenisey,1,1.459,19796.22,20063.75,1.0135,0.9894
 Ob + Pur,2,0.559,14432.29,16250.82,1.1260,0.5491
 Lena,1,1.126,17622.93,11616.04,0.6591,0.8266
