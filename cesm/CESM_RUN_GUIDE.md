@@ -679,4 +679,20 @@ rain = (rain_atm + snow_atm) × frac_rain ;  snow = 나머지
 - 패치는 `$CASEROOT/SourceMods/src.clm/`에 파일을 복사해 수정 → `case.build`가 그 파일만 다시 컴파일. 케이스마다 factor를 하드코딩하면 케이스 3개 = SourceMods 3벌. 로컬 git `cesm/patches/`에 diff를 남길 것.
 - 결합 F 케이스에서 ③은 대기가 이미 내보낸 물이 지면에서 소멸하므로 **물 수지가 안 닫힌다.** 민감도 실험으로는 통용되지만 논문에 그 사실을 명시해야 한다. 보존형 대안은 "줄인 눈만큼 비로"(= ①과 같은 부류).
 
+**선례 — CAM4 대기 쪽에서 눈을 깎은 패치 (ERL TPSD 과제, 2026-03~05)**
+`/Volumes/data01/2026_ERL_TPSD/experiments/stratiform_snowpcw_{0.25,0.5,0.75}_v4.F90` = CAM4 `stratiform.F90`의 `stratiform_tend`. RK 미세물리가 지면으로 내보내는 **층운성 눈 플럭스 `snow_pcw`**를 m/s로 바꾼 직후, 티벳 박스에서만 곱한다(805행, 세 파일은 이 계수만 다름):
+```fortran
+! YDYD half rate
+do i = 1, ncol
+  lat2 = get_rlat_p(lchnk,i)*57.296_r8 ; lon2 = get_rlon_p(lchnk,i)*57.296_r8
+  elev = state1%phis(i)/9.82_r8
+  if ((lat2.ge.25 .and. lat2.le.40) .and. (lon2.ge.70 .and. lon2.le.105) .and. elev.ge.3000) &
+       snow_pcw(i) = snow_pcw(i)*0.75_r8
+end do
+```
+- 대류성 눈(`snow_sh`, `snow_dp`)은 안 건드림. 물 수지 비보존(위 표의 ③과 같은 부류, 다만 대기 쪽).
+- **CAM4/CLM4에서는 이게 맞는 자리다** — CLM4는 재분배가 없어 그대로 지면에 도달.
+- **CAM6/CLM5로 옮기면 그대로 못 쓴다**: ① CAM6는 MG2 미세물리라 `stratiform.F90`이 없다(`micro_mg_cam.F90` 계열). ② CLM5가 눈+비 총량을 자기 온도로 다시 나누므로 대기에서 깎은 눈이 0–2 °C 구간에서 일부 비로 샌다. → CLM5에서는 재분배 뒤 `atm2lndMod.F90`에 거는 편이 "눈만 줄이는" 실험이다.
+- 원본 파일에 `write(iulog,*) 'YDYD2...'` 디버그 두 줄이 컬럼마다 매 스텝 남아 있다. 재사용 시 지울 것.
+
 **진단 변수 (CLM5 history, `atm2lndType.F90:693–723`)**: `SNOW_FROM_ATM`·`RAIN_FROM_ATM`(대기가 준 값, 재분배 **전**) vs `SNOW`·`RAIN`(재분배 **후** 지면 도달값). 두 쌍의 차이가 곧 §14.4 램프의 효과이고, ③ 패치가 먹혔는지는 `SNOW`로 본다. 그 외 `H2OSNO`, `SNOWDP`, `FSNO`, `QRUNOFF`, `QSNOMELT`. 패치가 들어간 첫 달은 반드시 `SNOW`의 전구 합이 f배가 됐는지 숫자로 확인하고 시작할 것.
