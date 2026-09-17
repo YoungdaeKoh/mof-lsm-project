@@ -357,3 +357,43 @@ CNRest: taking c12 SOM pools out of AD spinup mode
   climate01에서 1.83 h/yr → 남은 84년 ≈ **154 h (6.4일)**.
 - 200년에도 97 % 미달이면 §7j가 예고한 **완화 기준 채택 + 근거 박제** 경로로 간다.
   판정에 쓸 값은 이미 다 모여 있다.
+
+### 7o. ★★ post-AD 200년 완주 + 수렴 판정 — 여전히 97 % 미달, 완화 기준 경로 확정 (2026-09-17)
+
+체인 종료: `chain.log` "post-AD complete at year 0202" (2026-09-17 17:32, chunk 10 = job 8454).
+restart 0202-01-01 = **201 model-year 완주**, raw 201개 `~/CESM/spinup_raw/clm5_BGC_PAD`.
+판정 = 같은 도구 `clm5_postad_convergence.py 20` (마지막 20년 창, 40년·111년과 동일 방법).
+
+| 변수 | 평균 | 전지구 표류 | 기준 통과 격자 | 111년(§7n) | 40년(§7j) |
+|---|---|---|---|---|---|
+| **TOTECOSYSC** | 21,484 | +0.80 gC/m²/yr | **53.4 %** | 53.0 % | 51.8 % |
+| TOTSOMC | 15,912 | +0.43 | 66.4 % | 64.9 % | 65.9 % |
+| TOTVEGC | 4,184 | +0.21 | 54.5 % | 54.1 % | 52.7 % |
+| TLAI | 1.79 | +0.0007 | — | — | — |
+| TWS | 7,347 | +0.41 | — | — | — |
+
+- **40 → 111 → 201년: 51.8 → 53.0 → 53.4 %.** 90년을 더 돌려 0.4 %p. 97 %는 이 속도로
+  도달 불가(수천 년 규모) — 가이드가 말한 고위도 토양탄소 1000년+ 케이스.
+- 전지구 평균 표류는 +0.80 gC/m²/yr = 평균의 연 0.0037 % → 이미 기준 안(§7j 함정 그대로).
+- **결정: 추가 spin-up 중단, §7j 예고대로 완화 기준 채택.** 근거 정량(어느 threshold에서
+  97 %가 되는지, 미달 격자의 위도·토양탄소 분포)은 다음 단계에서 박제.
+- post-AD 최종 IC = `clm5_bgc_pad.clm2.r.0202-01-01-00000.nc`. 다음 = WFDE5 forcing
+  I compset 생산 적분(LM4p WFDE5 실험과 동일 forcing).
+
+### 7p. ★★ 생산런 착수 — `clm5_prod_1979_2023`, WFDE5 1979–2023, post-AD 0202 IC (2026-09-17)
+
+- 케이스 생성·빌드 `run_scripts/CLM5_prod_1979_2023.csh`(climate00, ~10분). finidat =
+  `clm5_bgc_pad.clm2.r.0202-01-01-00000.nc`. `RUN_STARTDATE=1979-01-01`, DATM 1979–2023 align 1979.
+- **★ 스트림 파일 함정**: post-AD의 `user_datm.streams.txt.*`는 **1981–2010 30개 파일만** 나열
+  (cycling용). 가이드 §7.3 "복사해서 그대로"로는 1979·2011+ forcing이 없어 죽는다. 스크립트가
+  복사 후 연도 목록만 awk로 1979–2023으로 재작성(도메인·변수 매핑은 그대로). 결과 검사 줄
+  ("forcing years in the streams")을 로그에서 반드시 확인 — 이번엔 `mv -i` alias 탓에 재작성이
+  무시된 걸 이 줄이 잡았다([[climate-cshrc-interactive-aliases]]). 최종: 3스트림 모두 45년,
+  CaseDocs 반영 확인.
+- hostfile: 케이스별 `mpi.hosts`를 chunk.pbs가 `$PBS_NODEFILE`에서 생성(§7k 재발 방지).
+- 실행: `run_scripts/run_F96_then_prod.sh`(nohup @climate00) → ① F2000climo f09 **96PE 2노드
+  타이밍 1년**(`F_f09_96pe_cam6clm5.csh` + `F_2000climo_f09_96pe.pbs`) 완료 후 ② `clm5_prod_chain.sh 2023`
+  (5년 청크 × 9, climate01, 1.8 h/yr → ≈81 h). 로그 `~/run_F96_then_prod.out`, `cases/clm5_prod_1979_2023/chain.log`.
+- raw 보존 `~/CESM/spinup_raw/clm5_PROD/`(청크마다 rsync, --delete 없음).
+- 설계 메모: LM4p WFDE5 ctl(1979–2023)과 forcing·기간 일치. CLM5 쪽은 `2000_` compset =
+  토지이용 2000년 고정·crop 없음 — LM4p(LUH2 transient)와 비교할 때 land-use는 자유변수.

@@ -345,3 +345,27 @@ LFMASS/STMASS/RTMASS/WOOD/FASTCP/STBLCP   cold->cyc2 |d| = 0.000000
 - 일수에 거의 선형(−0.039 K/일). **수렴 표류(3e-6 K)보다 ~9만 배 큼** → 표류 판정엔 상쇄되어 무해했으나 **모델 간 절대값 비교엔 치명적**이었음. SWE는 평균 22.5 mm 대비 +11%.
 - 진단 코드: `noahmp/scripts/extract_jan1_snapshots.py`, 데이터 `noahmp/data/jan1_snapshots.csv`, 실행 `jan1_snap/make_jan1.sh`.
 - **원칙: 다중 LSM 비교는 반드시 Jan-01 스냅샷(`JAN1.*`)을 쓸 것. 수렴 판정만 밀린 restart(Dec-25) 사용.** [[lsm-landmean-comparability]]
+
+## 10. ★★ WFDE5 forcing 전환 + DVEG=5 탄소 spin-up 설계 (2026-09-17, 실행은 보류)
+
+**결정(사용자)**: forcing을 LM4p·CLM5와 같은 **WFDE5**로 통일, **1° 도메인 유지**(물리 restart 재사용), **DVEG=5**.
+Noah-MP 실험 자체는 다른 실험(F 96PE 타이밍·CLM5 생산런)이 끝난 뒤 실행.
+
+- **층위 정합**: Noah-MP "dynamic veg"(2/5/6)는 탄소·LAI phenology이지 타입 변화가 아님 → CLM5-BGC(PFT 면적 고정,
+  LAI 예후)와 같은 층위. LM4p(cohort 경쟁+LUH2)는 한 층 위. DVEG=5는 FVEG를 연최대로 고정해 "탄소 켠 효과"만
+  분리(옵션 2는 FVEG=f(LAI) 되먹임이 추가돼 CLM5에 없는 항). §9d 결정 종결.
+- **변환기** `noahmp/scripts/wfde5_to_ldasin_1deg6h.py`(서버 `~/HRLDAS/`): `YYYY_wfde5.nc`(0.5°, 6h 평균 1460/yr,
+  noleap, 중점 stamp 0.125d=03Z) → stride-2 부표본 → LDASIN. **grid-verify 통과**(`chk_wfde5_grid_1deg.py`):
+  WFDE5 LATIXY/LONGXY == GSWP3 완전 일치, 부표본 == 1° setup(XLONG 360 차는 −180/180 표기). 1° 육지 22,003셀 중
+  WFDE5 fill 18셀(빙상 15) → 최근접 유효값 fill(lon 주기, lm4p 변환기와 동일). Feb 29 = avg(2/28, 3/1) 삽입.
+- **★ 시각 stamp 결정**: 6h **평균**이므로 창 중점 **03/09/15/21Z**에 파일을 찍고 `START_HOUR=3`. 창 시작(00Z)에
+  찍으면 일변화가 3h 앞당겨짐(SWDOWN 피크 09Z). HRLDAS는 forcing 사이를 선형보간 → LM4p(FMS data_override
+  선형보간)와 같은 처리. restart도 03Z에 찍힘. GSWP3 6h 변환기는 순간값이라 00Z stamp가 맞았던 것.
+- 첫 2일 검증: 8파일, NaN 0, 육지평균 T2D 266.0 K, 1.4 mm/d. GSWP3 LDASIN 1981-01-01 대조(육지 무가중 평균, 스냅샷
+  1개라 참고용): T2D 268.2 vs 265.4 K, Q2D 3.94e-3 vs 3.96e-3, U 2.9 vs 3.7 m/s, PSFC 884.8 vs 882.7 hPa,
+  LW 240 vs 233, SW 210 vs 202 W/m², P 1.42 vs 1.35 mm/d. 자료 차이지 변환 오류 신호는 아님(격자·단위·부호 정상).
+- **성능 함정**: 스텝마다 `[t, ::2, ::2]` 읽기 → ~1파일/s(45년 16h). 80스텝(20일) 블록 캐시로 수정.
+- 실행 스크립트(한 파일에 설정 전부): `noahmp/run_scripts/NoahMP_WFDE5_dveg5_spinup.sh` — `setup`(링크·seed redate
+  03Z·namelist·PBS 생성) / `next`(cycle N+1 스테이징). namelist 차이 5개: DVEG 4→5, INDIR, START_HOUR 00→03,
+  FORCING_TIMESTEP 10800→21600, KDAY 10956→10957(윤일 포함). 수렴 판정은 non-ice land·cos(lat) 가중, WOOD·STBLCP 표류.
+- 탄소 IC 없음: seed의 탄소풀은 cold-start 임의값 그대로(§9d). 4~10 cycle 예상.

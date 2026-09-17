@@ -403,7 +403,11 @@ post-AD 마지막 restart를 finidat으로, 실제 달력 1979–2023 transient.
 foreach s (Precip Solar TPQW)
   cp ~/CESM/cases/clm5_bgc_pad/user_datm.streams.txt.CLMGSWP3v1.$s .
 end
+# ...then ONLY the year list is rewritten to 1979-2023 (awk in the script):
+# post-AD's streams list just its 1981-2010 cycling files (notes 7p)
 ```
+- **스트림 연도 목록 ≠ DATM_CLMNCEP_YR_START/END면 그 해에 forcing 없음으로 죽는다.** 복사 후 스크립트의 "forcing years in the streams" 검사 줄(3스트림 × 45년, 1979..2023)을 빌드 로그에서 확인할 것.
+- 서버 시작파일이 `mv`를 `mv -i`로 alias해 둬서(`/etc/profile.d/hanul.csh`) 스크립트 안 `mv`가 tty 없이 조용히 건너뛴다 → 스크립트 안에선 `/bin/mv -f`.
 - 이 스크립트는 **케이스가 이미 있으면 ABORT**한다(45년 출력을 `rm -rf`로 날리지 않기 위해). spin-up 스크립트의 `rm -rf` 습관을 생산런에 옮기지 말 것.
 - `RUN_TYPE=hybrid` 대신 `startup`+`finidat`: I compset에선 동일 효과.
 - 5년 청크 체인 `run_scripts/clm5_prod_chain.sh 2023`.
@@ -523,7 +527,8 @@ set RES     = f19_f19
 | CLM5-BGC offline, post-AD·생산 | f09 | 1.70–1.83 h | 경합 시 2.4× 느려짐 |
 | CLM5-BGC-CROP AD | f09 | ~4.1 h | crop이 +40% |
 | CAM6+CLM5 F2000climo | f19 | 4.29 h | |
-| CAM6+CLM5 F2000climo | f09 | 측정 중 | 예상 30–34 h |
+| CAM6+CLM5 F2000climo | f09 | **18.6 h** (894 pe-hr/yr, 1.29 yr/day) | 2년 실측 2026-09-13, job 8446 |
+| CAM6+CLM5 F2000climo, **96PE 2노드** | f09 | 측정 중 | `F_f09_96pe_cam6clm5.csh`, 2026-09-17 착수 |
 
 디스크: CLM5 f09 restart 586 MB(SP)~1.4 GB(BGC), h0 월 122 MB → 30년 ≈ 62 GB. 컴포넌트 비중(SP): LND 86%, CPL 통신 ~20%, MOSART·DATM 각 5% 내외(꺼도 이득 없음).
 

@@ -1423,3 +1423,22 @@ radius_deg = 1.0 + 3.0 * min(1, area_mou / 2.5e6)
 - 한대림은 상한 아래(캐나다 0.69, 시베리아 0.86, 스칸디나비아 0.83) → §13.26 아북극 편차만이 **탄소 공급**(GPP·할당) 쪽 문제.
 - **결론**: LMA 튜닝은 전지구 LAI를 못 고친다. 열대·중위도는 `LAImax`(spdata), 한대는 탄소 사슬(§13.53)을 따로 봐야 한다.
 - 주의: 비율이 1을 넘는 p95=1.004는 코호트 집계 순서(bl·bl_max를 각각 면적가중 후 나눔) 탓의 잔차이지 물리가 아님.
+
+### 13.55 ★ 토지이용 전이 off 옵션 = CLM5식 "고정 토지이용" (2026-09-17, 미실행)
+
+- 스위치: `&landuse_nml do_landuse_change`(`lm4P/transitions/transitions.F90:136`). ctl은 `.TRUE.`(LUH2 v20260127
+  transition/states/landfrac, `distribute_transitions='min-n-tiles'`, `rangeland_is_pasture=.TRUE.`).
+  `.FALSE.`면 `land_transitions_init`가 293행에서 return → 전이 없음, `landuse.res` 시각 검사(§13.47 블로커)도 안 탐,
+  2023 LUH2 종료 제약도 사라짐.
+- 형태: 타일 구성이 seed 상태(2010년 토지이용 면적, §13.47의 수준편향 포함)로 **동결** = CLM5 `2000_` compset의
+  "고정 토지이용"과 같은 형태, 연도만 2010 vs 2000. CLM5 surfdata(PFT 분율)를 LM4 타일로 옮기는 변환기는 없고
+  분류체계도 달라 "같은 파일"은 불가. 둘 다 LUH2 파생이므로 정합은 **연도**로 맞추는 것이 현실적: LM4 쪽을
+  2000년으로 바꾸려면 all-natural seed에 states 2000을 초기 전이로 심어야 하는데(`transitions.F90:355`, cold start
+  경로) 현 seed엔 이미 2010 LU 타일이 있어 이중 전환(§13.47) → 비현실적. 필요하면 **CLM5 쪽을 2010 fsurdat로**
+  맞추는 게 싸다(별도 결정).
+- 비용: 느림의 본체는 코호트 수(37×, §13.17). 전이 off는 secondary/crop 타일 증가분만 제거 → 처리량 개선은 부분적.
+- 스크립트: `lm4/run_scripts/LM4p_WFDE5_ctl_1979_2024.sh`(ctl 전체 재구성, 한 파일) + `LANDUSE=off` 변수로 위 변형.
+- **결정(2026-09-17, 사용자)**: LM4p 고정-토지이용 변형은 **2010 동결(`LANDUSE=off`)**로 간다. CLM5 `simyr2000`과의 10년
+  차이는 수용 — 2000년으로 맞추려면 all-natural seed로 300년+ cold-start spin-up(≈4개월, 크래시 위험 재개)이 필요해
+  얻는 것에 비해 비용이 과함. 세 모델 형태 정합: CLM5 2000 고정 / LM4p 2010 동결 / Noah-MP 토지이용 없음.
+  실행 시점 = CLM5 생산런 종료 후.

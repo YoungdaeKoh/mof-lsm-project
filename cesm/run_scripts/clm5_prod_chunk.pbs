@@ -29,6 +29,13 @@ CHUNK_N=${CHUNK_N:-5}
 FIRST=${FIRST:-0}
 
 cd "$CASE" || exit 1
+
+# hostfile from the PBS allocation -- the launch always goes where the
+# allocation is (the case's env_mach_specific.xml points at this file).
+awk '{c[$1]++} END {for (h in c) print h":"c[h]}' "$PBS_NODEFILE" > "$CASE/mpi.hosts"
+echo "=== allocation ($PBS_NODEFILE) -> mpi.hosts ==="
+cat "$CASE/mpi.hosts"
+
 if [ "$FIRST" = "1" ]; then
   ./xmlchange CONTINUE_RUN=FALSE           # read finidat
 else

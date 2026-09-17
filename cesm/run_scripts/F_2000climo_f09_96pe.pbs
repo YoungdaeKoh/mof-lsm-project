@@ -1,0 +1,53 @@
+#!/bin/bash
+#PBS -N F_f09_96
+#PBS -q workq
+#PBS -l select=1:ncpus=48:mpiprocs=48:host=climate01+1:ncpus=48:mpiprocs=48:host=climate02
+#PBS -j oe
+#PBS -o /home/ydkoh/CESM/cases/F_2000climo_f09_96pe/run.log
+#
+# One model year of F2000climo at f09 on 96 PEs (climate01 + climate02), to
+# measure two-node throughput against the 48-PE reference (18.6 h/yr).
+#
+# Both nodes must be idle for the number to mean anything:
+#   ssh climate01 uptime; ssh climate02 uptime
+#
+# The hostfile is written from $PBS_NODEFILE, so the ranks land on the two
+# nodes PBS allocated (one "host:48" line per node).  Rank placement is
+# checked afterwards with pgrep on each node -- qstat -n is not proof.
+#
+# case.submit --no-batch exits 1 even on success; the model date and the
+# timing file are the test, not the exit code.
+set -u
+export PERL5LIB=/home/ydkoh/perl5/lib/perl5${PERL5LIB:+:$PERL5LIB}
+
+CASE=/home/ydkoh/CESM/cases/F_2000climo_f09_96pe
+RUN=/data2/ydkoh/cesm2_output/F_2000climo_f09_96pe/run
+
+cd "$CASE" || exit 1
+
+awk '{c[$1]++} END {for (h in c) print h":"c[h]}' "$PBS_NODEFILE" > "$CASE/mpi.hosts"
+echo "=== allocation ($PBS_NODEFILE) -> mpi.hosts ==="
+cat "$CASE/mpi.hosts"
+
+echo "=== START $(date) on $(hostname) ==="
+for h in climate01 climate02; do
+  echo "load at start, $h: $(ssh -o BatchMode=yes $h uptime | sed 's/.*load/load/')"
+done
+
+# rank placement, sampled two minutes in
+( sleep 120
+  for h in climate01 climate02; do
+    echo "=== ranks on $h after 2 min: $(ssh -o BatchMode=yes $h pgrep -c -u ydkoh -x cesm.exe) ==="
+  done ) &
+
+./case.submit --no-batch
+echo "=== MODEL PHASE DONE $(date) ==="
+cat "$RUN/rpointer.lnd" 2>/dev/null
+
+echo "=== timing ==="
+for f in "$CASE"/timing/cesm_timing.F_2000climo_f09_96pe.*; do
+  [ -f "$f" ] || continue
+  echo "$f"
+  grep -E 'total pes active|Model Cost|Model Throughput|Init Time|Run Time' "$f"
+done
+echo "=== END $(date) ==="

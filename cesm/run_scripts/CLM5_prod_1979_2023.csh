@@ -24,9 +24,13 @@ set RES      = f09_g17
 set NPE      = 48
 set HOSTNODE = climate01
 
-# post-AD's last restart.  Set this after post-AD finishes; the placeholder is
-# year 0093, where it stands as of 2026-09-08.
-set FINIDAT  = /data2/ydkoh/cesm2_output/clm5_bgc_pad/run/clm5_bgc_pad.clm2.r.0093-01-01-00000.nc
+# post-AD's last restart: the chain stopped at year 0202 on 2026-09-17 (201
+# model years; convergence judged in CLM5_SPINUP_NOTES 7o).
+set FINIDAT  = /data2/ydkoh/cesm2_output/clm5_bgc_pad/run/clm5_bgc_pad.clm2.r.0202-01-01-00000.nc
+
+# forcing years: the whole transient period, one WFDE5 file per year
+set YR0 = 1979
+set YR1 = 2023
 
 # ---------------------------------------------------------------- guards ----
 if ( ! -f $FINIDAT ) then
@@ -65,6 +69,13 @@ cd $CCSMROOT/cases/$CNAME
 
 ./case.setup
 
+# The launch must go where the PBS allocation is.  The machine default is a
+# fixed ~/mvapich2.hosts, which is how post-AD ran on the wrong node for three
+# weeks (CLM5_SPINUP_NOTES 7k).  clm5_prod_chunk.pbs writes mpi.hosts from
+# $PBS_NODEFILE at run time; here the case is only pointed at that file.
+sed -i "s|-hostfile /home/ydkoh/mvapich2.hosts|-hostfile $CCSMROOT/cases/$CNAME/mpi.hosts|" env_mach_specific.xml
+grep -n hostfile env_mach_specific.xml
+
 # ------------------------------------------------------------ run config -----
 # Normal turnover, not accelerated: the AD phase is over.
 ./xmlchange CLM_ACCELERATED_SPINUP=off
@@ -79,9 +90,9 @@ cd $CCSMROOT/cases/$CNAME
 ./xmlchange REST_OPTION=nyears,REST_N=1
 ./xmlchange RESUBMIT=0,DOUT_S=FALSE
 
-./xmlchange DATM_CLMNCEP_YR_START=1979
-./xmlchange DATM_CLMNCEP_YR_END=2023
-./xmlchange DATM_CLMNCEP_YR_ALIGN=1979
+./xmlchange DATM_CLMNCEP_YR_START=$YR0
+./xmlchange DATM_CLMNCEP_YR_END=$YR1
+./xmlchange DATM_CLMNCEP_YR_ALIGN=$YR0
 
 # ------------------------------------------------------------ namelists ------
 # finidat has to be stated.  With CONTINUE_RUN=FALSE, CLM reads it, and the
@@ -104,6 +115,18 @@ foreach s (Precip Solar TPQW)
 end
 cp $CCSMROOT/cases/clm5_bgc_pad/user_nl_datm .
 
+# The post-AD streams list only its 1981-2010 cycling years.  Everything else
+# in the copied files stays as it is (domain, variable mapping); only the year
+# list is rewritten so that it matches DATM_CLMNCEP_YR_START/END above.  The
+# domain file also ends in _wfde5.nc, hence the /domain/ exclusion.
+foreach s (Precip Solar TPQW)
+  set f = user_datm.streams.txt.CLMGSWP3v1.$s
+  awk -v y0=$YR0 -v y1=$YR1 '/domain/ { print; next } /_wfde5\.nc/ { next } /<\/fileNames>/ { n++; if (n == 2) for (y = y0; y <= y1; y++) printf "    %d_wfde5.nc\n", y } { print }' $f > ${f}.tmp
+  # /bin/mv -f: .cshrc aliases mv to "mv -i", which prompts "overwrite?" and,
+  # with no tty, silently leaves the .tmp in place (bitten on 2026-09-17)
+  /bin/mv -f ${f}.tmp $f
+end
+
 ./preview_namelists
 
 # ------------------------------------------------------------ checks ---------
@@ -111,6 +134,12 @@ echo ""
 echo "=== namelist check ==="
 grep -E "^ *(finidat|spinup_state|use_cn|use_crop)" \
      /data2/ydkoh/cesm2_output/$CNAME/run/lnd_in
+echo ""
+echo "=== forcing years in the streams (expect $YR0 .. $YR1 in each) ==="
+foreach s (Precip Solar TPQW)
+  echo "$s : `grep -c '^ *[0-9][0-9][0-9][0-9]_wfde5.nc' user_datm.streams.txt.CLMGSWP3v1.$s` years, first/last:" \
+       `grep '^ *[0-9][0-9][0-9][0-9]_wfde5.nc' user_datm.streams.txt.CLMGSWP3v1.$s | sed -n '1p;$p' | tr -d ' '`
+end
 echo ""
 echo "=== PE layout ==="
 ./pelayout
