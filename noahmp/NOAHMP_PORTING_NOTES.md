@@ -369,3 +369,7 @@ Noah-MP 실험 자체는 다른 실험(F 96PE 타이밍·CLM5 생산런)이 끝�
   03Z·namelist·PBS 생성) / `next`(cycle N+1 스테이징). namelist 차이 5개: DVEG 4→5, INDIR, START_HOUR 00→03,
   FORCING_TIMESTEP 10800→21600, KDAY 10956→10957(윤일 포함). 수렴 판정은 non-ice land·cos(lat) 가중, WOOD·STBLCP 표류.
 - 탄소 IC 없음: seed의 탄소풀은 cold-start 임의값 그대로(§9d). 4~10 cycle 예상.
+- **45년 변환 완료(2026-09-17 22:1x, climate00 단일코어 ~1h50m)**: `~/HRLDAS/forcing_WFDE5_1deg/LDASIN/` **65,744파일**
+  (= 16,436일×4, 윤일 11개 포함, 기대값 일치), 42 GB. 45개 연도 전부 NaN 0·fill 18셀. 육지평균(무가중, 빙상 포함)
+  T2D 1979 267.39 → 2001 268.10 → 2023 268.86 K, RAINRATE 1.52–1.53 mm/d. 로그 `convert_wfde5.log`.
+  → `NoahMP_WFDE5_dveg5_spinup.sh setup`의 전제조건(≥43,800파일, 1981010103·2010123121 존재) 충족. 실행은 보류 상태.
