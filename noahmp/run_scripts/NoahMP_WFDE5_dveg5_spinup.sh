@@ -145,7 +145,7 @@ setup)
  WETLAND_OPTION                    = 0
  FORCING_TIMESTEP = 21600
  NOAH_TIMESTEP    = 1800
- OUTPUT_TIMESTEP  = 31536000
+ OUTPUT_TIMESTEP  = __OUT__
  RESTART_FREQUENCY_HOURS = __FREQ__
  SPLIT_OUTPUT_COUNT = 1
  SKIP_FIRST_OUTPUT = .true.
@@ -192,8 +192,10 @@ for y in \$(seq $Y0 $Y1); do
   # A resubmitted job therefore continues from the last finished year.
   if [ -f "\$next" ]; then echo "=== segment \$y already done (\$next exists), skipping ===" | tee -a spinup.log; continue; fi
   [ -f "\$seed" ] || { echo "ABORT: seed \$seed missing before segment \$y"; exit 1; }
+  # OUTPUT_TIMESTEP follows the segment length too, so the yearly LDASOUT is
+  # stamped Jan 1 03Z in leap years as well (a fixed 365 d fires on Dec 31).
   sed -e "s/__YEAR__/\$y/" -e "s/__KDAY__/\$nd/" -e "s/__RESTART__/\$seed/" -e "s/__FREQ__/\$((nd * 24))/" \\
-      namelist.template > namelist.hrldas
+      -e "s/__OUT__/\$((nd * 86400))/" namelist.template > namelist.hrldas
   echo "=== segment \$y (\$nd d) start \$(date) ===" | tee -a spinup.log
   # 'Timing:' is per-step noise; the glacier-melt warning is the known flood
   # (10 M lines in the static run, notes 8) and is dropped here as well.
