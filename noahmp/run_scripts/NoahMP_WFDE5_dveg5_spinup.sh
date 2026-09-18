@@ -240,6 +240,35 @@ next)
   echo "staged cycle $((C + 1)).  submit with:  qsub $RUN/run_cycle.pbs"
   ;;
 
+# ------------------------------------------------------------------ chain ---
+# Unattended cycling up to cycle LAST (default 6): wait for the running cycle's
+# job to leave the queue, require its 2011-01-01 restart, stage the next cycle
+# with 'next', submit, repeat.  Sits on the login node under setsid/nohup:
+#   setsid nohup bash NoahMP_WFDE5_dveg5_spinup.sh chain 6 > ~/nmp_dveg5_chain.out 2>&1 < /dev/null &
+# Guards mirror the CLM5 chain: progress is judged by the restart file, a
+# cycle that ends without it stops the chain, and a hard cap bounds the run.
+chain)
+  LAST=${2:-6}
+  cd "$RUN"
+  log() { echo "[$(date +%F\ %T)] $*"; }
+  while :; do
+    # wait while a cycle job is in the queue
+    while qstat -u ydkoh 2>/dev/null | grep -q nmp_wfde5; do sleep 300; done
+    C=$(cat cycle.txt)
+    end=RESTART.$((Y1 + 1))010103_DOMAIN1
+    if [ ! -f "$end" ]; then
+      log "cycle $C: no $end after its job left the queue -- stopping (resubmit run_cycle.pbs to resume)"
+      exit 1
+    fi
+    log "cycle $C complete ($end)"
+    if [ "$C" -ge "$LAST" ]; then log "reached cycle $LAST -- chain done"; exit 0; fi
+    bash "$0" next || { log "ABORT: staging cycle $((C + 1)) failed"; exit 1; }
+    JID=$(qsub run_cycle.pbs)
+    log "cycle $((C + 1)): job $JID"
+    sleep 120
+  done
+  ;;
+
 *)
-  echo "usage: $0 setup | next"; exit 1 ;;
+  echo "usage: $0 setup | next | chain [LAST_CYCLE]"; exit 1 ;;
 esac
