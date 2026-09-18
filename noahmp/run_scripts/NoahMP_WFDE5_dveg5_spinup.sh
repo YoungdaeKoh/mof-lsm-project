@@ -55,7 +55,12 @@ ARCH=$HR/spinup_raw/noahmp_WFDE5_1deg_dveg5     # raw preservation, never --dele
 NODE=${NODE:-climate02}                          # climate01 carries the CLM5 production run (2026-09-18)
 Y0=1981; Y1=2010                                 # cycling block, same as GSWP3 and the LM4+/CLM5 spin-ups
 START="${Y0}-01-01_03:00:00"                     # 03Z: first WFDE5 stamp of the day
-KDAY=10957                                       # 1981-01-01 .. 2010-12-31 inclusive, real calendar (leap days included)
+# One cycle = 30 one-year SEGMENTS run back to back inside one PBS job, each
+# with KDAY = 365 or 366 and RESTART_FREQUENCY_HOURS = KDAY*24, so that every
+# restart lands exactly on Jan 1 03Z.  A single 30-year run with a 8760-h
+# alarm drifts one day per leap year and ends on 12-25 (notes 9a); yearly
+# segments keep the snapshots on the calendar year like LM4+ and CLM5
+# (memory lsm-landmean-comparability).  ~11 min per segment.
 
 case "${1:-}" in
 # ------------------------------------------------------------------ setup ----
@@ -88,21 +93,22 @@ setup)
   #   INDIR                          WFDE5 LDASIN
   #   START_HOUR 00 -> 03            WFDE5 stamps are window midpoints
   #   FORCING_TIMESTEP 10800 -> 21600
-  #   KDAY 10956 -> 10957            leap days are in the forcing (Feb 29 inserted)
+  #   KDAY / RESTART_FREQUENCY_HOURS / START_YEAR / restart name: per segment
+  #                                  (placeholders filled by run_cycle.pbs)
   # Everything else is identical to forcing_GSWP3_1deg/spinup/namelist.hrldas.
-  cat > namelist.hrldas << EOF
+  cat > namelist.template << EOF
 &NOAHLSM_OFFLINE
  HRLDAS_SETUP_FILE = "$SETUP"
  INDIR  = "$FORC"
  OUTDIR = "./"
- START_YEAR  = $Y0
+ START_YEAR  = __YEAR__
  START_MONTH = 01
  START_DAY   = 01
  START_HOUR  = 03
  START_MIN   = 00
- KDAY = $KDAY
+ KDAY = __KDAY__
  SPINUP_LOOPS = 0
- RESTART_FILENAME_REQUESTED = "RESTART.${Y0}010103_DOMAIN1"
+ RESTART_FILENAME_REQUESTED = "__RESTART__"
  FORCING_NAME_T = "T2D"
  FORCING_NAME_Q = "Q2D"
  FORCING_NAME_U = "U2D"
@@ -140,7 +146,7 @@ setup)
  FORCING_TIMESTEP = 21600
  NOAH_TIMESTEP    = 1800
  OUTPUT_TIMESTEP  = 31536000
- RESTART_FREQUENCY_HOURS = 8760
+ RESTART_FREQUENCY_HOURS = __FREQ__
  SPLIT_OUTPUT_COUNT = 1
  SKIP_FIRST_OUTPUT = .true.
  NSOIL=4
@@ -175,10 +181,29 @@ module load intel21/netcdf-4.6.1
 module load intel21/hdf5-1.10.5
 ulimit -s unlimited
 cd $RUN || exit 1
-echo "=== START \$(date) on \$(hostname) np48 (WFDE5 1deg/6h DVEG=5, cycle \$(cat cycle.txt 2>/dev/null || echo 1)) ==="
-mpirun -np 48 ./hrldas.exe 2>&1 | grep --line-buffered -vE 'Timing:' > spinup.log
-rc=\${PIPESTATUS[0]}
-echo "=== END exit=\$rc \$(date) ==="
+C=\$(cat cycle.txt 2>/dev/null || echo 1)
+echo "=== START \$(date) on \$(hostname) np48 (WFDE5 1deg/6h DVEG=5, cycle \$C, yearly segments $Y0-$Y1) ===" | tee -a spinup.log
+for y in \$(seq $Y0 $Y1); do
+  # real-calendar length of the year; the forcing has Feb 29
+  if [ \$((y % 4)) -eq 0 ] && { [ \$((y % 100)) -ne 0 ] || [ \$((y % 400)) -eq 0 ]; }; then nd=366; else nd=365; fi
+  seed=RESTART.\${y}010103_DOMAIN1
+  next=RESTART.\$((y + 1))010103_DOMAIN1
+  # resume: a year whose Jan 1 restart already exists is complete -- skip it.
+  # A resubmitted job therefore continues from the last finished year.
+  if [ -f "\$next" ]; then echo "=== segment \$y already done (\$next exists), skipping ===" | tee -a spinup.log; continue; fi
+  [ -f "\$seed" ] || { echo "ABORT: seed \$seed missing before segment \$y"; exit 1; }
+  sed -e "s/__YEAR__/\$y/" -e "s/__KDAY__/\$nd/" -e "s/__RESTART__/\$seed/" -e "s/__FREQ__/\$((nd * 24))/" \\
+      namelist.template > namelist.hrldas
+  echo "=== segment \$y (\$nd d) start \$(date) ===" | tee -a spinup.log
+  # 'Timing:' is per-step noise; the glacier-melt warning is the known flood
+  # (10 M lines in the static run, notes 8) and is dropped here as well.
+  mpirun -np 48 ./hrldas.exe 2>&1 | grep --line-buffered -vE 'Timing:|GLACIER HAS MELTED|ARE YOU SURE THIS SHOULD BE A GLACIER' >> spinup.log
+  rc=\${PIPESTATUS[0]}
+  # rc is not the test (exit=255 teardown artefact, notes 8d): the next Jan 1 restart is
+  [ -f "\$next" ] || { echo "ABORT: segment \$y ended (rc=\$rc) without \$next" | tee -a spinup.log; exit 1; }
+  echo "=== segment \$y done rc=\$rc -> \$next \$(date) ===" | tee -a spinup.log
+done
+echo "=== END cycle \$C \$(date) ==="
 ls -t RESTART.*_DOMAIN1 | head -1
 # raw preservation into a per-cycle folder, no --delete
 C=\$(cat cycle.txt 2>/dev/null || echo 1)
@@ -194,15 +219,13 @@ EOF
   ;;
 
 # ------------------------------------------------------------------- next ----
-# Stage cycle N+1: last restart of cycle N -> re-stamped seed for 1981-01-01 03Z.
-# The last restart is dated 12-25 (RESTART_FREQUENCY_HOURS=8760 = 365 d drifts
-# one day per leap year; notes 9a) -- the missing six days are harmless for a
-# spin-up seed.  Previous cycle's outputs are already in $ARCH (checked here).
+# Stage cycle N+1: the 2011-01-01 03Z restart of cycle N -> re-stamped seed
+# for 1981-01-01 03Z.  Previous cycle's outputs are already in $ARCH (checked).
 next)
   cd "$RUN"
   C=$(cat cycle.txt)
-  last=$(ls -t RESTART.*_DOMAIN1 | grep -v "RESTART.${Y0}010103_DOMAIN1" | head -1)
-  [ -n "$last" ] || { echo "ABORT: no restart from cycle $C in $RUN"; exit 1; }
+  last=RESTART.$((Y1 + 1))010103_DOMAIN1
+  [ -f "$last" ] || { echo "ABORT: cycle $C did not reach $last in $RUN"; exit 1; }
   A=$ARCH/cycle$(printf %02d "$C")
   [ -f "$A/$last" ] || { echo "ABORT: $last not archived in $A -- archive first"; exit 1; }
   echo "cycle $C ended at $last"
