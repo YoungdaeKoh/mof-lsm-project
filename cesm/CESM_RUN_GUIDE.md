@@ -528,7 +528,7 @@ set RES     = f19_f19
 | CLM5-BGC-CROP AD | f09 | ~4.1 h | crop이 +40% |
 | CAM6+CLM5 F2000climo | f19 | 4.29 h | |
 | CAM6+CLM5 F2000climo | f09 | **18.6 h** (894 pe-hr/yr, 1.29 yr/day) | 2년 실측 2026-09-13, job 8446 |
-| CAM6+CLM5 F2000climo, **96PE 2노드** | f09 | 측정 중 | `F_f09_96pe_cam6clm5.csh`, 2026-09-17 착수 |
+| CAM6+CLM5 F2000climo, **96PE 2노드**(climate01+02) | f09 | **10.95 h** (1052 pe-hr/yr, 2.19 yr/day) | 1년 실측 2026-09-18, job 8455. 48→96PE **1.70× 빠름, 병렬효율 85 %**. ATM이 93 %(36,734/39,434 s). mvapich2 2노드 정상(각 48 rank, `mpi.hosts`를 `$PBS_NODEFILE`에서 생성) |
 
 디스크: CLM5 f09 restart 586 MB(SP)~1.4 GB(BGC), h0 월 122 MB → 30년 ≈ 62 GB. 컴포넌트 비중(SP): LND 86%, CPL 통신 ~20%, MOSART·DATM 각 5% 내외(꺼도 이득 없음).
 

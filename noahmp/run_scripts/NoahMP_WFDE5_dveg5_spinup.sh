@@ -52,6 +52,7 @@ SEED=$HR/forcing_GSWP3_1deg/spinup/RESTART.2010122500_DOMAIN1       # static-veg
 RUN=$HR/forcing_WFDE5_1deg/spinup_dveg5
 ARCH=$HR/spinup_raw/noahmp_WFDE5_1deg_dveg5     # raw preservation, never --delete
 
+NODE=${NODE:-climate02}                          # climate01 carries the CLM5 production run (2026-09-18)
 Y0=1981; Y1=2010                                 # cycling block, same as GSWP3 and the LM4+/CLM5 spin-ups
 START="${Y0}-01-01_03:00:00"                     # 03Z: first WFDE5 stamp of the day
 KDAY=10957                                       # 1981-01-01 .. 2010-12-31 inclusive, real calendar (leap days included)
@@ -153,15 +154,16 @@ setup)
 /
 EOF
 
-  # --- PBS job: one 30-year cycle, 48 ranks on climate01 --------------------
+  # --- PBS job: one 30-year cycle, 48 ranks on $NODE ------------------------
   # Same module set and mpirun form as the static spin-up (run_cyc2b_c01.sh).
   # exit=255 at the end is the Intel-MPI teardown artefact (notes 8d): judge
-  # success by the last RESTART date, not by rc.
+  # success by the last RESTART date, not by rc.  Intel MPI follows the PBS
+  # allocation on its own (no hostfile), unlike the CESM/mvapich2 cases.
   cat > run_cycle.pbs << EOF
 #!/bin/bash
 #PBS -N nmp_wfde5_dveg5
 #PBS -q workq
-#PBS -l select=1:ncpus=48:mpiprocs=48:host=climate01
+#PBS -l select=1:ncpus=48:mpiprocs=48:host=$NODE
 #PBS -l walltime=12:00:00
 #PBS -j oe
 #PBS -o $RUN/pbs.log

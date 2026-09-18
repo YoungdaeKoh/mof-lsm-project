@@ -397,3 +397,10 @@ restart 0202-01-01 = **201 model-year 완주**, raw 201개 `~/CESM/spinup_raw/cl
 - raw 보존 `~/CESM/spinup_raw/clm5_PROD/`(청크마다 rsync, --delete 없음).
 - 설계 메모: LM4p WFDE5 ctl(1979–2023)과 forcing·기간 일치. CLM5 쪽은 `2000_` compset =
   토지이용 2000년 고정·crop 없음 — LM4p(LUH2 transient)와 비교할 때 land-use는 자유변수.
+
+### 7q. 생산런 체인 가동 확인 + F 96PE 결과 (2026-09-18)
+
+- F2000climo f09 96PE(2노드) 1년: **10.95 h/yr**, 1052 pe-hr/yr, 2.19 yr/day. 48PE(18.6 h/yr) 대비 1.70×, 효율 85 %.
+  **2노드 MPI 작동 확인**(rank 48+48, CLAUDE.md "96PE 불가"는 미검증이었음 → 정정). 생산런은 여전히 climate01 단독.
+- 생산 체인 chunk 1(1979–1983, job 8456) 07:04 시작 → 11:42 시점 1980-11 (≈2.4 h/yr, 초기화 포함). 5년 청크 ≈ 11 h,
+  45년 ≈ 4일 예상. 로그 `cases/clm5_prod_1979_2023/chain.log`.
