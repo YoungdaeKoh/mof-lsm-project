@@ -382,3 +382,10 @@ Noah-MP 실험 자체는 다른 실험(F 96PE 타이밍·CLM5 생산런)이 끝�
   30년 1,010만 줄) 필터.
 - 첫 제출(8457, 30년 단일 런)은 20분 만에 회수. 재제출 8458은 **NFS stale handle**로 즉사: run dir을 `rm -rf` 후 곧바로
   재생성·제출하니 climate02가 옛 디렉터리 핸들을 봐 "seed 없음"(세이프가드 정상 작동). 2–3분 뒤 재제출(8459) 정상.
+- **cycle 1 완주(2026-09-18 14:14→19:34, 5h20m, job 8459)**: 30 세그먼트 전부 `RESTART.(y+1)010103` 생성, 윤년 포함
+  내부 Times 정확히 `YYYY-01-01_03:00:00`. rc=255가 두어 번 나왔지만 restart 기준 판정으로 무시(§8d). 아카이브
+  `spinup_raw/noahmp_WFDE5_1deg_dveg5/cycle01/` 31 restart. 윤년 LDASOUT은 12-31 stamp(OUTPUT_TIMESTEP 365일 고정)
+  → cycle 2부터 세그먼트 길이 따르게 수정(`__OUT__`).
+- **탄소풀 seed→cycle 1 끝(non-ice land, cos(lat) 가중, gC/m²)**: WOOD 429→**3845**, FASTCP 857→**16,018**,
+  STBLCP 857→2157, LFMASS 17.9→27.3, STMASS 45.7→30.9, RTMASS 429→387, LAI 1.63→1.85. 탄소 모듈 작동 확인.
+  FASTCP가 19배로 뛴 건 임의 초기값이 너무 작았던 것 — 아직 평형과 멀다. cycle 간 표류로 판정 계속.
