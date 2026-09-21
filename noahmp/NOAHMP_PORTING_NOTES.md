@@ -422,3 +422,12 @@ restart, non-ice land, cos(lat) 가중).
 - **본실험 출력 결정**: HRLDAS LDASOUT은 순간값(누적변수 UGDRNOFF·SFCRNOFF·ACSNOW·ACSNOM 제외), 평균 옵션 없음 →
   **6h 출력(03/09/15/21Z)** 후 후처리로 일·월평균, 월평균 완성 확인 후 6h 삭제. 1° 95변수 31 MB/파일 → 45년 65,744파일
   ≈ 2 TB(/home). 일 1회 03Z(510 GB)는 플럭스가 일평균과 달라 기각.
+
+## 12. 본실험 착수 — `prod_1979_2023`, WFDE5 1°/6h, DVEG=5, 6h 출력 (2026-09-21 14:34, job 8473 @climate02)
+
+- 스크립트 `run_scripts/NoahMP_WFDE5_prod_1979_2023.sh setup` → `~/HRLDAS/forcing_WFDE5_1deg/prod_1979_2023/`. IC = cycle 6
+  restart redate 1979-01-01 03Z. namelist = spin-up 템플릿 + `OUTPUT_TIMESTEP=21600` 한 줄. 45 연 세그먼트 한 잡(walltime 14h),
+  이어달리기 가능, 연별 디스크 가드 200 GB. 진행 로그 `run.log`, 모델 로그 `hrldas.log`.
+- 예상 ~12 min/yr → 9 h, 9/22 새벽 종료. 출력 65,744파일 ≈ 2 TB(/home, 임시).
+- **다음**: ① 1979 세그먼트 검증(LDASOUT 1460개·31 MB, 03Z/15Z LH 육지평균 부호) ② 완주 확인(`RESTART.2024010103`)
+  ③ 후처리 cdo 6h→daymean→monmean(540 월파일, NaN 0, 누적변수 UGDRNOFF·SFCRNOFF·ACSNOW·ACSNOM은 차분) → 확인 후 6h 삭제.
