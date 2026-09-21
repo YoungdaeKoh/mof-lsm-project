@@ -429,5 +429,19 @@ restart, non-ice land, cos(lat) 가중).
   restart redate 1979-01-01 03Z. namelist = spin-up 템플릿 + `OUTPUT_TIMESTEP=21600` 한 줄. 45 연 세그먼트 한 잡(walltime 14h),
   이어달리기 가능, 연별 디스크 가드 200 GB. 진행 로그 `run.log`, 모델 로그 `hrldas.log`.
 - 예상 ~12 min/yr → 9 h, 9/22 새벽 종료. 출력 65,744파일 ≈ 2 TB(/home, 임시).
-- **다음**: ① 1979 세그먼트 검증(LDASOUT 1460개·31 MB, 03Z/15Z LH 육지평균 부호) ② 완주 확인(`RESTART.2024010103`)
+- **1979 세그먼트 검증 통과 (박제, 2026-09-21 14:51)**: 14:34→14:51 = **17 min/yr**(예상 12보다 느림 → 45년 ≈12.8 h, walltime 14 h 내).
+  `1979*` LDASOUT **1459개**(초기 03Z 미출력이라 1460 아님) + `1980010103` 1개, 6h stamp 결손 0, 크기 전부 31,380,840 B, NaN 0,
+  `RESTART.1980010103` 생성. 스크립트의 "expect 1460"은 표시용(ABORT 없음). LDASOUT에 XLAT/XLONG 없음 → setup nc에서 읽을 것.
+  **fill 2종**: 해양 -1e33 + 비적용 타일 **-9999**(LH 191격자, T2MV 7668격자) → 마스크는 `< -9998`로 (한 번 -1e30만 걸러서 T2MV 56 K 헛수치 냄).
+  LH 부호(cos(lat), non-ice, `chk_prod_1979.py`): 7/15 03Z 동아시아(낮) LH 192 / FSA 425, 북미(밤) LH 21 / FSA 11;
+  15Z는 반대(EA 17/0, NA 126/399). 1·4·10월 동일 패턴 → 순간값·UTC stamp 정합 ✓.
+- **다음**: ② 완주 확인(`RESTART.2024010103`, 9/22 03시경)
   ③ 후처리 cdo 6h→daymean→monmean(540 월파일, NaN 0, 누적변수 UGDRNOFF·SFCRNOFF·ACSNOW·ACSNOM은 차분) → 확인 후 6h 삭제.
+- **1979 세그먼트 검증(14:51, 17 min)**: LDASOUT 1459+1(다음 해 03Z) = 1460, 31.4 MB/파일, 49 GB/yr. 육지평균(non-ice,
+  cos(lat)) 7/1 03Z/15Z LH 47/66, HFX 27/46, FSA 155/205 W/m²; 1/15 SNEQV 31 mm; NaN 0. **03Z vs 15Z LH 차 20 W/m²** →
+  6h 출력 결정이 옳았음. 완주 예상 9/22 03–04시.
+- **후처리 `scripts/postproc_ldasout.py`**(연 단위, 검증 1979 1–2월): 월평균 101변수(연 ~100 MB) + 일평균 32변수
+  (연 ~0.8 GB), CF time, lat 오름차순, lon 0–360, 층 차원 (time,layer,lat,lon). 물 셀 fill −1e33(속성 없음) → NaN 처리.
+  누적변수 UGDRNOFF/SFCRNOFF/ACSNOW/ACSNOM → 기간 경계 차분 mm/day. 속도 ~2 min/yr. `run_scripts/postproc_prod.pbs`
+  (climate02, 8년 병렬) + `postproc_driver.sh`(모델 완주 대기 → qsub, 9/21 15:0x 가동, `~/nmp_postproc_driver.out`).
+  **6h 원본 삭제는 스크립트에 없음** — 월·일 파일 확인 후 수동.

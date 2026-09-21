@@ -1,0 +1,22 @@
+#!/bin/bash
+#PBS -N nmp_postproc
+#PBS -q workq
+#PBS -l select=1:ncpus=48:mpiprocs=48:host=climate02
+#PBS -l walltime=04:00:00
+#PBS -j oe
+#PBS -o /home/ydkoh/HRLDAS/forcing_WFDE5_1deg/prod_1979_2023/postproc.log
+#
+# Post-process the Noah-MP production run: 6-h LDASOUT -> monthly (all vars)
+# and daily (key vars) files per year, 8 years at a time (I/O bound; ~2 min
+# per year single-threaded when the files are warm).  Never deletes anything.
+# Submitted by postproc_driver.sh once RESTART.2024010103 exists.
+set -u
+RUN=/home/ydkoh/HRLDAS/forcing_WFDE5_1deg/prod_1979_2023
+OUT=$RUN/postproc
+PY=/home/ydkoh/anaconda3/bin/python
+cd /home/ydkoh/HRLDAS || exit 1
+echo "=== START $(date) on $(hostname) ==="
+seq 1979 2023 | xargs -P 8 -I{} sh -c "$PY postproc_ldasout.py {} --outdir $OUT > $OUT/log_{}.txt 2>&1; echo {} rc=\$?"
+echo "=== files: mon $(ls $OUT/noahmp_prod_mon_*.nc | wc -l) day $(ls $OUT/noahmp_prod_day_*.nc | wc -l) (expect 45 each) ==="
+grep -L "wrote mon (12 months)" $OUT/log_*.txt | sed 's/^/INCOMPLETE: /'
+echo "=== END $(date) ==="
