@@ -435,7 +435,20 @@ restart, non-ice land, cos(lat) 가중).
   **fill 2종**: 해양 -1e33 + 비적용 타일 **-9999**(LH 191격자, T2MV 7668격자) → 마스크는 `< -9998`로 (한 번 -1e30만 걸러서 T2MV 56 K 헛수치 냄).
   LH 부호(cos(lat), non-ice, `chk_prod_1979.py`): 7/15 03Z 동아시아(낮) LH 192 / FSA 425, 북미(밤) LH 21 / FSA 11;
   15Z는 반대(EA 17/0, NA 126/399). 1·4·10월 동일 패턴 → 순간값·UTC stamp 정합 ✓.
-- **다음**: ② 완주 확인(`RESTART.2024010103`, 9/22 03시경)
+- **후처리 파이프라인 = Python/xarray (`postproc/ldasout_6h_to_daymon.py YYYY MM [--daily]`), cdo 기각 (박제, 2026-09-21 15:20)**:
+  cdo 1.9.3이 LDASOUT 4D 변수(`SOIL_T` 등, 저장 순서 `(Time, south_north, soil_layers_stag, west_east)`)를 levels=180·grid=360×4로 오독.
+  xarray는 eager load(`open_dataset().load()` concat) — `open_mfdataset`+dask는 10배 느리고 월평균이 전부 NaN으로 나옴(원인 미추적).
+  처리: char `Times`→time 좌표, setup nc XLAT/XLONG→1D lat/lon, 두 fill(-1e33/-9999)→NaN(`_FillValue=-9999`), 층 변수 `(time,layer,lat,lon)`로 transpose,
+  누적 4종(UGDRNOFF·SFCRNOFF·ACSNOW·ACSNOM)은 전월 마지막 21Z 파일과 차분→mm/day. UTC 일평균은 03/09/15/21Z 4샘플(1979-01-01만 3).
+  검증 1979-01·02: 일평균 vs raw 4파일 독립계산 max|차| 1.8e-5, 누적 closure Σinc=(last−prev) 정확히 0, 월 육지평균(2월) LH 34.6 / HFX 21.0 / FSA 122 / TRAD 279.3 K.
+  월파일 6.4 MB, 일파일 ~160 MB(45 yr ≈ 90 GB), 월당 45 s.
+  **함정 2개**: ① 누적변수가 spin-up restart에서 상속돼 최대 1.27e6 mm → float32 6h 증분 분해능 0.125 mm(고유출 격자). 월평균은 (last−prev)/일수라 정확,
+  **일값은 고유출 격자에서 양자화 노이즈** (다음 런은 accumulator 0 초기화 권장). ② UGDRNOFF 증분 음수 5%(min −0.11 mm/6h, 누적 min −9649 mm) —
+  Noah-MP OPT_RUN=1 지하수 모듈의 상향 모세관 플럭스로 지하유출이 음수 가능(설계상), 필터링 안 함. ③ xarray `sel(time='YYYY-MM-DD')`는 정확 일치 시 time 차원을 떨어뜨림(`.squeeze()` 필요).
+- **1979 12개월 후처리 완료 (박제, 2026-09-21 16:44)**: `pp1979.sh`(월 루프, 로그 `postproc/pp1979.log`) 10분. 월파일 12 + 일파일 12(`--daily`) = 2.0 GB.
+  파일 합 1459 ✓, 12개월 모두 일평균 cross-check ≤2.1e-5, 누적 closure ≤2.4e-7 mm, 육지 NaN 191 고정. 월 육지평균 계절순환(cos(lat), non-ice):
+  LH 30.8(12월)→53.9(7월) W/m², HFX 17.7(1월)→42.1(6월), FSA 110.8→184.1, TRAD 277.9→295.2 K, UGDRNOFF 0.66–1.11 mm/day. NH 육지 지배 순환으로 타당.
+- **다음**: ② 완주 확인(`RESTART.2024010103`, 9/22 03시경) → 1980–2023 후처리(연 루프로 확장, 일파일 45 yr ≈ 90 GB 보존 여부 결정) → 6h 삭제 여부 결정
   ③ 후처리 cdo 6h→daymean→monmean(540 월파일, NaN 0, 누적변수 UGDRNOFF·SFCRNOFF·ACSNOW·ACSNOM은 차분) → 확인 후 6h 삭제.
 - **1979 세그먼트 검증(14:51, 17 min)**: LDASOUT 1459+1(다음 해 03Z) = 1460, 31.4 MB/파일, 49 GB/yr. 육지평균(non-ice,
   cos(lat)) 7/1 03Z/15Z LH 47/66, HFX 27/46, FSA 155/205 W/m²; 1/15 SNEQV 31 mm; NaN 0. **03Z vs 15Z LH 차 20 W/m²** →
