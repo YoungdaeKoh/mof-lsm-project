@@ -414,3 +414,11 @@ restart, non-ice land, cos(lat) 가중).
   현실적.
 - **제안**: cycle 6 restart(`cycle06/RESTART.2011010103_DOMAIN1`)를 생산런 IC로 채택, 판정 기준 "WOOD 격자 95 % ≤1 %/cycle
   + 물리·LAI 동결"로 박제. FASTCP까지 1 % 미만을 원하면 3~4 cycle 추가(≈1일).
+- **결정(2026-09-21, 사용자)**: cycle 6 restart(`cycle06/RESTART.2011010103_DOMAIN1`)를 본실험 IC로 채택. 판정 기준
+  "WOOD 격자 98 % ≤1 %/cycle + LAI·물리 동결" (완화 기준, CLM5 §7o와 동일 논리). STBLCP는 질소순환 없어 되먹임 없음
+  → NEE·토양호흡 진단 시 편향 명시. 미수렴 161셀 중 150셀 65°N 이상(IVGTYP 19 mixed tundra 141, WOOD 2–7 gC/m²).
+- 그림 `figures/noahmp/noahmp_dveg5_spinup_6cyc.png` (`scripts/plot_dveg5_spinup.py`, 로컬 아카이브
+  `/Volumes/data02/NOAHMP/spinup_raw/noahmp_WFDE5_1deg_dveg5/` 9.0 GB + seed).
+- **본실험 출력 결정**: HRLDAS LDASOUT은 순간값(누적변수 UGDRNOFF·SFCRNOFF·ACSNOW·ACSNOM 제외), 평균 옵션 없음 →
+  **6h 출력(03/09/15/21Z)** 후 후처리로 일·월평균, 월평균 완성 확인 후 6h 삭제. 1° 95변수 31 MB/파일 → 45년 65,744파일
+  ≈ 2 TB(/home). 일 1회 03Z(510 GB)는 플럭스가 일평균과 달라 기각.
