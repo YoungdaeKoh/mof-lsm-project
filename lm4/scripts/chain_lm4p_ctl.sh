@@ -23,7 +23,7 @@
 # archived before the run directory is reused (see lsm-spinup-raw-preservation).
 set -u
 
-R=/data2/ydkoh/lm4/RUN/lm4p_ctl_1979-2024
+R=${R:-/data2/ydkoh/lm4/RUN/lm4p_ctl_1979-2024}   # override for a variant run (e.g. lm4p_lufix_1979-2023)
 F=/data2/ydkoh/lm4/forcing_WFDE5_lm4p
 Y0=${1:-1979}
 Y1=${2:-2024}

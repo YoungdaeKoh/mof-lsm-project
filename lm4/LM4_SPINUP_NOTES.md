@@ -1442,3 +1442,10 @@ radius_deg = 1.0 + 3.0 * min(1, area_mou / 2.5e6)
   차이는 수용 — 2000년으로 맞추려면 all-natural seed로 300년+ cold-start spin-up(≈4개월, 크래시 위험 재개)이 필요해
   얻는 것에 비해 비용이 과함. 세 모델 형태 정합: CLM5 2000 고정 / LM4p 2010 동결 / Noah-MP 토지이용 없음.
   실행 시점 = CLM5 생산런 종료 후.
+- **착수 (2026-09-22 17:21, job 8474 @climate01)**: `lm4p_lufix_1979-2023` (45년, ctl·CLM5·Noah-MP와 기간 정합). 설정 스크립트
+  `LM4p_WFDE5_ctl_1979_2024.sh`를 `LANDUSE`로 런 이름·PBS -N·Y1까지 파생하도록 파라미터화(디렉토리명 3곳 하드코딩 제거),
+  `chain_lm4p_ctl.sh`는 `R=` env 오버라이드. **스크립트 결함 1건 수정**: cycle 1 템플릿은 `npes_io_group = 8`인데 스크립트가
+  "이미 48"로 가정 → assert에서 ABORT. sed로 48 설정 추가. 결과 run dir은 ctl과 `input.nml.template` diff가
+  **`do_landuse_change = .FALSE.` 한 줄뿐**(data/field/diag_table·SIS_layout 동일, seed = cycle 1 끝 2011-01-01 03Z, ctl SEED_2010과 바이트 동일).
+  체인: `nohup env R=<dir> bash chain_lm4p_ctl.sh 1979 2023` (로그인 노드). 예상 10.5 h/yr → 45년 ≈ 20일(10/12경).
+  /data2 여유 4.9 TB(98% 사용, 내 몫 ~3 TB: clm5_bgc_pad 955 G·lm4_spinup30 485 G·clm5_bgc_ad 398 G·ctl 397 G) — 런 중 4 TB 아래로 가면 정리.

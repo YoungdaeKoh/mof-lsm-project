@@ -120,7 +120,13 @@ done
 # 2. Run directory -- copied from cycle 1, never the other way round
 # ============================================================================
 SRC=/data2/ydkoh/lm4/RUN/lm4_spinup30          # cycle 1 (1981-2010), read only
-T=/data2/ydkoh/lm4/RUN/lm4p_ctl_1979-2024
+# LANDUSE=on  -> lm4p_ctl_1979-2024  (the ctl as run; LUH2 transitions)
+# LANDUSE=off -> lm4p_lufix_1979-2023 (land use frozen at the 2010 seed, 13.55;
+#                45 years to match ctl/CLM5/Noah-MP, no LUH2 end constraint)
+LANDUSE=${LANDUSE:-on}
+if [ "$LANDUSE" = "off" ]; then EXP=lm4p_lufix_1979-2023; JOB=lm4p_lufix; Y1=2023
+else                            EXP=lm4p_ctl_1979-2024;   JOB=lm4p_ctl;   Y1=2024; fi
+T=/data2/ydkoh/lm4/RUN/$EXP
 
 [ -e "$T" ] && { echo "ABORT: $T already exists (holds 45 years; not deleted)"; exit 1; }
 mkdir -p "$T/RESTART" "$T/FORCING" "$T/archive"
@@ -154,8 +160,10 @@ sed -i -e "s/^LAYOUT    = 6,4/LAYOUT    = 6,8/" "$T/SIS_layout"
 # land_model_nml npes_io_group = 48 (= all PEs): the land's unstructured grid
 # ignores io_layout; with the KIOST default 8 the restarts AND the land
 # diagnostics come out as .0001/.0002 pieces that the archive step below does
-# not match and the cleanup step does (13.21, 13.48).  Set in the template
-# already; asserted in section 3.
+# not match and the cleanup step does (13.21, 13.48).  Cycle 1's template still
+# carries the KIOST default 8 (the ctl template was edited by hand); set it here.
+sed -i -e "/^ &land_model_nml/,/^\// s/^       npes_io_group = 8$/       npes_io_group = 48/" \
+       "$T/input.nml.template"
 
 # --- land-use marker ------------------------------------------------------------
 # landuse.res (one line) records when transitions were last applied; cycle 1
@@ -228,7 +236,6 @@ need '^ +do_biogeography += .FALSE.'           # species prescribed, decision 13
 # limit -- the same "fixed land use" form as CLM5's 2000_ compset, a decade
 # apart.  LANDUSE=off also removes the tile growth transitions cause, which is
 # part (not the bulk: cohort count is, 13.17) of the 10 h/yr cost.
-LANDUSE=${LANDUSE:-on}
 if [ "$LANDUSE" = "off" ]; then
   sed -i 's/^\( *do_landuse_change *= *\)\.TRUE\./\1.FALSE./' "$T/input.nml.template"
   need '^ +do_landuse_change = .FALSE.'         # transitions frozen (LANDUSE=off)
@@ -366,6 +373,11 @@ echo "=== lm4p_ctl launching on $NP ranks (atmos_npes must=48) $(date) ==="
 mpirun -hostfile $PBS_NODEFILE -np $NP ./fms_esm4.5_compile_v3_1007_fix.x > esm4p5.log 2>&1
 echo "=== END rc=$? $(date) ==="
 EOF
+# the heredoc is literal: stamp this run's directory and job name into it
+sed -i -e "s|/data2/ydkoh/lm4/RUN/lm4p_ctl_1979-2024|$T|" \
+       -e "s|^#PBS -N lm4p_ctl$|#PBS -N $JOB|" \
+       -e "s|^### One model year of lm4p_ctl_1979-2024|### One model year of $EXP|" "$T/run_lm4p_ctl.sh"
+grep -q "^export work_dir=$T$" "$T/run_lm4p_ctl.sh" || { echo "ABORT: work_dir not stamped"; exit 1; }
 chmod +x "$T/run_lm4p_ctl.sh"
 
 # ============================================================================
@@ -388,7 +400,9 @@ chmod +x "$T/run_lm4p_ctl.sh"
 # R=$T and F=$FORC, so it needs no arguments beyond the year range.
 # TODO(confirm): path of the git checkout on climate00 -- until then, scp the
 # file from the local repo into $T before submitting.
-CHAIN=/data2/ydkoh/lm4/RUN/lm4p_ctl_1979-2024/chain_lm4p_ctl.sh     # the copy the run used
+# chain_lm4p_ctl.sh reads R from the environment (default = the ctl dir), so the
+# same file drives either run:  R=$T bash chain_lm4p_ctl.sh Y0 Y1
+CHAIN=${CHAIN:-$HOME/chain_lm4p_ctl.sh}        # scp lm4/scripts/chain_lm4p_ctl.sh here first
 [ -f "$CHAIN" ] && cp -p "$CHAIN" "$T/chain_lm4p_ctl.sh" \
   || echo "NOTE: chain_lm4p_ctl.sh not found at $CHAIN -- scp lm4/scripts/chain_lm4p_ctl.sh into $T"
 
@@ -409,9 +423,9 @@ echo "archive     : $(ls "$T/archive" | wc -l) (must be 0)"
 echo ""
 echo "submit (login node; the chain only sleeps and qsubs):"
 echo "  cd $T"
-echo "  nohup bash chain_lm4p_ctl.sh 1979 2024 > chain_driver.out 2>&1 &"
-echo "expect ~10.5 h per model year on climate01; it will stop at 2023 when"
-echo "LUH2 transitions run out (13.54) -- that is the intended end."
+echo "  nohup env R=$T bash chain_lm4p_ctl.sh 1979 $Y1 > chain_driver.out 2>&1 &"
+echo "expect ~10.5 h per model year on climate01 (land use: $LANDUSE)."
+[ "$LANDUSE" = "on" ] && echo "ctl stops at 2023 when LUH2 transitions run out (13.54) -- intended."
 echo "check:  tail chain.log ; ls archive | wc -l ; grep FATAL esm4p5.log"
 echo "warm-start proof is the vegetation structure, not rc: tile>=13, cohort~60"
 echo "in RESTART/vegn1.res.tile1.nc (cold start would show tile=1, cohort=1)."
