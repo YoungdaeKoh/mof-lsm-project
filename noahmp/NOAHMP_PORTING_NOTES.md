@@ -453,7 +453,14 @@ restart, non-ice land, cos(lat) 가중).
   결과: LDASOUT **65,743개 전부 31,380,840 B**, 마지막 두 파일 NaN 0·값 정상(SNEQV 상한 5000 = 빙상 정상). 잃은 건 `2024010103.LDASOUT`(기간 밖)과
   `RESTART.2024010103`(연장용 IC)뿐 → **일·월 평균엔 손실 없음**(12월 31일도 4샘플). 총 12.6 h(≈17 min/yr). 2024 이후 연장 필요 시 2023123121 LDASIN을
   2024010103으로 복제해 2023 세그먼트 17분 재실행하면 restart 확보 가능. 교훈: 연 세그먼트 런은 forcing이 마지막 연도 +1 스텝까지 있어야 함.
-- **다음**: 1980–2023 후처리(연 루프로 확장, 일파일 45 yr ≈ 90 GB 보존 여부 결정) → 6h 삭제 여부 결정
+- **45년 후처리 완료 (박제, 2026-09-23 16:21)**: `postproc/pp_years.sh 1980 2023`(월 단위 skip 가드, 로그 `pp_1980_2023.log`) 5.4 h.
+  **월파일 540 + 일파일 540 = 90 GB**(`postproc/`). 실패 0, 최악 일평균 cross-check 2.3e-5, 최악 누적 closure 7.2e-6 mm,
+  전 기간 육지 NaN 191 고정, nsamp/day 전부 4(1979-01만 3).
+- **45년 시계열 = 표류·튐 없음 (박제)**: 연 육지평균(cos(lat), non-ice) 45년 추세/10년 — LH +0.36, HFX −0.31, FSA +0.63 W/m²,
+  TRAD +0.24 K, SNEQV −0.13 mm, LAI +0.0005, SOIL_M(l1) −0.0007. **spin-up 잔여 표류로 볼 만한 단조 증감 없음**(LAI·SOIL_M은 사실상 0,
+  TRAD/FSA는 WFDE5 온난화와 부호 일치). 연간 최대 점프도 전부 표준편차의 2–3배 이내(최대 SNEQV 1.77 mm @2012→13, sd 0.60) —
+  wrap 스파이크([[lsm-cyclic-forcing-wrap-shock]])에 해당하는 불연속 없음(본실험은 cyclic 아님). 진단 스크립트 `/tmp/ydk_ts.py` 패턴.
+- **다음**: 6h 원본(65,743파일 ≈ 2 TB) 삭제 여부 결정 → 세 모델(CLM5·LM4p·Noah-MP) 공통격자 진단 착수
   ③ 후처리 cdo 6h→daymean→monmean(540 월파일, NaN 0, 누적변수 UGDRNOFF·SFCRNOFF·ACSNOW·ACSNOM은 차분) → 확인 후 6h 삭제.
 - **1979 세그먼트 검증(14:51, 17 min)**: LDASOUT 1459+1(다음 해 03Z) = 1460, 31.4 MB/파일, 49 GB/yr. 육지평균(non-ice,
   cos(lat)) 7/1 03Z/15Z LH 47/66, HFX 27/46, FSA 155/205 W/m²; 1/15 SNEQV 31 mm; NaN 0. **03Z vs 15Z LH 차 20 W/m²** →
