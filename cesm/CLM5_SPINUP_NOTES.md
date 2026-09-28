@@ -404,3 +404,17 @@ restart 0202-01-01 = **201 model-year 완주**, raw 201개 `~/CESM/spinup_raw/cl
   **2노드 MPI 작동 확인**(rank 48+48, CLAUDE.md "96PE 불가"는 미검증이었음 → 정정). 생산런은 여전히 climate01 단독.
 - 생산 체인 chunk 1(1979–1983, job 8456) 07:04 시작 → 11:42 시점 1980-11 (≈2.4 h/yr, 초기화 포함). 5년 청크 ≈ 11 h,
   45년 ≈ 4일 예상. 로그 `cases/clm5_prod_1979_2023/chain.log`.
+
+### 7r. 후처리 — 월 h0 → 연별 파일 (NCL, 2026-09-28)
+
+- 스크립트 `cesm/postproc/clm5_mon2year_extrac.ncl` (서버 사본 `/data2/ydkoh/cesm2_output/postproc/`).
+  사용자 기존 패턴(`sps/previous_project/2024_tibet_model/data_extrac/08.*.clm2d.mon.ncl`) 그대로:
+  `systemfunc("ls ...")` → `addfiles` + `ListSetType "cat"` → `fi[:]->$var$` → `fo->$var$`. 차이는 연도당 1파일에 34변수(옛 스크립트는 변수당 1파일).
+- **★ time 함정(해결)**: CLM h0는 월평균을 **기간 끝**에 찍음(1979-01 평균의 time = 31 = 2월 1일) → 파일별로 읽으면 전 월이 한 칸씩 밀림.
+  `wrk&time = wrk&time - 15`로 달 중앙 이동. 검증: 16/44/75… → 1979-01-17·02-14·03-17.
+- **★ 서버 NCL은 `NCARG_ROOT` 필수**: 비대화형 SSH에서 `module load`가 안 먹어 **segfault(rc=139)**.
+  `setenv NCARG_ROOT /usr/local/ncl_ncarg/6.6.2_gcc485` 먼저. (tcsh라 리다이렉트도 `>&`)
+- 산출물 `/data2/ydkoh/cesm2_output/postproc/clm5_prod/clm5_prod.YYYY.nc` 45개. 검증: 전 파일 12 records·월 1–12 순서·34변수, 문제 0.
+  45년 육지평균(cos(lat), 빙상 포함) 추세/10년 — LH +0.29, FSH −0.24 W/m², TSA +0.24 K, TLAI +0.0003. **표류 없음**, Noah-MP와 부호·크기 일치(TSA 둘 다 +0.24 K/dec).
+- 변수 대응표 `cesm/postproc/VARIABLE_MAP.md` (CLM5↔Noah-MP↔LM4p, 함정 포함).
+- raw 백업: `/Volumes/data02/MOF_LSM_model_results/clm5/clm5_prod_1979_2023/` (h0 540 + restart 45, 215 GB, rsync 진행 중).
