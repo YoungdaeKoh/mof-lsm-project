@@ -460,6 +460,13 @@ restart, non-ice land, cos(lat) 가중).
   TRAD +0.24 K, SNEQV −0.13 mm, LAI +0.0005, SOIL_M(l1) −0.0007. **spin-up 잔여 표류로 볼 만한 단조 증감 없음**(LAI·SOIL_M은 사실상 0,
   TRAD/FSA는 WFDE5 온난화와 부호 일치). 연간 최대 점프도 전부 표준편차의 2–3배 이내(최대 SNEQV 1.77 mm @2012→13, sd 0.60) —
   wrap 스파이크([[lsm-cyclic-forcing-wrap-shock]])에 해당하는 불연속 없음(본실험은 cyclic 아님). 진단 스크립트 `/tmp/ydk_ts.py` 패턴.
+- **연별 묶기 완료 + ncrcat 검증 (박제, 2026-09-28 17:05)**: `postproc/mon2year.csh`(tcsh, nco 4.8.0 풀경로) → `postproc/yearly/noahmp_prod.YYYY.nc` **45개, 3.1 GB**.
+  **ncrcat 신뢰성 검증(1979, Python 전수 비교)**: 98변수 중 **97개 bit 단위 완전 일치**, 마스크 일치, `_FillValue`·units·description·global attrs 전부 보존.
+  전 연도 감사도 통과(12 records·월 1–12·변수 수 동일, 3년×3월×95 float 변수 최대차 **0.000e+00**).
+- **★ ISNOW는 월파일에서 무의미 (ncrcat이 잡아낸 내 결함)**: `ldasout_6h_to_daymon.py`가 **정수형 변수를 전부 정적으로 간주**해 그 달 첫 6h 스냅샷을 넣음.
+  IVGTYP·ISLTYP는 실제 정적이라 맞지만 **ISNOW(적설층 수 −3~0)는 시변**(1월 vs 7월 6,957격자 상이, 하루 안에서도 188격자 변동).
+  → 연별 파일에서 `ncrcat -x -v ISNOW`로 **제외**. 적설 물리는 SNOWH·SNEQV·FSNO가 담당, 층 수가 필요하면 6h 원본에서 복구.
+  (교훈: dtype으로 static/prognostic을 나누면 안 됨. 다른 모델 후처리에도 같은 함정 가능)
 - **다음**: 6h 원본(65,743파일 ≈ 2 TB) 삭제 여부 결정 → 세 모델(CLM5·LM4p·Noah-MP) 공통격자 진단 착수
   ③ 후처리 cdo 6h→daymean→monmean(540 월파일, NaN 0, 누적변수 UGDRNOFF·SFCRNOFF·ACSNOW·ACSNOM은 차분) → 확인 후 6h 삭제.
 - **1979 세그먼트 검증(14:51, 17 min)**: LDASOUT 1459+1(다음 해 03Z) = 1460, 31.4 MB/파일, 49 GB/yr. 육지평균(non-ice,
