@@ -1,0 +1,161 @@
+&JULES_OUTPUT
+  run_id = 'jules1deg',
+  output_dir = '/home/ydkoh/JULES_runs/prod_1deg_test/output'
+  nprofiles = 4
+/
+
+! Variable identifiers verified against
+!   src/io/model_interface/variable_metadata.inc (672 identifiers, vn7.4).
+! Period constants from src/util/datetime_mod.F90:
+!   period_month = -1, period_year = -2, period_day = -3.
+! output_period = -1 gives calendar-month means; the previous setting of
+! 2592000 s produced fixed 30-day means, which drift away from calendar months
+! and would not line up with the LM4/CLM5 monthly output.
+! output_period must not be period_day (rejected in register_output_profile.inc);
+! use 86400 for daily.
+! Output types (src/io/output/output_mod.F90): S snapshot, A accumulation,
+!   M mean, X max, N min.
+
+!-----------------------------------------------------------------------------
+! Profile 1: monthly means - the main diagnostic stream (T1 + T2)
+!-----------------------------------------------------------------------------
+&JULES_OUTPUT_PROFILE
+  profile_name = 'monthly',
+  file_period = -2,
+  output_main_run = .true.,
+  output_period = -1,
+
+  nvars = 35
+
+  ! -- T1 vegetation
+  var(1 ) = 'lai'              output_type(1 ) = 'M'
+  var(2 ) = 'canht'            output_type(2 ) = 'M'
+  var(3 ) = 'cv'               output_type(3 ) = 'M'
+  var(4 ) = 'gpp_gb'           output_type(4 ) = 'M'
+  var(5 ) = 'npp_gb'           output_type(5 ) = 'M'
+  var(6 ) = 'resp_p_gb'        output_type(6 ) = 'M'
+  var(7 ) = 'resp_s_gb'        output_type(7 ) = 'M'
+  var(8 ) = 'frac'             output_type(8 ) = 'M'
+
+  ! -- T1 runoff
+  var(9 ) = 'runoff'           output_type(9 ) = 'M'
+  var(10) = 'surf_roff'        output_type(10) = 'M'
+  var(11) = 'sub_surf_roff'    output_type(11) = 'M'
+
+  ! -- T2 energy fluxes
+  var(12) = 'ftl_gb'           output_type(12) = 'M'
+  var(13) = 'latent_heat'      output_type(13) = 'M'
+  var(14) = 'rad_net'          output_type(14) = 'M'
+  var(15) = 'surf_ht_flux_gb'  output_type(15) = 'M'
+  var(16) = 'albedo_land'      output_type(16) = 'M'
+  var(17) = 'fsmc_gb'          output_type(17) = 'M'
+  var(18) = 'ecan_gb'          output_type(18) = 'M'
+  var(19) = 'esoil_gb'         output_type(19) = 'M'
+  var(20) = 'et_stom_gb'       output_type(20) = 'M'
+  var(21) = 'ei_gb'            output_type(21) = 'M'
+  var(22) = 'fqw_gb'           output_type(22) = 'M'
+
+  ! -- T2 soil
+  var(23) = 'smcl'             output_type(23) = 'M'
+  var(24) = 'sthu'             output_type(24) = 'M'
+  var(25) = 'sthf'             output_type(25) = 'M'
+  var(26) = 't_soil'           output_type(26) = 'M'
+  var(27) = 'smc_tot'          output_type(27) = 'M'
+  var(28) = 'cs'               output_type(28) = 'M'
+! 'zw' (water table depth) needs TOPMODEL: only add it back when
+! jules_hydrology.nml has l_top = .true. (currently .false.).
+
+  ! -- T2 snow
+  var(29) = 'snow_mass_gb'     output_type(29) = 'M'
+  var(30) = 'snow_frac'        output_type(30) = 'M'
+  var(31) = 'snow_depth'       output_type(31) = 'M'
+  var(32) = 'snow_melt_gb'     output_type(32) = 'M'
+
+  ! -- T2 forcing control / surface state
+  var(33) = 't1p5m_gb'         output_type(33) = 'M'
+  var(34) = 'precip'           output_type(34) = 'M'
+  var(35) = 'tstar_gb'         output_type(35) = 'M'
+/
+
+!-----------------------------------------------------------------------------
+! Profile 2: daily means - matches the LM4 land_daily stream so the models can
+! be compared at the same temporal resolution. Daily output cannot be
+! reconstructed from monthly files afterwards.
+!-----------------------------------------------------------------------------
+&JULES_OUTPUT_PROFILE
+  profile_name = 'daily',
+  file_period = -2,
+  output_main_run = .true.,
+  output_period = 86400,
+
+  nvars = 35
+
+  var(1 ) = 'lai'              output_type(1 ) = 'M'
+  var(2 ) = 'canht'            output_type(2 ) = 'M'
+  var(3 ) = 'cv'               output_type(3 ) = 'M'
+  var(4 ) = 'gpp_gb'           output_type(4 ) = 'M'
+  var(5 ) = 'npp_gb'           output_type(5 ) = 'M'
+  var(6 ) = 'resp_p_gb'        output_type(6 ) = 'M'
+  var(7 ) = 'resp_s_gb'        output_type(7 ) = 'M'
+  var(8 ) = 'frac'             output_type(8 ) = 'M'
+
+  var(9 ) = 'runoff'           output_type(9 ) = 'M'
+  var(10) = 'surf_roff'        output_type(10) = 'M'
+  var(11) = 'sub_surf_roff'    output_type(11) = 'M'
+
+  var(12) = 'ftl_gb'           output_type(12) = 'M'
+  var(13) = 'latent_heat'      output_type(13) = 'M'
+  var(14) = 'rad_net'          output_type(14) = 'M'
+  var(15) = 'surf_ht_flux_gb'  output_type(15) = 'M'
+  var(16) = 'albedo_land'      output_type(16) = 'M'
+  var(17) = 'fsmc_gb'          output_type(17) = 'M'
+  var(18) = 'ecan_gb'          output_type(18) = 'M'
+  var(19) = 'esoil_gb'         output_type(19) = 'M'
+  var(20) = 'et_stom_gb'       output_type(20) = 'M'
+  var(21) = 'ei_gb'            output_type(21) = 'M'
+  var(22) = 'fqw_gb'           output_type(22) = 'M'
+
+  var(23) = 'smcl'             output_type(23) = 'M'
+  var(24) = 'sthu'             output_type(24) = 'M'
+  var(25) = 'sthf'             output_type(25) = 'M'
+  var(26) = 't_soil'           output_type(26) = 'M'
+  var(27) = 'smc_tot'          output_type(27) = 'M'
+  var(28) = 'cs'               output_type(28) = 'M'
+! 'zw' (water table depth) needs TOPMODEL: only add it back when
+! jules_hydrology.nml has l_top = .true. (currently .false.).
+
+  var(29) = 'snow_mass_gb'     output_type(29) = 'M'
+  var(30) = 'snow_frac'        output_type(30) = 'M'
+  var(31) = 'snow_depth'       output_type(31) = 'M'
+  var(32) = 'snow_melt_gb'     output_type(32) = 'M'
+
+  var(33) = 't1p5m_gb'         output_type(33) = 'M'
+  var(34) = 'precip'           output_type(34) = 'M'
+  var(35) = 'tstar_gb'         output_type(35) = 'M'
+/
+
+!-----------------------------------------------------------------------------
+! Profiles 3-4: daily max / min of 1.5 m temperature, for the year-5 heatwave
+! and drought work (CLM equivalents: TREFMXAV / TREFMNAV).
+! Kept as separate profiles because one identifier appearing more than once
+! within a single profile would collide on the output variable name.
+!-----------------------------------------------------------------------------
+&JULES_OUTPUT_PROFILE
+  profile_name = 'daily_max',
+  file_period = -2,
+  output_main_run = .true.,
+  output_period = 86400,
+
+  nvars = 1
+  var(1 ) = 't1p5m_gb'         output_type(1 ) = 'X'
+/
+
+&JULES_OUTPUT_PROFILE
+  profile_name = 'daily_min',
+  file_period = -2,
+  output_main_run = .true.,
+  output_period = 86400,
+
+  nvars = 1
+  var(1 ) = 't1p5m_gb'         output_type(1 ) = 'N'
+/

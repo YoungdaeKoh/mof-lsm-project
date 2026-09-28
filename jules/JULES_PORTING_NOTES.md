@@ -319,3 +319,32 @@ tpl_name = 'TPQWL','TPQWL','TPQWL','TPQWL','TPQWL','Solr','Prec'   # %vv ← tpl
 
 **다음 (1° 런 착수)**: ① `model_grid.nml` nx=360 ny=180 + ancil 경로를 `global_1deg/`로 ② `ancillaries.nml`의 soil/frac 경로 교체
 ③ `drive.nml` `%vv`를 `/data2/ydkoh/jules_gswp3_1deg/`로 ④ initial_conditions 확인 ⑤ 48-rank MPI(§11) 1° spin-up.
+
+## 14. ★★★ 1° 런 성공 — 1개월 smoke (2026-09-28, job 8495 @climate02)
+
+`~/JULES_runs/prod_1deg_test` (repo `jules/runs/prod_1deg_test/`). base = `test_out36`(MPI+병렬netCDF 검증본, TRIFFID on, cold start).
+**1981-01 1개월, 8랭크, 50초 완주(rc=0, FATAL 0)**. 출력 4프로파일 + dump.
+
+**바꾼 파일 6개**: `model_grid.nml`(nx=360/ny=180, grid_info 2곳) · `ancillaries.nml`(soil/frac → global_1deg) ·
+`drive.nml`(GSWP3 1° 템플릿, **data_period 21600→10800**, 1981) · `timesteps.nml`(1981-01) · **`output.nml`(run_id/output_dir)** ·
+실행 스크립트. `initial_conditions.nml`은 cold start(상수)라 그대로 — 0.5° dump 재사용 금지 경고는 애초에 해당 없음.
+
+**막혔던 4단계 (전부 환경·자료 문제, 코드 아님)**
+1. PBS 스크립트에 **shebang 없음** → 로그인셸 tcsh로 실행돼 `> log 2>&1`이 `Ambiguous output redirect`. `#!/bin/bash` 필수.
+2. **`libifport.so.5` 없음(rc=127)**: mv234 netCDF/HDF5가 Intel 빌드라 exe가 ifort 런타임을 요구하는데, 비대화형 셸에서 제출한
+   PBS 잡엔 oneAPI 환경이 없음 → `LD_LIBRARY_PATH`에 `/usr/local/intel/oneapi/compiler/2022.0.1/linux/compiler/lib/intel64_lin` 추가.
+3. **★ `init_ic: Land ice points and soil points are mutually exclusive`** — 1° ancil 재격자화의 부작용. `init_ic.inc:906`은
+   `frac(ice) > 0`이면 즉시 빙하점으로 보고, `frac(ice) ≠ 1`이면 또 에러. 2×2 평균이 빙하 가장자리에 0.25/0.5/0.75를 만듦.
+   → **다수결**: ≥0.5면 순수빙하(ice=1, 나머지 0), <0.5면 빙하 조각 제거 후 8타일 합=1 재정규화. (834 순수빙하, 61셀 정리)
+4. **★ 그것만으론 부족했다 — 토양 판정은 `sm_sat > 0`으로 따로 한다**(`init_ic.inc:932`). 0.5° 원본은 빙하셀에서
+   b·sathh·satcon·sm_sat·sm_crit·sm_wilt=**0**, hcap=6.3e5·hcon=0.265·albsoil=0.75(얼음값) 규약인데 평균이 이걸 뭉갬.
+   → 순수빙하 셀의 토양 수리특성을 0으로, 열특성을 얼음값으로 복원. **빙하 마스크는 실제로 파일에 쓰이는 배열에서 뽑을 것**
+   (원본에서 따로 계산했더니 결측처리 차이로 16셀이 어긋남).
+
+**검증**: x = **17,295** 육지점으로 1° 마스크와 정확히 일치. lat −55.5..83.5(남극 없음, §13 그대로), lon 0..359.
+daily 31 records. 육지평균 `latent_heat` 35.1 W/m²(−102~303), `ftl_gb` 36.6, `t1p5m_gb` 273.2 K(211~311), `snow_frac` 0.38,
+`frac` 평균 0.1111(=1/9, 9타일 합=1). **물수지 `runoff = surf_roff + sub_surf_roff` 최대오차 4.1e-10** — §MPI 검증과 동일한 정합.
+처리량 8랭크 50초/월 → **≈10분/model-yr**, 48랭크면 더 빠름. 30년 cycle이 현실적.
+
+**다음**: ① 1년 런으로 계절순환 확인 ② 48랭크 벤치 ③ GSWP3 1981–2010 cycling spin-up ④ 생산런 1979–2023(단 1° GSWP3 forcing은
+현재 1981–2010만 — 1979–80·2011–23 추가 변환 필요).

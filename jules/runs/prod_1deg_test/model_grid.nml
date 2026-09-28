@@ -1,0 +1,30 @@
+&JULES_INPUT_GRID
+  grid_is_1d = .false.,
+  x_dim_name = 'lon',
+  y_dim_name = 'lat',
+  nx = 360,
+  ny = 180,
+  type_dim_name = 'pseudo',
+  time_dim_name = 'time'
+/
+&JULES_LATLON
+  l_coord_latlon = .true.,
+  file = '/home/ydkoh/JULES_runs/ancil/global_1deg/grid_info_1deg.nc',
+  nvars = 2,
+  var = 'latitude', 'longitude'
+/
+&JULES_LAND_FRAC
+  file = '/home/ydkoh/JULES_runs/ancil/global_1deg/grid_info_1deg.nc',
+  land_frac_name = 'land_fraction'
+/
+&JULES_MODEL_GRID
+  land_only = .true.
+/
+&JULES_NLSIZES
+  bl_levels = 1
+/
+&JULES_SURF_HGT
+  zero_height = .true.
+/
+&JULES_Z_LAND
+/

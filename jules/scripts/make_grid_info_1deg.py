@@ -39,6 +39,45 @@ os.makedirs(a.outdir, exist_ok=True)
 lon1 = np.arange(360, dtype='f8')            # 0 .. 359
 lat1 = -89.5 + np.arange(180, dtype='f8')    # -89.5 .. 89.5
 
+ICE_TILE = 8          # jules_surface_types: ice = 9, so index 8 (0-based)
+
+def fix_ice_soil(frac, land):
+    """Make every ice cell all-or-nothing, the way the 0.5 deg source is.
+
+    JULES (init_ic.inc) calls a point "ice" as soon as frac(ice) > 0, then
+    aborts if that same point is also in the soil list (built from sm_sat > 0),
+    and separately errors if the ice fraction is not exactly 1.  A 2x2 mean
+    turns the ice margin into mixtures (ice 0.25, vegetation 0.75) that violate
+    both rules.  The block decides by majority: ice-dominated blocks become pure
+    ice, the rest lose their ice sliver and the remaining eight tiles are
+    renormalised to sum to one.  Nothing is invented -- this restores the
+    all-or-nothing character the source had.
+
+    Sets the module-level PURE_ICE so the soil file, written next, can zero the
+    hydraulic properties at exactly these cells.
+    """
+    global PURE_ICE
+    f = np.array(frac, dtype='f8')
+    f[f <= FILL * 0.99] = np.nan
+    ice = np.where(np.isfinite(f[ICE_TILE]), f[ICE_TILE], 0.0)
+
+    PURE_ICE = land & (ice >= 0.5)
+    mixed    = land & (ice > 0) & (ice < 0.5)
+
+    f[ICE_TILE][mixed] = 0.0                  # drop the sliver
+    rest = np.nansum(f[:ICE_TILE], axis=0)
+    with np.errstate(invalid='ignore', divide='ignore'):
+        scale = np.where(rest > 0, 1.0 / rest, 0.0)
+    for k in range(ICE_TILE):
+        f[k][mixed] = f[k][mixed] * scale[mixed]
+
+    f[:, PURE_ICE] = 0.0                      # ice-dominated -> pure ice
+    f[ICE_TILE][PURE_ICE] = 1.0
+
+    print('  ice: %d pure-ice cells, %d mixed cells cleaned' % (PURE_ICE.sum(), mixed.sum()))
+    return np.where(np.isfinite(f), f, FILL)
+
+
 def roll_to_0360(lon, arr):
     """-180..180 -> 0..360, moving the data with the coordinate (last axis)."""
     k = int(np.sum(lon < 0))
@@ -91,8 +130,21 @@ print('  0.5deg land cells: %d -> expected ~%d at 1deg' % (lf05.sum(), lf05.sum(
 print('  block-mean histogram:', {float(k): int(v) for k, v in
                                   zip(*np.unique(frac_mean, return_counts=True))})
 
+# ---- which 1 deg cells are ice ---------------------------------------------
+# Decided from frac before anything else, because the soil file has to agree:
+# JULES builds its soil list from sm_sat > 0 (init_ic.inc), so an ice point must
+# carry sm_sat = 0 or it lands in both lists and the run aborts.  The 0.5 deg
+# source already follows this convention (at its ice points b/sathh/satcon/
+# sm_sat/sm_crit/sm_wilt = 0 and hcap/hcon/albsoil are the ice values).
+PURE_ICE = np.zeros_like(land1, dtype=bool)   # filled in by fix_ice_soil (frac is processed first)
+
+# values the 0.5 deg file carries at an ice point
+ICE_SOIL_VALUES = {'field1381': 0.0, 'field342': 0.0, 'field333': 0.0,
+                   'field332': 0.0, 'field330': 0.0, 'field329': 0.0,
+                   'field335': 6.3e5, 'field336': 0.265, 'field1395': 0.75}
+
 # ---- soil and frac on the same grid ---------------------------------------
-for src, outname in (('soil.nc', 'soil_1deg.nc'), ('frac.nc', 'frac_1deg.nc')):
+for src, outname in (('frac.nc', 'frac_1deg.nc'), ('soil.nc', 'soil_1deg.nc')):
     ip = os.path.join(SRC_DIR, src)
     op = os.path.join(a.outdir, outname)
     if os.path.exists(op):
@@ -128,6 +180,10 @@ for src, outname in (('soil.nc', 'soil_1deg.nc'), ('frac.nc', 'frac_1deg.nc')):
             else:
                 new[:, ~m] = FILL
             dims = ('lat', 'lon') if new.ndim == 2 else ('pseudo', 'lat', 'lon')
+            if src == 'frac.nc':
+                new = fix_ice_soil(new, m)
+            elif name in ICE_SOIL_VALUES:
+                new[PURE_ICE] = ICE_SOIL_VALUES[name]
             ov = o.createVariable(name, 'f4', dims)
             ov.units = getattr(sv, 'units', '-')
             ov.missing_value = np.float32(FILL)
