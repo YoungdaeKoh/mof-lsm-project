@@ -1449,3 +1449,19 @@ radius_deg = 1.0 + 3.0 * min(1, area_mou / 2.5e6)
   **`do_landuse_change = .FALSE.` 한 줄뿐**(data/field/diag_table·SIS_layout 동일, seed = cycle 1 끝 2011-01-01 03Z, ctl SEED_2010과 바이트 동일).
   체인: `nohup env R=<dir> bash chain_lm4p_ctl.sh 1979 2023` (로그인 노드). 예상 10.5 h/yr → 45년 ≈ 20일(10/12경).
   /data2 여유 4.9 TB(98% 사용, 내 몫 ~3 TB: clm5_bgc_pad 955 G·lm4_spinup30 485 G·clm5_bgc_ad 398 G·ctl 397 G) — 런 중 4 TB 아래로 가면 정리.
+
+### 13.61 ★★ 생산런 후처리 — 1° 연별 파일 45개 (세 모델 형식 통일, 2026-09-28)
+
+- 파이프라인 2단계. ① `lm4/postprocess/lm4p_to_latlon.py`(§13.59 변환기)로 **36변수 × 1979–2023**을 변수별 1° 파일로
+  (`postproc/lm4p_ctl/byvar/`, 스크립트 `lm4p_latlon_yearly.sh`, 1시간) → ② `lm4p_byvar_to_yearly.py`로 **연별 1파일 45개**
+  (`postproc/lm4p_ctl/yearly/lm4p_ctl.YYYY.nc`, 12 records × 36변수, 62 MB/yr, 합 5.1 GB). CLM5·Noah-MP와 같은 레이아웃.
+- **★ 변환기 결함 수정 — 층 변수 미지원**: `read_var`가 타일을 **axis=1 고정**으로 연결해 `soil_T(time,zfull_soil,grid_index)`에서
+  층을 이어붙이려다 사망(`3839 vs 3939`). `grid_index`를 **이름으로 찾아 마지막 축**에서 연결하고, regrid는 선행차원을 접어
+  처리, 출력에 층 차원을 그대로 실음. 이제 soil_T·soil_liq·soil_ice(zfull_soil 20) · swdn/swup(band 4)도 변환됨.
+- **검증(native C96 대조, 제3격자 안 거침)**: 층 순서·깊이 정상(zfull_soil 0.01/0.04/0.08…), **계절진폭이 깊이 따라 단조 감소
+  16.87 K(1층)→0.47 K(20층)** — 층 뒤섞임 없음의 물리적 증거. 1월 1층 육지평균 native 283.28 vs 변환 cos(lat)가중 **283.23 K**(차 0.05).
+  무가중 변환평균 284.3 vs native 289.9의 −5.6 K 차이는 1° 무가중이 고위도를 과대대표하는 효과([[lsm-landmean-comparability]]), 변환 오류 아님.
+- 연별 파일 감사: 45개 전부 12 records·월 1–12·36변수, byvar 대비 **max|diff| 0.000e+00**.
+  45년 육지평균 추세/10년 — sens −0.42 W/m², t_ref +0.25 K, lai −0.015, snow −0.17 mm, gpp −0.005.
+  **t_ref +0.25 K/dec는 CLM5(+0.24)·Noah-MP(+0.24)와 일치** — 같은 WFDE5를 받는 세 모델이 독립적으로 같은 온난화를 냄.
+  단 lai·gpp는 세 모델 중 LM4p만 감소 추세 → §13.46·13.52의 목재 발산/표류와 연결해 별도 진단 필요.

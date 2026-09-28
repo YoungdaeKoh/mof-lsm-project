@@ -86,23 +86,41 @@ def land_coords(case, year, griddir):
 def read_var(case, year, var):
     """One year of a land_month variable, concatenated over the six tiles.
 
-    Returns (nmonth, npoint).  Raises if a tile is short of twelve months --
-    a truncated year is the one thing that would quietly bias an annual mean.
+    Returns (values, attrs, lev) with values (nmonth, npoint) for a surface
+    field and (nmonth, nlev, npoint) for a layered one (soil_T, soil_liq ...).
+    The tiles are joined along `grid_index`, which is the LAST dimension and
+    the only one whose length differs between tiles -- joining on a fixed axis
+    number silently concatenates the levels instead and dies on the mismatch.
+    Raises if a tile is short of twelve months -- a truncated year is the one
+    thing that would quietly bias an annual mean.
     """
     pieces = []
+    lev = None
     for t in range(1, NTILE + 1):
         f = "%s/archive/y%d/%d0101.land_month.tile%d.nc" % (case, year, year, t)
         with Dataset(f) as d:
             if var not in d.variables:
                 raise SystemExit("'%s' not in %s\n  try --list-vars" % (var, f))
             v = d.variables[var]
+            if "grid_index" not in v.dimensions:
+                raise SystemExit("'%s' is not on grid_index (dims %s)" % (var, v.dimensions))
+            if v.dimensions[-1] != "grid_index":
+                raise SystemExit("'%s' has grid_index at %s, expected last"
+                                 % (var, v.dimensions))
+            if v.ndim not in (2, 3):
+                raise SystemExit("'%s' has %d dims, only (time,grid_index) and "
+                                 "(time,lev,grid_index) are handled" % (var, v.ndim))
             a = np.ma.filled(v[:].astype("f8"), np.nan)
             if a.shape[0] != 12:
                 raise SystemExit("%s has %d months, expected 12" % (f, a.shape[0]))
             attrs = {k: v.getncattr(k) for k in v.ncattrs()
                      if k not in ("_FillValue", "missing_value")}
+            if v.ndim == 3 and lev is None:
+                lname = v.dimensions[1]
+                lev = (lname, d.variables[lname][:].astype("f8")
+                       if lname in d.variables else np.arange(a.shape[1], dtype="f8"))
         pieces.append(a)
-    return np.concatenate(pieces, axis=1), attrs
+    return np.concatenate(pieces, axis=-1), attrs, lev
 
 
 def target_grid(res):
@@ -144,6 +162,8 @@ def regrid(values, lat, lon, res, how="nearest", maxdist_km=120.0):
     """
     lat_c, lon_c = target_grid(res)
     nlat, nlon = lat_c.size, lon_c.size
+    lead = values.shape[:-1]                 # (time,) or (time, lev)
+    values = values.reshape(-1, values.shape[-1])
     nm = values.shape[0]
 
     if how == "bin":
@@ -158,7 +178,7 @@ def regrid(values, lat, lon, res, how="nearest", maxdist_km=120.0):
             cnt = np.bincount(flat[ok], minlength=nlat * nlon)
             nz = cnt > 0
             out[m, nz] = tot[nz] / cnt[nz]
-        return out.reshape(nm, nlat, nlon), lat_c, lon_c
+        return out.reshape(lead + (nlat, nlon)), lat_c, lon_c
 
     if how != "nearest":
         raise SystemExit("how must be 'bin' or 'nearest'")
@@ -176,14 +196,17 @@ def regrid(values, lat, lon, res, how="nearest", maxdist_km=120.0):
     for m in range(nm):
         out[m] = values[m][idx]
         out[m][far] = np.nan
-    return out.reshape(nm, nlat, nlon), lat_c, lon_c
+    return out.reshape(lead + (nlat, nlon)), lat_c, lon_c
 
 
 # --------------------------------------------------------------------------
-def write_nc(path, var, data, lat_c, lon_c, years, attrs, case, res, regrid_note):
+def write_nc(path, var, data, lat_c, lon_c, years, attrs, case, res, regrid_note,
+             lev=None):
     nm = data.shape[0]
     with Dataset(path, "w", format="NETCDF4") as o:
         o.createDimension("time", nm)
+        if lev is not None:
+            o.createDimension(lev[0], lev[1].size)
         o.createDimension("lat", lat_c.size)
         o.createDimension("lon", lon_c.size)
 
@@ -205,7 +228,14 @@ def write_nc(path, var, data, lat_c, lon_c, years, attrs, case, res, regrid_note
         lo = o.createVariable("lon", "f8", ("lon",))
         lo.units = "degrees_east"; lo.long_name = "longitude"; lo[:] = lon_c
 
-        v = o.createVariable(var, "f4", ("time", "lat", "lon"),
+        if lev is not None:
+            lv = o.createVariable(lev[0], "f8", (lev[0],))
+            lv.long_name = lev[0]
+            lv[:] = lev[1]
+            dims = ("time", lev[0], "lat", "lon")
+        else:
+            dims = ("time", "lat", "lon")
+        v = o.createVariable(var, "f4", dims,
                              zlib=True, complevel=4, fill_value=FILL)
         for k, val in attrs.items():
             try:
@@ -269,15 +299,18 @@ def main():
     for var in a.vars:
         stack = []
         for y in range(y0, y1 + 1):
-            vals, attrs = read_var(case, y, var)
+            vals, attrs, lev = read_var(case, y, var)
             stack.append(vals)
             print("  %s %d  mean %.4g" % (var, y, np.nanmean(vals)), flush=True)
         vals = np.concatenate(stack, axis=0)
 
         grid, lat_c, lon_c = regrid(vals, lat, lon, a.res, a.how, a.maxdist)
-        filled = np.isfinite(grid[0]).sum()
-        print("  -> %d x %d grid, %d cells with land (%.1f%%)"
-              % (lat_c.size, lon_c.size, filled, 100.0 * filled / grid[0].size))
+        first = grid[0] if grid.ndim == 3 else grid[0, 0]
+        filled = np.isfinite(first).sum()
+        print("  -> %d x %d grid%s, %d cells with land (%.1f%%)"
+              % (lat_c.size, lon_c.size,
+                 "" if lev is None else " x %d %s" % (lev[1].size, lev[0]),
+                 filled, 100.0 * filled / first.size))
 
         out = os.path.join(outdir, "%s.%s.%d-%d.%gdeg.nc"
                            % (name, var, y0, y1, a.res))
@@ -287,7 +320,8 @@ def main():
             note += "; cell takes its nearest land point within %.0f km, else missing" % a.maxdist
         else:
             note += "; cell-mean of contained points, empty cells missing"
-        write_nc(out, var, grid, lat_c, lon_c, (y0, y1), attrs, name, a.res, note)
+        write_nc(out, var, grid, lat_c, lon_c, (y0, y1), attrs, name, a.res, note,
+                 lev=lev)
         print("  wrote %s (%.1f MB)" % (out, os.path.getsize(out) / 1e6))
 
 
