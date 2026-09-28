@@ -292,3 +292,30 @@ tpl_name = 'TPQWL','TPQWL','TPQWL','TPQWL','TPQWL','Solr','Prec'   # %vv ← tpl
 **★ 단, 출력 변수명 검증은 이 실패와 무관하게 완료됐다.** JULES는 초기화 단계에서 출력 식별자를 검증한다 — `register_output_profile.inc:354`가 `get_var_id()`를 호출하고, 미등록 이름이면 `get_var_id.inc:49`에서 `"Unrecognised variable identifier"`로 즉사한다. **`init: Initialisation is complete`가 찍혔다 = 확장한 35변수 × 2 프로파일 + 일최고/최저 2개가 전부 유효**하다는 뜻(`jules/runs/test_gridded_gf_dgvm/output.nml`).
 
 **함께 확인된 것**: `zw`(지하수면)는 TOPMODEL 전용이라 `l_top=.false.`인 현재 설정에선 사용 불가 → 목록에서 제외함. `l_top=.true.`로 바꾸면 되돌릴 것.
+
+## 13. ★★ 1° ancillary 생성 — grid_info / soil / frac (2026-09-28)
+
+§12에서 1° GSWP3 forcing만 만들어 두고 **1° ancil이 없어 두 달 멈춰 있던 지점**을 해소.
+스크립트 `jules/scripts/make_grid_info_1deg.py` (서버 산출물 `~/JULES_runs/ancil/global_1deg/`):
+`grid_info_1deg.nc`, `soil_1deg.nc`(9필드), `frac_1deg.nc`(9타일).
+
+- **JULES는 index로 맞춘다 — 좌표로 안 맞춘다.** forcing과 ancil의 배열 순서가 같아야 함.
+  1° forcing 격자는 **lon 0..359 / lat −89.5..89.5**, 0.5° ancil은 **lon −179.75..179.75** →
+  집계 전에 0–360으로 roll. 안 하면 사하라가 태평양에 놓이는데 **조용히** 돌아감.
+- **land mask 규칙**: 0.5° land_fraction은 이미 0/1 마스크(67,209셀). JULES는 `land_fraction > 0`이면
+  **그 박스를 100% 육지로 간주**(User Guide model_grid.nml) → 2×2를 "any"로 모으면 해안선이 1° 부풀음.
+  **다수결(4칸 중 2칸 이상)** 채택 → 1° 육지 **17,295셀**(기대치 67,209/4 = 16,802과 정합).
+- **grid-verify 통과 (2026-09-28)**: ① 좌표 lat 오름차순·lon 0–359, forcing 격자와 **배열 동일**(np.array_equal True)
+  ② 원본배열 index-space 플롯 = 정상 세계지도(lon 0 시작, 아프리카 좌측) ③ soil/frac 유효셀이 육지마스크와 **정확히 일치**(17,295),
+  육지 밖 유효값 0, **frac 9타일 합이 모든 육지셀에서 1.000** ④ 박스검정 사하라 1.00 / 태평양 0.00 / 아마존 1.00
+  ⑤ 값·결측(-1e20) 정상.
+- **★ 남극이 없다**: 0.5° 원본 ancil(찬혁님)에 남극 육지가 아예 없음(60S 이남 0셀). Noah-MP의 비빙설 육지와 대조하면
+  60S 이남 양쪽 다 0이라 **정합**(Noah 남극은 전부 IGBP 15 = ice). 다중 LSM 비교는 어차피 빙상 제외이므로 문제 없으나,
+  JULES 단독 전지구 수지에는 남극이 빠진다는 점 기록.
+- Noah-MP 1° 비빙설 육지(14,717)와 셀단위 불일치 2,740(4.2%): 대부분 **JULES-only**이고 60–90N에 1,413 집중
+  = 그린란드·북극 도서(Noah는 ice로 분류) + 해안 1셀. 설명되는 차이.
+- **★ 검증 중 잡은 함정(내 실수)**: Noah-MP `XLONG`은 **0.25..179.25 다음 −179.75..−0.75**로 이미 0–360 순서로 감겨 있다.
+  음수 개수만 보고 roll을 한 번 더 걸었더니 불일치가 2,740 → 24,269로 폭증. **"음수가 있으니 −180–180"은 증거가 아니다.**
+
+**다음 (1° 런 착수)**: ① `model_grid.nml` nx=360 ny=180 + ancil 경로를 `global_1deg/`로 ② `ancillaries.nml`의 soil/frac 경로 교체
+③ `drive.nml` `%vv`를 `/data2/ydkoh/jules_gswp3_1deg/`로 ④ initial_conditions 확인 ⑤ 48-rank MPI(§11) 1° spin-up.
