@@ -1,0 +1,44 @@
+#!/bin/bash
+#PBS -N wfde5_cdo_1deg
+#PBS -q workq
+#PBS -l select=1:ncpus=4:mpiprocs=4:host=climate02
+#PBS -l walltime=06:00:00
+#PBS -j oe
+#PBS -o /data2/ydkoh/wfde5_cdo_1deg.log
+#
+# WFDE5 v3.0 (CLM format, 0.5 deg, 6-hourly) -> 1 deg for JULES.
+#
+# Why WFDE5 and not GSWP3: the GSWP3 source stops at 2014-12, so the 1 deg
+# GSWP3 set (jules_gswp3_1deg, 1981-2010) cannot reach 2023.  The other three
+# models (CLM5, Noah-MP, LM4p) all run on WFDE5 1979-2023, so JULES has to use
+# it as well or the comparison is not like for like.
+#
+# Grid: the source carries 2-D LONGXY/LATIXY which CDO refuses ("Unsupported
+# generic coordinates"), so the grid is given explicitly -- same trick and same
+# src_grid_0.5.txt as the GSWP3 conversion (notes 12).  Target r360x180 puts
+# cell centres at lon 0,1,..,359 and lat -89.5,..,89.5, which is what
+# grid_info_1deg.nc was built on.
+#
+# One file per year holding all seven variables, so drive.nml needs no
+# tpl_name.  1460 records per year (6-hourly), noleap, stamped at the MIDPOINT
+# of each 6 h mean (03/09/15/21Z).
+
+CDO=/usr/local/cdo/1.9.3_gcc85/bin/cdo
+export LD_LIBRARY_PATH=/usr/local/netcdf/4.6.1_gcc85/lib:/usr/local/hdf5/1.10.5_gcc85/lib:$LD_LIBRARY_PATH
+S=/data2/ydkoh/2026_MOF_LSM/Atm_forc/1_CLM_WFDE5
+O=/data2/ydkoh/jules_wfde5_1deg
+G=/data2/ydkoh/src_grid_0.5.txt
+mkdir -p $O
+
+Y0=${Y0:-1979}
+Y1=${Y1:-2023}
+echo "=== WFDE5 0.5->1 deg CDO conservative remap ($Y0-$Y1) START $(date) ==="
+for yr in $(seq $Y0 $Y1); do
+  out=$O/wfde5_1deg_${yr}.nc
+  if [ -s "$out" ]; then echo "  $yr already done"; continue; fi
+  $CDO -s remapcon,r360x180 -setgrid,$G \
+      -selname,TBOT,QBOT,PSRF,WIND,FLDS,FSDS,PRECTmms \
+      $S/${yr}_wfde5.nc $out || { echo "FAILED $yr"; exit 1; }
+  echo "  $yr done $(date +%H:%M)"
+done
+echo "=== END $(ls $O/*.nc | wc -l) files (expect $((Y1-Y0+1))) $(date) ==="

@@ -1,0 +1,32 @@
+&JULES_DRIVE
+
+  l_imogen = .false.
+
+  diff_frac_const = 0.4
+  t_for_snow      = 274.0
+  t_for_con_rain  = 293.15
+
+! WFDE5 v3.0, 1 deg (CDO conservative remap of the 0.5 deg CLM-format files,
+! jules/scripts/wfde5_cdo_1deg.pbs).  One file per year, all seven variables.
+!
+! ** Time stamp **  WFDE5 records are 6-hourly MEANS stamped at the MIDPOINT of
+! their window (03/09/15/21Z).  JULES wants a centred average to be given the
+! time of the START of the averaging period (temporal-interpolation docs), so
+! data_start is 00:00 and interp is 'nc' (hold constant, centred).  Using 'nf'
+! here -- correct for the 3-hourly GSWP3 set, whose stamps are at period start
+! -- would shift the diurnal cycle by three hours.
+  data_start  = "1981-01-01 00:00:00"
+  data_end    = "2011-01-01 00:00:00"
+  data_period = 21600
+
+  file = "/data2/ydkoh/jules_wfde5_1deg/wfde5_1deg_%y4.nc"
+
+  nvars    = 7
+  var      = 't',     'q',     'pstar', 'wind',  'lw_down', 'sw_down', 'precip'
+  var_name = 'TBOT',  'QBOT',  'PSRF',  'WIND',  'FLDS',    'FSDS',    'PRECTmms'
+  interp   = 'nc',    'nc',    'nc',    'nc',    'nc',      'nc',      'nc'
+
+  z1_uv_in = 10.0
+  z1_tq_in = 2.0
+
+/

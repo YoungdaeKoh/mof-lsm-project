@@ -372,3 +372,22 @@ daily 31 records. 육지평균 `latent_heat` 35.1 W/m²(−102~303), `ftl_gb` 36
 
 **다음**: ① 48랭크 벤치 ② GSWP3 1981–2010 cycling spin-up(4.8분/yr × 30년 ≈ 2.4시간/cycle — 탄소풀 때문에 여러 cycle 필요)
 ③ 생산런 1979–2023(단 1° GSWP3 forcing은 현재 1981–2010만 — **1979–80·2011–23 추가 변환 필요**, §12 CDO 배치 재실행).
+
+## 15. forcing를 WFDE5로 전환 + 출력 검증 게이트 (2026-09-28)
+
+- **GSWP3로는 생산런이 불가능**: 원본이 **1901-01 ~ 2014-12**에서 끝남(1368 파일). 1° GSWP3 세트(§12)는 1981–2010뿐이고
+  2015–2023을 만들 수 없음. 반면 **다른 세 모델(CLM5·Noah-MP·LM4p)은 전부 WFDE5 1979–2023**으로 돌았으므로
+  JULES도 WFDE5를 써야 like-for-like 비교가 됨. → `jules/scripts/wfde5_cdo_1deg.pbs`로 1979–2023 변환(연 1파일, 7변수).
+  소스 `/data2/ydkoh/2026_MOF_LSM/Atm_forc/1_CLM_WFDE5/YYYY_wfde5.nc`(0.5°, 1460 rec/yr, noleap, LONGXY/LATIXY 2D →
+  §12와 같은 `src_grid_0.5.txt` + `remapcon,r360x180`).
+- **★ WFDE5는 GSWP3와 시각 규약이 다르다**: WFDE5는 6h **평균을 중점(03/09/15/21Z)**에 찍고, GSWP3 3h는 **구간 시작**에 찍는다.
+  JULES 문서(temporal-interpolation)는 centred average(`c`/`nc`)에 대해 **"데이터 시각을 중점이 아니라 평균구간의 시작으로 주라"**고 명시.
+  → `data_start = 1981-01-01 00:00`(03:00 아님), `data_period = 21600`, `interp = 'nc'`×7.
+  GSWP3용 `'nf'`를 그대로 쓰면 **일변화가 3시간 밀린다**(Noah-MP에서 이미 치른 함정).
+- **spin-up 창 = 1981–2010** (CLM5·Noah-MP·LM4p와 동일). 1979–80은 생산런 시작 구간으로 남겨 spin-up에 넣지 않음.
+- **★ 출력 검증 게이트 `jules/scripts/chk_jules_year.py`** (12개월 전부 나왔는지·12월이 실제 값인지·물수지·frac 합 확인, 실패 시 exit 1).
+  첫 사용에서 바로 함정 적발: **JULES 월평균도 CLM5 h0처럼 구간 끝에 stamp된다** — 1월 평균의 `time`이 2월 1일이라
+  생시각을 그대로 읽으면 월이 `[2,3,…,12,1]`로 디코드된다. **`time_bounds` 중점으로 판정할 것.**
+  (기존 1년 런 1981: 12개월·12월 실값·물수지 1.6e-9·frac 합 1.0000 → PASS)
+- **48랭크는 역효과**: 1° 육지점 17,295개를 48분할하면 랭크당 360점이고 JULES는 전구 360×180을 2D 분할하므로
+  바다만 든 랭크가 생겨 부하 불균형. 실측 **≈20분/yr**로 24랭크(4.8분/yr)의 **4배 느림** → 중단. **24랭크 확정.**
