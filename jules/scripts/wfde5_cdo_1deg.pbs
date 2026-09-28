@@ -1,8 +1,8 @@
 #!/bin/bash
 #PBS -N wfde5_cdo_1deg
 #PBS -q workq
-#PBS -l select=1:ncpus=4:mpiprocs=4:host=climate02
-#PBS -l walltime=06:00:00
+#PBS -l select=1:ncpus=8:mpiprocs=8:host=climate02
+#PBS -l walltime=12:00:00
 #PBS -j oe
 #PBS -o /data2/ydkoh/wfde5_cdo_1deg.log
 #
@@ -32,13 +32,36 @@ mkdir -p $O
 
 Y0=${Y0:-1979}
 Y1=${Y1:-2023}
-echo "=== WFDE5 0.5->1 deg CDO conservative remap ($Y0-$Y1) START $(date) ==="
+# CDO is single-threaded and CPU-bound here (93.8% CPU, 0% iowait, ~85 min
+# per year on climate02), so years are converted NPAR at a time.  NPAR must
+# not exceed ncpus in the #PBS select line.
+NPAR=${NPAR:-8}
+
+convert_year() {
+  local yr=$1
+  local out=$O/wfde5_1deg_${yr}.nc
+  # Write to .tmp and rename only on success: a walltime kill mid-write would
+  # otherwise leave a truncated $out that passes the -s test below and is
+  # silently skipped on resubmission.
+  rm -f $out.tmp
+  if $CDO -s remapcon,r360x180 -setgrid,$G \
+      -selname,TBOT,QBOT,PSRF,WIND,FLDS,FSDS,PRECTmms \
+      $S/${yr}_wfde5.nc $out.tmp; then
+    mv -f $out.tmp $out
+    echo "  $yr done $(date +%H:%M)"
+  else
+    echo "FAILED $yr"
+    rm -f $out.tmp
+  fi
+}
+
+echo "=== WFDE5 0.5->1 deg CDO conservative remap ($Y0-$Y1, NPAR=$NPAR) START $(date) ==="
 for yr in $(seq $Y0 $Y1); do
   out=$O/wfde5_1deg_${yr}.nc
   if [ -s "$out" ]; then echo "  $yr already done"; continue; fi
-  $CDO -s remapcon,r360x180 -setgrid,$G \
-      -selname,TBOT,QBOT,PSRF,WIND,FLDS,FSDS,PRECTmms \
-      $S/${yr}_wfde5.nc $out || { echo "FAILED $yr"; exit 1; }
-  echo "  $yr done $(date +%H:%M)"
+  # Sliding window: start the next year as soon as any running one finishes.
+  while [ $(jobs -rp | wc -l) -ge $NPAR ]; do wait -n; done
+  convert_year $yr &
 done
+wait
 echo "=== END $(ls $O/*.nc | wc -l) files (expect $((Y1-Y0+1))) $(date) ==="
