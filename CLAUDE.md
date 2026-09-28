@@ -57,7 +57,7 @@
 
 | 모델 | 상태 | 비고 |
 |---|---|---|
-| **JULES vn7.4** | **gridded 전구 + DGVM 실행 완료** | **gfortran 재빌드**로 Intel netcdf 깨짐(`__libm_feature_flag`) 우회. 0.5° 전구 맵 런 ✓ + TRIFFID(4-pool RothC) DGVM ✓. serial(nompi), 81분/월. 상세 `jules/JULES_PORTING_NOTES.md`. 전면 areal 경쟁(frac 진화)·MPI는 미해결 |
+| **JULES vn7.4** | **0.5° 런 완료 · MPI 해결 · 1° ancil 완비, 1° 런 미착수** | **gfortran 재빌드**로 Intel netcdf 깨짐(`__libm_feature_flag`) 우회. 0.5° 전구 맵 런 ✓ + TRIFFID(4-pool RothC) DGVM ✓ (serial 81분/월). **MPI는 §11에서 해결**(2026-07-15), 병렬 netCDF도 해결(07-29). 1° GSWP3 forcing(§12) + **1° ancil grid_info/soil/frac(§13, grid-verify 통과)** 준비됨 → 남은 건 namelist 5개 전환·1° spin-up. 전면 areal 경쟁(frac 진화)은 여전히 미해결. 상세 `jules/JULES_PORTING_NOTES.md` |
 | **CESM2.1.5 (CAM6/CLM5)** | **offline SP spin-up 실행 중** | CLM `release-clm5.0.37`(CLM6 아님). `I2000Clm50Sp` @ f09_g17, `NO_LEAP`, GSWP3 1981–2010 cycling, **cold start**. 벤치 48PE=35.3분/년(24PE 대비 1.55×, 효율 77%); 30년≈19h. cycle 1 진행 중(job 2931 @climate01). F2000climo timeaddmonths 에러 (PE layout 불일치)는 별건. 상세 `cesm/CLM5_SPINUP_NOTES.md` |
 | **CESM2.1.5 (CAM4/CLM4)** | smoke test 완료, spin-up 중 | F2000C4L40 @ f19_f19. F_ctrl_smoke 1개월 ✓. F_spinup 10년 실행 중 (매월 restart). Snowfall sensitivity: 5년 perturbation (-25/-50/-75% from year 10-11) |
 | **Noah-MP v5.2.1** | **static-veg spin-up 수렴 완료 (1°, 2 cycle)** | HRLDAS offline(`~/HRLDAS/`, v5.2.1). intel21 + **intelmpi-21, 48-rank MPI**(≈11분/model-yr, 30yr≈5.7h). 단일격자 ✓ · 0.5° gridded ✓ · **1°/3h GSWP3 static veg(DVEG=4) 1981–2010 × 2 cycle 완주**. 비빙설 지면 수렴(cos(lat) 가중): cycle 간 표류 심층T 3e-6 K, 컬럼수분 0.56 kg/m², SWE 2e-5 mm. 단 격자별 컬럼수분 p99=18 kg/m² 잔차. 빙상은 원리상 미수렴(아래 §8). seed = `forcing_GSWP3_1deg/spinup/RESTART.2010122500_DOMAIN1`. **다음: dynamic veg — 단 탄소풀은 아직 0에서 시작**. 상세 `noahmp/NOAHMP_PORTING_NOTES.md` §9 |
