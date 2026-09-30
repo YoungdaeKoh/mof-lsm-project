@@ -19,7 +19,10 @@
   data_end    = "2011-01-01 00:00:00"
   data_period = 21600
 
-  file = "/data2/ydkoh/jules_wfde5_1deg/wfde5_1deg_%y4.nc"
+! Nearest-neighbour filled copy (jules/scripts/wfde5_nnfill_1deg.sh): 406 JULES
+! land cells on coasts/islands have no WFDE5 value after the remap; the filled
+! cells are listed in jules_wfde5_gapcells_1deg.nc in the same directory.
+  file = "/data2/ydkoh/jules_wfde5_1deg_nnfill/wfde5_1deg_%y4.nc"
 
   nvars    = 7
   var      = 't',     'q',     'pstar', 'wind',  'lw_down', 'sw_down', 'precip'
