@@ -1,0 +1,68 @@
+--- codex_lm4/atm_land_ice_flux_exchange.F90	2026-10-02 17:41:33
++++ gateC/atm_land_ice_flux_exchange.F90	2026-10-02 17:54:38
+@@ -163,6 +163,10 @@
+   logical :: ocn_atm_flux_vmr_bug
+   logical :: do_area_weighted_flux = .FALSE.
+   logical :: do_forecast = .false.
++  !> Offline land (coupler do_atmos=.false.): skip the exchange-grid -> atmosphere
++  !! remaps in flux_up_to_atmos whose only consumer is the (skipped) atmosphere
++  !! physics (dt_tr, dt_t, shflx, lhflx).  Set by coupler_main; default keeps them.
++  logical, public :: atm_up_remap = .true.
+   integer :: nblocks = 1
+   logical :: partition_fprec_from_lprec = .FALSE. !< option for ATM override experiments where liquid+frozen precip are combined
+                                                   !! This option will convert liquid precip to snow when t_ref is less than
+@@ -3019,11 +3023,13 @@
+        enddo
+     enddo
+ 
++    if (atm_up_remap) then
+     do tr=1,n_exch_tr
+        ! get updated tracer tendency on the atmospheic grid
+        n=tr_table(tr)%atm
+        call fms_xgrid_get_from_xgrid (Land_Ice_Atmos_Boundary%dt_tr(:,:,n), 'ATM', ex_delta_tr_n(:,tr), xmap_sfc)
+     enddo
++    endif
+ 
+     do l = 1, my_nblocks
+        is=block_start(l)
+@@ -3041,11 +3047,13 @@
+     !-----------------------------------------------------------------------
+     !---- get mean quantites on atmospheric grid ----
+ 
++    if (atm_up_remap) then
+     call fms_xgrid_get_from_xgrid (Land_Ice_Atmos_Boundary%dt_t, 'ATM', ex_delta_t_n, xmap_sfc)
+ #ifndef use_AM3_physics
+     call fms_xgrid_get_from_xgrid (Land_Ice_Atmos_Boundary%shflx,'ATM', ex_flux_t    , xmap_sfc) !miz
+     call fms_xgrid_get_from_xgrid (Land_Ice_Atmos_Boundary%lhflx,'ATM', ex_flux_tr(:,isphum), xmap_sfc)!miz
+ #endif
++    endif
+ 
+     !=======================================================================
+     !-------------------- diagnostics section ------------------------------
+--- codex_lm4/coupler_main.F90	2026-10-02 17:41:32
++++ gateC/coupler_main.F90	2026-10-02 17:54:38
+@@ -395,6 +395,7 @@
+   use flux_exchange_mod,       only: flux_check_stocks, flux_init_stocks
+   use flux_exchange_mod,       only: flux_ocean_from_ice_stocks, flux_ice_to_ocean_stocks
+   use flux_exchange_mod,       only: flux_atmos_to_ocean, flux_ex_arrays_dealloc
++  use atm_land_ice_flux_exchange_mod, only: atm_up_remap
+ 
+   use atmos_tracer_driver_mod, only: atmos_tracer_driver_gather_data
+ 
+@@ -952,7 +953,7 @@
+ !$      call omp_set_num_threads(atmos_nthreads+(conc_nthreads-1)*radiation_nthreads)
+ 
+         call fms_mpp_clock_begin(newClockk)
+-        call update_atmos_model_state( Atm )
++        if (do_atmos) call update_atmos_model_state( Atm )
+         if (do_chksum) call atmos_ice_land_chksum('update_atmos_model_state+', (nc-1)*num_atmos_calls+na, Atm, Land, &
+                   Ice,Land_ice_atmos_boundary, Atmos_ice_boundary, Atmos_land_boundary)
+         if (do_debug)  call fms_memutils_print_memuse_stats( 'update state')
+@@ -1217,6 +1218,7 @@
+ 
+     read (fms_mpp_input_nml_file, coupler_nml, iostat=io)
+     ierr = check_nml_error (io, 'coupler_nml')
++    atm_up_remap = do_atmos   ! offline land: no atmosphere to receive the up-remaps
+ 
+ !----- read date and calendar type from restart file -----
+     if (fms2_io_file_exists('INPUT/coupler.res')) then

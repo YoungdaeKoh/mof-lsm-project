@@ -15,9 +15,16 @@ glacier dynamics, so those columns only accumulate.
 
 y1990 is read from the re-run (12 months).  1997-2010 come from the v2 chain
 and carry all twelve months; 1981-1996 still stop at November.
+
+Optional arguments (same mask and averaging, other run):
+  python extract_monthly_noice.py <archive_dir> <out_csv> <first_year> <last_year>
+e.g. the ctl production run's 1981-2010 (= effectively spin-up cycle 2, since ctl
+starts from the cycle-1 end state redated to 1979).  The re-run substitution for
+1990 applies only to the default spin-up archive.
 """
 import glob
 import os
+import sys
 import numpy as np
 from netCDF4 import Dataset
 from netCDF4 import num2date
@@ -46,7 +53,13 @@ VARS = {
     "soilT_2m":  ("soil_T", 12),
 }
 
-years = sorted(int(os.path.basename(d)[1:]) for d in glob.glob(MAIN + "/y[0-9]*"))
+USE_RERUN = True
+if len(sys.argv) == 5:
+    MAIN, OUT, Y0, Y1 = sys.argv[1], sys.argv[2], int(sys.argv[3]), int(sys.argv[4])
+    USE_RERUN = False
+    years = list(range(Y0, Y1 + 1))
+else:
+    years = sorted(int(os.path.basename(d)[1:]) for d in glob.glob(MAIN + "/y[0-9]*"))
 
 MASK = {}
 ngrn = 0
@@ -66,7 +79,7 @@ print("non-ice land points: %d   (Greenland cut removed %d)"
 
 rows = []
 for y in years:
-    root = RERUN if y == 1990 else MAIN
+    root = RERUN if (y == 1990 and USE_RERUN) else MAIN
     acc = {k: [None, None] for k in VARS}
     months = None
     for t in TILES:

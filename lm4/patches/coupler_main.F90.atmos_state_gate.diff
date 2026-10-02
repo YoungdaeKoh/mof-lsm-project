@@ -1,0 +1,12 @@
+--- coupler/full/coupler_main.F90  (with radiation_gate patch applied)
++++ coupler/full/coupler_main.F90
+@@ fast (dt_atmos) loop, after the OpenMP region @@
+         call fms_mpp_clock_begin(newClockk)
+-        call update_atmos_model_state( Atm )
++        ! Offline land (do_atmos=.false.): the frozen FV3 state needs no update.
++        ! update_atmos_model_state runs fv_update_phys over the full 3-D state and
++        ! all tracers, fv_diag, and bottom-level extraction that data_override
++        ! replaces anyway: 6.6 % of the main loop (LM4 notes 13.63).  Siblings
++        ! (_dynamics/_down/_up/_radiation) are already gated the same way.
++        if (do_atmos) call update_atmos_model_state( Atm )
+         if (do_chksum) call atmos_ice_land_chksum('update_atmos_model_state+', (nc-1)*num_atmos_calls+na, Atm, Land, &

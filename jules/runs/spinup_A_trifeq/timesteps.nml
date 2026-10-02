@@ -1,4 +1,7 @@
 &JULES_TIME
+! WFDE5 forcing is 365_day (1460 records every year), so no leap days here;
+! with the default l_leap=.true. the run would look for 1464 records in 1984.
+  l_leap         = .false.,
   timestep_len   = 1800,
 
   main_run_start = '1981-01-01 00:00:00',

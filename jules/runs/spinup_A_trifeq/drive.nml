@@ -16,7 +16,10 @@
 ! here -- correct for the 3-hourly GSWP3 set, whose stamps are at period start
 ! -- would shift the diurnal cycle by three hours.
   data_start  = "1981-01-01 00:00:00"
-  data_end    = "2011-01-01 00:00:00"
+! data_end is one record past the cycling window: JULES reads one record
+! ahead, so a run ending 2011-01-01 00:00 must be able to open that record
+! (2010 stopped with "Cannot advance to 2011-01-01 00:00:00" otherwise).
+  data_end    = "2011-01-01 06:00:00"
   data_period = 21600
 
 ! Nearest-neighbour filled copy (jules/scripts/wfde5_nnfill_1deg.sh): 406 JULES

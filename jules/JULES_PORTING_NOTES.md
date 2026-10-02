@@ -391,3 +391,60 @@ daily 31 records. 육지평균 `latent_heat` 35.1 W/m²(−102~303), `ftl_gb` 36
   (기존 1년 런 1981: 12개월·12월 실값·물수지 1.6e-9·frac 합 1.0000 → PASS)
 - **48랭크는 역효과**: 1° 육지점 17,295개를 48분할하면 랭크당 360점이고 JULES는 전구 360×180을 2D 분할하므로
   바다만 든 랭크가 생겨 부하 불균형. 실측 **≈20분/yr**로 24랭크(4.8분/yr)의 **4배 느림** → 중단. **24랭크 확정.**
+
+## 16. ★★ WFDE5 1° forcing 정비 — 변환 속도·결측 채움·2024 lookahead (2026-09-29 ~ 10-02)
+
+- **변환이 느렸던 원인 = 원본 chunk**: `YYYY_wfde5.nc`(10.6 GB, netCDF-4, 비압축)가 chunk **183×45×90 + shuffle**.
+  CDO는 레코드마다 chunk 64개(≈190 MB)를 풀었다 버림 → CPU 100 %·iowait 0 %, **78분/년**. 1월 124 레코드 기준
+  CDO `seltimestep` 7분+ vs **ncks 2.5초**; 1×360×720로 재chunk한 입력이면 CDO remapcon **2.6초**(원 chunk 55.7초).
+  → **다음 대량 변환은 "ncks 재chunk → CDO"** (≈1분/년 추정). 잡 8500(8병렬, 7h53m)으로 1979–2023 45개는 이미 완료.
+- **CDO vs NCO(ncremap+ESMF conserve) 비교**(1981-01, 기준 = 생산 파일): CDO는 chunk와 무관하게 **비트 동일**(max|diff| 0).
+  NCO `--rnr_thr=0.0`은 CDO와 사실상 같음(TBOT max 0.022 K, 해안). **NCO 기본값(재정규화 없음)은 해안이 바다 0으로 희석**
+  (TBOT 최대 235 K 오차) — ncremap 쓸 땐 `--rnr_thr=0.0` 필수. 속도 차이는 도구가 아니라 chunk.
+- **★ JULES 육지 406칸에 forcing 결측**: 1° 육지마스크는 찬혁 0.5° ancil 기반이라 WFDE5 육지와 해안·섬에서 어긋남
+  (98칸 = CDO가 결측 처리한 부분해안, 308칸 = WFDE5에 값 자체 없음). JULES는 forcing 결측 검사를 안 하므로 1e20으로 돈다.
+  → `jules/scripts/wfde5_nnfill_1deg.sh`(CDO `setmisstonn`, 8병렬 ≈2.5 h)로 **`/data2/ydkoh/jules_wfde5_1deg_nnfill/`** 생성.
+  검증: 45개 모두 1460 rec, 육지 결측 0, 원래 유효값 max|diff| 0. 채운 칸 목록·거리 = `jules_wfde5_gapcells_1deg.nc`
+  (≤1° 334칸, 1–10° 56, >10° 16 — 예: 프랑스령 폴리네시아 ← 피지 41°). **분석 시 원거리 채움 칸은 제외 가능.**
+- **2024 lookahead 파일**: JULES는 forcing을 한 레코드 미리 읽으므로 2024-01-01 00Z에 끝나는 런은 그 다음 레코드가 필요.
+  `wfde5_1deg_2024.nc` = 2023-12-31 21Z 1레코드 복사본(time 0.125 days since 2024-01-01, 전역 `note`에 명시). 실제 2024 아님.
+
+## 17. ★★★ spin-up A 3 cycle 완료 → 생산런 1979–2023 착수 (2026-10-01 ~ 10-02)
+
+**설정** (`~/JULES_runs/spinup_A_trifeq`, 체인 `jules/scripts/spinup_A_chain.sh`, climate00 nohup 24랭크, 연 단위 실행·연별 게이트):
+WFDE5 nnfill 1981–2010 cycling · `l_leap=.false.`(forcing 365_day; 기본 T면 1984-12-31에 레코드 부족) ·
+`l_trif_eq=.true.` + **`triffid_period=365`** · `l_veg_compete=.false.`(frac 고정, 12개월 변화 5.9e-6) · `l_nitrogen=.false.` · cold start.
+
+- **시험으로 확정한 것**: ① 윤년 1984-02→03 통과(2/28→3/1) ② `triffid_period`: 10일이면 평형 점프가 짧은 구간 흐름으로
+  일어나 LAI가 1월부터 2.77로 튐; 360/365면 1년에 1회(1982-01-01) 점프. **360은 365일 달력에서 매년 5일씩 밀리므로 365.**
+  JULES의 `triffid_period > 30 … dynamic mode` [ERROR]는 **`init_vegetation.F90:205`가 l_trif_eq를 안 거르는 오탐** ③ 날짜가 다른
+  dump(1983)를 1981 IC로 써도 그대로 읽음(30변수 중 26 비트동일, 나머지는 빙하 NaN 위치·반올림) ④ 연 단위로 끊은 체인 =
+  2년 연속 런과 게이트 수치 전 자리 동일.
+- **`data_end` 함정**: cycle 1 2010년이 `file_ts_advance: Cannot advance to 2011-01-01 00:00:00 - data_end is 2011-01-01` FATAL.
+  한 레코드 미리 읽기 때문 → **`data_end = 2011-01-01 06:00`**(생산런은 2024-01-01 06:00 + lookahead 파일).
+- **수렴** (`spinup_cycle_compare.py`, 2011-01-01 dump, 비빙설 16,461 − 영구적설 159 = 16,302점, |Δ|/X ≤1 %/cycle 셀 비율):
+
+| 변수 | c1→c2 | c2→c3 |
+|---|---|---|
+| LAI / canht | 98.5 / 98.6 % | **99.6 / 99.6 %** |
+| cs DPM / RPM / BIO | 97.8 / 97.4 / 96.2 % | **99.3 / 99.3 / 99.2 %** |
+| cs HUM (최저속) | 92.5 % | **99.2 %** (미수렴 476→48칸) |
+| 토양수분 컬럼 sthuf | 89.1 % | 91.8 % (미수렴 1,338칸 중 **1,236 = 연강수 <250 mm**, 사하라 828·고비 198, 최하층이 가장 변함) |
+| 심층 토양온도 | 100 % (max 1.6 K) | 100 % (max 0.8 K, 영구동토) |
+
+  같은 해 c3−c2: LAI ≤0.001, cs ≤0.006 kgC/m², T1.5m ≤1e-4 K → cycle 내 0.5 K 상승은 forcing 온난화(표류 아님).
+  최종 육지평균: LAI 2.94, canht 6.31 m, cs 6.55 kgC/m², GPP ≈2.4 gC/m²/d. cold start cs=4×10 kgC/m² 탓에 1981 토양호흡 151 gC/m²/d.
+  **판정: 3 cycle(90년)로 수렴** — 사막 심층수만 남음(LM4 사하라 심층수와 같은 현상, 플럭스 무영향, 사막 심층 토양수분 값은 사용 금지).
+- **★ 영구적설 159칸**(`jules/scripts/find_snow_accum.py`, 마스크 `~/JULES_runs/ancil/global_1deg/jules_perennial_snow_mask_1deg.nc`):
+  여름 최소 적설 >0이 10년 연속 + 증가 → 그린란드 62·북극 섬 48 등. 육지평균 적설 증가의 107 %. 최대 적설 c1 99,870 →
+  c3 287,538 kg/m²(크래시 없음). **원인 = Met Office WFD-EI frac(찬혁 `frac.nc`와 비트 동일, 좌표 없는 파일을 index 비교로 검증)이
+  154칸을 맨땅으로 분류**(1° 다수결 빙하 정리 탓은 21칸뿐). JULES엔 눈 상한·고체유출이 없음(소스 전수) → 빙하 타일로 바꿔도 축적은 남음.
+  **처리 = 결과에서 마스크**(offline은 칸 독립). 단 **routing을 붙이면 후처리 snow capping(상한 초과분을 유출로)이 필요**, 유출 진단에 한계 명시.
+- **참고**: 찬혁(vn7.7, ERA5 1979–85)도 veg_compete=T로 100 cycle 미수렴 → frac reseed 후 l_trif_eq=T, 이후 lai_min 상향.
+  rose-stem 벤치마크 데이터는 서버에 없음, 공식 spin-up 앱은 `loobos_trif_spinup`(l_trif_eq=T, triffid_period=1825).
+
+**생산런** (`~/JULES_runs/prod_1979_2023`, `jules/scripts/prod_chain.sh`, 2026-10-02 16:55 착수 @climate00 24랭크):
+spin-up과 차이는 4줄 — `l_trif_eq=.false.`, **`triffid_period=5`**, `data_start=1979`, `data_end=2024-01-01 06:00`.
+IC = `jules_spinA_c03.dump.20110101`. **주기 5일인 이유**: TRIFFID 누적량과 `asteps_since_triffid`는 dump 변수가 아님
+(`required_vars_for_configuration_mod.F90`) → 연 단위 재시작마다 0. 10일이면 해마다 마지막 5일이 버려지고, 5는 365를 나눔.
+경계 시험 2023-12 → 2024-01-01 통과(lookahead 파일 열림, dump 20240101). 출력 `/data2/ydkoh/JULES_runs/prod_1979_2023/output/jules_prod.*`.
