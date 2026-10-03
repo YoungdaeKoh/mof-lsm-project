@@ -1,0 +1,391 @@
+<title>지면모델 계보와 LM4p</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: field-notebook — sticky contents rail on wide screens, one reading column; generations run as a soil-profile strip (surface -> depth = older -> newer) */
+:root{
+  --bg:#f5f6f2; --surface:#fbfcf9; --fg:#1a221d; --muted:#58645c; --rule:#d6ddd5;
+  --moss:#2f6a4c; --water:#2b5b86; --soil:#7a5a3a; --mark:#e7efe6; --code:#eef1ec;
+  --g1:#8a7356; --g2:#6f7d4f; --g3:#4d7a52; --g4:#2f6a4c; --g5:#2b5b86; --g6:#4a4a86;
+  --display:"Gowun Batang","Noto Serif KR",Georgia,serif;
+  --body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111613; --surface:#161c18; --fg:#e3e9e4; --muted:#9ba69e; --rule:#2b342f;
+  --moss:#74c099; --water:#84b4de; --soil:#c9a27a; --mark:#1c2620; --code:#1a211d;
+  --g1:#b89a77; --g2:#a3b37a; --g3:#86b88b; --g4:#74c099; --g5:#84b4de; --g6:#a3a3e0; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111613; --surface:#161c18; --fg:#e3e9e4; --muted:#9ba69e; --rule:#2b342f;
+  --moss:#74c099; --water:#84b4de; --soil:#c9a27a; --mark:#1c2620; --code:#1a211d;
+  --g1:#b89a77; --g2:#a3b37a; --g3:#86b88b; --g4:#74c099; --g5:#84b4de; --g6:#a3a3e0; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15.5px;line-height:1.75;padding-inline:16px;padding-block:28px 64px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:220px minmax(0,1fr);gap:48px}
+@media (max-width:900px){.wrap{grid-template-columns:minmax(0,1fr)}.toc{display:none}}
+.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px);align-self:start;font-size:13px;line-height:1.5}
+.toc p{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:18px 0 6px}
+.toc a{display:block;color:var(--muted);text-decoration:none;padding:3px 0 3px 10px;border-left:2px solid var(--rule)}
+.toc a:hover,.toc a:focus-visible{color:var(--moss);border-left-color:var(--moss);outline:none}
+main{min-width:0;max-width:78ch}
+header.top{margin-bottom:36px}
+.kicker{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--moss)}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(28px,4.2vw,40px);line-height:1.25;margin:6px 0 10px;text-wrap:balance}
+.lede{color:var(--muted);max-width:62ch;margin:0}
+h2{font-family:var(--display);font-size:26px;line-height:1.3;margin:64px 0 8px;text-wrap:balance;padding-top:8px;border-top:1px solid var(--rule)}
+h3{font-size:17px;font-weight:600;margin:34px 0 6px;text-wrap:balance}
+p{margin:10px 0}
+a{color:var(--water)}
+code,.m{font-family:var(--mono);font-size:.88em;background:var(--code);padding:1px 5px;border-radius:4px}
+.note{color:var(--muted);font-size:13.5px}
+.tbl{overflow-x:auto;margin:14px 0;border:1px solid var(--rule);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:560px}
+th,td{text-align:left;vertical-align:top;padding:9px 12px;border-bottom:1px solid var(--rule)}
+th{font-weight:600;font-size:12.5px;letter-spacing:.02em;color:var(--muted);background:var(--mark)}
+tr:last-child td{border-bottom:0}
+td.ok{color:var(--moss);font-weight:600} td.no{color:var(--muted)}
+.axes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0}
+@media (max-width:640px){.axes{grid-template-columns:minmax(0,1fr)}}
+.axis{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:12px 14px}
+.axis b{display:block;font-family:var(--mono);font-size:12px;letter-spacing:.06em;color:var(--moss)}
+.axis span{font-size:13.5px;color:var(--muted)}
+/* soil-profile strip: six generations stacked like horizons */
+.profile{margin:18px 0 6px;border-radius:10px;overflow:hidden;border:1px solid var(--rule)}
+.hz{display:grid;grid-template-columns:120px minmax(0,1fr);background:var(--surface);border-bottom:1px solid var(--rule)}
+.hz:last-child{border-bottom:0}
+.hz .tag{padding:12px 12px;color:#fff;font-family:var(--mono);font-size:12px;line-height:1.35}
+.hz .tag em{display:block;font-style:normal;font-size:11px;opacity:.85}
+.hz .txt{padding:10px 14px;min-width:0}
+.hz .txt b{font-weight:600}
+.hz .txt span{display:block;font-size:13.5px;color:var(--muted)}
+@media (max-width:520px){.hz{grid-template-columns:minmax(0,1fr)}}
+.gen{scroll-margin-top:16px}
+.gen .who{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.eq{font-family:var(--mono);font-size:13.5px;background:var(--code);border-radius:6px;padding:10px 12px;margin:10px 0;overflow-x:auto;white-space:pre}
+.here{border-left:3px solid var(--moss);background:var(--mark);padding:8px 12px;border-radius:0 6px 6px 0;margin:12px 0;font-size:14.5px}
+.lineage{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:16px 0}
+@media (max-width:760px){.lineage{grid-template-columns:minmax(0,1fr)}}
+.lin{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:14px 16px;min-width:0}
+.lin h4{margin:0 0 4px;font-size:15.5px}
+.lin .role{font-size:12.5px;color:var(--moss);font-family:var(--mono)}
+.lin ol{margin:8px 0 0;padding-left:18px;font-size:13.5px;line-height:1.6}
+.lin .ours{margin-top:8px;font-size:13px;color:var(--muted)}
+.diagram{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:14px;overflow-x:auto;margin:16px 0}
+.diagram pre.mermaid{margin:0;background:transparent;text-align:center}
+.steps{counter-reset:s;list-style:none;padding:0;margin:14px 0}
+.steps>li{position:relative;padding:12px 14px 12px 52px;border-bottom:1px solid var(--rule)}
+.steps>li:last-child{border-bottom:0}
+.steps>li::before{counter-increment:s;content:counter(s);position:absolute;left:10px;top:12px;width:28px;height:28px;border-radius:50%;background:var(--mark);color:var(--moss);font-family:var(--mono);font-size:13px;display:grid;place-items:center;font-weight:500}
+.steps .fn{font-family:var(--mono);font-size:12.5px;color:var(--water)}
+.steps .core::before{background:var(--moss);color:var(--surface)}
+.io{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media (max-width:640px){.io{grid-template-columns:minmax(0,1fr)}}
+.refs{font-size:13px;color:var(--muted);line-height:1.6;padding-left:18px}
+.refs li{margin:3px 0}
+.chip{display:inline-block;font-family:var(--mono);font-size:11px;padding:1px 7px;border-radius:999px;border:1px solid var(--rule);color:var(--muted);vertical-align:1px}
+.chip.on{border-color:var(--moss);color:var(--moss)}
+footer{margin-top:56px;color:var(--muted);font-size:13px;border-top:1px solid var(--rule);padding-top:14px}
+@media (prefers-reduced-motion:no-preference){.toc a{transition:color .15s,border-color .15s}}
+</style>
+
+<div class="wrap">
+<nav class="toc" aria-label="목차">
+  <p>1부 · 세대 변화</p>
+  <a href="#axes">세 축으로 보기</a>
+  <a href="#profile">여섯 세대 한눈에</a>
+  <a href="#g1">1 양동이</a>
+  <a href="#g2">2 식생–대기 교환</a>
+  <a href="#g3">3 광합성 결합</a>
+  <a href="#g4">4 동적 식생</a>
+  <a href="#g5">5 탄소–질소</a>
+  <a href="#g6">6 개체군 역학</a>
+  <a href="#lineage">네 모델의 계보</a>
+  <a href="#cmip">CMIP6 · CMIP7</a>
+  <p>2부 · LM4p 계산 흐름</p>
+  <a href="#flow">전체 흐름도</a>
+  <a href="#in">받는 것</a>
+  <a href="#fast">30분 스텝</a>
+  <a href="#out">돌려보내는 것</a>
+  <a href="#slow">느린 시간 규모</a>
+  <p>부록</p>
+  <a href="#refs">참고문헌</a>
+</nav>
+
+<main>
+<header class="top">
+  <div class="kicker">MOF KIMST 1.7 · 지면모델 진단 참고 노트 · 2026-10-03</div>
+  <h1>지면모델은 어떻게 발전했고, LM4p는 한 스텝을 어떻게 계산하나</h1>
+  <p class="lede">CLM4 CNDV/BGC를 기준점으로, 그 이후의 개념을 학부생 수준에서 정리했습니다. 1부는 지면모델 여섯 세대와 우리 네 모델(CLM5, LM4p, JULES, Noah-MP)의 계보, CMIP6/7의 기준입니다. 2부는 lm4P 소스에서 직접 추출한 계산 순서입니다. <span class="chip">확인 필요</span> 표시는 원문으로 다시 확인할 항목입니다.</p>
+</header>
+
+<!-- ========================= PART 1 ========================= -->
+<h2 id="axes">식생 설정은 세 축으로 나눠서 본다</h2>
+<p>"동적 식생"이라는 말 하나에 서로 다른 세 가지가 섞여 있습니다. 모델을 비교할 때는 항상 셋을 따로 봅니다.</p>
+<div class="axes">
+  <div class="axis"><b>① C / N</b>탄소(와 질소)를 계산해 잎·줄기·뿌리·목재를 예측. <span>LAI는 여기서 나온다: 잎 탄소 × 비엽면적(SLA).</span></div>
+  <div class="axis"><b>② DV (생물지리)</b>그 칸에 어떤 식물(PFT)이 몇 % 사는가. <span>규칙 방식(기후 기준표) 또는 경쟁 방식.</span></div>
+  <div class="axis"><b>③ cohort</b>나무의 크기·개수·나이 구조. <span>큰 나무가 빛을 먼저 받는 경쟁, 성장·사망·유입.</span></div>
+</div>
+<div class="tbl"><table>
+<thead><tr><th>모델 (우리 설정)</th><th>① C / N</th><th>② DV</th><th>③ cohort</th></tr></thead>
+<tbody>
+<tr><td>CLM5 BGC</td><td class="ok">C + N</td><td class="no">끔</td><td class="no">없음</td></tr>
+<tr><td>LM4p (lm4P)</td><td class="ok">C만</td><td class="no">끔 <code>do_biogeography=F</code></td><td class="ok">있음 (PPA)</td></tr>
+<tr><td>JULES vn7.4</td><td class="ok">C만</td><td class="no">끔 <code>l_veg_compete=F</code></td><td class="no">없음</td></tr>
+<tr><td>Noah-MP v5.2.1</td><td class="ok">C만</td><td class="no">기능 없음</td><td class="no">없음</td></tr>
+</tbody></table></div>
+<p class="note">CLM4 CNDV = ①+② · CLM4.5/5 BGC = ① · FATES = ①+③ (②는 경쟁의 결과로 나옴) · LM4p = ①(C만)+③.</p>
+
+<h2 id="profile">여섯 세대 한눈에</h2>
+<p>각 세대는 앞 세대를 대체하지 않고 그 위에 쌓입니다. 지금 모델은 1–3세대 물리를 모두 갖고 있고, 4–6세대를 옵션으로 켜고 끕니다. 세대 구분은 Sellers et al. (1997)과 Pitman (2003)의 리뷰를 따릅니다.</p>
+<div class="profile" role="list">
+  <div class="hz" role="listitem"><div class="tag" style="background:var(--g1)">1세대<em>1960–70s</em></div><div class="txt"><b>양동이</b> — 땅이 물을 얼마나 내보내나?<span>Manabe (1969)</span></div></div>
+  <div class="hz" role="listitem"><div class="tag" style="background:var(--g2)">2세대<em>1980s</em></div><div class="txt"><b>식생–대기 교환 (SVAT)</b> — 식물이 증발을 어떻게 조절하나?<span>BATS (Dickinson 1986), SiB (Sellers 1986)</span></div></div>
+  <div class="hz" role="listitem"><div class="tag" style="background:var(--g3)">3세대<em>1990s</em></div><div class="txt"><b>광합성 결합</b> — 기공은 왜 열고 닫나?<span>SiB2 (1996), NCAR LSM (Bonan 1996), MOSES (Cox 1999)</span></div></div>
+  <div class="hz" role="listitem"><div class="tag" style="background:var(--g4)">4세대<em>1996–2003</em></div><div class="txt"><b>동적 식생</b> — 어떤 식물이 어디에 사나?<span>IBIS (1996), TRIFFID (Cox 2001), LPJ (Sitch 2003)</span></div></div>
+  <div class="hz" role="listitem"><div class="tag" style="background:var(--g5)">5세대<em>2005–2012</em></div><div class="txt"><b>탄소–질소</b> — 질소가 성장을 제한하나?<span>CLM4-CN (Thornton 2007), O-CN (Zaehle 2010)</span></div></div>
+  <div class="hz" role="listitem"><div class="tag" style="background:var(--g6)">6세대<em>2001→2015~</em></div><div class="txt"><b>개체군 역학</b> — 숲은 몇 그루, 어떤 크기 구조인가?<span>ED (Moorcroft 2001), PPA (Purves 2008), FATES, LM3-PPA (Weng 2015)</span></div></div>
+</div>
+<div class="here">우리 1차년도: 네 모델 모두 3세대 물리 위에 <b>4세대의 탄소 저장(LAI 예측)</b>을 켜고 <b>DV는 끈</b> 상태. CLM5만 5세대(질소), LM4p만 6세대(cohort)를 더 켬.</div>
+
+<section class="gen" id="g1">
+<h3>1세대 · 양동이 모델</h3>
+<p class="who">Manabe (1969) · GFDL</p>
+<p>땅을 <b>구멍 난 양동이</b> 하나로 봅니다. 비가 오면 물이 차고, 넘치면 유출, 증발은 양동이가 얼마나 찼는지에 비례합니다.</p>
+<div class="eq">E = β · E_pot,   β = W / W_crit   (W ≥ W_crit 이면 β = 1, 양동이 용량 약 15 cm)</div>
+<p>처음으로 "땅의 물 상태가 대기에 되먹임한다"를 기후모델에 넣었습니다. 대신 식물이 가뭄에 기공을 닫는 것, 뿌리 깊이, 낮과 밤의 차이는 없습니다. β 함수 개념은 지금의 토양수분 스트레스 함수(JULES <code>fsmc</code>, CLM <code>btran</code>)로 이어집니다.</p>
+</section>
+
+<section class="gen" id="g2">
+<h3>2세대 · 식생–대기 교환 (SVAT)</h3>
+<p class="who">BATS (Dickinson et al. 1986) · SiB (Sellers et al. 1986)</p>
+<p>양동이 위에 <b>잎으로 된 우산(캐노피)</b>을 씌우고, 잎에 열고 닫는 <b>창문(기공)</b>을 답니다. 캐노피 복사, 기공 저항, 다층 토양, 차단 강수, 눈 층이 들어왔습니다.</p>
+<div class="eq">증산 E_t = ρ (q_sat(T_leaf) − q_a) / (r_a + r_s)
+r_s = 경험식 f(빛, 기온, 수증기압차, 토양수분)   (Jarvis 형)</div>
+<p>숲·초지·사막의 알베도·거칠기·증산 차이가 기후에 주는 영향을 처음 정량화했습니다. 한계는 기공 저항이 경험식이라 CO₂ 증가에 반응하지 못하고, 식생이 지도로 처방된다는 점입니다. Noah LSM, GFDL LM2, Noah-MP의 DVEG=1·3·4가 식생 측면에서 이 수준입니다.</p>
+</section>
+
+<section class="gen" id="g3">
+<h3>3세대 · 광합성 결합</h3>
+<p class="who">Farquhar et al. (1980) · Ball et al. (1987) · SiB2 (Sellers et al. 1996) · NCAR LSM (Bonan 1996)</p>
+<p>창문을 <b>열 이유</b>가 생겼습니다. 열어야 CO₂가 들어와 광합성(돈 벌기)을 하지만, 열면 물이 나갑니다(비용).</p>
+<div class="eq">광합성  A = min(J_c Rubisco 제한, J_e 빛 제한, J_s 산물 수송 제한) − R_d
+기공    g_s = g_0 + m · A · h_s / c_s          (Ball–Berry; Leuning·Medlyn 변형)</div>
+<p>둘이 묶이면서 <b>CO₂가 늘면 기공을 덜 열어도 같은 광합성 → 증산 감소</b>(CO₂ 생리 효과)를 계산할 수 있게 됐습니다. 이때부터 GPP를 계산해 FLUXNET과 비교할 수 있습니다. 식물의 몸집은 아직 고정이고 LAI는 위성값으로 처방합니다. <b>CLM의 SP 모드가 정확히 이 단계</b>입니다.</p>
+</section>
+
+<section class="gen" id="g4">
+<h3>4세대 · 동적 식생</h3>
+<p class="who">IBIS (Foley et al. 1996) · TRIFFID (Cox 2001) · LPJ (Sitch et al. 2003) · CLM-DGVM (Levis et al. 2004) · LM3V (Shevliakova et al. 2009)</p>
+<p>두 가지가 함께 들어왔고, 이걸 구분하는 게 중요합니다.</p>
+<ul>
+  <li><b>(a) 탄소 저장</b>: 번 탄소(NPP = GPP − 호흡)를 잎·줄기·뿌리에 나눠 쌓습니다. 잎이 늘면 LAI가 늘어납니다.</li>
+  <li><b>(b) 생물지리(DV)</b>: 기후가 바뀌면 어떤 PFT가 사는지가 바뀝니다. 규칙 방식(LPJ, CNDV, LM3V, LM4p <code>do_biogeography</code>)과 경쟁 방식(TRIFFID <code>l_veg_compete</code>)이 있습니다.</li>
+</ul>
+<div class="eq">LAI = SLA × 잎 탄소          (CLM5: CNVegStructUpdateMod.F90:152-155, 캐노피 깊이 보정 포함)</div>
+<p><b>Cox et al. (2000, Nature)</b>가 HadCM3LC에 TRIFFID를 결합해 "온난화 → 아마존 숲 고사 → 탄소 방출 → 추가 온난화"라는 양의 되먹임을 보였고, 탄소–기후 되먹임 연구가 시작됐습니다. Friedlingstein et al. (2006, C4MIP)은 모델마다 되먹임 크기가 크게 다르다는 걸 보였습니다.</p>
+<div class="here">우리 1차년도 설정은 네 모델 모두 (a)는 켜고 (b)는 끈 상태입니다.</div>
+</section>
+
+<section class="gen" id="g5">
+<h3>5세대 · 탄소–질소</h3>
+<p class="who">CLM4-CN (Thornton et al. 2007) · O-CN (Zaehle &amp; Friend 2010) · JULES-CN (Wiltshire et al. 2021)</p>
+<p>돈(탄소)만 있으면 집(식물 몸)을 짓는 게 아니라 <b>벽돌(질소)</b>도 있어야 합니다. 조직은 정해진 C:N 비를 가져야 하므로 토양 무기 질소가 부족하면 성장이 제한됩니다. 질소는 침착, 생물학적 고정, 무기화(토양 유기물 분해)로 들어오고 용탈·탈질로 나갑니다.</p>
+<p>질소를 넣으면 CO₂ 비료효과로 인한 탄소 흡수가 줄어듭니다. 그리고 <b>토양 탄소가 식물에 되먹임하는 경로</b>가 생깁니다. 빠른 토양·낙엽풀이 분해되며 질소를 내놓기 때문에, 질소 모델에서는 토양 빠른 풀까지 평형이어야 식물이 안정됩니다.</p>
+<div class="tbl"><table>
+<thead><tr><th>모델</th><th>C–N 기능</th><th>우리 실험</th><th>근거</th></tr></thead>
+<tbody>
+<tr><td>CLM5</td><td>있음</td><td class="ok">켜짐</td><td><code>use_cn</code>, <code>use_fun</code>, <code>use_flexiblecn</code>, <code>use_nitrif_denitrif</code></td></tr>
+<tr><td>LM4p</td><td>있음</td><td class="no">꺼짐</td><td><code>'CENTURY-like' !Nitrogen turned off</code> (KIOST 설정 상속)</td></tr>
+<tr><td>JULES</td><td>있음</td><td class="no">꺼짐</td><td><code>l_nitrogen=.false.</code> (UKESM1 JULES-ES는 켬)</td></tr>
+<tr><td>Noah-MP</td><td>없음</td><td class="no">—</td><td>모듈 부재</td></tr>
+</tbody></table></div>
+<p class="note">"CLM5만 GPP가 다르다"면 1순위로 의심할 원인은 질소 제한입니다.</p>
+</section>
+
+<section class="gen" id="g6">
+<h3>6세대 · 개체군 역학 (cohort)</h3>
+<p class="who">ED (Moorcroft et al. 2001) · PPA (Purves et al. 2008) · LM3-PPA (Weng et al. 2015) · FATES (Koven et al. 2020) · 리뷰 Fisher et al. (2018)</p>
+<p>숲을 "초록 카펫(큰 잎 하나)"이 아니라 <b>키가 다른 나무들이 사는 마을</b>로 봅니다. 큰 나무가 햇빛을 먼저 받고, 그늘의 작은 나무는 천천히 자라거나 죽고, 큰 나무가 쓰러지면 빈자리에 새 나무가 자랍니다.</p>
+<ul>
+  <li><b>ED</b>: 크기·나이가 같은 나무 무리를 cohort로, 교란 이후 경과 시간이 같은 땅을 patch로 묶어 계산량을 줄입니다.</li>
+  <li><b>PPA</b>: 키 큰 나무부터 캐노피를 채우고, 캐노피가 차면 그 아래는 그늘층. 빛 경쟁을 단순하게 계산합니다.</li>
+</ul>
+<p>교란 후 회복, 숲의 나이 구조, 가뭄에 큰 나무가 먼저 죽는 현상을 다룰 수 있고, 산림 인벤토리·라이다 수고와 직접 비교할 수 있습니다. 대가는 계산량입니다(우리 LM4p는 cohort 143,546개). <b>목재와 숲 구조가 평형에 가는 데 수십~수백 년</b>이 걸려서 LM4p spin-up이 느립니다.</p>
+<p>FATES는 여러 PFT를 함께 키워 <b>경쟁의 결과로</b> 분포가 나옵니다. LM4p는 cohort 경쟁은 켜고, 종 분포는 규칙 방식 <code>do_biogeography</code>로 따로 켜고 끕니다(지금은 끔).</p>
+</section>
+
+<h2 id="lineage">네 모델의 계보</h2>
+<div class="lineage">
+  <div class="lin"><h4>CLM (NCAR)</h4><div class="role">커뮤니티 통합형</div>
+    <ol><li>BATS + NCAR LSM + IAP94 → Common Land Model (Dai 2003)</li><li>CLM2/3 + DGVM (Levis 2004)</li><li>CLM4: CN + CNDV</li><li>CLM4.5: BGC (층별 토양 C/N, CENTURY)</li><li>CLM5 (Lawrence 2019): BGC 기본, FUN, 식물 수리학, CNDV 미지원, FATES 옵션</li></ol>
+    <div class="ours">우리: release-clm5.0.37 BGC(crop 없음). CNDV 코드 잔존(<code>use_cndv=.false.</code>), FATES sci.1.30.0.</div></div>
+  <div class="lin"><h4>GFDL LM</h4><div class="role">토지이용·cohort 선도</div>
+    <ol><li>Manabe 양동이 (1969)</li><li>LaD / LM2 (Milly &amp; Shmakin 2002): 처방 식생</li><li>LM3V (Shevliakova 2009): 탄소 + DV, 토지이용 타일</li><li>LM4.0 (Zhao 2018)</li><li>LM4.1 (ESM4.1): PPA cohort (Weng 2015), 화재</li><li>lm4P: 질소 코드 추가, KIOST에선 끔</li></ol>
+    <div class="ours">우리: <code>do_ppa=T</code>(끄면 "LM3 mode"), <code>do_biogeography=F</code>, 질소 off.</div></div>
+  <div class="lin"><h4>JULES (Met Office)</h4><div class="role">탄소–기후 되먹임 원조</div>
+    <ol><li>MOSES (Cox 1999), MOSES2 타일 (Essery 2003)</li><li>TRIFFID (Cox 2001) → HadCM3LC (Cox 2000)</li><li>JULES 커뮤니티화 (Best 2011; Clark 2011)</li><li>GL7 (Wiltshire 2020): 9 PFT 물리 설정</li><li>JULES-ES (UKESM1; Wiltshire 2021): 질소 켬</li></ol>
+    <div class="ours">우리: vn7.4, 5 PFT + 4 비식생, TRIFFID 켬, <code>l_veg_compete=F</code>, <code>l_nitrogen=F</code>. 질소 침착 자료는 준비됨.</div></div>
+  <div class="lin"><h4>Noah 계열</h4><div class="role">예보용, 물리 옵션형</div>
+    <ol><li>OSU LSM (Pan &amp; Mahrt 1987)</li><li>Noah LSM (Chen 1996; Ek 2003): 현업 예보, 처방 식생</li><li>Noah-MP (Niu 2011; Yang 2011): 다중 물리 옵션, 동적 잎 모델</li><li>작물 (Liu 2016), v5 모듈화 (He 2023)</li></ol>
+    <div class="ours">우리: v5.2.1, DVEG=5 (LAI 예측, 최대 식생비율 고정), 질소 기능 없음.</div></div>
+</div>
+<h3>CLM이 리더인가?</h3>
+<div class="tbl"><table>
+<thead><tr><th>기능</th><th>처음 또는 대표적으로 이끈 모델</th></tr></thead>
+<tbody>
+<tr><td>기후모델에 탄소 + DV 결합</td><td>JULES / TRIFFID (HadCM3LC, 2000)</td></tr>
+<tr><td>토지이용 타일</td><td>GFDL LM3V</td></tr>
+<tr><td>ESM에 질소 결합 (CMIP5)</td><td>CLM4-CN (CESM1)</td></tr>
+<tr><td>개체군 역학</td><td>ED (하버드, 학계) → FATES, LM4 PPA</td></tr>
+<tr><td>수문·적설 물리 옵션의 다양성</td><td>Noah-MP</td></tr>
+<tr><td>사용자층, 공개성, 문서화</td><td>CLM</td></tr>
+</tbody></table></div>
+<p>기능별 원조는 여러 모델에 흩어져 있습니다. CLM은 이 기능들을 가장 넓게 모으고 가장 많이 쓰이는 커뮤니티 모델이라는 뜻에서 리더입니다. 같은 기능이 모델마다 다르게 구현돼 있다는 것이 곧 다중 LSM 비교에서 보는 <b>구조오차</b>입니다.</p>
+
+<h2 id="cmip">CMIP6에서는 어디까지였고, CMIP7은 어디로 가나</h2>
+<h3>CMIP6</h3>
+<ul>
+  <li>지면 관련 MIP: C4MIP (Jones et al. 2016), LUMIP (Lawrence et al. 2016), <b>LS3MIP</b> (van den Hurk et al. 2016, 우리 과제와 가장 가까움).</li>
+  <li>탄소 순환 ESM이라면 3세대 물리 + 탄소 저장(LAI 예측)은 기본. 토지이용 변화(LUH2) 반영.</li>
+  <li><b>질소 순환은 절반</b>: 탄소–기후 되먹임 분석 ESM 11개 중 6개 (ACCESS-ESM1.5, CESM2, MIROC-ES2L, MPI-ESM1.2-LR, NorESM2-LM, UKESM1-0-LL). CMIP5는 8개 중 2개 (Arora et al. 2020).</li>
+  <li>소수만: 층별 토양 탄소(CESM2, NorESM2 정도), 영구동토 탄소, 화재 결합, DV 결합, cohort(GFDL ESM4 등).</li>
+  <li>알려진 약점: 영구동토 활동층 모의, 토양 탄소 spin-up 미수렴, 모델 간 지면 탄소 흡수 차이가 해양보다 큼.</li>
+</ul>
+<h3>CMIP7</h3>
+<p>가장 큰 변화는 <b>CO₂ 배출량으로 구동하는 실험</b>입니다. CMIP7은 배출량 구동 모델의 참여를 장려하도록 프로토콜을 다시 짰습니다 (Dunne et al. 2025). 대기 CO₂를 처방하지 않고 모델이 탄소 순환으로 계산하므로, 지면 탄소 흡수가 틀리면 기온 예측까지 틀립니다.</p>
+<ol>
+  <li><b>탄소 순환의 정량 신뢰성</b>: 역사기간 지면 탄소 흡수, spin-up 수렴. 느린 풀 미수렴이 곧 CO₂ 오차가 됨.</li>
+  <li><b>질소(와 인) 제한</b>: CMIP6의 절반에서 기본 기대치로 <span class="chip">확인 필요</span></li>
+  <li><b>영구동토 탄소, 층별 토양 탄소</b>: 다음 세대 모델에 필요하다는 공감대 (Gaillard et al. 2026)</li>
+  <li><b>토지이용 강제 개선</b>: 개선된 토지이용 조화 자료 (Chini et al. 2023 계열)</li>
+  <li>화재, 습지 메탄 등 추가 탄소 경로 <span class="chip">확인 필요</span></li>
+  <li>개체군 역학: 아직 기본은 아니지만 선도 그룹(FATES, LM4)은 이미 탑재</li>
+</ol>
+<div class="here">KIOST-ESM2(LM4p)는 cohort는 갖췄지만 질소가 꺼져 있습니다. 배출량 구동을 목표로 한다면 질소와 토양 탄소 spin-up이 개선 1순위 후보입니다 (Phase 2 물리과정 고도화와 직결).</div>
+
+<!-- ========================= PART 2 ========================= -->
+<h2 id="flow">LM4p 한 스텝의 전체 흐름</h2>
+<p>우리 offline 설정의 lm4P 기준입니다. 호출 순서는 <code>land_model.F90</code>, <code>vegetation.F90</code>, <code>coupler/full</code>에서 직접 추출했습니다. 시간 규모는 셋입니다.</p>
+<div class="axes">
+  <div class="axis"><b>fast · 30분</b>물·에너지·광합성 <span>dt_atmos = 1800 s</span></div>
+  <div class="axis"><b>slow · 1시간</b>날·달·해가 바뀔 때만 식생 구조 <span>dt_cpld = 3600 s</span></div>
+  <div class="axis"><b>하천</b>fast 끝에 매번 <span>update_river</span></div>
+</div>
+<div class="diagram">
+<pre class="mermaid">
+flowchart TD
+  ATM["대기 / WFDE5 forcing<br/>T, q, p, 바람, 단파, 장파, 비, 눈, CO2"] --> A["(A) sfc_boundary_layer<br/>난류 교환 계수"]
+  A --> B["(B) flux_down_from_atmos<br/>복사·강수 전달"]
+  B --> C["(C) 타일 간 지하수 교환"]
+  C --> S1["(1)(2) 토양·눈 열전도 계수"]
+  S1 --> T3["(3) 캐노피 난류·저항"]
+  T3 --> V1["(4) 광합성 + 기공<br/>cohort별, 토양수분 공급 β"]
+  V1 --> Q5["(5) 포화습도·장파 수지"]
+  Q5 --> EB["(6) 에너지 수지 연립방정식<br/>캐노피 공기 T·q, 잎 T, 지면 T, 융해"]
+  EB --> UP["(7)(8)(9) 잎·눈·토양 갱신<br/>침투, 유출, 배수"]
+  UP --> C10["(10) 탄소 적분<br/>NPP를 cohort 저장 탄소에"]
+  C10 --> BC["(13)(14) 캐노피 CO2, 표면 상태 준비<br/>T_surf, 알베도, 거칠기"]
+  BC --> R["(15) 하천 라우팅"]
+  BC --> D["(D) flux_up_to_atmos<br/>현열·잠열·상향 장파"]
+  R --> O["바다로: 하천 유출"]
+  D --> AO["대기로: H, LE, LW, 알베도, CO2"]
+  C10 -.하루·한 해마다.-> SL["slow: 탄소 배분, 계절, 사망<br/>번식, cohort 재배치·병합"]
+  SL -.LAI·수고·뿌리 갱신.-> V1
+</pre>
+</div>
+
+<h2 id="in">받는 것</h2>
+<div class="tbl"><table>
+<thead><tr><th>양</th><th>기호</th><th>우리 offline 출처</th></tr></thead>
+<tbody>
+<tr><td>최하층 기온, 비습, 기압, 바람</td><td>T_a, q_a, p_s, u, v</td><td>WFDE5 (data_table <code>"ATM","t_bot"</code> 등)</td></tr>
+<tr><td>단파 (가시·근적외 × 직달·산란)</td><td>SW↓</td><td>WFDE5 <code>flux_sw</code> 10종</td></tr>
+<tr><td>장파</td><td>LW↓</td><td>WFDE5 <code>flux_lw</code></td></tr>
+<tr><td>비, 눈</td><td>P_l, P_s</td><td>WFDE5 <code>lprec</code>, <code>fprec</code></td></tr>
+<tr><td>태양천정각</td><td>cos z</td><td>WFDE5 <code>coszen</code></td></tr>
+<tr><td>CO₂</td><td>—</td><td>얼어붙은 대기 최하층 값 (override 없음)</td></tr>
+</tbody></table></div>
+<p><b>(A) <code>sfc_boundary_layer</code></b>는 Monin–Obukhov 상사로 난류 교환 계수를 구합니다. 기본형은 다음과 같고, C_H·C_E는 대기 안정도와 거칠기 z₀에 따라 바뀝니다.</p>
+<div class="eq">H = ρ c_p C_H |u| (T_s − T_a)        E = ρ C_E |u| (q_s − q_a)</div>
+
+<h2 id="fast">30분 스텝 안의 계산 (<code>update_land_model_fast_0d</code>)</h2>
+<ol class="steps">
+  <li><b>토양·눈 열전도 준비</b> <span class="fn">soil_step_1 · snow_step_1</span><br>층별 열용량·열전도도로 온도 방정식의 계수를 만듭니다. 실제 온도는 (6)에서 한꺼번에 풉니다.<div class="eq">C ∂T/∂t = ∂/∂z (λ ∂T/∂z)</div></li>
+  <li><b>캐노피 난류</b> <span class="fn">land_turbulence · cana_v_turb · cana_g_turb · surface_resistances</span><br>대기와 잎·지면 사이에 <b>캐노피 공기</b>라는 중간 저장소가 있고, 각 경로가 저항입니다. 잎 경로에는 기공 저항이 더해집니다.<div class="eq">대기 --r_a--> 캐노피 공기 (T_ca, q_ca, CO2) --r_v--> 잎 (T_v)
+                                          --r_g--> 지면/눈 (T_g)</div></li>
+  <li><b>광합성과 기공</b> <span class="fn">vegn_step_1 → soil_data_beta · vegn_photosynthesis</span><br>cohort마다 뿌리 분포 × 토양수분으로 물 공급 β를 구하고, Collatz 형 광합성과 단순화된 Leuning (1995) 기공 모델로 광합성·기공 전도도·증산 항을 계산합니다. 식물 수리학 변수(ψ_r, ψ_x, ψ_l)도 여기서.<div class="eq">A   = min(J_c, J_e, J_s) − R_d
+g_s = g_0 + m · A / [(c_s − Γ*) (1 + D_s/D_0)]</div></li>
+  <li><b>포화습도와 장파</b> <span class="fn">qscomp · land_lw_balance</span><br>Clausius–Clapeyron으로 q_sat(T), 잎·지면의 장파 흡수·방출(εσT⁴). 우리 offline의 <code>qscomp clamp</code> 패치가 이 단계에 있습니다.</li>
+  <li class="core"><b>에너지 수지를 한 번에 풂</b> <span class="fn">land_surface_energy_balance (+ ludcmp / lubksb)</span><br>LM4의 핵심입니다. 잎·지면·캐노피 공기의 에너지·수분 수지를 연립 일차방정식 A X = B로 세워 <b>캐노피 공기 T·q, 잎 온도, 지면 온도, 눈·얼음 융해량</b>을 30분 동안 암시적으로 동시에 풉니다. 미분항으로 선형화해서 시간 간격을 크게 잡아도 안정합니다.<div class="eq">R_net = H + LE + G (+ 융해 잠열)        각 표면마다</div></li>
+  <li><b>잎·눈·토양 갱신</b> <span class="fn">vegn_step_2 · snow_step_2 · soil_step_2</span><br>(5)의 해로 상태를 실제로 바꿉니다. 잎의 차단 물·눈, 적설·융해·다짐, 토양 열과 물(침투, 지표 유출, 배수·기저유출).<div class="eq">∂θ/∂t = ∂/∂z [K(θ)(∂ψ/∂z − 1)] − S_root          (Richards 형, Milly et al. 2014)</div></li>
+  <li><b>탄소 적분</b> <span class="fn">vegn_step_3 → vegn_carbon_int_ppa</span><br>30분 동안의 광합성에서 호흡을 빼서(NPP = GPP − R_a) 각 cohort의 저장 탄소(NSC)에 쌓습니다. 잎·뿌리·줄기 배분은 하루에 한 번(slow). 질소 침착 호출은 있지만 질소 off라 무영향. 토양 유기물 분해는 CENTURY-like 방식입니다 <span class="chip">호출 위치 확인 필요</span><div class="eq">dC_soil/dt = 입력 − k · f(T) · f(θ) · C_soil</div></li>
+  <li><b>진단·화재·캐노피 트레이서</b> <span class="fn">soil_step_3 · update_fire_fast · update_cana_tracers</span><br>토양 탄소 진단 출력, 화재 빠른 부분, 캐노피 공기의 CO₂·수증기 갱신(순 생태계 CO₂ 교환).</li>
+  <li><b>대기로 돌려보낼 표면 상태</b> <span class="fn">update_land_bc_fast</span><br>복사 온도, 캐노피 공기 T·q·CO₂, 알베도(<code>brdf-params</code>, 가시·근적외 × 직달·산란), 거칠기, 방출률.</li>
+  <li><b>하천</b> <span class="fn">update_river</span><br>모든 타일의 유출을 하천망으로 흘려 바다로 보냅니다. 진단 출력 <code>river_month</code>가 여기서 나옵니다.</li>
+</ol>
+<p class="note">이 앞에 (C) 타일 간 지하수 교환 <code>hlsp_hydrology_1</code>이 격자마다 한 번 돕니다.</p>
+
+<h2 id="out">돌려보내는 것</h2>
+<div class="io">
+  <div class="tbl"><table><thead><tr><th>대기로 (<code>flux_up_to_atmos</code>)</th></tr></thead><tbody>
+    <tr><td>현열 H, 잠열 LE (증발 E)</td></tr><tr><td>상향 장파, 지표 알베도</td></tr><tr><td>거칠기, 캐노피 공기 q·CO₂</td></tr></tbody></table></div>
+  <div class="tbl"><table><thead><tr><th>바다로 (<code>flux_land_to_ice</code>)</th></tr></thead><tbody>
+    <tr><td>하천 유출 (액체 + 얼음)</td></tr><tr><td>해양모델의 담수 유입 = 과제 핵심 경로</td></tr></tbody></table></div>
+</div>
+<div class="here">우리 offline 설정에서는 대기가 얼어 있어 대기 쪽 값을 받는 곳이 없습니다. 그래서 B+C 패치로 "대기 격자로 옮기는 부분"만 생략해도 지면 결과가 비트 단위로 같았습니다 (LM4 notes §13.63). 지면 진단과 하천 유출은 그대로 계산됩니다.</div>
+
+<h2 id="slow">느린 시간 규모 — 식생 구조 (<code>update_vegn_slow</code>)</h2>
+<div class="tbl"><table>
+<thead><tr><th>언제</th><th>무엇</th></tr></thead>
+<tbody>
+<tr><td>매시간</td><td>자연 사망(PPA), 화재·토지이용 전이 (lufix에선 토지이용 끔)</td></tr>
+<tr><td>새 달</td><td>화재 자료, 연료량 (LM3 모드에서만 계절 변화)</td></tr>
+<tr><td>새 날</td><td><b>vegn_growth</b>: 저장 탄소를 잎·가는 뿌리·변재·목재로 배분 → LAI·수고·직경 성장 · 굶주림 · PPA 계절 변화 · 작은 cohort 제거 · 수확(끔)</td></tr>
+<tr><td>새 해</td><td>연 기후 통계 · <b>생물지리(끔)</b> · 이탄 재분배 · 교란 · <b>번식</b>(씨앗 → 새 cohort) · <b>키 순서로 캐노피 층 재배치</b> · 비슷한 cohort 병합</td></tr>
+</tbody></table></div>
+<div class="eq">알로메트리 예:  H = a · D^b        수관 면적 = c · D^d        (Weng et al. 2015)</div>
+<p>PPA에서는 키 큰 cohort부터 캐노피를 채우고, 캐노피가 차면 나머지는 그늘층이 됩니다. 그늘층은 빛이 적어 광합성이 작고, 성장이 느리거나 굶어 죽습니다. 목재와 뿌리는 이 <b>하루 단위 배분과 한 해 단위 사망·번식</b>의 결과라 평형까지 수십~수백 년이 걸립니다. LM4p spin-up이 느린 이유입니다 (LM4 notes §13.62–13.65).</p>
+
+<h2 id="refs">참고문헌</h2>
+<ul class="refs">
+<li>Arora, V. K. et al. (2020) Carbon–concentration and carbon–climate feedbacks in CMIP6 models and their comparison to CMIP5 models. <i>Biogeosciences</i> 17, 4173–4222. <a href="https://bg.copernicus.org/articles/17/4173/2020/">link</a></li>
+<li>Ball, J. T., Woodrow, I. E., Berry, J. A. (1987) A model predicting stomatal conductance… <i>Progress in Photosynthesis Research</i>.</li>
+<li>Best, M. J. et al. (2011); Clark, D. B. et al. (2011) The Joint UK Land Environment Simulator (JULES). <i>GMD</i> 4.</li>
+<li>Bonan, G. B. (1996) A Land Surface Model (LSM 1.0). NCAR Technical Note.</li>
+<li>Chen, F. et al. (1996) <i>JGR</i>; Ek, M. B. et al. (2003) Noah land surface model advances. <i>JGR</i> 108.</li>
+<li>Collatz, G. J. et al. (1991) <i>Agric. For. Meteorol.</i> 54; Collatz, Ribas-Carbo, Berry (1992) C4 photosynthesis. <i>Aust. J. Plant Physiol.</i> 19.</li>
+<li>Cox, P. M. et al. (1999) <i>Clim. Dyn.</i>; Cox, P. M. et al. (2000) <i>Nature</i> 408; Cox, P. M. (2001) TRIFFID, Hadley Centre Tech. Note 24.</li>
+<li>Dai, Y. et al. (2003) The Common Land Model. <i>BAMS</i> 84.</li>
+<li>Dickinson, R. E. et al. (1986) BATS. NCAR Technical Note.</li>
+<li>Dunne, J. P. et al. (2025) An evolving CMIP7 and Fast Track. <i>GMD</i> 18, 6671–6700. <a href="https://gmd.copernicus.org/articles/18/6671/2025/">link</a></li>
+<li>Farquhar, G. D., von Caemmerer, S., Berry, J. A. (1980) <i>Planta</i> 149.</li>
+<li>Fisher, R. A. et al. (2018) Vegetation demographics in Earth System Models. <i>GCB</i> 24.</li>
+<li>Foley, J. A. et al. (1996) IBIS. <i>GBC</i> 10.</li>
+<li>Friedlingstein, P. et al. (2006) C4MIP. <i>J. Climate</i> 19.</li>
+<li>Gaillard, R. et al. (2026) IPSL-Perm-LandN. <i>GMD</i> 19, 661. <a href="https://gmd.copernicus.org/articles/19/661/2026/">link</a></li>
+<li>Jones, C. D. et al. (2016) C4MIP; Lawrence, D. M. et al. (2016) LUMIP; van den Hurk, B. et al. (2016) LS3MIP. <i>GMD</i> 9.</li>
+<li>Koven, C. D. et al. (2020) FATES. <i>Biogeosciences</i> 17.</li>
+<li>Lawrence, D. M. et al. (2011) CLM4. <i>JAMES</i> 3; Lawrence, D. M. et al. (2019) CLM5. <i>JAMES</i> 11.</li>
+<li>Leuning, R. (1995) <i>Plant Cell Environ.</i> 18.</li>
+<li>Levis, S. et al. (2004) CLM-DGVM. NCAR Technical Note.</li>
+<li>Manabe, S. (1969) <i>Mon. Wea. Rev.</i> 97.</li>
+<li>Milly, P. C. D., Shmakin, A. B. (2002) LaD. <i>J. Hydrometeorol.</i> 3; Milly, P. C. D. et al. (2014) LM3. <i>J. Hydrometeorol.</i> 15.</li>
+<li>Monin, A. S., Obukhov, A. M. (1954) Surface-layer turbulence.</li>
+<li>Moorcroft, P. R., Hurtt, G. C., Pacala, S. W. (2001) Ecosystem Demography. <i>Ecol. Monogr.</i> 71.</li>
+<li>Niu, G.-Y. et al. (2011); Yang, Z.-L. et al. (2011) Noah-MP. <i>JGR</i> 116.</li>
+<li>Pitman, A. J. (2003) <i>Int. J. Climatol.</i> 23.</li>
+<li>Purves, D. W. et al. (2008) <i>PNAS</i> 105.</li>
+<li>Sellers, P. J. et al. (1986) SiB, <i>J. Atmos. Sci.</i> 43; (1996) SiB2, <i>J. Climate</i> 9; (1997) <i>Science</i> 275.</li>
+<li>Shevliakova, E. et al. (2009) LM3V. <i>GBC</i> 23.</li>
+<li>Sitch, S. et al. (2003) LPJ. <i>GCB</i> 9.</li>
+<li>Thornton, P. E. et al. (2007) <i>GBC</i> 21.</li>
+<li>Weng, E. S. et al. (2015) LM3-PPA. <i>Biogeosciences</i> 12.</li>
+<li>Wiltshire, A. J. et al. (2021) JULES-CN. <i>GMD</i> 14.</li>
+<li>Zaehle, S., Friend, A. D. (2010) O-CN. <i>GBC</i> 24.</li>
+<li>Zhao, M. et al. (2018) AM4.0/LM4.0. <i>JAMES</i> 10.</li>
+</ul>
+<footer>원문 마크다운: <code>docs/LSM_generations_primer.md</code>, <code>docs/LM4p_timestep_flow.md</code> · 모델 설정 근거: JULES notes §13–18, LM4 notes §13.11–13.65, CLM5 notes §7.</footer>
+</main>
+</div>
