@@ -101,6 +101,7 @@ footer{margin-top:56px;color:var(--muted);font-size:13px;border-top:1px solid va
   <a href="#g5">5 탄소–질소</a>
   <a href="#g6">6 개체군 역학</a>
   <a href="#lineage">네 모델의 계보</a>
+  <a href="#lai">LAI 계산 비교</a>
   <a href="#cmip">CMIP6 · CMIP7</a>
   <p>2부 · LM4p 계산 흐름</p>
   <a href="#flow">전체 흐름도</a>
@@ -243,6 +244,19 @@ r_s = 경험식 f(빛, 기온, 수증기압차, 토양수분)   (Jarvis 형)</di
 <tr><td>사용자층, 공개성, 문서화</td><td>CLM</td></tr>
 </tbody></table></div>
 <p>기능별 원조는 여러 모델에 흩어져 있습니다. CLM은 이 기능들을 가장 넓게 모으고 가장 많이 쓰이는 커뮤니티 모델이라는 뜻에서 리더입니다. 같은 기능이 모델마다 다르게 구현돼 있다는 것이 곧 다중 LSM 비교에서 보는 <b>구조오차</b>입니다.</p>
+
+<h2 id="lai">네 모델은 LAI를 어떻게 계산하나</h2>
+<p>LAI는 식생 쪽 <b>주 검증 변수</b>입니다. 위성 관측(MODIS 2000–, GIMMS 1982–)이 전 지구로 길게 있고, 광합성·탄소 배분·계절·물 스트레스가 모두 반영되기 때문입니다. LAI가 맞아도 GPP나 증발산이 틀릴 수 있어서 보통 <b>LAI + GPP + 증발산</b>을 함께 봅니다.</p>
+<p>네 모델 모두 <b>잎에 든 탄소(질량)를 잎 1 g이 펼치는 면적으로 바꿔서</b> LAI를 만듭니다. 차이는 잎 탄소를 어떻게 정하느냐입니다. 식은 소스에서 확인했습니다.</p>
+<div class="tbl"><table>
+<thead><tr><th>모델</th><th>LAI 식</th><th>잎 탄소를 정하는 방식</th></tr></thead>
+<tbody>
+<tr><td>CLM5 BGC</td><td><code>LAI = SLA_top·(exp(leafC·dSLA/dLAI) − 1)/(dSLA/dLAI)</code><br><span class="note">CNVegStructUpdateMod.F90:153</span></td><td>PFT별 잎 탄소를 C–N 배분과 계절 변화로 예측. 캐노피 아래로 갈수록 잎이 얇아지는 효과 포함</td></tr>
+<tr><td>JULES</td><td><code>LAI_bal = (a_ws·η_sl·h / a_wl)^(1/(b_wl−1))</code><br><code>LAI = phen × LAI_bal</code><br><span class="note">phenol_jls.F90:107-109</span></td><td>TRIFFID가 식생 탄소로 <b>수고 h</b>를 정하고, 알로메트리로 그 수고에서 가질 수 있는 최대 LAI를 구함. 계절 변화는 phen(0–1)</td></tr>
+<tr><td>Noah-MP</td><td><code>LAI = max(LeafMass × LeafAreaPerMass, LAI_min)</code><br><span class="note">CarbonFluxNatureVegMod.F90:241</span></td><td>잎 질량을 탄소 배분으로 예측. 가장 단순한 형태</td></tr>
+<tr><td>LM4p</td><td><code>LAI_cohort = (b_l / LMA) / (A_crown·(1 − gap))</code><br><code>A_crown = α·DBH^θ</code><br><span class="note">vegn_dynamics.F90:2192, vegn_cohort.F90:567</span></td><td><b>나무 한 그루</b>의 잎 탄소 b_l을 잎 면적당 질량(LMA)으로 나눠 잎 면적을 구하고 수관 면적으로 나눔. 그늘층 잎은 더 얇음. cohort를 캐노피 층 비율로 합쳐 격자 LAI</td></tr>
+</tbody></table></div>
+<div class="here">관측과 비교하기 전 주의: MODIS LAI는 <b>격자 전체 면적</b> 기준이라 맨땅이 있으면 낮아집니다. 모델 출력은 PFT 타일 안의 값일 수 있습니다(JULES PFT별 <code>lai</code>). LM4는 같은 이름 <code>lai</code>가 두 출력 스트림에서 정의가 달라 전 지구 평균이 9% 차이 난 적이 있습니다. 비교 전에 모두 <b>격자 전체 면적 기준</b>(PFT 비율로 가중, 맨땅은 0 포함)으로 맞춰야 합니다.</div>
 
 <h2 id="cmip">CMIP6에서는 어디까지였고, CMIP7은 어디로 가나</h2>
 <h3>CMIP6</h3>

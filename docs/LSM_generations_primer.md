@@ -130,6 +130,24 @@ OSU LSM (Pan & Mahrt 1987) → **Noah LSM** (Chen et al. 1996; Ek et al. 2003; �
 
 ---
 
+## 7.5 네 모델의 LAI 계산 (주 검증 변수, 소스 확인 2026-10-03)
+
+LAI는 식생 쪽 주 검증 변수(MODIS 2000–, GIMMS 1982–). LAI가 맞아도 GPP·증발산이 틀릴 수 있어 **LAI + GPP + ET**를 함께 볼 것.
+네 모델 모두 "잎 탄소(질량) → 잎 면적"이 기본이고, 잎 탄소를 정하는 방식이 다르다.
+
+| 모델 | LAI 식 | 소스 | 잎 탄소 결정 |
+|---|---|---|---|
+| CLM5 BGC | `LAI = SLA_top·(exp(leafC·dSLA/dLAI) − 1)/(dSLA/dLAI)` | `CNVegStructUpdateMod.F90:153` | C–N 배분 + 계절, 캐노피 깊이 보정 |
+| JULES | `LAI_bal = (a_ws·η_sl·h/a_wl)^(1/(b_wl−1))`, `LAI = phen × LAI_bal` | `phenol_jls.F90:107-109` | TRIFFID 식생 탄소 → 수고 h → 알로메트리 최대 LAI, 계절은 phen(0–1) |
+| Noah-MP | `LAI = max(LeafMass × LeafAreaPerMass, LAI_min)` | `CarbonFluxNatureVegMod.F90:241` | 잎 질량을 탄소 배분으로 예측 |
+| LM4p | `LAI_cohort = (b_l/LMA)/(A_crown·(1−gap))`, `A_crown = α·DBH^θ` | `vegn_dynamics.F90:2192`, `vegn_cohort.F90:567` | 한 그루 잎 탄소 b_l, 그늘층 LMA 보정, cohort를 캐노피 층 비율로 합산 |
+
+**관측 비교 주의**: MODIS LAI = 격자 전체 면적 기준(맨땅 포함). 모델 출력은 PFT 타일 기준일 수 있음(JULES PFT별 `lai`).
+LM4는 native `lai`와 CMIP `lai`가 정의가 달라 전 지구 평균 −9% 차이(memory `lm4-lai-native-vs-cmip`).
+→ 비교 전 **격자 전체 면적 기준**(PFT 비율 가중, 맨땅 0 포함)으로 통일.
+
+---
+
 ## 8. CMIP6에서는 어디까지였나
 
 - **배경**: CMIP6에서 지면 관련 MIP — C4MIP (Jones et al. 2016, 탄소–기후 되먹임), LUMIP (Lawrence et al. 2016, 토지이용),
