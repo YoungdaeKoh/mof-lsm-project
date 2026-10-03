@@ -1,12 +1,22 @@
---- coupler/full/coupler_main.F90  (with radiation_gate patch applied)
-+++ coupler/full/coupler_main.F90
-@@ fast (dt_atmos) loop, after the OpenMP region @@
+--- coupler_main.F90	2026-10-02 18:00:27
++++ gateB/coupler_main.F90	2026-10-02 18:27:18
+@@ -952,7 +952,18 @@
+ !$      call omp_set_num_threads(atmos_nthreads+(conc_nthreads-1)*radiation_nthreads)
+ 
          call fms_mpp_clock_begin(newClockk)
 -        call update_atmos_model_state( Atm )
-+        ! Offline land (do_atmos=.false.): the frozen FV3 state needs no update.
-+        ! update_atmos_model_state runs fv_update_phys over the full 3-D state and
-+        ! all tracers, fv_diag, and bottom-level extraction that data_override
-+        ! replaces anyway: 6.6 % of the main loop (LM4 notes 13.63).  Siblings
-+        ! (_dynamics/_down/_up/_radiation) are already gated the same way.
-+        if (do_atmos) call update_atmos_model_state( Atm )
++        if (do_atmos) then
++          call update_atmos_model_state( Atm )
++        else
++          ! Offline land (do_atmos=.false.): the frozen FV3 state needs no update.
++          ! Skipped: fv_update_phys over the 3-D state and all tracers, fv_diag,
++          ! bottom-level extraction (the atmosphere restarts are byte-identical
++          ! from year to year in the unpatched run, and forcing is data_override).
++          ! Kept: the atmosphere clock and the diag_manager end-of-step call, the
++          ! only one on the atmosphere/land PEs (LM4 notes 13.63).
++          Atm%Time = Atm%Time + Atm%Time_step
++          call fms_diag_send_complete(Atm%Time_step)
++        endif
          if (do_chksum) call atmos_ice_land_chksum('update_atmos_model_state+', (nc-1)*num_atmos_calls+na, Atm, Land, &
+                   Ice,Land_ice_atmos_boundary, Atmos_ice_boundary, Atmos_land_boundary)
+         if (do_debug)  call fms_memutils_print_memuse_stats( 'update state')

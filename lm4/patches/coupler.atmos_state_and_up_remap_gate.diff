@@ -1,17 +1,18 @@
---- codex_lm4/atm_land_ice_flux_exchange.F90	2026-10-02 17:41:33
-+++ gateC/atm_land_ice_flux_exchange.F90	2026-10-02 17:54:38
-@@ -163,6 +163,10 @@
+--- atm_land_ice_flux_exchange.F90	2026-10-02 18:00:27
++++ gateBC/atm_land_ice_flux_exchange.F90	2026-10-02 18:27:18
+@@ -163,6 +163,11 @@
    logical :: ocn_atm_flux_vmr_bug
    logical :: do_area_weighted_flux = .FALSE.
    logical :: do_forecast = .false.
 +  !> Offline land (coupler do_atmos=.false.): skip the exchange-grid -> atmosphere
-+  !! remaps in flux_up_to_atmos whose only consumer is the (skipped) atmosphere
-+  !! physics (dt_tr, dt_t, shflx, lhflx).  Set by coupler_main; default keeps them.
++  !! remaps in flux_up_to_atmos whose only readers are the (skipped) atmosphere
++  !! physics routines (dt_tr, dt_t, shflx, lhflx).  Set by coupler_main; the
++  !! default keeps them.  Flux corrections and land diagnostics are untouched.
 +  logical, public :: atm_up_remap = .true.
    integer :: nblocks = 1
    logical :: partition_fprec_from_lprec = .FALSE. !< option for ATM override experiments where liquid+frozen precip are combined
                                                    !! This option will convert liquid precip to snow when t_ref is less than
-@@ -3019,11 +3023,13 @@
+@@ -3019,11 +3024,13 @@
         enddo
      enddo
  
@@ -25,7 +26,7 @@
  
      do l = 1, my_nblocks
         is=block_start(l)
-@@ -3041,11 +3047,13 @@
+@@ -3041,11 +3048,13 @@
      !-----------------------------------------------------------------------
      !---- get mean quantites on atmospheric grid ----
  
@@ -39,8 +40,8 @@
  
      !=======================================================================
      !-------------------- diagnostics section ------------------------------
---- codex_lm4/coupler_main.F90	2026-10-02 17:41:32
-+++ gateC/coupler_main.F90	2026-10-02 17:54:38
+--- coupler_main.F90	2026-10-02 18:00:27
++++ gateBC/coupler_main.F90	2026-10-02 18:27:18
 @@ -395,6 +395,7 @@
    use flux_exchange_mod,       only: flux_check_stocks, flux_init_stocks
    use flux_exchange_mod,       only: flux_ocean_from_ice_stocks, flux_ice_to_ocean_stocks
@@ -49,16 +50,27 @@
  
    use atmos_tracer_driver_mod, only: atmos_tracer_driver_gather_data
  
-@@ -952,7 +953,7 @@
+@@ -952,7 +953,18 @@
  !$      call omp_set_num_threads(atmos_nthreads+(conc_nthreads-1)*radiation_nthreads)
  
          call fms_mpp_clock_begin(newClockk)
 -        call update_atmos_model_state( Atm )
-+        if (do_atmos) call update_atmos_model_state( Atm )
++        if (do_atmos) then
++          call update_atmos_model_state( Atm )
++        else
++          ! Offline land (do_atmos=.false.): the frozen FV3 state needs no update.
++          ! Skipped: fv_update_phys over the 3-D state and all tracers, fv_diag,
++          ! bottom-level extraction (the atmosphere restarts are byte-identical
++          ! from year to year in the unpatched run, and forcing is data_override).
++          ! Kept: the atmosphere clock and the diag_manager end-of-step call, the
++          ! only one on the atmosphere/land PEs (LM4 notes 13.63).
++          Atm%Time = Atm%Time + Atm%Time_step
++          call fms_diag_send_complete(Atm%Time_step)
++        endif
          if (do_chksum) call atmos_ice_land_chksum('update_atmos_model_state+', (nc-1)*num_atmos_calls+na, Atm, Land, &
                    Ice,Land_ice_atmos_boundary, Atmos_ice_boundary, Atmos_land_boundary)
          if (do_debug)  call fms_memutils_print_memuse_stats( 'update state')
-@@ -1217,6 +1218,7 @@
+@@ -1217,6 +1229,7 @@
  
      read (fms_mpp_input_nml_file, coupler_nml, iostat=io)
      ierr = check_nml_error (io, 'coupler_nml')

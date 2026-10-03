@@ -395,7 +395,7 @@ before=276.4987 after=276.4988 diff=6.6e-6  time=1982-01-01 00:00:00
 **★★ 근본 문제: `update_atmos_model_radiation`만 `do_atmos` 게이트 밖에 있음.** `coupler/full/coupler_main.F90`:
 - 839행 직렬 경로 `if (.not.do_concurrent_radiation)` — **`do_atmos` 안 봄**
 - 920행 동시 경로 `if (do_concurrent_radiation)` — **역시 안 봄**
-- 형제 호출은 전부 `if (do_atmos)`: `_dynamics`(830) · `_down`(849) · `_up`(902) · `_state` · `atmos_tracer_driver_gather_data`(789).
+- 형제 호출은 전부 `if (do_atmos)`: `_dynamics`(830) · `_down`(849) · `_up`(902) · `atmos_tracer_driver_gather_data`(789). **정정(2026-10-02): `_state`(955)는 게이트 없음** — §13.63.
 - → **어느 쪽으로 설정해도 복사는 반드시 실행됨. namelist로 끌 방법 없음.** 24 PE 1일 probe 프로파일에서 `Radiation` 48회 **148.0초 = main loop(264.7초)의 56%**. 물리적으론 무해(계산 결과를 `flux_down_from_atmos`가 data_override 값으로 덮어씀) — **순수 낭비**.
 - **패치(clone 전용, 2곳)**: `if (do_atmos .and. .not.do_concurrent_radiation)` / `if (do_atmos .and. do_concurrent_radiation)`. 재빌드 후 `Radiation` **0회 0.000초** 확인.
 
@@ -434,7 +434,7 @@ offline 성능의 핵심. `do_atmos=.false.`로도 **세 종류의 대기 계산
 
 **#1 복사 — 유일하게 소스 패치가 필요한 항목.** `coupler/full/coupler_main.F90`:
 - 839행 직렬 `if (.not.do_concurrent_radiation)` / 920행 동시 `if (do_concurrent_radiation)` — **둘 다 `do_atmos`를 안 봄.** `do_concurrent_radiation`을 어느 값으로 줘도 **하나는 반드시 실행** → namelist 탈출구 없음.
-- 형제 호출은 전부 `if (do_atmos)`: `_dynamics`(830)·`_down`(849)·`_up`(902)·`_state`·`atmos_tracer_driver_gather_data`(789). **복사만 누락** = GFDL 쪽 버그로 보고할 만함(data-atmosphere 모드를 쓰는 누구나 겪음).
+- 형제 호출은 전부 `if (do_atmos)`: `_dynamics`(830)·`_down`(849)·`_up`(902)·`atmos_tracer_driver_gather_data`(789). (**정정 2026-10-02: `_state`는 게이트 없이 매 dt_atmos 실행** — §13.63.) **복사만 누락** = GFDL 쪽 버그로 보고할 만함(data-atmosphere 모드를 쓰는 누구나 겪음).
 - 패치 = 두 조건에 `do_atmos .and.` 추가. **동작 변경이 아니라 원래 의도대로 정렬.** 물리적으로도 무해(복사 결과를 `flux_down_from_atmos`가 data_override 값으로 덮어씀).
 - 보존: `lm4/patches/coupler_main.F90.radiation_gate.diff`.
 
@@ -1488,3 +1488,35 @@ radius_deg = 1.0 + 3.0 * min(1, area_mou / 2.5e6)
 - **진단 함의**: LAI·GPP·플럭스·적설은 생산런 그대로 사용 가능. **ctl/lufix의 목재·토양탄소 저장량 추세와 NEE에는
   spin-up 표류가 섞임** → 탄소 추세를 온난화 반응으로 해석 금지(표류 명시 또는 cycle 간 차감). KIOST 결합기후 평형에서
   WFDE5 관측기후로 바뀐 데 대한 탄소 재평형으로 해석(추정). 그림 `figures/spinup_4models/lm4p_spinup.png`(cycle 2 포함).
+- **빠른 탄소풀** (`analysis/fast_pool_convergence.py`, c1 y2010 vs ctl y2010, Jan–Nov, C96 비빙설): cLeaf −1.05 %(셀 ≤1 % 18.6 %),
+  **cRoot +6.9 %**(12.2 %), cLitter +0.97 %(22.7 %) → 빠른 풀도 셀 단위로는 미수렴(PPA cohort 변동이 섞였을 가능성, 분리 안 함).
+  비교: CLM5 post-AD 171→201년 LEAFC/FROOTC/LITR1C/SOIL1C 육지평균 ≤0.1 %, 셀 ≤1 % 92–96 %(수렴).
+
+### 13.63 ★★★ offline 대기 잔존 계산 제거 — B+C 패치, 지면 비트 동일 + 18–21 % 단축 (2026-10-02~03)
+
+- **실측 분해** (`lm4_spinup30` 1년, 24 PE, 44,466 s): Update-Land-Fast 73.9 %(그중 ddep 8.5 %), Land-Slow 4.3 %,
+  **`update_atmos_model_state` 6.6 %**(FV dy-core 1,113 s + FV Diag 974 s …), **Flux UP to atm 5.3 %**, SFC BL+Flux DN 6.2 %, Ice 0.8 %.
+  FV3 역학·물리 적분은 이미 꺼져 있음. 남은 대기 계산 = `coupler_main.F90:955` `update_atmos_model_state`가 **게이트 없이**
+  매 dt_atmos 실행(`fv_update_phys` 3-D 전체 + 트레이서, `fv_diag`, 최하층 추출) + `flux_up_to_atmos`의 대기 격자 remap.
+- **근거**: 무패치 lufix의 대기 restart 6종(fv_core/tracer/srf_wnd, atmos_coupled, physics_driver, radiative_gases)이
+  y1990과 y2001에서 **바이트 동일** = 대기는 진짜로 얼어 있음.
+- **패치** (Codex CLI와 교차검토 후 안전형으로 수정):
+  - **B** `lm4/patches/coupler_main.F90.atmos_state_gate.diff`: `if (do_atmos) … else` 분기에서 **대기 시계 전진과
+    `fms_diag_send_complete`만 유지**(atmos/land PE에서 유일한 diag 완료 호출, `atmos_model.F90:1129`).
+  - **C** `lm4/patches/coupler.atmos_state_and_up_remap_gate.diff`(B 포함): 모듈 플래그 `atm_up_remap = do_atmos`로
+    `flux_up_to_atmos`의 `dt_tr`(교환 트레이서 전부)·`dt_t`·`shflx`·`lhflx` → ATM remap 생략. 읽는 곳은 `atmos_model.F90`의
+    대기 물리뿐(이미 꺼짐). flux 보정·지면 진단·stock은 유지. 안전 근거는 "값이 0"이 아니라 "소비자 없음"(shflx/lhflx는 SFC BL에서도 채움).
+  - Codex 우려 해소: `atmos_tracer_driver_gather_data_down`의 `tr_bot`은 `intent(in)`; `restart_tbot_qbot` 기본 `.false.`;
+    CO₂는 override 안 해 제자리 변환 분기 미진입; 빌드에 OpenMP 없음(`-qopenmp` 0, libiomp 미링크).
+  - 빌드: 섀도 소스 + `exec/coupler` 복사본만 재컴파일·재링크(`lm4/scripts/stategate_build.sh gateB|gateBC`), 생산 exe 불변.
+    exe = `/data2/ydkoh/lm4/build_gateBC/fms_esm4.5_gateBC.x`.
+- **이어달리기 A/B 시험** (`lm4/scripts/stategate_test.sh`, `RUN/stategate_test2/`, 48 PE @climate00, lufix y2001 끝 → 2002-01-01,
+  seg1 31일 → 각자 seg1 RESTART에서 seg2 5일, namelist 동일·`print_freq=0`):
+  - **비교 결과 (B, B+C × seg1, seg2 전부)**: 지면 restart 60 · 지면/하천 history 132 · 대기/해빙/결합기 restart 57 ·
+    coupler.res · landuse.res **전부 비트 동일**, 월평균 레코드 수 동일.
+  - **main loop**: base 5,055 / 885 s → B 5,062 / 778 s → **B+C 4,139 / 697 s (−18.1 % / −21.3 %)**.
+  - **B 단독은 31일 구간에서 효과 0**: `update_atmos_model_state` 154→0 s인데 Flux UP 832→942 s로 증가 = 그 시간 대부분이
+    계산이 아니라 **다음 동기화 지점에서의 대기 시간**이 옮겨 간 것(추정). **실효는 C**: Flux UP 832→148 s(교환격자 통신 제거).
+  - A(`print_freq=-99`)는 불필요: B가 `fv_diag`를 포함(FV Diag 호출 1,488 → 0).
+- **결정(2026-10-03, 사용자)**: **B+C 채택.** 진행 중인 lufix는 기존 exe로 끝까지, **다음 LM4p 실행(spin-up cycle 3)부터 gateBC exe.**
+  예상: 10.6 → ≈8.5 h/model-yr, 45년 −≈90 h, 30년 cycle −≈2.6일. 진단 출력 축소(≈25 %)는 별도로 추가 가능.

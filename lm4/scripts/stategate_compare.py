@@ -66,4 +66,9 @@ for t in ("coupler.res", "landuse.res"):
     fa, fb = a + "/RESTART/" + t, b + "/RESTART/" + t
     if os.path.exists(fa) and os.path.exists(fb):
         print("%s identical: %s" % (t, open(fa).read() == open(fb).read()))
+for f in sorted(glob.glob(a + "/*.land_month.tile1.nc")):
+    g = f.replace(a, b, 1)
+    na = Dataset(f).dimensions["time"].size
+    ng = Dataset(g).dimensions["time"].size if os.path.exists(g) else -1
+    print("monthly records %s: base %d, patched %d" % (os.path.basename(f), na, ng))
 print("\nVERDICT: land state and land output %s" % ("BIT-FOR-BIT IDENTICAL" if nb + nh == 0 else "DIFFER"))
