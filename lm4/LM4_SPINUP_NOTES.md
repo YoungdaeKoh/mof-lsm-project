@@ -1541,3 +1541,28 @@ radius_deg = 1.0 + 3.0 * min(1, area_mou / 2.5e6)
   토지이용 **켠** 채 cycling하면 매 cycle 1981–2010 전이 델타가 다시 더해져(§13.47 "2010 면적 + 델타") 농경지가 cycle마다 늘어남 → 부적합.
   판정: cycle 2(lufix 1981–2010) vs cycle 3 같은 해 비교 + **연별 목재·뿌리(cRoot) 증가율이 줄어드는지** 감시.
   뿌리 탄소는 수분 흡수로 식물에 되먹임하므로 수렴 필수(빠른 토양풀은 질소 off라 식물 무영향). 수렴 시 생산런 재실행 검토(≈16일).
+
+### 13.65 ★★ LM4p spin-up 가속 기법 유무 + 4개 모델 C–N 결합 정리 (2026-10-03)
+
+**(1) LM4p에 CLM5 AD 같은 가속 스위치는 없다** (lm4P 소스 전수 grep `spin.?up|accelerat|equilib` + namelist).
+- 있는 것: **토양 탄소 해석적 평형용 누적 변수** `fsc_in`·`ssc_in`(빠른/느린 토양 탄소 입력 누적, kgC/m²)·`asoil_in`(분해 활성도 누적).
+  주석 `"for soil carbon equilibration"`(`soil_util.F90:90`), restart `soil.res`에 저장(`soil.F90:1641-1643`), 진단 `fsc_in`/`ssc_in`.
+  **모델 안에서는 누적·저장만 하고 사용하지 않음** → 오프라인으로 `C_eq = 연 입력 / (기준 분해율 × 평균 활성도)`를 계산해
+  restart를 덮어쓰라는 장치(GFDL LM3식 해석적 spin-up으로 추정; 계산 도구는 소스에 없음).
+- 없는 것: **식생(목재·뿌리) 가속**(사망률·회전율 일시 증대 등). namelist `tLongest=500`은 토양모델 파라미터일 뿐.
+- **함의**: 해석적 평형은 **식물에 영향 없는 토양 탄소**(질소 off)만 당길 수 있음. 정작 식물에 되먹임하는 **목재·뿌리는 cycle을 더
+  돌리는 것이 유일한 길**(B+C로 ≈10.6일/cycle, 진단 축소 시 ≈8일). 토양 탄소 해석적 평형은 2차년도 탄소 진단 때 검토.
+- **판정 원칙 수정**: 빠른 풀의 평형은 입력원인 **느린 풀(목재)에 묶임**(목재↑ → 뿌리·고사목·낙엽↑). LM4p cRoot +6.9 %가 bwood +7.6 %와
+  거의 같은 비율인 이유. → "빠른 풀 수렴?"이 아니라 **"목재 수렴?"을 볼 것.** cycle 2→3 목재 증가율 감소폭으로 필요 cycle 수 외삽.
+  (참고 CLM5 기준 회전시간 `clm5_params.c171117.nc`: LITR1 0.054년, LITR2/3 0.204년, SOIL1 0.137년, SOIL2 5년, SOIL3 222년, CWD 3.3년.)
+
+**(2) 4개 모델 탄소–질소(C–N) 결합** (설정·소스 직접 확인)
+| 모델 | C–N 기능 | 우리 실험 | 근거 |
+|---|---|---|---|
+| CLM5 | 있음 | **켜짐** | `lnd_in`: `use_cn`·`use_fun`·`use_flexiblecn`·`use_nitrif_denitrif = .true.` |
+| LM4p | 있음 | **꺼짐** | `soil_carbon_model_to_use='CENTURY-like' !Nitrogen turned off`, `N_limits_live_biomass=.FALSE.` (질소엔 `CORPSE-N`+ndep 입력 필요, §13.16; KIOST 설정 그대로 물려받음) |
+| JULES | 있음 | **꺼짐** | `l_nitrogen=.false.` (rose-stem `loobos_jules_cn` 등은 켬) |
+| Noah-MP | **없음** | — | 모듈 부재 (NOAHMP notes §11) |
+- **식물 되먹임 경로가 다름**: CLM5만 빠른 토양·낙엽풀 → 질소 무기화 → 식물 성장 제한. 나머지 셋은 토양 탄소가 식물에 영향 없음
+  (식물에 중요한 건 잎·뿌리·목재뿐). → spin-up 판정 기준도 CLM5는 토양 빠른 풀 포함, 나머지는 식생 풀 중심.
+- **진단 해석**: GPP·LAI가 질소 제한을 받는 건 CLM5뿐 → "CLM5만 GPP 낮음" 등 차이의 1순위 원인 후보 = 질소 제한(2차년도 구조오차 주제).
