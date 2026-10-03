@@ -448,3 +448,19 @@ spin-up과 차이는 4줄 — `l_trif_eq=.false.`, **`triffid_period=5`**, `data
 IC = `jules_spinA_c03.dump.20110101`. **주기 5일인 이유**: TRIFFID 누적량과 `asteps_since_triffid`는 dump 변수가 아님
 (`required_vars_for_configuration_mod.F90`) → 연 단위 재시작마다 0. 10일이면 해마다 마지막 5일이 버려지고, 5는 365를 나눔.
 경계 시험 2023-12 → 2024-01-01 통과(lookahead 파일 열림, dump 20240101). 출력 `/data2/ydkoh/JULES_runs/prod_1979_2023/output/jules_prod.*`.
+
+## 18. 질소 침착 자료 준비 — JULES 질소 켬 실험 대비 (2026-10-03, 실험은 보류)
+
+- **왜**: JULES는 C–N 기능이 있으나 `l_nitrogen=.false.`. 실제 운영 설정(UKESM1 / JULES-ES, rose-stem `loobos_jules_es_1p0_spinup`)은
+  질소를 켬 → 2차년도 "질소 켬/끔" 민감도 실험 후보. 켜려면 질소 침착 입력이 필요(4개 모델 C–N 정리는 LM4 notes §13.65).
+- **자료**: CLM5가 쓰는 파일 그대로(`/data1/CESM2_INPUT/lnd/clm2/ndepdata/fndep_clm_hist_b.e21.BWHIST.f09_g17.CMIP6-historical-WACCM.ensmean_1849-2015_monthly_0.9x1.25_c180926.nc`,
+  1849–2015 월별, kg/m²/s). CLM5 생산런은 **2000년 반복**(`stream_year_first/last_ndep=2000`) → JULES도 2000년.
+- **산출**: `jules/scripts/make_ndep_2000clim_1deg.py` → `/data2/ydkoh/jules_ndep/ndep_2000clim_1deg.nc`
+  (`deposition_n` = dry+wet × NHx+NOy, 12개월 기후값, cdo remapcon → r360x180).
+- **grid-verify 통과 (2026-10-03)**: 좌표 = `grid_info_1deg.nc`와 배열 동일(lat −89.5..89.5, lon 0..359) · 원본/변환본 index-space
+  그림이 세계지도이고 JULES 육지 윤곽과 일치(`figures/jules/gridcheck_ndep.png`) · 결측 0 · 전구 **111.61 TgN/yr**, 변환 전후 0.000 %
+  (문헌 2000년 ≈100–120) · JULES 육지 79.3 TgN/yr · 지역(gN/m²/yr): 중국 동부 2.62 > 서유럽 1.84 > 미국 동부 1.42 > 아마존 0.32 >
+  시베리아 0.10 ≈ 사하라 0.08.
+- **켤 때 할 일**: `l_nitrogen=.true.` + `&jules_prescribed_dataset`(file=위 파일, `var='deposition_n'`, `is_climatology=.true.`,
+  `data_period=-2`) → 평형 모드 spin-up 3–5 cycle(토양 N이 식물에 되먹임하므로 HUM까지 볼 것) → 생산런. JULES 단위
+  `deposition_n` = kg/m²/s(`variable_metadata.inc:4887`), 소비처 `soil_inorg_n_mod.F90:soil_n_deposition`.
