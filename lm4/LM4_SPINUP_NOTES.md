@@ -1566,3 +1566,44 @@ radius_deg = 1.0 + 3.0 * min(1, area_mou / 2.5e6)
 - **식물 되먹임 경로가 다름**: CLM5만 빠른 토양·낙엽풀 → 질소 무기화 → 식물 성장 제한. 나머지 셋은 토양 탄소가 식물에 영향 없음
   (식물에 중요한 건 잎·뿌리·목재뿐). → spin-up 판정 기준도 CLM5는 토양 빠른 풀 포함, 나머지는 식생 풀 중심.
 - **진단 해석**: GPP·LAI가 질소 제한을 받는 건 CLM5뿐 → "CLM5만 GPP 낮음" 등 차이의 1순위 원인 후보 = 질소 제한(2차년도 구조오차 주제).
+
+### 13.66 ★★★ ctl 생산런 LAI vs GIMMS 1982–2020 — 과대 +54 %, 2001년 이후 추세 부호 반대 (2026-10-03, 포스터용)
+
+포스터 폴더 `poster/2026_LM4p_LAI/` (scripts `p1_gimms_to_monthly_1deg.py` → `n1_lai_clim_anom.ncl`, 요약 `data/lai_mean_trend_summary.txt`).
+LM4p = `postproc/lm4p_ctl/yearly`(lm4p_to_latlon.py, nearest 1°)의 `lai`를 CDO mergetime. GIMMS LAI4g = 반달 2개 평균 → 1/12°를 12×12 블록평균.
+두 파일 좌표 동일(lat −89.5→89.5, lon −179.5→179.5) · 원본배열 플롯 정상 · 기후값 1982–2010(GIMMS 시작이 1982) · 기준기간 anom 평균 ~1e-10.
+공통 14,903격자(60S–90N, 그린란드 제외), cos(lat) 가중, 연평균(1–12월).
+
+| 항목 | LM4p | GIMMS | |
+|---|---|---|---|
+| 평균 1982–2010 | 2.586 | 1.678 | **+54 %**, r 0.81, RMSE 1.57 |
+| 열대 20S–20N | 3.98 | 2.80 | +42 % |
+| 북반구 중위도 20–50N | 1.89 | 1.17 | +61 % |
+| 한대 50–70N | 1.59 | 1.02 | +57 % |
+| 남반구 온대 60–20S | 2.58 | 1.21 | **+113 %** |
+| 추세 1982–2000 | +0.05 %/yr (p=0.07) | +0.09 %/yr | 부호 일치 |
+| **추세 2001–2020** | **−0.11 %/yr** (p<0.001) | **+0.28 %/yr** | **부호 반대** |
+| 연간 아노말리 상관 | r=−0.63 (추세 제거 후 −0.05) | | 연변동 재현 못함 |
+
+- 한대 계절주기: **가을 낙엽이 늦다** — 9월 2.87 vs 1.16, 10월 1.84 vs 0.78. 겨울 0.9 vs 0.3(관측의 눈 아래 상록수 신호 약화 가능성 있으므로 해석 주의). 봄 녹화 시점(5–6월)은 맞음.
+- cycle 1(§13.46, 1990–2010 −0.08 vs +0.15 %/yr)과 같은 결론이 ctl에서도 재현 → 표류가 아니라 **모델 고유의 녹화 실패**. ctl은 cycle 1 끝 상태에서 출발해 1980년대 표류가 없음(1982–2000 추세 부호 일치가 그 확인).
+- 2001년 이후 감소의 원인 후보(미검증): LUH2 전환(ctl vs lufix LAI 차 <1 %라 약함), 목재 미평형에 따른 잎 재배분, CO₂ 시비 반응 부족(N off이므로 오히려 과대가 예상됨 → 확인 필요). 다음: 추세 지도로 어느 위도대가 끌어내리는지.
+- **위도대 분해 (2001–2020, LAI/10년)**: LM4p 감소는 **남반구가 주도** — 60–30S −0.157(전구 추세의 +28 %), 30–10S −0.101(+52 %), 10S–10N −0.057(+36 %). 북반구는 거의 0(10–60N), 60N 이상만 +0.044(관측 +0.041과 비슷). GIMMS는 모든 위도대 증가, 중위도 30–50N 기여가 가장 큼(+27 %). 감소 격자 비율 LM4p 50 % vs GIMMS 20 %, 추세 공간상관 r=0.06. → 남반구 건조지(호주·남미 남부·남아프리카) 가뭄 민감도 의심. 다음: 이 지역의 토양수분·강수(WFDE5) 추세와 대조.
+- **지역별 (16개 박스, `poster/.../data/lai_regional_summary.txt`)**: 과대가 큰 곳 = **건조·반건조 초지/방목지** — C.Asia/Mongolia +147 %, US west/plains +142 %, S.America south +141 %, Boreal N.America +131 %, Australia +79 %. 작은 곳 = Europe +4 %, US east +9 %, Arctic tundra 0 %. 2001–2020 추세 부호 반대가 큰 곳 = S.America south −5.0 vs +3.2 %/10년, Southern Africa −5.3 vs +0.7, Amazon −3.0 vs +0.5, Australia −2.5 vs +1.8. **India(+9.7)·East China(+10.4)의 관측 녹화를 모델은 0** — 관개·조림·이모작 없음(Chen 2019, Shevliakova 2024).
+- **LAI 상한 (field_table `LAImax`, `vegn_dynamics.F90:2119` `bl_max = LMA·LAImax·crownarea·(1−gap)`)**: prioria(열대) 6.0, picea·larix 5.0, acer 3.5, c3/c4grass 2.5, understory 0.25배. 이는 **한 cohort 수관 안의 목표 잎량**이지 격자 LAI 상한이 아님 — 격자 LAI는 층·cohort 합. 열대 15S–15N 정점월 LAI: LM4p p50 5.46 / p99 9.59 / max 11.0 (6 초과 격자 38 %) vs GIMMS p99 6.46 / max 6.52 (광학 위성 포화).
+- **목초지 (LUH3 `states.v20260127.nc` 2000년 pastr+range, 0.25°→1° gridboxmean; 격자확인 몽골 0.98·호주 0.96·아마존 0·사하라 0·바다 nan)**: ≥0.5 격자 2,420개, 연평균 LM4p 1.39 vs GIMMS 0.68, 정점 2.04 vs 1.12. GIMMS는 목초지 면적 79 %가 연평균 LAI<1. `min_lai_for_grazing_past/range = 1.0`은 **"LAI<1이면 방목 중단" 문턱**이지 하한이 아님 → 관측 LAI가 원래 <1인 곳엔 방목이 거의 작동 안 함. LM4.1 논문의 "목초지 과소"와 반대로 **우리 오프라인은 목초지 과대**.
+
+### 13.67 ★★ phenology 민감도 시험 tc_crit 5→10 °C (2026-10-04 시작, 포스터용)
+
+- 동기(§13.66): 한대 50–70N 9월 LAI 2.80 vs GIMMS 1.14. phenology는 식(`vegn_phenology_ppa`), 모수는 `field_table` 종별.
+  잎 켜기 = GDD>gdd_crit & tc_pheno≥tc_crit & 비가뭄, 끄기 = tc_pheno<tc_crit(GDD 리셋) 또는 가뭄; 끈 뒤 잎 7.5 %/일 감소.
+  `tc_pheno = 0.95·old + 0.05·daily`(`vegetation.F90:2664`) → 일기온보다 ≈16일 늦음.
+- 근거: 코드 기본값 tc_crit=283.16 K(`vegn_data.F90:261`, 주석 "10 C gives good growing season pattern"), 우리 field_table은 larix·c3grass만 278.15로 덮어씀(acer는 기본 10 °C).
+  모델 한대 t_ref 기후값으로 계산한 가을 문턱 통과: 5 °C → tc_pheno 282일(10/9), 10 °C → 258일(9/15). 관측은 8→9월에 LAI 반감.
+  **예상 부작용**: 같은 tc_crit이 잎 켜기에도 쓰여 봄 onset ≈3주 지연(현재 봄은 관측과 맞음).
+- 설정 `lm4/scripts/phentest.sh`: ctl archive/y2009(2010-01-01 03Z) restart, 2010 1년, **24PE**(fv/land 2,2, SIS 6,4, io group 8 — KIOST AMIP 24PE 설정), gateBC exe, climate00 nohup. base / tc10(field_table 2줄만 다름).
+  24PE 1일 시험 rc=0, restart 119, 361 s(main loop 180 s/일) → 1년 ≈18–19 h. 두 런 동시 시작 2026-10-04 01:28 KST.
+- 판정 계획: 50–70N 월별 LAI base vs tc10 vs GIMMS, 특히 9–10월(개선)과 5–6월(악화) 크기. base는 ctl 2010과 PE 수만 달라 비트동일은 아님 → 비교는 base 대비로.
+- **부작용 (2026-10-04)**: `/data2`·`/home`은 climate00이 NFS로 제공 → phentest 48랭크로 climate00 load 57이 되자 climate01의 lufix가 느려짐. y2001–2004 각 11.4–11.7 h, y2005(gateBC 첫 해, phentest와 7.5 h 겹침) 11.0 h, y2006 진행 속도 ≈11.2 h/년. gateBC 실측 이득(−18–21 %)은 climate00이 한가할 때 측정한 값 → phentest 종료 후 y2007 소요시간으로 재확인. /data2 98 %(3.8 TB 남음), lufix archive 8.7 GB/년.
+- **극지 점검 (2026-10-04)**: 남극(<60S)은 LM4p·GIMMS 모두 유효 격자 0 → 식생 없음. 북극 65–75N 공통 2,006격자: **평균은 0.43 vs 0.43으로 같지만 분포가 양극화** — LM4p 52 %가 LAI≈0(맨땅), 6 %는 연평균 >1.5(툰드라에 나무, 정점 최대 6.8) vs GIMMS 맨땅 0 %·>1.5 0 %. 지역표의 "Arctic tundra 0 %"는 **상쇄된 가짜 일치**. >75N 섬은 LM4p 0.000 vs GIMMS 0.148. 그림 (c)의 유라시아 북단 갈색띠가 이 맨땅 격자.
+- **그린란드 마스크 정정**: 60N+/75–10W 박스는 아이슬란드(40격자, LM4p 0.65 vs 0.50)와 캐나다 배핀·웅가바(120격자)도 잘랐음 → Fig.1(`n2_fig_meanmap.ncl`)부터 그린란드 본토만 제외. 전구 bias +54.0→+53.9 %(영향 무시 가능, 기존 summary txt는 옛 박스).
