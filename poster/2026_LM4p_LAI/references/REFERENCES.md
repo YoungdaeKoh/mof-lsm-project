@@ -48,3 +48,23 @@ LM4.1 수치는 Shevliakova 2024 전문에서 직접 확인.
 | 늦은 휴면·성장기 과다 (B2, B3, B5) | 한대 9월 2.87 vs 1.16 | 일치 |
 | TRENDY 추세 과대 (B3) | 2001–2020 **−0.11 vs +0.28 %/yr** (남반구 주도) | **반대** — lm4P 고유 문제 |
 | 목초지 과소(C1) vs CMIP6 비산림 과대(B5) | 남반구 온대 +113 % | 확인 필요 (PFT별 분해) |
+
+## D. 우리 그룹·전신 과제 / 기존 확보분 (2026-10-04 추가)
+| # | 문헌 | 핵심 | 파일 |
+|---|---|---|---|
+| D1 | **Kim, D., Lee, M.-I., Seo, E. (2019) *J. Climate* 32, 127–143.** Improvement of soil respiration parameterization in a DGVM and its impact on the simulation of terrestrial carbon fluxes | CLM4 고정 Q10=1.5 → 토양온도·수분 다변량회귀로 **식생 17종별·시공간 변동 Q10**(Qi 2002 방법, Hashimoto 2015 Rs). 고위도 Rh 과소 50 % 이상 개선, 시베리아 GPP 과소 개선 — **경로는 분해→질소 무기화→GPP** | `lm4/LAI/reference/05_Kim2019_Q10_reparameterization_template_JCLI.pdf` (사용자가 9/11 "방법론 템플릿"으로 지정) |
+| D2 | UNIST (2019) 기후예측 시뮬레이터를 위한 지면-대기 탄소순환 모형 개발 최종보고서 (책임 이명인, 위탁 전남대 정지훈), 과기정통부 기후변화대응기술개발사업 | D1의 보고서판 + GAIA-ESM(CLM4) 결합, CO₂ 계절진동, phenology 오차 | `reference/UNIST2019_…최종보고서(이명인,위탁정지훈).pdf` |
+| D3 | GAIA 지구시스템 모형을 이용한 기후변화 진단 및 예측 최종보고서 (2009–2019, 책임 이재학) | 전신 과제 | `reference/GAIA 지구시스템 모형을 이용한 기후변화 진단 및 예측 최종보고서.pdf` |
+| D4 | CRESCENDO (2025) *Biogeosciences* 22, 7117–7135. doi:10.5194/bg-22-7117-2025 — Plant phenology evaluation of CRESCENDO land surface models | 다중모델 phenology/LAI 편차 기준선 | `lm4/LAI/reference/04_CRESCENDO2025_LAI_evaluation_BG.pdf` |
+
+※ `lm4/LAI/reference/`(9/11 확보, 목록 `_받을것.md`)에 Weng 2015·2019, Shevliakova 2024, Martínez Cano 2020, Medlyn 2002, Bernacchi 2001, Paulsen & Körner 2014 등이 이미 있음 — 이 폴더 PDF와 일부 중복.
+
+## E. 가을 phenology 선례 — 하지·일장 기준 (2026-10-06 추가, LM4 notes §13.69 패치 근거)
+| # | 문헌 | 핵심 | 파일 |
+|---|---|---|---|
+| E1 | Lawrence et al. (2019) *JAMES* 11, 4245–4287. doi:10.1029/2018MS001583 + CLM5 Technical Note (seasonal-deciduous phenology) | **CLM4/4.5/5 표준**: 잎 켜기 = **동지 이후** 토양온도 GDD 적산, 잎 끄기 = **하지 이후** 일장 < 10.92 h(≈11 h, 전 지구 공통). 가을을 일장만으로 결정 | 미확보 |
+| E2 | **Birch et al. (2021) *Geosci. Model Dev.* 14, 3361.** doi:10.5194/gmd-14-3361-2021 — Addressing biases in Arctic–boreal carbon cycling in CLM5 | 증상이 우리와 같음(한대 가을 생산성이 늦게까지 과대). 일장 문턱을 **65°N 이북 15 h → 45°N 11 h 선형**으로 변경. 켜기는 GDD 대신 토양온도(10일)>0 °C·최저기온(5일)>0 °C·적설<10 cm. **전 지구 공통 11 h는 북극에 안 맞았다 = 일장 문턱은 위도 의존** | 미확보 (open access) |
+| E3 | **Zohner et al. (2023) *Science* 381, eadf5098.** doi:10.1126/science.adf5098 — Effect of climate warming on the timing of autumn leaf senescence reverses after the summer solstice | 관측: 북반구 숲 84 %에서 **하지 전** 온난화는 낙엽 시작을 1.9±0.1 일/°C 앞당기고, **하지 후** 온난화는 낙엽 기간을 2.6±0.1 일/°C 늘림 → "하지 이후" 조건의 생물학적 근거 | 미확보 |
+
+우리 패치의 위치: CLM = 가을을 **일장만**, LM4p·JULES·LPJ = **기온만**, §13.69 패치 = 하지 이후 일장(<14 h)으로 문을 열고 기온(<10 °C)으로 날짜를 정하는 **결합형**. 14 h 고정은 E2가 지적한 위도 의존 문제를 그대로 가짐(한계로 명시).
+미확인(기억 기반, 서지·수치 재확인 필요): White et al. 1997 *GBC*(일장+토양온도 낙엽 모형, CLM 원형), Delpierre et al. 2009 *Agric. For. Meteorol.*(일장 의존 냉각적산 낙엽 모형), JULES·LPJ가 기온만 쓴다는 점.

@@ -1,0 +1,83 @@
+LM4p ctl vs GIMMS LAI4g consolidated, monthly climatology 1982-2010, 1 deg, common valid cells, cos(lat) weights
+growing season (GS) = months where obs > obs_min + 0.5*(obs_max-obs_min); off-season = the rest
+
+boreal 50-70N (4956 cells)
+  month         1     2     3     4     5     6     7     8     9    10    11    12
+  LM4p       0.89  0.88  0.88  0.90  1.06  1.90  2.66  2.81  2.80  1.79  1.09  0.95
+  GIMMS      0.36  0.32  0.26  0.51  1.11  2.07  2.45  2.02  1.14  0.77  0.59  0.36
+  diff      +0.54 +0.57 +0.62 +0.39 -0.05 -0.17 +0.21 +0.80 +1.66 +1.02 +0.50 +0.59
+  GS month      .     .     .     .     .    GS    GS    GS     .     .     .     .
+  annual: LM4p 1.55 obs 1.00 bias +0.56 (+56 %)
+  peak month value: LM4p 2.81 (month 8) obs 2.45 (month 7) -> peak bias +15 %
+  GS-mean bias +13 % | off-season-mean bias +108 %
+  share of annual bias: GS months (3) 13 % | off-season (9) 87 %
+  seasonal amplitude (max-min): LM4p 1.93 obs 2.19 | min: LM4p 0.88 obs 0.26
+
+NH mid 40-50N (1945 cells)
+  month         1     2     3     4     5     6     7     8     9    10    11    12
+  LM4p       1.02  1.00  1.04  1.22  1.65  2.22  2.36  2.34  2.30  2.12  1.58  1.19
+  GIMMS      0.39  0.33  0.50  0.95  1.50  2.10  2.30  2.11  1.50  0.82  0.56  0.52
+  diff      +0.63 +0.67 +0.54 +0.27 +0.15 +0.11 +0.06 +0.24 +0.80 +1.30 +1.02 +0.67
+  GS month      .     .     .     .    GS    GS    GS    GS    GS     .     .     .
+  annual: LM4p 1.67 obs 1.13 bias +0.54 (+48 %)
+  peak month value: LM4p 2.36 (month 7) obs 2.30 (month 7) -> peak bias +3 %
+  GS-mean bias +14 % | off-season-mean bias +125 %
+  share of annual bias: GS months (5) 21 % | off-season (7) 79 %
+  seasonal amplitude (max-min): LM4p 1.36 obs 1.97 | min: LM4p 1.00 obs 0.33
+
+NH subtrop 20-40N (2265 cells)
+  month         1     2     3     4     5     6     7     8     9    10    11    12
+  LM4p       1.68  1.64  1.75  1.94  2.08  2.18  2.23  2.22  2.25  2.27  2.25  2.06
+  GIMMS      0.73  0.80  0.95  1.21  1.35  1.47  1.64  1.72  1.55  1.25  0.95  0.78
+  diff      +0.95 +0.84 +0.80 +0.74 +0.72 +0.72 +0.58 +0.51 +0.70 +1.02 +1.30 +1.29
+  GS month      .     .     .     .    GS    GS    GS    GS    GS    GS     .     .
+  annual: LM4p 2.05 obs 1.20 bias +0.85 (+71 %)
+  peak month value: LM4p 2.27 (month 10) obs 1.72 (month 8) -> peak bias +32 %
+  GS-mean bias +47 % | off-season-mean bias +109 %
+  share of annual bias: GS months (6) 42 % | off-season (6) 58 %
+  seasonal amplitude (max-min): LM4p 0.63 obs 0.99 | min: LM4p 1.64 obs 0.73
+
+tropics 20S-20N (3725 cells)
+  month         1     2     3     4     5     6     7     8     9    10    11    12
+  LM4p       4.10  4.01  3.85  3.89  4.07  4.16  4.06  3.85  3.68  3.82  4.09  4.22
+  GIMMS      2.66  2.70  2.82  2.92  2.86  2.79  2.73  2.79  2.87  2.89  2.84  2.73
+  diff      +1.44 +1.30 +1.02 +0.97 +1.21 +1.37 +1.33 +1.07 +0.81 +0.93 +1.25 +1.49
+  GS month      .     .    GS    GS    GS    GS     .     .    GS    GS    GS     .
+  annual: LM4p 3.98 obs 2.80 bias +1.18 (+42 %)
+  peak month value: LM4p 4.22 (month 12) obs 2.92 (month 4) -> peak bias +44 %
+  GS-mean bias +38 % | off-season-mean bias +49 %
+  share of annual bias: GS months (7) 53 % | off-season (5) 47 %
+  seasonal amplitude (max-min): LM4p 0.54 obs 0.26 | min: LM4p 3.68 obs 2.66
+
+SH 60-20S (1561 cells)
+  month         1     2     3     4     5     6     7     8     9    10    11    12
+  LM4p       2.66  2.72  2.77  2.80  2.73  2.59  2.42  2.29  2.27  2.42  2.60  2.70
+  GIMMS      1.45  1.49  1.39  1.20  1.09  1.00  0.96  0.99  1.10  1.21  1.30  1.38
+  diff      +1.21 +1.23 +1.38 +1.60 +1.64 +1.59 +1.46 +1.30 +1.18 +1.21 +1.29 +1.32
+  GS month     GS    GS    GS     .     .     .     .     .     .     .    GS    GS
+  annual: LM4p 2.58 obs 1.21 bias +1.37 (+113 %)
+  peak month value: LM4p 2.80 (month 4) obs 1.49 (month 2) -> peak bias +88 %
+  GS-mean bias +92 % | off-season-mean bias +132 %
+  share of annual bias: GS months (5) 39 % | off-season (7) 61 %
+  seasonal amplitude (max-min): LM4p 0.52 obs 0.53 | min: LM4p 2.27 obs 0.96
+
+global 60S-90N (15109 cells)
+  month         1     2     3     4     5     6     7     8     9    10    11    12
+  LM4p       2.32  2.29  2.26  2.34  2.51  2.80  2.94  2.89  2.82  2.64  2.53  2.47
+  GIMMS      1.33  1.34  1.41  1.57  1.77  2.05  2.17  2.09  1.82  1.62  1.48  1.36
+  diff      +1.00 +0.94 +0.86 +0.77 +0.74 +0.75 +0.77 +0.80 +1.00 +1.03 +1.05 +1.10
+  GS month      .     .     .     .    GS    GS    GS    GS    GS     .     .     .
+  annual: LM4p 2.57 obs 1.67 bias +0.90 (+54 %)
+  peak month value: LM4p 2.94 (month 7) obs 2.17 (month 7) -> peak bias +35 %
+  GS-mean bias +41 % | off-season-mean bias +67 %
+  share of annual bias: GS months (5) 38 % | off-season (7) 62 %
+  seasonal amplitude (max-min): LM4p 0.68 obs 0.85 | min: LM4p 2.26 obs 1.33
+
+contribution of each latitude band to the global (60S-90N) annual-mean bias, area-weighted:
+  70-90N             area share  1.8 % | bias share -0.5 %
+  boreal 50-70N      area share 22.4 % | bias share 13.8 %
+  NH mid 40-50N      area share 12.5 % | bias share  7.5 %
+  NH subtrop 20-40N  area share 17.6 % | bias share 16.5 %
+  tropics 20S-20N    area share 33.5 % | bias share 44.1 %
+  SH 60-20S          area share 12.2 % | bias share 18.5 %
+boreal 50-70N bias by season: Aug-Oct 52 % | Nov-Apr 48 % | May-Jul -0 %

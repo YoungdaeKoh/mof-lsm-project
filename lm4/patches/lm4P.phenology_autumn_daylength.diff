@@ -1,0 +1,85 @@
+--- a/src/lm4P/vegetation/vegn_data.F90	2026-10-06 13:40:19
++++ b/src/lm4P/vegetation/vegn_data.F90	2026-10-06 13:44:14
+@@ -259,6 +259,11 @@
+ 
+ 
+   real    :: tc_crit   = 283.16 ! critical temperature for leaf drop, degK
++  ! ydkoh 2026-10: optional autumn leaf-off rule, separate from the leaf-on threshold
++  ! (LM4 notes 13.69). Leaves also drop when days are shortening AND day length
++  ! < dayl_crit_off AND tc_pheno < tc_crit_off. Negative values = rule off (default).
++  real    :: tc_crit_off   = -1.0 ! autumn leaf-off temperature, degK
++  real    :: dayl_crit_off = -1.0 ! autumn leaf-off day length, hours
+   real    :: gdd_crit  = 360.0
+   real    :: gdd_base_T =  273.16 ! base temperature for GDD calculations, degK
+   ! critical soil-water-stress index, used in place of fact_crit_phen and
+@@ -1024,6 +1029,8 @@
+   __GET_SPDATA_REAL__(fuel_intensity)
+ 
+   __GET_SPDATA_REAL__(tc_crit)
++  __GET_SPDATA_REAL__(tc_crit_off)
++  __GET_SPDATA_REAL__(dayl_crit_off)
+   __GET_SPDATA_REAL__(gdd_crit)
+   __GET_SPDATA_REAL__(gdd_base_T)
+   __GET_SPDATA_REAL__(psi_stress_crit_phen)
+@@ -1489,6 +1496,8 @@
+   call add_row(table, 'fuel_intensity',spdata(idx)%fuel_intensity)
+ 
+   call add_row(table, 'tc_crit',       spdata(idx)%tc_crit)
++  call add_row(table, 'tc_crit_off',   spdata(idx)%tc_crit_off)
++  call add_row(table, 'dayl_crit_off', spdata(idx)%dayl_crit_off)
+   call add_row(table, 'gdd_crit',      spdata(idx)%gdd_crit)
+   call add_row(table, 'gdd_base_T',    spdata(idx)%gdd_base_T)
+ 
+--- a/src/lm4P/vegetation/vegn_dynamics.F90	2026-10-06 13:40:19
++++ b/src/lm4P/vegetation/vegn_dynamics.F90	2026-10-06 13:44:40
+@@ -2058,8 +2058,10 @@
+ 
+ ! =============================================================================
+ ! Added by Weng 2012-02-29
+-subroutine vegn_phenology_ppa(tile)
++subroutine vegn_phenology_ppa(tile, lat, doy)
+   type(land_tile_type), intent(inout) :: tile
++  real,    intent(in) :: lat ! latitude of the tile, radian (for the autumn day-length rule)
++  integer, intent(in) :: doy ! day of year, 1..365
+ 
+   ! ---- local vars
+   integer :: i,l
+@@ -2081,7 +2083,15 @@
+   real :: wilt       ! vertically-average soil moisture content at wilting point
+   real :: theta_crit ! critical soil moisture for drought-deciduous phenology
+   logical :: drought ! drought indicator
++  real    :: decl, dayl ! solar declination (radian) and day length (hours), for the autumn rule
++  logical :: shortening ! true when days are getting shorter at this latitude
++  real, parameter :: pi_ = 3.14159265358979
+ 
++  ! day length from latitude and day of year (Cooper 1969 declination, sunrise
++  ! equation); days shorten when lat*d(decl)/dt < 0, i.e. after the local solstice
++  decl = 23.44*pi_/180.0 * sin(2.0*pi_*(284.0+doy)/365.0)
++  dayl = 24.0/pi_ * acos(max(-1.0, min(1.0, -tan(lat)*tan(decl))))
++  shortening = (lat*cos(2.0*pi_*(284.0+doy)/365.0) < 0.0)
+ 
+   associate(vegn=>tile%vegn, soil=>tile%soil)
+ 
+@@ -2122,7 +2132,10 @@
+         endif
+      case (LEAF_ON)
+         ! cold-deciduous: turn leaves off and reset GDD
+-        if (vegn%tc_pheno < sp%tc_crit) then
++        ! ydkoh 2026-10: optional autumn rule (off unless both parameters > 0)
++        if (vegn%tc_pheno < sp%tc_crit .or. &
++            (sp%tc_crit_off > 0.0 .and. sp%dayl_crit_off > 0.0 .and. shortening .and. &
++             dayl < sp%dayl_crit_off .and. vegn%tc_pheno < sp%tc_crit_off)) then
+            cc%status = LEAF_OFF
+            cc%gdd = 0.0
+         endif
+--- a/src/lm4P/vegetation/vegetation.F90	2026-10-06 13:40:20
++++ b/src/lm4P/vegetation/vegetation.F90	2026-10-06 13:44:40
+@@ -2773,7 +2773,7 @@
+         if (do_ppa) then
+            call vegn_starvation_ppa(tile%vegn, tile%soil)
+            call check_conservation_2(tile,'update_vegn_slow 4.2',lmass0,fmass0,cmass0,nmass0)
+-           if (do_phenology) call vegn_phenology_ppa (tile)
++           if (do_phenology) call vegn_phenology_ppa (tile, lnd%ug_lat(l), doy)
+            call check_conservation_2(tile,'update_vegn_slow 4.3',lmass0,fmass0,cmass0,nmass0)
+         else
+            call vegn_nat_mortality_lm3(tile%vegn,tile%soil,86400.0)

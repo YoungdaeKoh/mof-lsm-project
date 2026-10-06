@@ -9,16 +9,23 @@ are missing, each half-month file is block-averaged to 1 degree (nanmean of the
 scale_factor/add_offset itself -- do NOT redo it.
 
 Output: ../data/gimms_lai4g_monthly_1deg_1982_2020.nc  (lai, time mid-month)
+
+usage: p1_gimms_to_monthly_1deg.py [consolidated|solely]
+  consolidated (default): AVHRR LAI4g 1982-2003 + reprocessed MODIS LAI 2004-2020 (Cao et al. 2023)
+  solely                : AVHRR LAI4g only, 1982-2015 -> ../data/gimms_lai4g_solely_monthly_1deg_1982_2015.nc
 """
 import os
+import sys
 import numpy as np
 import netCDF4 as nc
 
+VAR = sys.argv[1] if len(sys.argv) > 1 else "consolidated"
 GIM = ("/Users/youngdaekoh/data2/LAI-DataKit/derived/gimms_lai4g/native0083/"
-       "consolidated/GIMMS_LAI4g-consolidated_V1.2_%d%02d%02d.nc")
-Y0, Y1 = 1982, 2020
+       "%s/GIMMS_LAI4g-%s_V1.2_" % (VAR, VAR)) + "%d%02d%02d.nc"
+Y0, Y1 = (1982, 2020) if VAR == "consolidated" else (1982, 2015)
+TAG = "" if VAR == "consolidated" else "_" + VAR
 NLAT, NLON, R = 180, 360, 12
-OUT = os.path.join(os.path.dirname(__file__), "..", "data", "gimms_lai4g_monthly_1deg_%d_%d.nc" % (Y0, Y1))
+OUT = os.path.join(os.path.dirname(__file__), "..", "data", "gimms_lai4g%s_monthly_1deg_%d_%d.nc" % (TAG, Y0, Y1))
 
 # check the native grid orientation once (descending lat, lon -180..180 expected)
 with nc.Dataset(GIM % (Y0, 1, 1)) as d:
@@ -45,7 +52,7 @@ with nc.Dataset(OUT, "w", format="NETCDF4_CLASSIC") as o:
     v = o.createVariable("lat", "f8", ("lat",)); v[:] = lat1; v.units = "degrees_north"
     v = o.createVariable("lon", "f8", ("lon",)); v[:] = lon1; v.units = "degrees_east"
     lai = o.createVariable("lai", "f4", ("time", "lat", "lon"), fill_value=1e20)
-    lai.units = "m2/m2"; lai.long_name = "leaf area index (GIMMS LAI4g V1.2, monthly mean of 2 half-months, 1-deg block mean)"
+    lai.units = "m2/m2"; lai.long_name = "leaf area index (GIMMS LAI4g V1.2 " + VAR + ", monthly mean of 2 half-months, 1-deg block mean)"
     o.source = "poster/2026_LM4p_LAI/scripts/p1_gimms_to_monthly_1deg.py"
     k = 0
     for y in range(Y0, Y1 + 1):

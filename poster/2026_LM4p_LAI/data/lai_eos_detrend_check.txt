@@ -1,0 +1,6 @@
+EOS raw vs detrended LAI (linear trend of each calendar month removed, mean kept), Giorgi regions, per-year 50 % amplitude, 1982-2010
+
+NAS North Asia   dEOS raw +35.6 | detrended +35.6 | EOS trend d/decade LM4p +0.76 GIMMS -0.47
+ALA Alaska       dEOS raw +27.6 | detrended +27.7 | EOS trend d/decade LM4p +0.73 GIMMS -1.03
+EAS East Asia    dEOS raw +61.7 | detrended +61.7 | EOS trend d/decade LM4p +0.88 GIMMS +0.37
+NEU N. Europe    dEOS raw +41.1 | detrended +41.2 | EOS trend d/decade LM4p +1.10 GIMMS -0.77

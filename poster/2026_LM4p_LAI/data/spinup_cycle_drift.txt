@@ -1,0 +1,6 @@
+LM4p spin-up drift: cycle 2 (ctl 1981-2010) minus cycle 1 (spin-up 1981-2010), same forcing year; non-ice land mean, Jan-Nov annual mean
+years per cycle: 30 + 30
+
+LAI          last year (2010): c1 2.2653 c2 2.2521 diff -0.59 % | 30-yr mean: c1 2.2680 c2 2.2877 diff +0.87 %
+GPP          last year (2010): c1 3.2143 c2 3.2286 diff +0.44 % | 30-yr mean: c1 3.1840 c2 3.2252 diff +1.30 %
+Wood carbon  last year (2010): c1 1.7346 c2 1.8671 diff +7.64 % | 30-yr mean: c1 1.6926 c2 1.8139 diff +7.17 %

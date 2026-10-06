@@ -1,0 +1,51 @@
+Pilot phenology runs, monthly LAI 2010, AR6 regions (common valid cells, cos-lat weights); runs present: base tc10
+gap closed = share of the (base - GIMMS) Sep-Oct gap removed by the run; May-Jun shows the side effect on spring
+
+N.W. North America (NWN)  (1044 cells)
+  month         1     2     3     4     5     6     7     8     9    10    11    12
+  GIMMS      0.35  0.36  0.28  0.49  0.86  1.58  1.96  1.64  0.98  0.76  0.59  0.29
+  base       0.95  0.94  0.94  0.96  1.09  2.36  3.09  3.19  3.22  1.89  1.12  1.00
+  tc10       0.95  0.94  0.94  0.95  0.97  1.38  2.45  2.94  2.38  1.22  1.01  0.99
+  Sep-Oct mean: GIMMS 0.87 | base 2.56 | tc10 1.80 | tc10 closes +45 % of the gap
+  May-Jun mean: GIMMS 1.22 | base 1.73 | tc10 1.17
+
+E. Siberia (ESB)  (800 cells)
+  month         1     2     3     4     5     6     7     8     9    10    11    12
+  GIMMS      0.42  0.40  0.28  0.44  1.12  2.59  3.05  2.46  1.19  0.57  0.48  0.34
+  base       1.12  1.11  1.10  1.09  1.21  2.29  2.75  2.83  2.75  1.70  1.22  1.16
+  tc10       1.12  1.11  1.10  1.09  1.17  1.84  2.65  2.79  2.42  1.48  1.20  1.16
+  Sep-Oct mean: GIMMS 0.88 | base 2.23 | tc10 1.95 | tc10 closes +21 % of the gap
+  May-Jun mean: GIMMS 1.85 | base 1.75 | tc10 1.51
+
+Russian Far East (RFE)  (494 cells)
+  month         1     2     3     4     5     6     7     8     9    10    11    12
+  GIMMS      0.32  0.19  0.12  0.31  0.98  2.41  3.08  2.71  1.53  0.68  0.45  0.36
+  base       0.44  0.44  0.43  0.43  0.47  1.55  2.63  2.80  2.86  1.48  0.58  0.47
+  tc10       0.44  0.44  0.43  0.43  0.46  0.93  2.17  2.66  2.20  1.00  0.53  0.46
+  Sep-Oct mean: GIMMS 1.10 | base 2.17 | tc10 1.60 | tc10 closes +54 % of the gap
+  May-Jun mean: GIMMS 1.70 | base 1.01 | tc10 0.70
+
+E. North America (ENA)  (426 cells)
+  month         1     2     3     4     5     6     7     8     9    10    11    12
+  GIMMS      0.63  0.67  1.11  2.07  2.99  3.88  4.14  3.95  2.96  1.71  1.09  0.81
+  base       1.08  0.98  1.05  1.70  2.30  3.38  3.60  3.72  3.84  3.44  2.44  1.53
+  tc10       0.90  0.73  0.82  1.55  2.15  3.23  3.47  3.60  3.72  3.32  2.30  1.38
+  Sep-Oct mean: GIMMS 2.33 | base 3.64 | tc10 3.52 | tc10 closes +9 % of the gap
+  May-Jun mean: GIMMS 3.44 | base 2.84 | tc10 2.69
+
+West & Central Europe (WCE)  (455 cells)
+  month         1     2     3     4     5     6     7     8     9    10    11    12
+  GIMMS      0.49  0.38  0.68  1.58  2.65  3.43  3.20  2.57  1.89  1.23  0.82  0.62
+  base       0.63  0.61  0.62  0.79  1.61  2.37  2.53  2.60  2.50  1.98  1.15  0.78
+  tc10       0.63  0.61  0.61  0.64  1.49  2.29  2.46  2.56  2.51  1.90  0.92  0.67
+  Sep-Oct mean: GIMMS 1.56 | base 2.24 | tc10 2.20 | tc10 closes +5 % of the gap
+  May-Jun mean: GIMMS 3.04 | base 1.99 | tc10 1.89
+
+E. Asia (EAS)  (582 cells)
+  month         1     2     3     4     5     6     7     8     9    10    11    12
+  GIMMS      0.85  0.92  1.07  1.48  2.06  2.50  3.07  3.26  2.66  1.92  1.41  1.04
+  base       1.70  1.61  1.76  2.16  2.66  3.09  3.21  3.27  3.27  3.19  2.94  2.54
+  tc10       1.45  1.30  1.46  1.89  2.41  2.87  3.01  3.09  3.07  2.99  2.70  2.26
+  Sep-Oct mean: GIMMS 2.29 | base 3.23 | tc10 3.03 | tc10 closes +21 % of the gap
+  May-Jun mean: GIMMS 2.28 | base 2.88 | tc10 2.64
+

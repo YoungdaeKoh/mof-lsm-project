@@ -1,7 +1,7 @@
 #!/bin/bash
-# Phenology sensitivity test for the boreal autumn LAI excess (LM4 notes 13.66/13.67).
+# Phenology tests for the boreal autumn LAI excess (LM4 notes 13.66/13.67/13.69).
 #   base  ctl settings
-#   tc10  tc_crit 278.15 -> 283.15 K for larix and c3grass (the two species that
+#   tc10    tc_crit 278.15 -> 283.15 K for larix and c3grass (the two species that
 #         override it; acer already uses the code default 283.16 K, vegn_data.F90:261).
 #         tc_crit is BOTH the leaf-on gate and the cold leaf-off trigger
 #         (vegn_dynamics.F90 vegn_phenology_ppa), so spring onset moves too.
@@ -14,12 +14,23 @@ set -u
 C=/data2/ydkoh/lm4/RUN/lm4p_ctl_1979-2024
 T=/data2/ydkoh/lm4/RUN/phentest
 EXE=/data2/ydkoh/lm4/build_gateBC/fms_esm4.5_gateBC.x
-VARIANTS="base tc10"
+EXE_PHENOFF=/data2/ydkoh/lm4/build_phenoff/fms_esm4.5_phenoff.x   # phenoff_build.sh
+VARIANTS=${VARIANTS:-"base tc10"}
+#   noparam phenoff exe, ctl field_table (regression: must equal base bit for bit)
+#   offon   phenoff exe, larix/c3grass tc_crit_off=283.15 K, dayl_crit_off=14 h (13.69)
+#   <variant>_d  same as <variant> plus daily LAI in the land_daily stream (diag only,
+#           e.g. base_d, offon_d; used for day-resolved SOS/EOS on the poster)
 Y=2010; SEED=$C/archive/2009; NP=24
 [ -d $SEED ] || SEED=$C/archive/y2009
 
 stage() {   # $1 variant  $2 days
-  D=$T/$1; rm -rf $D; mkdir -p $D/INPUT $D/RESTART $D/FORCING
+  D=$T/$1
+  # never wipe a finished run by accident: a run that wrote its end-of-run restart is kept
+  # unless FORCE=1 is given (LM4 notes 13.70, raw results are not reproducible for free)
+  if [ -s $D/RESTART/coupler.res ] && [ "${FORCE:-0}" != 1 ]; then
+    echo "REFUSING to re-stage $1: $D holds a finished run (end $(tail -1 $D/RESTART/coupler.res | awk '{print $1"-"$2"-"$3}')). Use FORCE=1 to overwrite."; exit 1
+  fi
+  rm -rf $D; mkdir -p $D/INPUT $D/RESTART $D/FORCING
   for f in data_table diag_table field_table MOM_input MOM_layout MOM_override \
            SIS_input SIS_layout SIS_override COBALT_input COBALT_override; do
     [ -e $C/$f ] && cp -p $C/$f $D/
@@ -38,18 +49,25 @@ stage() {   # $1 variant  $2 days
       -e "s/^       npes_io_group = 48/       npes_io_group = 8/" \
       $C/input.nml.template > $D/input.nml
   sed -i "s/^LAYOUT    = 6,8/LAYOUT    = 6,4/" $D/SIS_layout
-  if [ "$1" = tc10 ]; then
+  K=${1%_d}   # variant kind without the daily-output suffix
+  if [ "$K" = tc10 ]; then
     sed -i -E "s/tc_crit *= *278\.15/tc_crit = 283.15/" $D/field_table
   fi
-  ln -sfn $EXE $D/model.x
+  if [ "$K" = offon ]; then
+    sed -i -E "s/^( *)tc_crit *= *278\.15.*/&\n\1tc_crit_off = 283.15\n\1dayl_crit_off = 14.0/" $D/field_table
+  fi
+  if [ "$1" != "$K" ]; then
+    sed -i '/^"land", "precip", "precip", "land_daily"/a "vegn", "lai", "lai", "land_daily", "all", .true., "none", 2' $D/diag_table
+  fi
+  case $K in noparam|offon) ln -sfn $EXE_PHENOFF $D/model.x ;; *) ln -sfn $EXE $D/model.x ;; esac
   echo "$1: $MO months $DA days from $Y-01-01, seed $SEED"
 }
 
 setup() {   # $1 days
   for v in $VARIANTS; do stage $v $1; done
-  echo "--- field_table diff (tc10 vs base)"; diff $T/base/field_table $T/tc10/field_table
-  echo "--- input.nml diff (base vs ctl template)"; diff $C/input.nml.template $T/base/input.nml
-  echo "--- SIS_layout"; grep -i "^LAYOUT" $T/base/SIS_layout
+  for v in $VARIANTS; do echo "--- field_table diff ($v vs ctl)"; diff $C/field_table $T/$v/field_table; echo "    exe -> $(readlink $T/$v/model.x)"; echo "    diag_table diff:"; diff $C/diag_table $T/$v/diag_table; done
+  v1=${VARIANTS%% *}; echo "--- input.nml diff ($v1 vs ctl template)"; diff $C/input.nml.template $T/$v1/input.nml
+  echo "--- SIS_layout"; grep -i "^LAYOUT" $T/$v1/SIS_layout
   echo "--- seed date"; cat $SEED/coupler.res 2>/dev/null | tail -2
 }
 
@@ -61,7 +79,7 @@ run() {     # $1 variant
   ulimit -s unlimited
   export MV2_SMP_USE_CMA=1 MV2_IBA_EAGER_THRESHOLD=131072 MV2_ENABLE_AFFINITY=0
   echo "=== $1 start $(date)"
-  mpirun -np $NP ./model.x > esm4p5.log 2>&1
+  nice -n 10 mpirun -np $NP ./model.x > esm4p5.log 2>&1
   echo "=== $1 end rc=$? $(date)"
   grep -E '^(Total runtime|Main loop)' esm4p5.log | cut -c1-80
 }
@@ -74,7 +92,7 @@ check() {
 }
 
 case "${1:-}" in
-  setup) setup "${2:-1}" ;;
+  setup) setup "${2:-1}" ;;   # VARIANTS="noparam" bash phentest.sh setup 31
   run)   run "$2" ;;
   check) check ;;
   *) echo "usage: $0 setup <days> | run <variant> | check" ;;

@@ -1,0 +1,22 @@
+AR6 land reference regions (Iturbide et al. 2020; regionmask 0.13.0), NH extratropics: EOS (50 % amplitude, per year 1982-2010), LM4p - GIMMS
+abbr name                      cells  dEOS(d) +-sd  yrs  | EOS LM4p GIMMS (doy) | peak LM4p GIMMS | MJJAS bias | seasonal amplitude/mean (GIMMS)
+
+NWN  N.W.North-America          1044   +32.9 +-  3.9  29  |  285.4 252.5  |  3.12 1.99  |   +75 %  | 2.04
+NEN  N.E.North-America           809   +24.4 +-  4.7  29  |  284.9 260.6  |  2.39 1.34  |   +93 %  | 2.27
+WNA  W.North-America             309   +20.7 +- 40.1  29  |  286.4 265.7  |  2.45 1.45  |   +79 %  | 0.99
+CNA  C.North-America             296   +67.2 +-  9.4  29  |  332.4 265.2  |  3.44 2.53  |   +58 %  | 1.72
+ENA  E.North-America             426   +42.4 +-  3.8  29  |  316.4 274.0  |  3.94 4.05  |    -2 %  | 1.63
+NCA  N.Central-America           223   -60.0 +-121.5   7  |  242.0 304.1  |  1.79 1.35  |   +13 %  | 0.82
+NEU  N.Europe                    487   +26.5 +-  9.0  29  |  300.0 273.5  |  2.81 2.70  |    -0 %  | 1.54
+WCE  West&Central-Europe         455   +48.8 +-  3.8  29  |  305.5 256.7  |  2.66 3.22  |   -12 %  | 1.67
+EEU  E.Europe                    395   +57.5 +-  6.7  29  |  302.8 245.4  |  2.47 2.69  |   +10 %  | 2.11
+MED  Mediterranean               466   -67.0 +- 10.2  29  |  192.3 259.2  |  2.47 1.56  |   +35 %  | 0.84
+RAR  Russian-Arctic             1112   +24.1 +-  3.2  29  |  276.2 252.1  |  1.48 1.47  |    +1 %  | 3.11
+WSB  W.Siberia                   599   +48.1 +-  5.5  29  |  293.6 245.5  |  2.50 2.22  |   +46 %  | 2.39
+ESB  E.Siberia                   800   +37.6 +-  2.4  29  |  283.7 246.1  |  2.84 2.98  |   +17 %  | 2.43
+RFE  Russian-Far-East            494   +28.2 +-  2.9  29  |  284.9 256.7  |  2.67 2.88  |    -5 %  | 2.59
+WCA  W.C.Asia                    443   -79.0 +- 10.1  29  |  190.8 269.8  |  1.35 0.67  |   +64 %  | 1.16
+ECA  E.C.Asia                    195   +45.3 +-  9.7  29  |  306.2 260.8  |  0.85 0.75  |   +38 %  | 2.04
+TIB  Tibetan-Plateau             198   +11.3 +-  4.6  29  |  295.0 283.7  |  1.97 1.14  |   +82 %  | 1.08
+EAS  E.Asia                      582   +69.7 +-  4.3  29  |  349.9 280.2  |  3.32 3.16  |   +18 %  | 1.26
+SAS  S.Asia                      369    +nan +-  nan   0  |    nan 327.1  |  2.94 2.01  |   +51 %  | 0.61

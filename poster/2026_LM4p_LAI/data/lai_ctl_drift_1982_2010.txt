@@ -1,0 +1,6 @@
+LM4p ctl LAI drift check, 1 deg, cos-lat weights, cells valid in all months 1979-2023
+
+global 60S-90N   annual mean 1979 2.366 | 1982 2.361 | 2010 2.338 | 1982-2010 mean 2.357 sd 0.021 | trend -0.0112/decade (-0.47 %/decade) | seasonal cycle 2006-10 minus 1982-86: max |diff| 0.055 (month 9), Sep diff -0.055
+boreal 50-70N    annual mean 1979 1.474 | 1982 1.441 | 2010 1.547 | 1982-2010 mean 1.508 sd 0.039 | trend +0.0406/decade (+2.69 %/decade) | seasonal cycle 2006-10 minus 1982-86: max |diff| 0.234 (month 6), Sep diff +0.229
+Boreal Siberia   annual mean 1979 1.672 | 1982 1.643 | 2010 1.663 | 1982-2010 mean 1.655 sd 0.032 | trend +0.0203/decade (+1.23 %/decade) | seasonal cycle 2006-10 minus 1982-86: max |diff| 0.168 (month 6), Sep diff +0.147
+East Asia        annual mean 1979 2.039 | 1982 1.966 | 2010 1.970 | 1982-2010 mean 2.011 sd 0.051 | trend +0.0266/decade (+1.32 %/decade) | seasonal cycle 2006-10 minus 1982-86: max |diff| 0.124 (month 3), Sep diff +0.022

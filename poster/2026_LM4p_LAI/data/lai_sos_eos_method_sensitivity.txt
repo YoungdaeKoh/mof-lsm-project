@@ -1,0 +1,6 @@
+SOS/EOS method sensitivity, Giorgi regions, 1982-2010 mean monthly regional curves; EOS = 50 % amplitude date; dEOS = LM4p - GIMMS (days)
+
+NAS North Asia   dEOS linear +35.5 | double-logistic +38.3 | poly6 +17.1 (poly6 fitted min GIMMS -1.03 vs data 0.22)
+ALA Alaska       dEOS linear +27.8 | double-logistic +29.0 | poly6  +0.4 (poly6 fitted min GIMMS -0.49 vs data 0.09)
+EAS East Asia    dEOS linear +61.5 | double-logistic +61.4 | poly6 +51.7 (poly6 fitted min GIMMS +0.39 vs data 0.70)
+NEU N. Europe    dEOS linear +40.6 | double-logistic +44.3 | poly6 +32.2 (poly6 fitted min GIMMS +0.05 vs data 0.51)

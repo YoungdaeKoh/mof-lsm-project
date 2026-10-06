@@ -1,0 +1,22 @@
+Offline walk-through of the LM4p leaf-off rule with the model's own regional-mean 2 m temperature climatology (t_ref, 1982-2010, monthly -> daily by linear interpolation)
+tc_pheno = 0.95*tc_pheno + 0.05*T_daily (cycled 3 years); leaf-off when tc_pheno < tc_crit; then leaves decay 7.5 %/day (half gone after 8.9 days)
+new rule = after solstice AND day length < 14 h AND tc_pheno < 10 C (day length at the region's mean latitude)
+
+NWN: mean lat 62.1N | monthly T (C) Jul  12.0 Aug  10.3 Sep   5.2 Oct  -3.1 Nov -12.5 | coldest month -19.0
+     daily T < 5C on 09/16 (doy 259) | tc_pheno < 5C on 10/01 (doy 274) -> half leaves gone 10/10 | tc_pheno < 10C on 08/28 | new rule fires 09/01 (day length < 14 h from 09/01)
+     filter lag 12 d | T on observed EOS date (09/09): daily 6.2 C, tc_pheno 8.6 C | EOS from LAI: model 10/12, GIMMS 09/09
+ESB: mean lat 54.2N | monthly T (C) Jul  17.3 Aug  14.6 Sep   7.4 Oct  -2.4 Nov -15.6 | coldest month -26.4
+     daily T < 5C on 09/23 (doy 266) | tc_pheno < 5C on 10/10 (doy 283) -> half leaves gone 10/19 | tc_pheno < 10C on 09/21 | new rule fires 09/21 (day length < 14 h from 08/25)
+     filter lag 17 d | T on observed EOS date (09/03): daily 10.2 C, tc_pheno 13.3 C | EOS from LAI: model 10/11, GIMMS 09/03
+RFE: mean lat 56.6N | monthly T (C) Jul  13.8 Aug  12.7 Sep   7.1 Oct  -2.7 Nov -14.7 | coldest month -24.7
+     daily T < 5C on 09/22 (doy 265) | tc_pheno < 5C on 10/08 (doy 281) -> half leaves gone 10/17 | tc_pheno < 10C on 09/14 | new rule fires 09/14 (day length < 14 h from 08/27)
+     filter lag 15 d | T on observed EOS date (09/14): daily 7.5 C, tc_pheno 10.1 C | EOS from LAI: model 10/12, GIMMS 09/14
+ENA: mean lat 40.7N | monthly T (C) Jul  21.9 Aug  21.3 Sep  17.5 Oct  11.7 Nov   6.0 | coldest month  -2.5
+     daily T < 5C on 11/21 (doy 325) | tc_pheno < 5C on 12/09 (doy 343) -> half leaves gone 12/18 | tc_pheno < 10C on 11/13 | new rule fires 11/13 (day length < 14 h from 08/06)
+     filter lag 18 d | T on observed EOS date (10/01): daily 14.4 C, tc_pheno 17.3 C | EOS from LAI: model 11/12, GIMMS 10/01
+WCE: mean lat 50.5N | monthly T (C) Jul  19.4 Aug  18.6 Sep  14.0 Oct   8.8 Nov   3.0 | coldest month  -2.4
+     daily T < 5C on 11/05 (doy 309) | tc_pheno < 5C on 11/24 (doy 328) -> half leaves gone 12/03 | tc_pheno < 10C on 10/27 | new rule fires 10/27 (day length < 14 h from 08/21)
+     filter lag 18 d | T on observed EOS date (09/14): daily 14.3 C, tc_pheno 16.5 C | EOS from LAI: model 11/02, GIMMS 09/14
+EAS: mean lat 33.0N | monthly T (C) Jul  24.0 Aug  23.9 Sep  20.2 Oct  15.0 Nov   8.8 | coldest month   1.3
+     daily T < 5C on 12/06 (doy 340) | tc_pheno < 5C on 12/28 (doy 362) -> half leaves gone 01/06 | tc_pheno < 10C on 11/28 | new rule fires 11/28 (day length < 14 h from 07/14)
+     filter lag 20 d | T on observed EOS date (10/07): daily 16.4 C, tc_pheno 19.2 C | EOS from LAI: model 12/16, GIMMS 10/07
