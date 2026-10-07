@@ -22,11 +22,19 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 YEAR = 2010
-REGIONS = [("N.W. North America (NWN)", "NWN"), ("E. Siberia (ESB)", "ESB"), ("Russian Far East (RFE)", "RFE"),
-           ("E. North America (ENA)", "ENA"), ("West & Central Europe (WCE)", "WCE"), ("E. Asia (EAS)", "EAS")]
-RUNS = [("base", "LM4+ control (5 °C)", "tab:red", "-"),
-        ("tc10", "threshold 10 °C", "tab:orange", "--"),
-        ("offon", "autumn day-length rule", "tab:blue", "-")]
+# REGSET=default: the six Fig. 2 regions.  REGSET=dl: where the autumn rule works best (top row) and
+# where it does not (bottom row), chosen from the SOS/EOS maps (../data/sos_eos_maps_2010_regions.txt).
+REGSET = os.environ.get("REGSET", "default")
+SUFFIX = "" if REGSET == "default" else "_" + REGSET
+REGIONS = {"default": [("N.W. North America (NWN)", "NWN"), ("E. Siberia (ESB)", "ESB"), ("Russian Far East (RFE)", "RFE"),
+                       ("E. North America (ENA)", "ENA"), ("West & Central Europe (WCE)", "WCE"), ("E. Asia (EAS)", "EAS")],
+           "dl": [("Russian Arctic (RAR)", "RAR"), ("N. Europe (NEU)", "NEU"), ("N.W. North America (NWN)", "NWN"),
+                  ("E. Siberia (ESB)", "ESB"), ("E. North America (ENA)", "ENA"), ("E. Asia (EAS)", "EAS")]}[REGSET]
+RUNS = [("base", "CTRL", "k", "-"),            # short run names; definitions go in the caption
+        ("tc10", "TC10", "tab:blue", "-."),
+        ("offon", "DL14+TC10", "tab:red", "--"),
+        ("dayl", "DL13/12", "tab:green", "-"),
+        ("dayl2", "DLtype", "tab:purple", "--")]
 
 g = nc.Dataset("../data/gimms_lai_mon_1982_2020.nc")
 gname = [v for v in g.variables if g.variables[v].ndim == 3][0]
@@ -55,7 +63,7 @@ for (name, ab), ax in zip(REGIONS, axs.ravel()):
     w = W * (ok & m3.sel(region=ar6.map_keys(ab)).values.astype(bool))
     mean = lambda v: np.array([np.nansum(v[k] * w) / w.sum() for k in range(12)])
     o = mean(obs)
-    ax.plot(mon, o, color="k", lw=2.4, marker="o", ms=4, label="GIMMS %d" % YEAR)
+    ax.plot(mon, o, color="0.65", lw=2, marker="o", ms=3, label="GIMMS", alpha=0.9, zorder=1)
     out.append("%s  (%d cells)" % (name, int((w > 0).sum())))
     out.append("  month     " + " ".join("%5d" % m for m in mon))
     out.append("  GIMMS     " + " ".join("%5.2f" % x for x in o))
@@ -64,7 +72,7 @@ for (name, ab), ax in zip(REGIONS, axs.ravel()):
         if key not in data:
             continue
         ser[key] = mean(data[key])
-        ax.plot(mon, ser[key], color=col, lw=2, ls=ls, marker="o", ms=3, label=label)
+        ax.plot(mon, ser[key], color=col, lw=2, ls=ls, marker="o", ms=3, label=label, alpha=0.7)   # translucent so overlaps show
         out.append("  %-9s " % key + " ".join("%5.2f" % x for x in ser[key]))
     so = lambda x: x[8:10].mean(); mj = lambda x: x[4:6].mean()
     gap = so(ser["base"]) - so(o)
@@ -74,7 +82,6 @@ for (name, ab), ax in zip(REGIONS, axs.ravel()):
     out.append("  May-Jun mean: GIMMS %.2f" % mj(o) + "".join(" | %s %.2f" % (k, mj(v)) for k, v in ser.items()))
     out.append("")
     print(name, "|", line.strip())
-    ax.axvspan(8.5, 10.5, color="0.92", lw=0)        # Sep-Oct, the months the rule targets
     ax.set_title(name, fontsize=11, loc="left")
     ax.set_xlim(1, 12); ax.set_ylim(0, None)
     ax.set_xticks(mon); ax.set_xticklabels(list("JFMAMJJASOND"))
@@ -82,7 +89,7 @@ for (name, ab), ax in zip(REGIONS, axs.ravel()):
 for ax in axs[:, 0]:
     ax.set_ylabel("LAI (m$^2$ m$^{-2}$)")
 axs[0, 0].legend(loc="upper left", fontsize=8.5, frameon=False)
-fig.suptitle("Pilot sensitivity runs for %d (one year, monthly means); shading = September–October" % YEAR, fontsize=10)
+fig.suptitle("Pilot sensitivity runs for %d (one year from the same 1 Jan state, monthly means)" % YEAR, fontsize=10)
 fig.tight_layout(rect=(0, 0, 1, 0.96))
-fig.savefig("../figures/fig3_phentest_regions.png", dpi=200)
-open("../data/phentest_regions_summary.txt", "w").write("\n".join(out) + "\n")
+fig.savefig("../figures/fig3_phentest_regions%s.png" % SUFFIX, dpi=200)
+open("../data/phentest_regions_summary%s.txt" % SUFFIX, "w").write("\n".join(out) + "\n")

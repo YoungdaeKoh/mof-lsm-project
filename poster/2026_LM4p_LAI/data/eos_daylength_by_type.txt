@@ -1,0 +1,18 @@
+Day length on the observed EOS date by dominant vegetation type (CLM5 PFT >= 50 % of vegetated area), GIMMS 1982-2010 climatology, 1 deg, 20N+
+day length (h): median [p25-p75]; EOS = 50 % amplitude; n = cells
+
+type                                     all cells                    20-40N                     40-50N                     50-60N                     60-72N                    
+evergreen needleleaf (picea)             12.55 [11.47-13.26] n 1449 10.79 [10.54-11.10] n   85 11.59 [11.28-11.89] n  252 12.83 [12.16-13.27] n  696 13.12 [10.86-13.47] n  416
+deciduous needleleaf / larch (larix)     13.68 [13.39-14.07] n  284 (n<15)                     (n<15)                     13.35 [13.08-13.53] n  127 14.03 [13.83-14.19] n  157
+deciduous broadleaf (acer)               11.40 [11.25-11.67] n   85 11.25 [11.19-11.30] n   20 11.51 [11.33-11.78] n   65 (n<15)                     (n<15)                    
+shrub                                    13.32 [12.32-14.00] n 1105 (n<15)                     (n<15)                     12.07 [11.74-12.28] n   36 13.48 [12.83-14.08] n  963
+C3 grass incl. arctic (c3grass)          12.34 [11.24-13.21] n 2076 12.22 [11.83-13.78] n  332 12.77 [12.23-13.41] n  580 12.22 [11.45-13.21] n  489 11.61 [ 8.25-13.03] n  555
+crop                                     12.62 [11.86-13.74] n  717 11.77 [11.19-12.30] n  296 12.79 [12.32-13.72] n  218 13.71 [13.46-13.95] n  203 (n<15)                    
+
+same, EOS day of year median by type and band
+evergreen needleleaf (picea)                                          302.3 n   85               270.4 n  252               253.3 n  696               252.4 n  416              
+deciduous needleleaf / larch (larix)                                  (n<15)                     (n<15)                     247.2 n  127               243.5 n  157              
+deciduous broadleaf (acer)                                            281.3 n   20               273.2 n   65               (n<15)                     (n<15)                    
+shrub                                                                 (n<15)                     (n<15)                     262.7 n   36               252.0 n  963              
+C3 grass incl. arctic (c3grass)                                       257.8 n  332               249.6 n  580               260.4 n  489               266.8 n  555              
+crop                                                                  270.0 n  296               249.1 n  218               239.9 n  203               (n<15)                    

@@ -1,0 +1,57 @@
+Pilot phenology runs, monthly LAI 2010, AR6 regions (common valid cells, cos-lat weights); runs present: base tc10 offon
+gap closed = share of the (base - GIMMS) Sep-Oct gap removed by the run; May-Jun shows the side effect on spring
+
+Russian Arctic (RAR)  (1112 cells)
+  month         1     2     3     4     5     6     7     8     9    10    11    12
+  GIMMS      0.15  0.17  0.05  0.13  0.37  0.96  1.48  1.15  0.58  0.36  0.15  0.03
+  base       0.00  0.00  0.00  0.00  0.01  0.58  1.52  1.74  1.58  0.30  0.02  0.00
+  tc10       0.00  0.00  0.00  0.00  0.00  0.06  1.02  1.44  0.50  0.03  0.00  0.00
+  offon      0.00  0.00  0.00  0.00  0.01  0.58  1.52  1.74  0.62  0.05  0.01  0.00
+  Sep-Oct mean: GIMMS 0.47 | base 0.94 | tc10 0.26 | offon 0.34 | tc10 closes +144 % of the gap | offon closes +128 % of the gap
+  May-Jun mean: GIMMS 0.66 | base 0.30 | tc10 0.03 | offon 0.30
+
+N. Europe (NEU)  (487 cells)
+  month         1     2     3     4     5     6     7     8     9    10    11    12
+  GIMMS      0.40  0.36  0.47  0.99  1.69  2.60  2.76  2.30  1.74  1.50  1.01  0.48
+  base       0.64  0.62  0.61  0.72  0.96  2.20  2.60  2.80  2.94  2.27  1.05  0.69
+  tc10       0.64  0.62  0.61  0.62  0.72  1.41  2.23  2.59  2.27  1.43  0.79  0.65
+  offon      0.64  0.62  0.61  0.72  0.96  2.20  2.60  2.80  2.42  1.52  0.81  0.65
+  Sep-Oct mean: GIMMS 1.62 | base 2.61 | tc10 1.85 | offon 1.97 | tc10 closes +76 % of the gap | offon closes +65 % of the gap
+  May-Jun mean: GIMMS 2.14 | base 1.58 | tc10 1.06 | offon 1.58
+
+N.W. North America (NWN)  (1044 cells)
+  month         1     2     3     4     5     6     7     8     9    10    11    12
+  GIMMS      0.35  0.36  0.28  0.49  0.86  1.58  1.96  1.64  0.98  0.76  0.59  0.29
+  base       0.95  0.94  0.94  0.96  1.09  2.36  3.09  3.19  3.22  1.89  1.12  1.00
+  tc10       0.95  0.94  0.94  0.95  0.97  1.38  2.45  2.94  2.38  1.22  1.01  0.99
+  offon      0.95  0.94  0.94  0.96  1.09  2.36  3.09  3.19  2.56  1.25  1.02  0.99
+  Sep-Oct mean: GIMMS 0.87 | base 2.56 | tc10 1.80 | offon 1.91 | tc10 closes +45 % of the gap | offon closes +38 % of the gap
+  May-Jun mean: GIMMS 1.22 | base 1.73 | tc10 1.17 | offon 1.73
+
+E. Siberia (ESB)  (800 cells)
+  month         1     2     3     4     5     6     7     8     9    10    11    12
+  GIMMS      0.42  0.40  0.28  0.44  1.12  2.59  3.05  2.46  1.19  0.57  0.48  0.34
+  base       1.12  1.11  1.10  1.09  1.21  2.29  2.75  2.83  2.75  1.70  1.22  1.16
+  tc10       1.12  1.11  1.10  1.09  1.17  1.84  2.65  2.79  2.42  1.48  1.20  1.16
+  offon      1.12  1.11  1.10  1.09  1.21  2.29  2.75  2.83  2.44  1.48  1.20  1.16
+  Sep-Oct mean: GIMMS 0.88 | base 2.23 | tc10 1.95 | offon 1.96 | tc10 closes +21 % of the gap | offon closes +20 % of the gap
+  May-Jun mean: GIMMS 1.85 | base 1.75 | tc10 1.51 | offon 1.75
+
+E. North America (ENA)  (426 cells)
+  month         1     2     3     4     5     6     7     8     9    10    11    12
+  GIMMS      0.63  0.67  1.11  2.07  2.99  3.88  4.14  3.95  2.96  1.71  1.09  0.81
+  base       1.08  0.98  1.05  1.70  2.30  3.38  3.60  3.72  3.84  3.44  2.44  1.53
+  tc10       0.90  0.73  0.82  1.55  2.15  3.23  3.47  3.60  3.72  3.32  2.30  1.38
+  offon      1.08  0.98  1.05  1.70  2.30  3.38  3.60  3.72  3.84  3.43  2.41  1.47
+  Sep-Oct mean: GIMMS 2.33 | base 3.64 | tc10 3.52 | offon 3.63 | tc10 closes +9 % of the gap | offon closes +0 % of the gap
+  May-Jun mean: GIMMS 3.44 | base 2.84 | tc10 2.69 | offon 2.84
+
+E. Asia (EAS)  (582 cells)
+  month         1     2     3     4     5     6     7     8     9    10    11    12
+  GIMMS      0.85  0.92  1.07  1.48  2.06  2.50  3.07  3.26  2.66  1.92  1.41  1.04
+  base       1.70  1.61  1.76  2.16  2.66  3.09  3.21  3.27  3.27  3.19  2.94  2.54
+  tc10       1.45  1.30  1.46  1.89  2.41  2.87  3.01  3.09  3.07  2.99  2.70  2.26
+  offon      1.70  1.61  1.76  2.16  2.66  3.09  3.20  3.27  3.25  3.16  2.87  2.43
+  Sep-Oct mean: GIMMS 2.29 | base 3.23 | tc10 3.03 | offon 3.21 | tc10 closes +21 % of the gap | offon closes +2 % of the gap
+  May-Jun mean: GIMMS 2.28 | base 2.88 | tc10 2.64 | offon 2.88
+

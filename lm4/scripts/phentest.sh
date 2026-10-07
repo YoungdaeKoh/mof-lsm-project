@@ -18,10 +18,17 @@ EXE_PHENOFF=/data2/ydkoh/lm4/build_phenoff/fms_esm4.5_phenoff.x   # phenoff_buil
 VARIANTS=${VARIANTS:-"base tc10"}
 #   noparam phenoff exe, ctl field_table (regression: must equal base bit for bit)
 #   offon   phenoff exe, larix/c3grass tc_crit_off=283.15 K, dayl_crit_off=14 h (13.69)
+#   dayl    phenoff exe, day-length-led leaf-off: larix/c3grass dayl_crit_off=13 h, acer 12 h,
+#           tc_crit_off=293.15 K for all three (notes 13.70, experiment 4)
+#   dayl2   phenoff exe, type-specific thresholds: larix 13.5 h, c3grass 12.5 h, acer 11.5 h,
+#           tc_crit_off=293.15 K (notes 13.70, experiment 5); submit with phentest_pbs.sh on climate01
+#   replant  CTRL settings (gateBC exe, ctl field_table) started from the relabelled restart
+#           /data2/ydkoh/lm4/RUN/replant_seed (species from the CLM5 map, replant_step3_relabel.py);
+#           any variant can start elsewhere with SEED=<dir>
 #   <variant>_d  same as <variant> plus daily LAI in the land_daily stream (diag only,
 #           e.g. base_d, offon_d; used for day-resolved SOS/EOS on the poster)
-Y=2010; SEED=$C/archive/2009; NP=24
-[ -d $SEED ] || SEED=$C/archive/y2009
+Y=2010; NP=24
+SEED=${SEED:-$C/archive/y2009}            # override with SEED=<dir> (e.g. the replanted restart)
 
 stage() {   # $1 variant  $2 days
   D=$T/$1
@@ -56,10 +63,22 @@ stage() {   # $1 variant  $2 days
   if [ "$K" = offon ]; then
     sed -i -E "s/^( *)tc_crit *= *278\.15.*/&\n\1tc_crit_off = 283.15\n\1dayl_crit_off = 14.0/" $D/field_table
   fi
+  if [ "$K" = dayl ]; then
+    # experiment 4: day length sets the leaf-off date; the 20 C cap only keeps tropical grass on
+    sed -i -E "s/^( *)tc_crit *= *278\.15.*/&\n\1tc_crit_off = 293.15\n\1dayl_crit_off = 13.0/" $D/field_table
+    sed -i -E '/"species", *"land_mod", *"acer"/{n;s/$/\n    tc_crit_off = 293.15\n    dayl_crit_off = 12.0/}' $D/field_table
+  fi
+  if [ "$K" = dayl2 ]; then
+    # experiment 5: thresholds from the observed EOS of each vegetation type (notes 13.70):
+    # larch 13.5 h, C3 grass 12.5 h, deciduous broadleaf 11.5 h; same 20 C cap
+    sed -i -E '/"species", *"land_mod", *"larix"/,/"species", *"land_mod", *"acer"/ s/^( *)tc_crit *= *278\.15.*/&\n\1tc_crit_off = 293.15\n\1dayl_crit_off = 13.5/' $D/field_table
+    sed -i -E '/"species", *"land_mod", *"c3grass"/,$ s/^( *)tc_crit *= *278\.15.*/&\n\1tc_crit_off = 293.15\n\1dayl_crit_off = 12.5/' $D/field_table
+    sed -i -E '/"species", *"land_mod", *"acer"/{n;s/$/\n    tc_crit_off = 293.15\n    dayl_crit_off = 11.5/}' $D/field_table
+  fi
   if [ "$1" != "$K" ]; then
     sed -i '/^"land", "precip", "precip", "land_daily"/a "vegn", "lai", "lai", "land_daily", "all", .true., "none", 2' $D/diag_table
   fi
-  case $K in noparam|offon) ln -sfn $EXE_PHENOFF $D/model.x ;; *) ln -sfn $EXE $D/model.x ;; esac
+  case $K in noparam|offon|dayl|dayl2) ln -sfn $EXE_PHENOFF $D/model.x ;; *) ln -sfn $EXE $D/model.x ;; esac
   echo "$1: $MO months $DA days from $Y-01-01, seed $SEED"
 }
 
@@ -79,7 +98,8 @@ run() {     # $1 variant
   ulimit -s unlimited
   export MV2_SMP_USE_CMA=1 MV2_IBA_EAGER_THRESHOLD=131072 MV2_ENABLE_AFFINITY=0
   echo "=== $1 start $(date)"
-  nice -n 10 mpirun -np $NP ./model.x > esm4p5.log 2>&1
+  # under PBS pass HOSTFILE=$PBS_NODEFILE so the ranks land on the allocated node (pbs-alloc-vs-mpirun-hostfile)
+  nice -n 10 mpirun ${HOSTFILE:+-hostfile $HOSTFILE} -np $NP ./model.x > esm4p5.log 2>&1
   echo "=== $1 end rc=$? $(date)"
   grep -E '^(Total runtime|Main loop)' esm4p5.log | cut -c1-80
 }

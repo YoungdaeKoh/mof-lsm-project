@@ -1,0 +1,6 @@
+LM4+ species share of natural vegetated area from the CLM5 map (crosswalk in replant_step1_crosswalk.py), area-weighted %
+band        prioria    picea    larix     acer  c4grass  c3grass   dominant tree / grass (cells)
+ 50- 90N        0.0     28.1      8.0      4.2      0.3     59.4   prioria 0 picea 3556 larix 1165 acer 432 | c4grass 38 c3grass 5870
+ 20- 50N        5.3     17.2      0.0     11.4     13.8     52.2   prioria 736 picea 2011 larix 1 acer 1326 | c4grass 876 c3grass 3765
+-60- 20N       40.6      0.3      0.0      1.0     40.4     17.7   prioria 5103 picea 64 larix 2 acer 160 | c4grass 4061 c3grass 1579
+-90- 90N       20.9     12.0      2.2      4.4     22.9     37.5   prioria 5839 picea 5631 larix 1168 acer 1918 | c4grass 5044 c3grass 11272

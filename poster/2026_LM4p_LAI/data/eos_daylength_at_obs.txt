@@ -1,10 +1,10 @@
-Day length on the observed EOS date (GIMMS, 1982-2010 mean), AR6 regions, at the regional mean latitude
-and the date a pure day-length rule would fire for thresholds 12, 13, 14 h (after the solstice)
+Day length on the observed EOS date (GIMMS LAI4g, 1982-2010 mean EOS from lai_regional_sos_eos.txt), AR6 regions, at the regional mean latitude
+and the date a day-length rule would fire for thresholds 12, 13, 14 h (after the solstice); script p5_daylength_at_obs_eos.py
 
-NWN lat 62.1N  obs EOS 09/09  T   6.2 C  day length 13.12 h | rule fires: 12 h 09/21  13 h 09/11  14 h 09/01
-ESB lat 54.2N  obs EOS 09/03  T  10.2 C  day length 13.29 h | rule fires: 12 h 09/21  13 h 09/08  14 h 08/25
-RFE lat 56.6N  obs EOS 09/14  T   7.5 C  day length 12.55 h | rule fires: 12 h 09/21  13 h 09/09  14 h 08/27
-ENA lat 40.7N  obs EOS 10/01  T  14.4 C  day length 11.52 h | rule fires: 12 h 09/21  13 h 08/30  14 h 08/06
-WCE lat 50.5N  obs EOS 09/14  T  14.3 C  day length 12.44 h | rule fires: 12 h 09/21  13 h 09/06  14 h 08/21
-EAS lat 33.0N  obs EOS 10/07  T  16.4 C  day length 11.42 h | rule fires: 12 h 09/21  13 h 08/23  14 h 07/14
-range of day length at obs EOS: 11.42-13.29 h (spread 1.87 h) | range of temperature: 6.2-16.4 C (spread 10.2 C)
+NWN lat 61.2N  obs EOS 09/09 (doy 252.5)  day length 13.08 h | rule fires: 12 h 09/21  13 h 09/11  14 h 09/01
+ESB lat 54.2N  obs EOS 09/03 (doy 246.1)  day length 13.29 h | rule fires: 12 h 09/21  13 h 09/08  14 h 08/25
+RFE lat 56.8N  obs EOS 09/14 (doy 256.7)  day length 12.56 h | rule fires: 12 h 09/21  13 h 09/09  14 h 08/27
+ENA lat 41.0N  obs EOS 10/01 (doy 274.0)  day length 11.51 h | rule fires: 12 h 09/21  13 h 08/30  14 h 08/06
+WCE lat 50.5N  obs EOS 09/14 (doy 256.7)  day length 12.44 h | rule fires: 12 h 09/21  13 h 09/06  14 h 08/21
+EAS lat 32.8N  obs EOS 10/07 (doy 280.2)  day length 11.43 h | rule fires: 12 h 09/21  13 h 08/22  14 h 07/13
+range of day length at obs EOS: 11.43-13.29 h (spread 1.86 h)
