@@ -1703,6 +1703,50 @@ LM4p = `postproc/lm4p_ctl/yearly`(lm4p_to_latlon.py, nearest 1°)의 `lai`를 CD
 
 ### 13.70 ★★★ phenology 민감도 실험 대장 (2026-10-06 작성 — 실험을 추가·재실행할 때 이 표부터 갱신)
 
+종별 phenology 파라미터(ctl `field_table` 확인 2026-10-06; 코드 기본값 `tc_crit=283.16`, `gdd_crit=360`, 유형 기본 = deciduous): **larix** 5 °C·180 · **c3grass** 5 °C·180(deciduous 명시) · acer 기본값 10 °C·360 · c4grass 기본값 10 °C·360(deciduous 명시) · prioria(열대) 기본값 10 °C·360 · **picea** `phenology_type='evergreen'`(규칙 미적용). 즉 기본값을 덮어쓴 종은 larix·c3grass 둘뿐이고 둘 다 문턱과 GDD 기준을 함께 낮춤.
+
+**이 값들의 출처 (2026-10-06 서버 확인)**: ① ctl `field_table`은 KIOST 원본 `~/KIOST-ESM2/field_table`(2026-06-13)과 **6줄(3쌍)만 다름** — n2o·ch4·co2 `lower_bound`에서 `fixed_year=1850.`을 뺀 것뿐, 종 블록은 동일(larix·c3grass `gdd_crit=180`, `tc_crit=278.15`) → **phenology 파라미터는 KIOST에서 받은 그대로**. `~/ESM4p5_KIOSTv2b/ASCII_INPUT_{PROD,SMALL}/field_table`(2026-02-13)도 같은 두 값. (co2 `fixed_year` 줄은 §13.68 CO₂ 고정 문제와 관련 가능 — 별도 확인 거리.)
+② 옛 UFS LM4(`ufs-weather-model/LM4-driver/LM4/vegetation/`, 5종 c4grass·c3grass·tempdec·tropical·evergreen)의 **코드 기본값 배열** `tc_crit = 283.16, 278.16, 283.16, 283.16, 263.16` → **c3grass 5 °C는 GFDL 옛 코드부터 있던 값**(KIOST 조정 아님), lm4P에서 새로 생긴 larix가 같은 값을 받은 것으로 보임. 우리 UFS 실행 namelist는 `tc_crit(0:2) = 3*273.16`(c4grass·c3grass·tempdec을 0 °C로 덮어씀).
+③ UFS LM4의 낙엽 규칙은 LM3식: `vegn_phenology`에서 `tc_av < tc_crit` 또는 가뭄이면 LEAF_OFF, **잎을 한 번에** 떨굼(`leaf_litter=(1-l_fract)*bl`), GDD·tc_pheno 평활 없음. lm4P(PPA)는 일 단위 판정 + GDD + 지수이동평균 + 7.5 %/일 낙엽으로 바뀐 것.
+
+**★★★★ larix는 모델에 사실상 없다 — 종별 잎 면적 분포 (2026-10-06, base 2010, C96 원격자·land_area 가중; `lm4/scripts/phentest_species_share.py`·`phentest_species_presence.py` → `poster/.../data/species_leaf_area_share_july2010.txt`)**: 연중 잎이 한 번이라도 있는 격자 수 — prioria 4,183 · picea 5,864 · **larix 20** · acer 3,741 · c4grass 8,738 · **c3grass 16,649**(전체 육지 ≈18,700). 7월 잎 면적 몫(%):
+| 영역 | prioria | picea | larix | acer | c4grass | c3grass | 평균 LAI |
+|---|---|---|---|---|---|---|---|
+| 70–90N | 0 | 0 | 0 | 0 | 0 | **100** | 0.07 |
+| 50–70N | 0 | 34.2 | 0.0 | 17.7 | 0 | **48.1** | 2.69 |
+| 30–50N | 0 | 32.5 | 0.0 | 33.0 | 0.3 | 34.3 | 1.83 |
+| 0–30N | 50.9 | 1.5 | 0 | 4.7 | 5.9 | 37.0 | 2.45 |
+| 60S–0 | 59.2 | 3.0 | 0 | 0.9 | 2.6 | 34.3 | 3.25 |
+| NWN(박스) | 0 | 32.7 | 0 | 11.2 | 0 | 56.1 | 3.03 |
+| ESB | 0 | **41.8** | **0.0** | 20.7 | 0 | 37.5 | 2.75 |
+| RFE(박스) | 0 | 14.8 | 0 | 26.6 | 0 | 58.6 | 2.52 |
+| ENA(박스) | 0 | 5.1 | 0 | **72.3** | 0.3 | 22.3 | 3.40 |
+| WCE(박스) | 0 | 24.5 | 0 | 47.8 | 0 | 27.6 | 2.48 |
+| EAS(박스) | 12.7 | 21.9 | 0 | 40.0 | 0.7 | 24.8 | 2.76 |
+(NWN·RFE·ENA·WCE·EAS는 AR6 다각형을 근사한 경위도 박스.)
+→ ① tc10·offon의 파라미터는 larix·c3grass에 주지만 **효과는 전부 c3grass 경유**. "낙엽송 문턱"이라는 표현은 틀림 — "한대 C3 풀의 문턱"으로. ② 실제 낙엽송 지대인 동시베리아가 모델에서는 **상록 가문비 42 % + 단풍나무류 21 % + C3 풀 38 %** → 겨울 바닥값(모델 ≈1.1 vs 관측 ≈0.3)의 유력한 원인 후보 = 상록수가 있어서(가설; 관측의 눈 효과와 분리 필요). ③ 한대에 온대 낙엽수(acer, 문턱 10 °C)가 18–27 % 있음. ④ 온대(ENA 72 %·WCE 48 %·EAS 40 %가 acer)는 tc10·offon의 대상 종이 소수라 반응이 작았던 것 — 4번 실험에서는 acer에도 가을 파라미터를 줘야 함. 종 분포 자체(초기 분포·`do_biogeography=F`)의 검토가 별도 과제로 추가됨.
+
+**larix 부재의 출처 = 초기 상태 (2026-10-06, `lm4/scripts/restart_species_census.py`, `vegn2.res` cohort 수)**: spin-up 시작 IC(`lm4_spinup30/INPUT`, KIOST 결합 400년 IC) — prioria 196,909 · picea 282,873 · **larix 1,790(전체의 0.15 %)** · acer 252,182 · c4grass 143,741 · c3grass 297,129. ctl y1979 1,794 → y2009 1,825 → y2023 1,754 → **처음부터 거의 없었고 45년간 늘지도 줄지도 않음**(`do_biogeography=F`라 새 곳에 정착 불가). 종으로서 계산은 되지만 사는 곳이 20격자뿐. 왜 KIOST IC에 larix가 거의 없는지는 미확인(KIOST 문의 필요). 주의: restart는 1월 1일이라 북반구 낙엽종의 잎 생물량 몫은 과소 — 종 비교는 cohort 수나 7월 잎 면적(위 표)으로.
+
+**독립 검토 — codex CLI (2026-10-06, read-only, 원본·패치 소스 6개 파일만 제공; 프롬프트는 결론을 주지 않고 코드에서 답하게 함)**: 우리 진단과 일치 — 가을 지연 1순위 = `tc_pheno` 평활(평균 지연 ≈19일) + 온도 문턱까지 ON 유지, 겨울 잔존 1순위 = picea의 계절 낙엽 면제, 기본값이면 패치는 논리상 원본과 동일(비트 동일은 별개).
+  새로 지적된 것: ① **가을 재전엽 반복 위험(실행 중인 offon_d에 해당)** — 새 규칙으로 OFF된 뒤 tc_pheno가 5–10 °C인 동안 GDD가 다시 쌓여 180(c3grass의 `gdd_crit`)을 넘으면 ON, 다음 날 다시 OFF·GDD 리셋. ON 분기는 가을 조건을 보지 않음 → **v2 후보: 가을 조건이 참인 동안 OFF→ON 금지**. offon_d의 일별 LAI에서 가을 재상승 유무 확인할 것. ② **초본은 OFF 순간 급감** — `vegn_dynamics.F90:2154–2168`에서 키·DBH·수관면적을 묘목 크기로 되돌리고 그 `bl_max`를 넘는 잎을 즉시 제거 → c3grass(한대 잎 면적 48 %)는 "7.5 %/일·반감 9일"이 아님. ESB에서 스위치 OFF(10/10)와 모델 LAI EOS(10/11)가 하루 차이인 이유로 보임(앞서 "종·격자 혼합" 추정을 대체). ③ 성장 배분 조건의 기온은 `tc_dorm`(≈10일 평활) > `T_dorm`. ④ `gdd`·`status` 진단 출력은 첫 cohort만 → 종 대표로 쓰면 안 됨. ⑤ 일장식 분모 365 고정(윤년 ≈1일 오차), 극점 `tan` 취약. ⑥ 기존 `tc_crit`(10 °C)보다 낮은 `tc_crit_off`는 효과 없음 → acer에 283.15를 줘도 무의미, 4번 실험은 더 높은 값(또는 일장만) 필요.
+  codex가 "세 파일에서 확인 불가"라 한 일평균 정규화는 **확인 완료**: `land_model.F90:2832` `tc_daily = tc_daily/steps_per_day`, `:2881–2883`에서 일 누적·극값 리셋 → 문제 없음.
+
+**★★★ 종 분포를 관측 기반 자료와 대조 (2026-10-06)** — 격자 검증 2건 포함.
+① **MCD12C1 IGBP 격자 검증 통과**: `/Volumes/data02/MODIS/MCD12C1/mcd12c1_igbp_GLOBAL_2010_2020.nc`(GEE `MODIS/061/MCD12C1` Type 1 majority, 0.05°, 2010·2020; tif→nc 변환은 geotransform에서 좌표 계산). `igbp`(year,lat,lon)=(2,3600,7200) int16, 값 0–16, **lat 오름차순** −89.975→89.975, lon −179.976→179.976, 간격 0.0500002°. 좌표 없는 원본 배열 그림 = 정상 세계지도. 지점 점검 10곳 중 8곳 일치(사하라 Barren·아마존/콩고 EBF·그린란드 SnowIce·태평양 Water·미국 옥수수지대 Crop·티벳 Grass·호주 내륙 OpenShrub); 불일치 2곳(동시베리아 62N120E·캐나다 55N100W = WoodySavanna)은 격자 오류가 아니라 **IGBP가 성긴 한대림을 Woody savanna/Savanna로 분류**하기 때문(전구 DNF 0.2 %뿐). → **IGBP 다수 등급으로는 낙엽송/가문비 구분 불가**. 쓸모 있는 것은 농경지 비율(AR6 육지 면적 %, `poster/.../data/igbp_share_ar6_regions_2010.txt`): WCE **50.7** · EAS 25.9 · ENA 16.7 · NWN 4.7 · ESB 3.9 · RFE 2.5.
+② **CLM5 지면자료 PFT 비율**(잎 유형이 구분됨; `surfdata_0.9x1.25_hist_16pfts_Irrig_CMIP6_simyr2000_c190214.nc` → `lm4/scripts/clm_surfdata_pft_extract.py` → `poster/.../data/clm5_surfdata_pft_0.9x1.25_simyr2000.nc`; 점검: lat −90→90 오름차순, lon 0→358.75, 지점 우점 PFT 동시베리아 NDT boreal 79.8 %·아마존 BET tropical·사하라 bare·캐나다 NET boreal·미국 동부 BDT temperate). AR6 지역의 식생 면적 대비 %(`clm5_pft_share_ar6_regions.txt`) vs LM4+ 7월 잎 면적 몫(위 표):
+| 유형 (CLM5 / LM4+ 종) | NWN | ESB | RFE | ENA | WCE | EAS |
+|---|---|---|---|---|---|---|
+| 상록 침엽 / picea | 37.4 / 32.7 | 22.8 / **41.8** | 15.0 / 14.8 | 31.6 / 5.1 | 15.6 / 24.5 | 20.5 / 21.9 |
+| **낙엽 침엽(낙엽송) / larix** | 0.2 / 0 | **25.4 / 0.0** | **17.2 / 0** | 0 / 0 | 0 / 0 | 0 / 0 |
+| 낙엽 활엽 / acer | 2.1 / 11.2 | 4.6 / **20.7** | 5.2 / 26.6 | 24.5 / 72.3 | 12.2 / 47.8 | 15.9 / 40.0 |
+| 관목 / (없음) | 18.2 / – | 5.5 / – | **29.5** / – | 0.5 / – | 0 / – | 0.1 / – |
+| C3 풀 / c3grass | 37.1 / 56.1 | 36.8 / 37.5 | 31.5 / 58.6 | 16.3 / 22.3 | 32.5 / 27.6 | 22.5 / 24.8 |
+| C4 풀 / c4grass | 0 / 0 | 1.1 / 0 | 0.1 / 0 | 8.6 / 0.3 | 1.5 / 0 | 13.3 / 0.7 |
+| 작물 / (없음) | 5.0 / – | 3.8 / – | 1.5 / – | 17.3 / – | **38.1** / – | 22.0 / – |
+주의: CLM5 쪽은 **지면 면적 비율**, LM4+ 쪽은 **7월 잎 면적 비율**이라 같은 양이 아님(나무는 면적당 잎이 많아 잎 면적 몫이 더 큼) → 숫자를 그대로 빼지 말고 "있다/없다, 많다/적다"로만 읽을 것. LM4+의 NWN·RFE·ENA·WCE·EAS는 근사 박스.
+→ 분명한 것: (a) **동시베리아·러시아 극동의 낙엽송(식생 면적의 25 %·17 %)이 LM4+에는 없음**, 그 자리를 picea와 acer가 채움 → 겨울 잎 잔존의 원인 후보. (b) LM4+에는 관목·작물이 없음 — RFE 관목 30 %, WCE 작물 38 %·EAS 22 %·ENA 17 %(온대 관측 EOS에 수확이 섞임). (c) C3 풀 비율은 ESB에서 비슷(36.8 vs 37.5). CLM5 지면자료도 위성 기반 추정(2000년 기준)이지 실측은 아님.
+
 공통: 2010-01-01 03Z 시작(ctl `archive/y2009` restart), 2010년 WFDE5, 24PE @climate00(한 번에 1개), 실행 `lm4/scripts/phentest.sh`(서버 `/data2/ydkoh/lm4/RUN/phentest.sh`), 런 폴더 `/data2/ydkoh/lm4/RUN/phentest/<이름>/`. 파라미터는 larix·c3grass 두 종의 field_table 값. "기온" = `tc_pheno`(캐노피 공기온도의 지수이동평균, 시간상수 20일).
 
 | # | 이름 | 실행파일 | 켜는 조건 | 끄는 조건 | 기간 | 상태 |
@@ -1710,12 +1754,17 @@ LM4p = `postproc/lm4p_ctl/yearly`(lm4p_to_latlon.py, nearest 1°)의 `lai`를 CD
 | 1 | `base` | gateBC | 기온 ≥ 5 °C | 기온 < 5 °C | 1년 | 완료 10/04 (8.7 G, restart 119, 종료 2011-01-01) |
 | 2 | `tc10` | gateBC | 기온 ≥ 10 °C | 기온 < 10 °C (`tc_crit=283.15`) | 1년 | 완료 10/04 (8.7 G) |
 | – | `noparam` | phenoff | #1과 같음(새 파라미터 없음) | #1과 같음 | 31일 | 완료 10/06 (5.2 G) — 회귀 시험용, gateBC와 비트 동일 아님(§13.69) |
-| 3 | `offon_d` | phenoff | 기온 ≥ 5 °C | 기온 < 5 °C **또는** (하지 이후·일장 < 14 h·기온 < 10 °C) (`tc_crit_off=283.15`, `dayl_crit_off=14.0`) | 1년 | **실행 중** 10/06 15:33:41~ (≈18.5 h), 일별 LAI 포함 |
+| 3 | `offon_d` | phenoff | 기온 ≥ 5 °C | 기온 < 5 °C **또는** (하지 이후·일장 < 14 h·기온 < 10 °C) (`tc_crit_off=283.15`, `dayl_crit_off=14.0`) | 1년 | **완료** 10/06 15:33:41 → 10/07 08:02:30 (16.5 h, rc=0, restart 119, FATAL 4줄은 MOM 경고), 일별 LAI 포함, 로컬 사본 `cases/phentest_2010/offon_d` |
 | 4 | (미정) 일장만 | phenoff | 기온 ≥ 5 °C | 기온 < 5 °C **또는** (하지 이후·일장 < 문턱) — `tc_crit_off`를 330 K처럼 크게 주면 재빌드 없이 가능 | 1년 | 미실행. 종별 문턱 후보: 한대 종 ≈13.3 h, 온대 종 ≈11.5–12 h(§13.69 일장 표). c3grass는 전 지구 분포라 제외 권장 |
 | – | `noparam_d` | phenoff | #1과 같음 | #1과 같음 | 1년 | 15:35:58 중단(결과 없음). 일 단위 비교가 필요해지면 #3 종료 후 순차 실행 |
 | – | `offon` | phenoff | #3과 같음 | #3과 같음 | – | 13:47 시작 직후 중단된 빈 폴더(다른 세션), 결과 없음 |
 
+- **★★★ 실험 3(offon) 결과 (2026-10-07; 1° 변환 `lm4p_to_latlon.py`로 base를 재변환해 기존 파일과 차이 0 확인 → 같은 방법; `poster/.../data/offon.lai.2010-2010.1deg.nc`, `phentest_regions_summary.txt`, `figures/fig3_phentest_regions.png`)** — AR6 지역 9–10월 평균 LAI(관측 / base / tc10 / offon)와 base−관측 격차의 해소율:
+  NWN 0.87 / 2.56 / 1.80 / **1.91** (tc10 45 %, offon **38 %**) · ESB 0.88 / 2.23 / 1.95 / **1.96** (21 %, **20 %**) · RFE 1.10 / 2.17 / 1.60 / **1.63** (54 %, **50 %**) · ENA 2.33 / 3.64 / 3.52 / 3.63 (9 %, 0 %) · WCE 1.56 / 2.24 / 2.20 / 2.20 (5 %, 6 %) · EAS 2.29 / 3.23 / 3.03 / 3.21 (21 %, 2 %).
+  5–6월 평균: offon = base와 **동일**(NWN 1.73, ESB 1.75, RFE 1.01, ENA 2.84, WCE 1.99, EAS 2.88; tc10은 각각 1.17·1.51·0.70·2.69·1.89·2.64로 악화) → **설계 목표 달성: 가을만 당기고 봄은 그대로**. 1–8월은 base와 같고 9월부터 갈라짐(NWN 9월 3.22→2.56, 10월 1.89→1.25).
+  온대 0–6 %는 예상대로(대상 종이 c3grass뿐, acer 미적용). 일별 LAI(`phentest_daily_lai_band.py`): 50–70N 밴드 정점 doy 242(2.84) → 9/1 2.83 · 9/15 2.23 · 10/1 1.62 · 10/15 1.31 · 11/1 1.03, 정점 이후 **재상승 일수 0** → codex가 우려한 가을 재전엽 반복은 밴드 평균에서는 안 보임(격자 단위 미확인). 60–72N: 9/1 2.37 → 9/15 1.30 → 10/1 0.63.
+  손계산 예측과의 대조: 한대 "가까워짐·온대 그대로·봄 불변" 세 가지 모두 적중. 50 % 진폭 EOS(밴드, 일별): offon ≈ doy 266(9/23) vs base(월별 보간) ≈ 10/10 → **약 17일 당겨짐**, 관측(9/3–9/9)까지는 2–3주 남음.
 - 패치 `lm4/patches/lm4P.phenology_autumn_daylength.diff`(작업본 `lm4/patches/phenoff_work/`, `.orig` = 원본), 빌드 `lm4/scripts/phenoff_build.sh` → `/data2/ydkoh/lm4/build_phenoff/fms_esm4.5_phenoff.x`.
 - 판정(월평균, 사용자 결정): AR6 6개 지역의 9–10월 평균 LAI 격차 감소·5–6월 유지·12개월 오차 — `poster/2026_LM4p_LAI/scripts/p4_fig_phentest_regions.py`(1° 파일 `data/<이름>.lai.2010-2010.1deg.nc`가 있으면 자동 포함). 플럭스 반응 `lm4/scripts/phentest_flux_response.py`.
-- **보존**: 완료된 `base`·`tc10`·`noparam`을 로컬 `/Volumes/data02/LM4P/cases/phentest_2010/`로 복사(2026-10-06, INPUT·FORCING 링크와 exe 제외, history+RESTART 포함). `offon_d`도 끝나면 같은 곳으로. 서버 `/data2`는 98 %라 원본을 지우기 전 반드시 로컬 사본의 파일 수·체크섬 확인.
+- **보존**: 완료된 `base`·`tc10`·`noparam`을 로컬 `/Volumes/data02/LM4P/cases/phentest_2010/`로 복사(2026-10-06, INPUT·FORCING 링크와 exe 제외, history+RESTART 포함). **검증 완료**: 세 실험 모두 서버=로컬 — history 138·restart 119개, 바이트 base 9,290,940,033 · tc10 9,283,668,287 · noparam 5,479,864,689, md5(land_month.tile1 / RESTART 전체) base 8409508e6670 / 9caa985b5620 · tc10 5d6263a03a43 / 02bfbbf4c0bd · noparam 3d24a581e7e8 / afd8aabc0d31. `offon_d`도 2026-10-07 복사·검증 완료(history 138·restart 119, 9,315,952,732 B, md5 ce57de992a6c / 61c4e96459b8, 서버=로컬). 서버 `/data2`는 98 %라 원본을 지우기 전 반드시 로컬 사본의 파일 수·체크섬 확인.
 - **덮어쓰기 방지**: `phentest.sh setup`은 변형 폴더를 `rm -rf` 후 다시 만든다 → 종료 restart(`RESTART/coupler.res`)가 있는 폴더는 `FORCE=1` 없이는 거부하도록 가드 추가(로컬 수정 완료, **서버 반영은 offon_d 종료 후** — 실행 중인 bash 스크립트를 덮어쓰면 종료 단계가 깨질 수 있음).

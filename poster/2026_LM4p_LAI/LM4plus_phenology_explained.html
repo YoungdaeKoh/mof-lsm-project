@@ -131,9 +131,20 @@ end select</code></pre>
   <p>핵심은 <b>같은 <code>tc_crit</code>이 양쪽에 다 나온다</b>는 점입니다. 봄에 잎을 켜는 문턱과 가을에 잎을 끄는 문턱이 하나의 숫자입니다.</p>
   <div class="scroll"><table>
     <tr><th>파라미터</th><th>코드 기본값</th><th>우리 실험 설정</th></tr>
-    <tr><td><code>tc_crit</code></td><td class="n">283.16 K (10 °C)</td><td>낙엽송(larix)과 C3 풀은 <span class="n">278.15 K (5 °C)</span>로 낮춰져 있음. 단풍나무류(acer)는 기본값 10 °C.</td></tr>
-    <tr><td><code>gdd_crit</code></td><td class="n">360</td><td>종별 값은 이 글에서 확인하지 않았습니다.</td></tr>
+    <tr><td><code>tc_crit</code></td><td class="n">283.16 K (10 °C)</td><td>낙엽송(larix)과 C3 풀만 <span class="n">278.15 K (5 °C)</span>로 낮춰져 있음. 나머지는 기본값 10 °C.</td></tr>
+    <tr><td><code>gdd_crit</code></td><td class="n">360</td><td>낙엽송과 C3 풀만 <span class="n">180</span>. 나머지는 기본값 360.</td></tr>
   </table></div>
+  <p>기본값은 "따로 값을 주지 않은 종"에 적용됩니다. 우리 실험의 여섯 종은 이렇게 나뉩니다.</p>
+  <div class="scroll"><table>
+    <tr><th>종</th><th>유형</th><th class="n">tc_crit</th><th class="n">gdd_crit</th></tr>
+    <tr><td>larix (낙엽송)</td><td>낙엽</td><td class="n">5 °C</td><td class="n">180</td></tr>
+    <tr><td>c3grass (C3 풀)</td><td>낙엽</td><td class="n">5 °C</td><td class="n">180</td></tr>
+    <tr><td>acer (단풍나무류)</td><td>낙엽</td><td class="n">10 °C (기본값)</td><td class="n">360 (기본값)</td></tr>
+    <tr><td>c4grass (C4 풀)</td><td>낙엽</td><td class="n">10 °C (기본값)</td><td class="n">360 (기본값)</td></tr>
+    <tr><td>prioria (열대 활엽수)</td><td>낙엽</td><td class="n">10 °C (기본값)</td><td class="n">360 (기본값)</td></tr>
+    <tr><td>picea (가문비나무류)</td><td>상록</td><td class="n" colspan="2">규칙을 적용받지 않음</td></tr>
+  </table></div>
+  <p class="note">낙엽송(larix)은 설정에는 있지만 모델 안에 거의 살지 않습니다. 잎이 있는 격자가 전 지구 약 18,700개 중 20개뿐입니다. 그래서 문턱 5 °C의 효과는 사실상 C3 풀을 통해 나타납니다. 모델의 한대 식생은 가문비나무(상록) 34 %, C3 풀 48 %, 단풍나무류 18 %로 이루어져 있습니다(50–70°N, 2010년 7월 잎 면적 기준).</p>
   <p class="src">vegn_data.F90:261–263. 기본값 옆 주석은 "critical temperature for leaf drop". 종별 값은 실행 폴더의 field_table에서 덮어씁니다.</p>
 
   <h3>4단계. 꺼진 뒤 잎을 날마다 7.5 % 줄인다</h3>
@@ -147,7 +158,7 @@ if (cc%status==LEAF_OFF .AND. cc%bl>0 ...) then
 
 <section>
   <h2>그래서 가을에 생기는 일</h2>
-  <p>이 규칙을 동시베리아(낙엽송 지대, 평균 위도 54°N)에 적용해 보겠습니다. 모델 자신의 지역 평균 기온(1982–2010 기후값)을 넣고 위 1·3·4단계를 손으로 따라간 결과입니다.</p>
+  <p>이 규칙을 동시베리아(평균 위도 54°N)에 적용해 보겠습니다. 모델 자신의 지역 평균 기온(1982–2010 기후값)을 넣고 위 1·3·4단계를 손으로 따라간 결과입니다.</p>
 
   <figure>
     <div class="scroll">
@@ -201,7 +212,7 @@ if (cc%status==LEAF_OFF .AND. cc%bl>0 ...) then
   </table></div>
   <p class="src">관측 = GIMMS LAI4g, 모델 = LM4+ ctl, 1982–2010 평균. 기온은 모델의 2 m 기온 기후값(월평균을 일별로 보간). 표: data/phenology_rule_walkthrough.txt, data/lai_regional_sos_eos.txt</p>
   <ul>
-    <li><b>한대 세 지역(위 세 줄)</b>은 손으로 따라간 날짜(10/1–10/10)와 모델 EOS(10/11–10/12)가 잘 맞습니다. 낙엽송과 C3 풀이 많고, 둘 다 문턱이 5 °C이기 때문입니다.</li>
+    <li><b>한대 세 지역(위 세 줄)</b>은 손으로 따라간 날짜(10/1–10/10)와 모델 EOS(10/11–10/12)가 잘 맞습니다. 이 지역 여름 잎 면적의 38–59 %가 C3 풀이고, C3 풀의 문턱이 5 °C이기 때문입니다.</li>
     <li><b>온대 세 지역(아래 세 줄)</b>은 관측에서 잎이 줄 때 기온이 14–16 °C입니다. 어떤 온도 문턱으로도 설명하기 어려운 시기입니다. 이 지역의 낙엽은 기온보다 낮의 길이에 더 좌우되는 것으로 알려져 있습니다.</li>
     <li><b>동아시아</b>는 가장 추운 달 평균이 1.3 °C라서, 남쪽에서는 평활 기온이 5 °C 아래로 내려가는 날이 거의 없습니다. 모델의 잎이 12월까지 남는 이유입니다.</li>
   </ul>

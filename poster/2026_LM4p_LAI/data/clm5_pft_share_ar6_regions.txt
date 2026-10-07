@@ -1,0 +1,13 @@
+CLM5 surface dataset (surfdata_0.9x1.25_hist_16pfts_Irrig_CMIP6_simyr2000_c190214), PFT area as % of VEGETATED area (bare excluded) in AR6 regions
+weights cos(lat) x land fraction; last column of the header = closest LM4+ species
+
+CLM5 PFT group                        NWN    ESB    RFE    ENA    WCE    EAS   LM4+ species
+evergreen needleleaf tree            37.4   22.8   15.0   31.6   15.6   20.5   picea
+deciduous needleleaf tree (larch)     0.2   25.4   17.2    0.0    0.0    0.0   larix
+deciduous broadleaf tree              2.1    4.6    5.2   24.5   12.2   15.9   acer
+evergreen broadleaf tree              0.0    0.0    0.0    1.2    0.0    5.7   prioria
+shrub                                18.2    5.5   29.5    0.5    0.0    0.1   -
+C3 grass (incl. arctic)              37.1   36.8   31.5   16.3   32.5   22.5   c3grass
+C4 grass                              0.0    1.1    0.1    8.6    1.5   13.3   c4grass
+crop                                  5.0    3.8    1.5   17.3   38.1   22.0   (none)
+(bare ground, % of land)              8.8    5.1    2.4    1.6    0.2    0.6
