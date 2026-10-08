@@ -1,0 +1,10 @@
+GIMMS vs LM4+ vs CLM5 (BGC offline), 1982-2010, regional mean over common valid cells; SOS/EOS = 50 % amplitude per year, mean +- sd
+CLM5 leaf-off = day length < 10.92 h after the summer solstice; LM4+ = smoothed canopy T < 5/10 C
+
+N. Europe (NEU)              ( 452 cells) | GIMMS SOS 132.6 EOS 273.6 | LM4+ SOS 159.0 EOS 298.6 | CLM5 SOS 171.4 EOS 299.5 | dLM4+ SOS +26.3 EOS +25.0 | dCLM5 SOS +38.7 EOS +26.0
+Russian Far East (RFE)       ( 475 cells) | GIMMS SOS 148.8 EOS 255.8 | LM4+ SOS 173.0 EOS 284.4 | CLM5 SOS 158.2 EOS 293.3 | dLM4+ SOS +24.2 EOS +28.6 | dCLM5 SOS  +9.3 EOS +37.5
+N.W. North America (NWN)     (1012 cells) | GIMMS SOS 146.0 EOS 252.2 | LM4+ SOS 162.1 EOS 283.9 | CLM5 SOS 158.8 EOS 287.7 | dLM4+ SOS +16.1 EOS +31.7 | dCLM5 SOS +12.8 EOS +35.5
+E. Siberia (ESB)             ( 800 cells) | GIMMS SOS 147.8 EOS 246.1 | LM4+ SOS 160.5 EOS 283.7 | CLM5 SOS 154.7 EOS 299.0 | dLM4+ SOS +12.6 EOS +37.6 | dCLM5 SOS  +6.8 EOS +52.9
+E. North America (ENA)       ( 410 cells) | GIMMS SOS 123.8 EOS 273.9 | LM4+ SOS 145.5 EOS 316.2 | CLM5 SOS 134.1 EOS 338.1 | dLM4+ SOS +21.7 EOS +42.4 | dCLM5 SOS +10.3 EOS +64.3
+West & Central Europe (WCE)  ( 452 cells) | GIMMS SOS 112.5 EOS 256.7 | LM4+ SOS 140.0 EOS 305.5 | CLM5 SOS 136.0 EOS 352.0 | dLM4+ SOS +27.5 EOS +48.8 | dCLM5 SOS +23.5 EOS +95.5
+E. Asia (EAS)                ( 560 cells) | GIMMS SOS 130.3 EOS 279.7 | LM4+ SOS 116.3 EOS 349.5 | CLM5 SOS 133.0 EOS 337.0 | dLM4+ SOS -14.0 EOS +69.8 | dCLM5 SOS  +2.7 EOS +57.3

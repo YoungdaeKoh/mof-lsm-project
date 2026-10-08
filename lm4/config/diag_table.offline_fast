@@ -1,0 +1,566 @@
+"KIOST-ESM2-amip"
+1979 1 1 0 0 0
+
+"grid_spec", -1, "months", 1, "days", "time"
+"dynamics", "grid_lon", "grid_lon", "grid_spec", "all", .false., "none", 2
+"dynamics", "grid_lat", "grid_lat", "grid_spec", "all", .false., "none", 2
+"dynamics", "grid_lont", "grid_lont", "grid_spec", "all", .false., "none", 2
+"dynamics", "grid_latt", "grid_latt", "grid_spec", "all", .false., "none", 2
+"dynamics", "area", "area", "grid_spec", "all", .false., "none", 2
+"dynamics", "bk", "bk", "grid_spec", "all", .false., "none", 2
+"dynamics", "pk", "pk", "grid_spec", "all", .false., "none", 2
+"flux", "sftlf", "sftlf", "grid_spec", "all", .false., "none", 2
+"atmos", "orog", "orog", "grid_spec", "all", .false., "none", 2
+"flux", "land_mask", "land_mask", "grid_spec", "all", .false., "none", 2
+"dynamics", "zsurf", "zsurf", "grid_spec", "all", .false., "none", 2
+
+
+# --- Added from diag_table_add (atmos_month) ---
+
+##. Eddy Diffusivity Coefficient for Temperature, m2 s-1 (longitude latitude alevel time)
+
+##. Eddy Viscosity Coefficient for Momentum, m2 s-1 (longitude latitude alevel time)
+
+
+
+
+"land_static", -1, "months", 1, "days", "time"
+"land", "geolon_t", "geolon_t", "land_static", "all", .false., "none", 1
+"land", "geolat_t", "geolat_t", "land_static", "all", .false., "none", 1
+"lake", "lake_depth", "lake_depth", "land_static", "all", .false., "none", 2
+"lake", "lake_width", "lake_width", "land_static", "all", .false., "none", 2
+"land", "area_land", "land_area", "land_static", "all", .false., "none", 2
+"land", "area_lake", "lake_area", "land_static", "all", .false., "none", 2
+"land", "area_soil", "soil_area", "land_static", "all", .false., "none", 2
+"land", "land_frac", "land_frac", "land_static", "all", .false., "none", 2
+"land", "area_glac", "glac_area", "land_static", "all", .false., "none", 2
+"land", "frac_soil", "frac_soil", "land_static", "all", .false., "none", 2
+"land", "frac_glac", "frac_glac", "land_static", "all", .false., "none", 2
+"land", "frac_lake", "frac_lake", "land_static", "all", .false., "none", 2
+"soil", "soil_Ksat", "soil_Ksat", "land_static", "all", .false., "none", 2
+"soil", "soil_alpha", "soil_alpha", "land_static", "all", .false., "none", 2
+"soil", "soil_depth", "soil_depth", "land_static", "all", .false., "none", 2
+"soil", "soil_fc", "soil_fc", "land_static", "all", .false., "none", 2
+"soil", "soil_K_gw", "soil_K_gw", "land_static", "all", .false., "none", 2
+"soil", "soil_rlief", "soil_rlief", "land_static", "all", .false., "none", 2
+"soil", "soil_sat", "soil_sat", "land_static", "all", .false., "none", 2
+"soil", "soil_type", "soil_type", "land_static", "all", .false., "none", 2
+"soil", "soil_wilt", "soil_wilt", "land_static", "all", .false., "none", 2
+"vegn", "crop_planting_day", "crop_planting_day", "land_static", "all", .false., "none", 2
+"vegn", "crop_harvest_day", "crop_harvest_day", "land_static", "all", .false., "none", 2
+
+"land_static_sg", -1, "months", 1, "days", "time"
+"land_sg", "cell_area", "cell_area", "land_static_sg", "all", .false., "none", 2
+
+"land_month", 1, "months", 1, "days", "time"
+"land", "geolon_t", "geolon_t", "land_month", "all", .false., "none", 1
+"land", "geolat_t", "geolat_t", "land_month", "all", .false., "none", 1
+"land", "area_ntrl", "area_ntrl", "land_month", "all", .true., "none", 2
+"soil", "soil_ice", "soil_ice", "land_month", "all", .true., "none", 2
+"soil", "soil_liq", "soil_liq", "land_month", "all", .true., "none", 2
+"soil", "soil_psi", "soil_psi", "land_month", "all", .true., "none", 2
+"soil", "soil_T", "soil_T", "land_month", "all", .true., "none", 2
+"land", "swdn_dif", "swdn_dif", "land_month", "all", .true., "none", 2
+"land", "swdn_dir", "swdn_dir", "land_month", "all", .true., "none", 2
+"land", "swup_dif", "swup_dif", "land_month", "all", .true., "none", 2
+"land", "swup_dir", "swup_dir", "land_month", "all", .true., "none", 2
+"land", "evap", "evap_land", "land_month", "all", .true., "none", 2
+"land", "evap_soil", "evap_soil", "land_month", "all", .true., "none", 2
+"land", "fco2", "fco2", "land_month", "all", .true., "none", 2
+"land", "fevapg", "fevapg", "land_month", "all", .true., "none", 2
+"land", "fevaps", "fevaps", "land_month", "all", .true., "none", 2
+"land", "fevapv", "fevapv", "land_month", "all", .true., "none", 2
+"land", "flw", "flw", "land_month", "all", .true., "none", 2
+"land", "frunf", "frunf", "land_month", "all", .true., "none", 2
+"land", "fsw", "fsw", "land_month", "all", .true., "none", 2
+"land", "FWS", "FWS", "land_month", "all", .true., "none", 2
+"land", "FWSv", "FWSv", "land_month", "all", .true., "none", 2
+"land", "grnd_flux", "grnd_flux", "land_month", "all", .true., "none", 2
+"land", "hevap", "hevap", "land_month", "all", .true., "none", 2
+"land", "hrunf", "hrunf", "land_month", "all", .true., "none", 2
+"land", "levapg", "levapg", "land_month", "all", .true., "none", 2
+"land", "levaps", "levaps", "land_month", "all", .true., "none", 2
+"land", "levapv", "levapv", "land_month", "all", .true., "none", 2
+"land", "lwdn", "lwdn", "land_month", "all", .true., "none", 2
+"land", "LWS", "LWS", "land_month", "all", .true., "none", 2
+"land", "LWSv", "LWSv", "land_month", "all", .true., "none", 2
+"land", "melt", "melt", "land_month", "all", .true., "none", 2
+"land", "precip", "precip", "land_month", "all", .true., "none", 2
+"land", "qca", "qca", "land_month", "all", .true., "none", 2
+"land", "runf", "runf", "land_month", "all", .true., "none", 2
+"land", "sens", "sens", "land_month", "all", .true., "none", 2
+"land", "snow", "snow", "land_month", "all", .true., "none", 2
+"land", "snow_soil", "snow_soil", "land_month", "all", .true., "none", 2
+"land", "Tca", "Tca", "land_month", "all", .true., "none", 2
+"land", "Tgrnd", "Tgrnd", "land_month", "all", .true., "none", 2
+"land", "Trad", "Trad", "land_month", "all", .true., "none", 2
+"land", "transp", "transp", "land_month", "all", .true., "none", 2
+"land", "water_lake", "water_lake", "land_month", "all", .true., "none", 2
+"land", "water_soil", "water_soil", "land_month", "all", .true., "none", 2
+"soil", "soil_fsat", "soil_fsat", "land_month", "all", .true., "none", 2
+"soil", "fsc", "fsc", "land_month", "all", .true., "none", 2
+"soil", "ssc", "ssc", "land_month", "all", .true., "none", 2
+"soil", "tot_soil_C", "tot_soil_C", "land_month", "all", .true., "none", 2
+"soil", "litterfall_C", "litterfall_C", "land_month", "all", .true., "none", 2
+"soil", "rsoil", "rsoil", "land_month", "all", .true., "none", 2
+"vegn", "bl", "bl", "land_month", "all", .true., "none", 2
+"vegn", "br", "br", "land_month", "all", .true., "none", 2
+"vegn", "bseed", "bseed", "land_month", "all", .true., "none", 2
+"vegn", "bsw", "bsw", "land_month", "all", .true., "none", 2
+"vegn", "bwood", "bwood", "land_month", "all", .true., "none", 2
+"vegn", "nsc", "nsc", "land_month", "all", .true., "none", 2
+"vegn", "btot", "btot", "land_month", "all", .true., "none", 2
+"vegn", "gpp", "gpp", "land_month", "all", .true., "none", 2
+"vegn", "height", "vegn_height", "land_month", "all", .true., "none", 2
+"vegn", "lai", "lai", "land_month", "all", .true., "none", 2
+"vegn", "nep", "nep", "land_month", "all", .true., "none", 2
+"vegn", "npp", "npp", "land_month", "all", .true., "none", 2
+"vegn", "resp", "resp", "land_month", "all", .true., "none", 2
+"vegn", "species", "species", "land_month", "all", .true., "none", 2
+"vegn", "temp", "vegn_T", "land_month", "all", .true., "none", 2
+"vegn", "theta", "theta", "land_month", "all", .true., "none", 2
+"vegn", "tsoil_av", "tsoil_av", "land_month", "all", .true., "none", 2
+"vegn", "PAR_dn", "PAR_dn", "land_month", "all", .true., "none", 2
+"vegn", "PAR_net", "PAR_net", "land_month", "all", .true., "none", 2
+"vegn", "height_ave", "height_ave", "land_month", "all", .true., "none", 2
+"vegn", "sai", "sai", "land_month", "all", .true., "none", 2
+"vegn", "soil_water_supply", "soil_water_supply", "land_month", "all", .true., "none", 2
+"vegn", "stomatal_cond", "stomatal_cond", "land_month", "all", .true., "none", 2
+"vegn", "ncohorts", "ncohorts", "land_month", "all", .true., "none", 2
+"vegn", "nindivs", "nindivs", "land_month", "all", .true., "none", 2
+"vegn", "nlayers", "nlayers", "land_month", "all", .true., "none", 2
+"vegn", "dbh", "dbh", "land_month", "all", .true., "none", 2
+"vegn", "crownarea", "crownarea", "land_month", "all", .true., "none", 2
+"vegn", "gdd", "gdd", "land_month", "all", .true., "none", 2
+"vegn", "tc_pheno", "tc_pheno", "land_month", "all", .true., "none", 2
+"vegn", "theta_phen", "theta_phen", "land_month", "all", .true., "none", 2
+"vegn", "bl_max", "bl_max", "land_month", "all", .true., "none", 2
+"vegn", "br_max", "br_max", "land_month", "all", .true., "none", 2
+"vegn", "csmoke_rate", "csmoke_rate", "land_month", "all", .true., "none", 2
+"vegn", "lai_ntrl", "lai_ntrl", "land_month", "all", .true., "none", 2
+"vegn", "height_ntrl", "vegn_height_ntrl", "land_month", "all", .true., "none", 2
+"land", "snow_depth", "snow_depth", "land_month", "all", .true., "none", 2
+"land", "snow_frac", "snow_frac", "land_month", "all", .true., "none", 2
+"land", "snow_ice", "snow_ice", "land_month", "all", .true., "none", 2
+"land", "snow_liq", "snow_liq", "land_month", "all", .true., "none", 2
+"land", "water_cons", "water_cons", "land_month", "all", .true., "none", 2
+"land", "carbon_cons", "carbon_cons", "land_month", "all", .true., "none", 2
+
+
+
+
+"land_month_by_species", 1, "months", 1, "days", "time"
+"land", "geolon_t", "geolon_t", "land_month_by_species", "all", .false., "none", 1
+"land", "geolat_t", "geolat_t", "land_month_by_species", "all", .false., "none", 1
+"vegn", "bl(species)", "bl", "land_month_by_species", "all", .true., "none", 2
+"vegn", "br(species)", "br", "land_month_by_species", "all", .true., "none", 2
+"vegn", "bsw(species)", "bsw", "land_month_by_species", "all", .true., "none", 2
+"vegn", "bwood(species)", "bwood", "land_month_by_species", "all", .true., "none", 2
+"vegn", "bseed(species)", "bseed", "land_month_by_species", "all", .true., "none", 2
+"vegn", "nsc(species)", "nsc", "land_month_by_species", "all", .true., "none", 2
+"vegn", "btot(species)", "btot", "land_month_by_species", "all", .true., "none", 2
+"vegn", "height_ave(species)", "height_ave", "land_month_by_species", "all", .true., "none", 2
+"vegn", "lai(species)", "lai", "land_month_by_species", "all", .true., "none", 2
+"vegn", "sai(species)", "sai", "land_month_by_species", "all", .true., "none", 2
+"vegn", "npp(species)", "npp", "land_month_by_species", "all", .true., "none", 2
+"vegn", "gpp(species)", "gpp", "land_month_by_species", "all", .true., "none", 2
+"vegn", "resp(species)", "resp", "land_month_by_species", "all", .true., "none", 2
+"vegn", "w_scale(species)", "w_scale", "land_month_by_species", "all", .true., "none", 2
+"vegn", "an_cl(species)", "an_cl", "land_month_by_species", "all", .true., "none", 2
+"vegn", "an_op(species)", "an_op", "land_month_by_species", "all", .true., "none", 2
+"vegn", "ncohorts(species)", "ncohorts", "land_month_by_species", "all", .true., "none", 2
+"vegn", "nindivs(species)", "nindivs", "land_month_by_species", "all", .true., "none", 2
+"vegn", "dbh(species)", "dbh", "land_month_by_species", "all", .true., "none", 2
+"vegn", "crownarea(species)", "crownarea", "land_month_by_species", "all", .true., "none", 2
+"vegn", "leafarea(species)", "leafarea", "land_month_by_species", "all", .true., "none", 2
+"vegn", "bl_max(species)", "bl_max", "land_month_by_species", "all", .true., "none", 2
+"vegn", "br_max(species)", "br_max", "land_month_by_species", "all", .true., "none", 2
+"vegn", "age(species)", "age", "land_month_by_species", "all", .true., "none", 2
+"vegn", "PAR_dn(species)", "PAR_dn", "land_month_by_species", "all", .true., "none", 2
+"vegn", "PAR_net(species)", "PAR_net", "land_month_by_species", "all", .true., "none", 2
+"vegn", "temp(species)", "Tvegn", "land_month_by_species", "all", .true., "none", 2
+"vegn", "exudate(species)", "exudate", "land_month_by_species", "all", .true., "none", 2
+"vegn", "rhiz_exud_C(species)", "rhiz_exud_C", "land_month_by_species", "all", .true., "none", 2
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# --- Added from diag_table_add (ocean_cobalt_omip_sfc) ---
+
+##. Oxygen Minimum Concentration, mol m-3 (longitude latitude time)
+# DISABLED 2026-06-13: this binary double-registers generic_cobalt/o2min -> diag_manager
+# fatal "ALREADY registered". FINAL omits it (so it runs). Re-enable only if rebuilt.
+# "generic_cobalt",  "o2min",  "o2min",     "ocean_cobalt_omip_sfc", "all", "mean", "none", 2
+
+
+# --- Added from diag_table_add (ocean_cobalt_omip_2d) ---
+
+##### ocean_chem
+
+##. Surface Downward Mass Flux of Carbon-14 as Abiotic 14CO2 [kgC m-2 s-1] (longitude latitude time)
+
+
+
+
+
+
+
+
+# --- Added from diag_table_add (atmos_month_cmip) ---
+
+
+#### atmos
+
+### cfadDbze94 , cfadLidarsr532..?
+
+##. Convective Cloud Area Percentage, % (longitude latitude alevel time)
+# DISABLED 2026-06-13: 3D lev-axis field in atmos_month_cmip needs lev_bnds (not declared
+# for this file) -> diag_util FATAL. FINAL omits it. See SETUP_NOTES 수정이력.
+# "moist",       "conv_cloud_area",  "clc",        "atmos_month_cmip",      "all",  .true.,  "none", 2
+
+##. CALIPSO Ice Cloud Percentage, 1 (longitude latitude alt40 time)
+
+##. CALIPSO Ice Liquid Percentage, 1 (longitude latitude alt40 time)
+
+##. Mass Fraction of Convective Cloud Ice, 1 (longitude latitude alevel time)
+# DISABLED 2026-06-13: 3D lev-axis field needs lev_bnds in atmos_month_cmip (see above).
+# "uw_conv",    "clic_uw",    "clic",     "atmos_month_cmip",      "all",  .true.,  "none", 2
+
+##. MODIS Ice Cloud Area Percentage, % (longitude latitude time)
+
+##. Mass Fraction of Convective Cloud Liquid Water, 1 (longitude latitude alevel time)
+# DISABLED 2026-06-13: 3D lev-axis field needs lev_bnds in atmos_month_cmip (see above).
+# "uw_conv",      "clwc_uw",     "clwc",    "atmos_month_cmip",      "all",  .true.,  "none", 2
+
+##. Deep Convective Mass Flux, kg m-2 s-1 (longitude latitude alevhalf time)
+# DISABLED 2026-06-13: 3D levhalf-axis field needs lev_bnds in atmos_month_cmip (see above).
+# "uw_conv",    "dmc_uw",      "dmc",       "atmos_month_cmip",      "all",  .true.,  "none", 2
+
+##. PARASOL Reflectance, 1 (longitude latitude sza5 time)
+
+##. ISCCP Mean Cloud Top Pressure, Pa (longitude latitude time)
+
+##. Shallow Convective Mass Flux, kg m-2 s-1 (longitude latitude alevhalf time)
+# DISABLED 2026-06-13: 3D levhalf-axis field needs lev_bnds in atmos_month_cmip (see above).
+# "uw_conv",   "smc_uw",     "smc",    "atmos_month_cmip",      "all",  .true.,  "none", 2
+
+
+# --- Added from diag_table_add (atmos_level_cmip) ---
+
+##. Tendency of Specific Humidity Due to Convection, s-1 (alevel site time1)
+
+##. Tendency of Specific Humidity Due to Model Physics, s-1 (longitude latitude alevel time)
+
+##. Tendency of Air Temperature Due to Radiative Heating, K s-1 (longitude,latitude,alevel,time)
+
+
+# --- Added from diag_table_add (aerosol_month_cmip) ---
+##### not in diag_table.yaml
+
+##. Total Net Production of Anthropogenic Secondary Organic Aerosol, kg m-2 s-1 (longitude,latitude,time)
+
+##. total emission rate of dust, kg m-2 s-1 (longitude,latitude,time)
+### 확인 필요 : eminox = eminox_woL + eminox_lght 로 원래 diag table에서 합으로 쓴듯 함
+
+##. PM10 mass mixing ratio, kg kg-1 (longitude,latitude,alevel,time)
+
+
+"land_static_cmip", -1, "months", 1, "days", "time"
+"land", "geolon_t", "geolon_t", "land_static_cmip", "all", .false., "none", 1
+"land", "geolat_t", "geolat_t", "land_static_cmip", "all", .false., "none", 1
+"cmor_land", "sftlf", "sftlf", "land_static_cmip", "all", .false., "none", 2
+"cmor_land", "sftgif", "sftgif", "land_static_cmip", "all", .false., "none", 2
+"cmor_land", "mrsofc", "mrsofc", "land_static_cmip", "all", .false., "none", 2
+
+
+
+"land_month_cmip", 1, "months", 1, "days", "time"
+"cmor_land", "nep", "nep", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "fLuc", "fLuc", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "cLand", "cLand", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "fAnthDisturb", "fAnthDisturb", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "fFireNat", "fFireNat", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "fProductDecomp", "fProductDecomp", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "netAtmosLandCO2Flux", "netAtmosLandCO2Flux", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "vegFrac", "vegFrac", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "vegHeight", "vegHeight", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "mrsfl", "mrsfl", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "mrsll", "mrsll", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "mrsol", "mrsol", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "mrlso", "mrlso", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "tasLut", "tasLut", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "snc", "snc", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "snd", "snd", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "snw", "snw", "land_month_cmip", "all", .true., "none", 2
+"land", "geolon_t", "geolon_t", "land_month_cmip", "all", .false., "none", 1
+"land", "geolat_t", "geolat_t", "land_month_cmip", "all", .false., "none", 1
+"cmor_land", "mrsos", "mrsos", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "mrso", "mrso", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "mrfso", "mrfso", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "mrros", "mrros", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "mrro", "mrro", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "prveg", "prveg", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "evspsblveg", "evspsblveg", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "evspsblsoi", "evspsblsoi", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "tran", "tran", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "mrlsl", "mrlsl", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "tsl", "tsl", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "treeFrac", "treeFrac", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "grassFrac", "grassFrac", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "cropFrac", "cropFrac", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "pastureFrac", "pastureFrac", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "cVeg", "cVeg", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "cLitter", "cLitter", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "cSoil", "cSoil", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "cProduct", "cProduct", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "lai", "lai", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "gpp", "gpp", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "ra", "ra", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "npp", "npp", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "rh", "rh", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "fFire", "fFire", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "fGrazing", "fGrazing", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "fHarvest", "fHarvest", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "nbp", "nbp", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "snm", "snm", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "hfdsn", "hfdsn", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "sbl", "sbl", "land_month_cmip", "all", .true., "none", 2
+"cmor_land", "residualFrac", "residualFrac", "land_month_cmip", "all", .true., "none", 2
+
+# --- Added from diag_table_add (land_month_cmip) ---
+### 확인 필요 drynh3 = drynh3_woOCN + (nh3_mol_flux_atm0-nh3_mol_flux)*0.017(kg/mole) 이렇게 diag table에 쓴다고 함
+
+
+##### land
+
+##. Carbon Mass in Leaves, kg m-2 (longitude, latitude, time)
+ "cmor_land",     "cLeaf",     "cLeaf",   "land_month_cmip",     "all",     .true.,  "none", 2
+
+##. Carbon Mass in Coarse Woody Debris, kg m-2 (longitude, latitude, time)
+ "cmor_land",     "cLitterCwd",   "cLitterCwd",  "land_month_cmip",    "all",  .true.,  "none", 2
+
+##. Carbon  in Above and Below-Ground Litter Pools on Land-Use Tiles, kg m-2 (longitude, latitude, time)
+ "cmor_land",     "cLitterLut",   "cLitterLut",  "land_month_cmip",    "all",   .true., "none", 2
+
+##. Wood and Agricultural Product Pool Carbon Associated with Land-Use Tiles, kg m-2 (longitude, latitude, time)
+ "cmor_land",   "cProductLut",   "cProductLut",   "land_month_cmip",    "all",  .true., "none", 2
+
+##. Carbon Mass in Roots, kg m-2 (longitude, latitude, time)
+ "cmor_land",    "cRoot",   "cRoot",  "land_month_cmip",    "all",  .true.,  "none",  2
+
+##. Carbon in Soil Pool on Land-Use Tiles, kg m-2 (longitude, latitude, time)
+ "cmor_land",    "cSoilLut",  "cSoilLut", "land_month_cmip",   "all",  .true., "none",  2
+
+##. Carbon Mass in Stem, kg m-2 (longitude, latitude, time)
+ "cmor_land",     "cStem",    "cStem",   "land_month_cmip",   "all",    .true., "none",  2
+
+##. Carbon in Vegetation on Land-Use Tiles, kg m-2 (longitude, latitude, time)
+ "cmor_land",    "cVegLut",    "cVegLut",   "land_month_cmip",  "all",   .true., "none",  2
+
+##. Snow Evaporation, kg m-2 (longitude, latitude, time)
+ "cmor_land",    "esn",    "esn",     "land_month_cmip",   "all",   .true., "none",   2
+
+##. Dry and Wet Deposition of Reactive Nitrogen onto Land, kg m-2 (longitude, latitude, time)
+ "cmor_land",    "fNdep",  "fNdep",    "land_month_cmip",  "all",   .true., "none",   2
+
+##. Total Nitrogen Added for Cropland Fertilisation (Artificial and Manure), kg m-2 (longitude, latitud, time)
+ "cmor_land",  "fNfert",   "fNfert",   "land_month_cmip",  "all",   .true., "none", 2
+
+##. Annual Gross Percentage That Was Transferred into This Tile from Other Land-Use Tiles, % (longitude, latitude, landuse, time)
+ "cmor_land",  "fraclnLut",  "fraclnLut",   "land_month_cmip",  "all", .true., "none", 2
+
+##. Terrestrial Water Storage, kg m-2 (longitude, latitude, time)
+ "cmor_land",  "mrtws",  "mrtws",   "land_month_cmip",   "all", .true., "none", 2
+
+##. Total Nitrogen in All Terrestrial Nitrogen Pools, kg m-2 (longitude, latitude, time)
+ "cmor_land",   "nLand",  "nLand",   "land_month_cmip",   "all",  .true.,  "none",  2
+
+##. Nitrogen Mass in Leaves, kg m-2 (longitude, latitude, time)
+ "cmor_land",  "nLeaf",   "nLeaf",  "land_month_cmip",   "all",  .true.,  "none",  2     
+
+##. Nitrogen Mass in Litter Pool, kg m-2 (longitude, latitude, time)   
+ "cmor_land", "nLitter",  "nLitter",   "land_month_cmip",   "all",  .true.,  "none",  2     
+
+##. Nitrogen Mass in Coarse Woody Debris, kg m-2 (longitude, latitude, time)    
+ "cmor_land",   "nLitterCwd",  "nLitterCwd",  "land_month_cmip",   "all",  .true.,  "none",  2
+
+##. Mineral Nitrogen in the Soil, kg m-2 (longitude, latitude, time)
+ "cmor_land",  "nMineral",  "nMineral",  "land_month_cmip",   "all",  .true.,  "none",  2
+
+##. Mineral Ammonium in the Soil, kg m-2 (longitude, latitude, time)
+ "cmor_land", "nMineralNH4", "nMineralNH4", "land_month_cmip",   "all",  .true.,  "none",  2
+
+##. Mineral Nitrate in the Soil, kg m-2 (longitude, latitude, time)
+ "cmor_land",  "nMineralNO3",  "nMineralNO3",  "land_month_cmip",   "all",  .true.,  "none",  2
+
+##. Nitrogen Mass in Vegetation Components Other than Leaves, Stem and Root, kg m-2 (longitude, latitude, time)
+ "cmor_land",  "nOther",  "nOther",  "land_month_cmip",   "all",  .true.,  "none",  2
+
+##. Nitrogen Mass in Roots, kg m-2 (longitude, latitude, time)
+ "cmor_land",   "nRoot",   "nRoot",  "land_month_cmip",   "all",  .true.,  "none",  2
+
+##. Nitrogen Mass in Soil Pool, kg m-2 (longitude, latitude, time)
+ "cmor_land",   "nSoil",  "nSoil",   "land_month_cmip",   "all",  .true.,  "none",  2
+
+##. Nitrogen Mass in Stem, kg m-2 (longitude, latitude, time)
+ "cmor_land",  "nStem",  "nStem",  "land_month_cmip",   "all",  .true.,  "none",  2
+
+##. Nitrogen Mass in Vegetation, kg m-2 (longitude, latitude, time)
+ "cmor_land",  "nVeg",  "nVeg",  "land_month_cmip",   "all",  .true.,  "none",  2
+
+
+
+
+
+
+# DISABLED 2026-06-13: this binary registers these *_exopdep_col_vis names but never sends
+# data for them -> diag_manager send_data_3d "write EMPTY buffer" FATAL. FINAL keeps all 9
+# commented for exactly this reason; KIOST's CMIP-merged table had re-enabled them.
+#"radiation", "so4_exopdep_col_vis", "sulfate_ex_c_vs", "atmos_tracer_diurnal", "all", diurnal24, "none", 2
+#"radiation", "nitrate_exopdep_col_vis", "nh4no3_ex_c_vs", "atmos_tracer_diurnal", "all", diurnal24, "none", 2
+#"radiation", "small_dust_exopdep_col_vis", "sm_dst_ex_c_vs", "atmos_tracer_diurnal", "all", diurnal24, "none", 2
+#"radiation", "large_dust_exopdep_col_vis", "lg_dst_ex_c_vs", "atmos_tracer_diurnal", "all", diurnal24, "none", 2
+#"radiation", "black_carbon_exopdep_col_vis", "blk_crb_ex_c_vs", "atmos_tracer_diurnal", "all", diurnal24, "none", 2
+#"radiation", "organic_carbon_exopdep_col_vis", "org_crb_ex_c_vs", "atmos_tracer_diurnal", "all", diurnal24, "none", 2
+#"radiation", "sea_salt_exopdep_col_vis", "salt_ex_c_vs", "atmos_tracer_diurnal", "all", diurnal24, "none", 2
+#"radiation", "aerosol_exopdep_col_vis", "aer_ex_c_vs", "atmos_tracer_diurnal", "all", diurnal24, "none", 2
+#"radiation", "aerosol_abopdep_col_vis", "aer_ab_c_vs", "atmos_tracer_diurnal", "all", diurnal24, "none", 2
+
+
+
+
+
+
+
+"land_daily", 1, "days", 1, "days", "time"
+"land", "geolon_t", "geolon_t", "land_daily", "all", .false., "none", 1
+"land", "geolat_t", "geolat_t", "land_daily", "all", .false., "none", 1
+"land", "precip", "precip", "land_daily", "all", .true., "none", 2
+"land", "runf_soil", "runf_soil", "land_daily", "all", .true., "none", 2
+"land", "snow_lake", "snow_lake", "land_daily", "all", .true., "none", 2
+"land", "snow_soil", "snow_soil", "land_daily", "all", .true., "none", 2
+"vegn", "temp", "vegn_temp_max", "land_daily", "all", max, "none", 2
+"vegn", "temp", "vegn_temp_min", "land_daily", "all", min, "none", 2
+"vegn", "npp", "npp", "land_daily", "all", .true., "none", 2
+"soil", "soil_liq", "soil_liq", "land_daily", "all", .true., "-1 -1 -1 -1 0 0.1", 2
+"soil", "soil_ice", "soil_ice", "land_daily", "all", .true., "-1 -1 -1 -1 0 0.1", 2
+"flux_land", "evap", "evap_land", "land_daily", "all", .true., "none", 2
+"flux_land", "t_ref", "t_ref_max", "land_daily", "all", max, "none", 2
+"flux_land", "t_ref", "t_ref_min", "land_daily", "all", min, "none", 2
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#"atmos_diurnal_cmip", 1, "months", 1, "days", "time"
+# DISABLED 2026-06-13: FINAL keeps these 5 diurnal TOA-flux lines commented (same EMPTY-buffer
+# class as the *_exopdep_col_vis group). KIOST's CMIP-merged table had re-enabled them.
+#"radiation", "rsdt", "rsdt", "atmos_diurnal_cmip", "all", diurnal24, "none", 2
+#"radiation", "rsut", "rsut", "atmos_diurnal_cmip", "all", diurnal24, "none", 2
+#"radiation", "rlut", "rlut", "atmos_diurnal_cmip", "all", diurnal24, "none", 2
+#"radiation", "rsutcs", "rsutcs", "atmos_diurnal_cmip", "all", diurnal24, "none", 2
+#"radiation", "rlutcs", "rlutcs", "atmos_diurnal_cmip", "all", diurnal24, "none", 2
+
+
+# --- Added from diag_table_add (atmos_daily_cmip) ---
+
+##. Cloud Droplet Number Concentration of Cloud Tops, m-3 (longitude latitude time)
+
+"land_daily_cmip", 1, "days", 1, "days", "time"
+"land", "geolon_t", "geolon_t", "land_daily_cmip", "all", .false., "none", 1
+"land", "geolat_t", "geolat_t", "land_daily_cmip", "all", .false., "none", 1
+"cmor_land", "mrso", "mrso", "land_daily_cmip", "all", .true., "none", 2
+"cmor_land", "mrsos", "mrsos", "land_daily_cmip", "all", .true., "none", 2
+"cmor_land", "snc", "snc", "land_daily_cmip", "all", .true., "none", 2
+"cmor_land", "snw", "snw", "land_daily_cmip", "all", .true., "none", 2
+"cmor_land", "mrro", "mrro", "land_daily_cmip", "all", .true., "none", 2
+
+#=============================================================================
+# River routing / discharge to ocean   (added 2026-07-29, effective from the
+# 1997 segment onward; segments 1981-1996 have no river output)
+# Field names verified in src/lm4P/river/river.F90 register_diag_field calls.
+# Module name is 'river'; axes are grid_xt/grid_yt on the same C96 6-tile
+# domain as the land streams, with geolon_t/geolat_t as aux coordinates.
+# rv_Qavg is m3/s, directly comparable with GRDC gauge discharge.
+#=============================================================================
+"river_month", 1, "months", 1, "days", "time"
+"river", "cell_area", "cell_area", "river_month", "all", .false., "none", 2
+"river", "dis_liq", "dis_liq", "river_month", "all", .true., "none", 2
+"river", "dis_ice", "dis_ice", "river_month", "all", .true., "none", 2
+"river", "dis_heat", "dis_heat", "river_month", "all", .true., "none", 2
+"river", "rv_Qavg", "rv_Qavg", "river_month", "all", .true., "none", 2
+"river", "rv_o_h2o", "rv_o_h2o", "river_month", "all", .true., "none", 2
+"river", "rv_depth", "rv_depth", "river_month", "all", .true., "none", 2
+"river", "rv_width", "rv_width", "river_month", "all", .true., "none", 2
+"river", "rv_veloc", "rv_veloc", "river_month", "all", .true., "none", 2
+
+# Daily: GRDC gauges report daily discharge, and flood peaks are lost in a
+# monthly mean.
+"river_daily", 1, "days", 1, "days", "time"
+"river", "cell_area", "cell_area", "river_daily", "all", .false., "none", 2
+"river", "dis_liq", "dis_liq", "river_daily", "all", .true., "none", 2
+"river", "dis_ice", "dis_ice", "river_daily", "all", .true., "none", 2
+"river", "rv_Qavg", "rv_Qavg", "river_daily", "all", .true., "none", 2
+"river", "rv_o_h2o", "rv_o_h2o", "river_daily", "all", .true., "none", 2
+
+
+

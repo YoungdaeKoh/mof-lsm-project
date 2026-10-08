@@ -24,6 +24,11 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 Y0, Y1 = 1982, 2010
+# SOS/EOS threshold as a fraction of the amplitude: 0.2 = Peano et al. (2021, BG 18, 2405) definition used on the poster
+# since 2026-10-08; THR=0.5 reproduces the earlier 50 % results (outputs without suffix)
+import os
+THR = float(os.environ.get("THR", "0.2"))
+TAG = "" if THR == 0.5 else "_thr%02d" % round(100 * THR)
 NY = Y1 - Y0 + 1
 REGIONS = [  # title, AR6 abbreviation
     # IPCC AR6 land reference regions (Iturbide et al. 2020), masks from
@@ -31,12 +36,11 @@ REGIONS = [  # title, AR6 abbreviation
     # top row boreal, bottom row temperate (choice and all-region table: notes 13.69,
     # ../data/lai_eos_ar6_regions.txt). Northern Hemisphere only: the calendar-year
     # SOS/EOS logic below does not apply to the Southern Hemisphere.
+    # poster (2026-10-08): the four regions with the largest pilot gain, same order as Fig. 3
+    ("N. Europe (NEU)", "NEU"),
+    ("Russian Far East (RFE)", "RFE"),
     ("N.W. North America (NWN)", "NWN"),
     ("E. Siberia (ESB)", "ESB"),
-    ("Russian Far East (RFE)", "RFE"),
-    ("E. North America (ENA)", "ENA"),
-    ("West & Central Europe (WCE)", "WCE"),
-    ("E. Asia (EAS)", "EAS"),
 ]
 MID = np.array([15.5, 45.0, 74.5, 105.0, 135.5, 166.0, 196.5, 227.5, 258.0, 288.5, 319.0, 349.5])
 DOY = np.arange(1, 366)
@@ -57,7 +61,7 @@ def daily(mon, prev_dec, next_jan):
 
 def sos_eos(c):
     lo, hi = c.min(), c.max()
-    thr = lo + 0.5 * (hi - lo)
+    thr = lo + THR * (hi - lo)
     ip = int(c.argmax())
     up = np.where((c[:-1] < thr) & (c[1:] >= thr))[0]
     dn = np.where((c[:-1] >= thr) & (c[1:] < thr))[0]
@@ -90,9 +94,9 @@ with warnings.catch_warnings():
     m3 = ar6.mask_3D(np.asarray(lon), np.asarray(lat))
 
 out = ["LM4p ctl vs GIMMS LAI4g (consolidated), %d-%d, regional mean (common valid cells, cos-lat weights)" % (Y0, Y1),
-       "daily curve = linear interpolation of monthly means; SOS/EOS = 50 %% amplitude threshold per year; mean +- sd over %d years" % NY,
+       "daily curve = linear interpolation of monthly means; SOS/EOS = %d %% amplitude threshold per year; mean +- sd over %d years" % (round(100 * THR), NY),
        "diff = LM4p - GIMMS (days, + = model later)", ""]
-fig, axs = plt.subplots(2, 3, figsize=(15.5, 7.2), sharex=True)
+fig, axs = plt.subplots(2, 2, figsize=(10.5, 7.2), sharex=True)
 for (name, ab), ax in zip(REGIONS, axs.ravel()):
     r = ok & m3.sel(region=ar6.map_keys(ab)).values.astype(bool)
     w = W * r
@@ -147,8 +151,6 @@ for (name, ab), ax in zip(REGIONS, axs.ravel()):
 for ax in axs[:, 0]:
     ax.set_ylabel("LAI (m$^2$ m$^{-2}$)")
 axs[0, 0].legend(loc="upper right", fontsize=9, frameon=False)
-fig.suptitle("LAI seasonal cycle %d–%d: mean ± 1 s.d. over %d years (monthly means, linearly interpolated).  dotted = SOS, dashed = EOS (50 %% amplitude)"
-             % (Y0, Y1, NY), fontsize=10)
-fig.tight_layout(rect=(0, 0, 1, 0.96))
-fig.savefig("../figures/fig2_regional_seasonal_cycle.png", dpi=200)
-open("../data/lai_regional_sos_eos.txt", "w").write("\n".join(out) + "\n")
+fig.tight_layout()   # no suptitle on the poster version (2026-10-08); definitions go in the caption
+fig.savefig("../figures/fig2_regional_seasonal_cycle%s.png" % TAG, dpi=200)
+open("../data/lai_regional_sos_eos%s.txt" % TAG, "w").write("\n".join(out) + "\n")

@@ -93,7 +93,8 @@ fill(intro, [
     ("Background: KIOST is developing KIOST-ESM2 for CMIP7 with GFDL's LM4+ (LM4 family) as its land component. "
      "LM4+ grows vegetation as size-structured cohorts (PPA), so leaf area, biomass and canopy structure evolve with climate.", True),
     ("Vegetation controls the land–atmosphere exchange of energy, water and carbon; a biased leaf area index (LAI) therefore "
-     "feeds back on the coupled climate. Offline evaluation under observed forcing isolates the land model's own errors.", False),
+     "feeds back on the coupled climate. Offline evaluations show that most land models keep leaves too long in autumn "
+     "(Murray-Tortarolo et al., 2013); offline runs isolate the land model's own errors.", False),
     ("Key question: Does offline LM4+ reproduce the magnitude and the phenology of global LAI, and what causes the mismatch?", True),
     ("Objective 1: Benchmark 1982–2010 LAI against GIMMS LAI4g (pattern, magnitude, seasonal cycle).", False),
     ("Objective 2: Trace the autumn leaf-off delay to the phenology rule and test a day-length cue in pilot runs.", False),
@@ -120,8 +121,8 @@ for i, row in enumerate(rows):
         r0.text = txt; r0.font.size = Pt(22)
 move(sh["Methods body"], 27.9, 3.6)
 fill(sh["Methods body"], [
-    ("Evaluation: 1982–2010 monthly climatology on a common 1° grid; MJJAS mean and bias; seasonal cycles in six IPCC AR6 regions. "
-     "SOS/EOS = dates at which the interpolated monthly cycle crosses 50 % of its amplitude.", True),
+    ("Evaluation: 1982–2010 monthly climatology on a common 1° grid; MJJAS mean and bias; seasonal cycles in four IPCC AR6 regions. "
+     "SOS/EOS = dates at which the interpolated monthly cycle crosses 50 % of its amplitude (White et al., 1997).", True),
     ("Pilot runs (year 2010 from the 1 Jan 2010 CTRL state): TC10 raises the leaf-off temperature threshold 5 → 10 °C; "
      "DL14+TC10 adds a day-length (< 14 h) leaf-off condition (code patch; larch and C3 grass).", False),
 ], size=28)
@@ -143,42 +144,47 @@ fill(sh["Results 1 body"], [
 ])
 
 # ---------------------------------------------------------------- results 2 (right column, Fig. 2 = seasonal cycle + EOS maps)
-sh["Header text: RESULTS 2"].text_frame.paragraphs[0].runs[0].text = "RESULTS 2: SEASONAL TIMING AND ITS CAUSE"
+sh["Header text: RESULTS 2"].text_frame.paragraphs[0].runs[0].text = "RESULTS 2: PHENOLOGY (OBS. AND MODEL)"
 RW = 14.5; RL = int((18.1 + (16.3 - RW) / 2) * IN)        # right-column figure width and left edge (centred)
-pic2 = place(sh["Figure 2 placeholder"], "fig2_regional_seasonal_cycle.png", sh["Figure 2 placeholder label"], top=int(12.8 * IN), width=int(RW * IN)); pic2.left = RL
+pic2 = place(sh["Figure 2 placeholder"], "fig2_regional_seasonal_cycle.png", sh["Figure 2 placeholder label"], top=int(12.8 * IN), width=int(12.6 * IN)); pic2.left = int((18.1 + (16.3 - 12.6) / 2) * IN)   # 2x2 panel (four regions): narrower so the column fits
 y = pic2.top / IN + pic2.height / IN + 0.15
 move(sh["Caption 2"], y, 1.4)
-fill(sh["Caption 2"], [("Figure 2. Climatological LAI seasonal cycle, 1982–2010, GIMMS vs LM4+ in six AR6 regions; "
-                        "markers: SOS/EOS at 50 % of the amplitude.", True)])
+fill(sh["Caption 2"], [("Figure 2. Climatological LAI seasonal cycle, 1982–2010, GIMMS vs LM4+ in four AR6 regions (shading: ±1 s.d. over 29 years); "
+                        "dotted / dashed lines: SOS / EOS at 50 % of the amplitude.", True)])
 y += 1.5
 move(sh["Results 2 body"], y, 4.6)
 fill(sh["Results 2 body"], [
-    ("Leaf-off (EOS) is 28–70 days too late in every region (NWN +33, ESB +38, RFE +28, ENA +42, WCE +49, EAS +70 d); "
-     "boreal leaf-on is also late (+13–24 d).", True),
+    ("Leaf-off (EOS) is 27–38 days too late in every region (NEU +27, RFE +28, NWN +33, ESB +38 d) and in all 29 years; "
+     "leaf-on is also late (+13–27 d).", True),
     ("Cause: leaves are dropped only when the 20-day smoothed canopy temperature falls below 5 °C (10 °C for broadleaf trees). "
      "Daily T < 5 °C is reached ≈20 d after the observed EOS and the smoothing adds ≈17 d: ESB observed 3 Sep → model 11 Oct.", False),
-    ("The observed EOS instead clusters at a day length of 11.4–13.3 h regardless of temperature: a day-length cue is missing.", False),
+    ("The observed EOS falls at a day length of 12.7–13.3 h in NWN, ESB and RFE: a day-length cue is missing in the model.", False),
 ])
 y += 4.8
-# ---------------------------------------------------------------- results 3 (Fig. 3 normalized cycle, full width)
+# ---------------------------------------------------------------- phenology rule box (code-exact, p15_phenology_rule_box.py)
+box = s.shapes.add_picture(FIG + "box_phenology_rule.png", RL, int(y * IN), width=int(RW * IN)); box.name = "Picture phenology rule box"
+y += box.height / IN + 0.2
+# ---------------------------------------------------------------- results 3 (Fig. 3: four regions, 2x2, with text beside it)
 for nm in ("Header: RESULTS 3", "Header text: RESULTS 3"):
     move(sh[nm], y)
-sh["Header text: RESULTS 3"].text_frame.paragraphs[0].runs[0].text = "RESULTS 3: DAY-LENGTH LEAF-OFF PILOT RUNS"
+sh["Header text: RESULTS 3"].text_frame.paragraphs[0].runs[0].text = "RESULTS 3: MODIFIED PHENOLOGY RULES (PILOT)"
+sh["Header text: RESULTS 3"].text_frame.paragraphs[0].runs[0].font.size = Pt(40)   # long title: 48 pt wraps to two lines
 y += 1.5
-pic3 = place(sh["Figure 3 placeholder"], "fig3b_phentest_regions_normalised_dl.png", sh["Figure 3 placeholder label"], top=int(y * IN), width=int(RW * IN)); pic3.left = RL
+F3W = 9.2                                                     # figure width (in); the text column takes the rest
+pic3 = place(sh["Figure 3 placeholder"], "fig3b_phentest_regions_normalised_NEU_RFE_NWN_ESB_poster.png", sh["Figure 3 placeholder label"],
+             top=int(y * IN), width=int(F3W * IN)); pic3.left = int(18.1 * IN)
+b3 = sh["Results 3 body"]; b3.left = int((18.1 + F3W + 0.2) * IN); b3.width = int((16.3 - F3W - 0.2) * IN); move(b3, y, pic3.height / IN)
+fill(b3, [
+    ("TC10 (temperature only): autumn drop moves, but spring leaf-on is delayed.", False),
+    ("DL14+TC10 removes the Sep–Oct excess by NEU 65 %, RFE 50 %, NWN 38 %, ESB 20 %, with spring unchanged.", True),
+    ("50–70°N EOS bias: +33 → +16 d.", True),
+    ("Sep–Oct fluxes change too (50–70°N, TC10): ET −4.5 %, GPP −11 %.", False),
+], size=24)
 y += pic3.height / IN + 0.1
 move(sh["Caption 3"], y, 1.4)
-fill(sh["Caption 3"], [("Figure 3. Normalized 2010 LAI cycle, (LAI − min)/(max − min), in six regions: GIMMS, CTRL, TC10 and DL14+TC10.", True)])
+fill(sh["Caption 3"], [("Figure 3. Normalized 2010 LAI cycle, (LAI − min)/(max − min), in the four regions with the largest gain: "
+                        "GIMMS, CTRL, TC10 and DL14+TC10.", True)])
 y += 1.5
-b3 = sh["Results 3 body"]; b3.left = int(18.1 * IN); b3.width = int(16.3 * IN); move(b3, y, 5.0)
-fill(b3, [
-    ("Temperature threshold alone (TC10): the autumn drop moves little and spring leaf-on is delayed as a side effect.", False),
-    ("DL14+TC10 removes 20–50 % of the Sep–Oct excess in boreal regions (NWN 38 %, ESB 20 %, RFE 50 %); "
-     "the 50–70°N EOS bias falls from +33 to +16 d with spring unchanged.", True),
-    ("Temperate regions are unchanged: the rule was applied only to larch and C3 grass; broadleaf trees need a ≈11.5 h cue.", False),
-    ("Even the small TC10 shift changes Sep–Oct fluxes at 50–70°N: ET −4.5 %, GPP −11 %, runoff +4.7 %.", False),
-])
-y += 5.2
 # ---------------------------------------------------------------- summary
 for nm in ("Header: SUMMARY", "Header text: SUMMARY"):
     move(sh[nm], y)
@@ -190,7 +196,7 @@ fill(sh["Conclusions body"], [
     ("The delay follows from a temperature-only phenology rule (5 °C threshold on a 20-day smoothed temperature); "
      "observations point to day length as the missing cue.", True),
     ("A day-length leaf-off rule removes about half of the boreal EOS bias with no spring side effect; "
-     "type-specific thresholds (larch 13.5 h, C3 grass 12.5 h, broadleaf 11.5 h) are being tested.", True),
+     "further threshold tests are under way.", True),
     ("Next: replant species from an observed map (larch is nearly absent in the current state), time-varying CO₂ "
      "and the C–N version, then coupled KIOST-ESM2 experiments.", False),
 ], bullet=CHECK_PPR)
@@ -202,7 +208,8 @@ move(sh["References body"], y, 3.39)
 fill(sh["References body"], [
     ("Cao, S., et al. (2023). ESSD, 15, 4877. • Cucchi, M., et al. (2020). ESSD, 12, 2097. • Shevliakova, E., et al. (2024). JAMES, 16. "
      "• Weng, E., et al. (2015). Biogeosciences, 12, 2655. • Iturbide, M., et al. (2020). ESSD, 12, 2959. "
-     "• Zohner, C. M., et al. (2023). Science, 381, eadf5098.", False),
+     "• Zohner, C. M., et al. (2023). Science, 381, eadf5098. • White, M. A., et al. (1997). GBC, 11, 217. "
+     "• Murray-Tortarolo, G., et al. (2013). Remote Sens., 5, 4819.", False),
     ("Acknowledgements: This work was supported by Korea Environment Industry & Technology Institute (KEITI) through "
      "“Climate Change R&D Project for New Climate Regime.”, funded by Korea Ministry of Climate, Energy and Environment (MCEE) "
      "(RS-2022-KE002160). This research was supported by Korea Institute of Marine Science & Technology Promotion (KIMST) "
@@ -210,6 +217,6 @@ fill(sh["References body"], [
 ], size=20)
 p.save(OUT)
 print("saved", OUT, "| bottom of references box at %.1f in (slide %.1f)" % (y + sh["References body"].height / IN, 55.12))
-for nm in ("Picture fig1_lai_mean_bias.png", "Picture fig2_regional_seasonal_cycle.png", "Picture fig3b_phentest_regions_normalised_dl.png"):
+for nm in ("Picture fig1_lai_mean_bias.png", "Picture fig2_regional_seasonal_cycle.png", "Picture fig3b_phentest_regions_normalised_NEU_RFE_NWN_ESB_poster.png", "Picture phenology rule box"):
     x = [q for q in s.shapes if q.name == nm][0]
     print("  %-48s y %.1f..%.1f  w %.1f" % (nm, x.top / IN, (x.top + x.height) / IN, x.width / IN))

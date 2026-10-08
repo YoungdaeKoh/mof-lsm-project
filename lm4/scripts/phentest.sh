@@ -27,7 +27,21 @@ VARIANTS=${VARIANTS:-"base tc10"}
 #           any variant can start elsewhere with SEED=<dir>
 #   <variant>_d  same as <variant> plus daily LAI in the land_daily stream (diag only,
 #           e.g. base_d, offon_d; used for day-resolved SOS/EOS on the poster)
+# DEFAULT CONFIG (2026-10-08): every variant except the four speed tests below now starts from the fast
+#   offline tables config/field_table.offline_fast + config/diag_table.offline_fast (-23 % wall time at 48 ranks,
+#   land output bit-identical); FULLCFG=1 reverts to the ctl tables. Runs staged before this date used the ctl tables.
+# Offline speed tests (LM4 notes 13.71; all gateBC exe, ctl physics, run 31 days via phentest_pbs_chain.sh):
+#   ctrl1m  ctl settings (timing baseline; same as base but its own 1-month directory)
+#   ddep1m  ctrl1m + every "dry_deposition" line removed from field_table (atmos_mod and land_mod)
+#           -> land_tracer_driver sets do_deposition=F for all generic tracers; tracers themselves stay
+#   diag1m  ddep1m + diag_table replaced by config/diag_table.offline_min (make_diag_table_min.py)
+#   cons1m  diag1m + water_cons/carbon_cons also dropped (config/diag_table.offline_min_nocons)
 Y=2010; NP=24
+# decomposition suffixes (offline speed tests, LM4 notes 13.71); combine after the kind, before _d:
+#   _np48  48 ranks with the production layout (template unchanged); submit with ncpus=48
+#   _l14 / _l41  24 ranks, land layout 1,4 / 4,1 per cube face instead of 2,2
+npcfg() { NP=24; LL=""; case $1 in *_np48*) NP=48 ;; esac; case $1 in *_l14*) LL=1,4 ;; *_l41*) LL=4,1 ;; esac; }
+kind()  { local k=${1%_d}; k=${k%_np48}; k=${k%_l14}; k=${k%_l41}; echo $k; }
 SEED=${SEED:-$C/archive/y2009}            # override with SEED=<dir> (e.g. the replanted restart)
 
 stage() {   # $1 variant  $2 days
@@ -46,6 +60,14 @@ stage() {   # $1 variant  $2 days
   for r in $SEED/*.res*; do ln -sf $r $D/INPUT/; done
   ln -sfn /data2/ydkoh/lm4/forcing_WFDE5_lm4p/wfde5_atm_${Y}.nc $D/FORCING/wfde5_atm.nc
   if [ "$2" -ge 365 ]; then MO=12; DA=0; else MO=0; DA=$2; fi
+  npcfg $1
+  if [ "$NP" = 48 ]; then   # production decomposition, template unchanged (fv/land 2,4, SIS 6,8, io group 48)
+    sed -e "s/^        months = .*/        months = $MO,/" \
+        -e "s/^        days   = .*/        days   = $DA,/" \
+        -e "s/^        hours  = .*/        hours  = 0,/" \
+        -e "s/^        current_date = .*/        current_date = $Y,1,1,3,0,0,/" \
+        $C/input.nml.template > $D/input.nml
+  else
   sed -e "s/^        months = .*/        months = $MO,/" \
       -e "s/^        days   = .*/        days   = $DA,/" \
       -e "s/^        hours  = .*/        hours  = 0,/" \
@@ -56,7 +78,10 @@ stage() {   # $1 variant  $2 days
       -e "s/^       npes_io_group = 48/       npes_io_group = 8/" \
       $C/input.nml.template > $D/input.nml
   sed -i "s/^LAYOUT    = 6,8/LAYOUT    = 6,4/" $D/SIS_layout
-  K=${1%_d}   # variant kind without the daily-output suffix
+  fi
+  # land decomposition per cube face (&land_model_nml is the second "layout" line, 7-space indent)
+  [ -n "$LL" ] && sed -i "s/^       layout   = 2,2/       layout   = $LL/" $D/input.nml
+  K=$(kind $1)   # variant kind without the daily-output / decomposition suffixes
   if [ "$K" = tc10 ]; then
     sed -i -E "s/tc_crit *= *278\.15/tc_crit = 283.15/" $D/field_table
   fi
@@ -75,9 +100,20 @@ stage() {   # $1 variant  $2 days
     sed -i -E '/"species", *"land_mod", *"c3grass"/,$ s/^( *)tc_crit *= *278\.15.*/&\n\1tc_crit_off = 293.15\n\1dayl_crit_off = 12.5/' $D/field_table
     sed -i -E '/"species", *"land_mod", *"acer"/{n;s/$/\n    tc_crit_off = 293.15\n    dayl_crit_off = 11.5/}' $D/field_table
   fi
-  if [ "$1" != "$K" ]; then
+  # default since 2026-10-08: fast offline config (LM4 notes 13.71; land physics bit-identical to ctl):
+  # field_table without dry deposition, diag_table = config/diag_table.offline_fast. FULLCFG=1 keeps the ctl tables.
+  # The speed-test variants below keep their own definitions.
+  case $K in ctrl1m|ddep1m|diag1m|cons1m) ;;
+    *) if [ "${FULLCFG:-0}" != 1 ]; then cp -p $T/../config/field_table.offline_fast $D/field_table
+                                         cp -p $T/../config/diag_table.offline_fast  $D/diag_table; fi ;; esac
+  case $K in ddep1m|diag1m|cons1m) sed -i '/"dry_deposition"/d' $D/field_table ;; esac
+  case $K in diag1m) cp -p $T/../config/diag_table.offline_min        $D/diag_table ;;
+             cons1m) cp -p $T/../config/diag_table.offline_min_nocons $D/diag_table ;; esac
+  if [ "${1%_d}" != "$1" ]; then
     sed -i '/^"land", "precip", "precip", "land_daily"/a "vegn", "lai", "lai", "land_daily", "all", .true., "none", 2' $D/diag_table
   fi
+  # keep the configuration diff of every variant next to the run for the record
+  { echo "### field_table diff (ctl -> $1)"; diff $C/field_table $D/field_table; echo "### diag_table diff (ctl -> $1)"; diff $C/diag_table $D/diag_table; } > $D/config_diff.txt
   case $K in noparam|offon|dayl|dayl2) ln -sfn $EXE_PHENOFF $D/model.x ;; *) ln -sfn $EXE $D/model.x ;; esac
   echo "$1: $MO months $DA days from $Y-01-01, seed $SEED"
 }
@@ -92,6 +128,7 @@ setup() {   # $1 days
 
 run() {     # $1 variant
   D=$T/$1; cd $D || exit 1
+  npcfg $1
   source /etc/profile.d/modules.sh
   module purge
   module load intel21/compiler-21 intel21/mkl intel21/hdf5-1.10.5 intel21/netcdf-4.6.1 intel21/mvapich2-2.3.4

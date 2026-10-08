@@ -68,3 +68,31 @@ LM4.1 수치는 Shevliakova 2024 전문에서 직접 확인.
 
 우리 패치의 위치: CLM = 가을을 **일장만**, LM4p·JULES·LPJ = **기온만**, §13.69 패치 = 하지 이후 일장(<14 h)으로 문을 열고 기온(<10 °C)으로 날짜를 정하는 **결합형**. 14 h 고정은 E2가 지적한 위도 의존 문제를 그대로 가짐(한계로 명시).
 미확인(기억 기반, 서지·수치 재확인 필요): White et al. 1997 *GBC*(일장+토양온도 낙엽 모형, CLM 원형), Delpierre et al. 2009 *Agric. For. Meteorol.*(일장 의존 냉각적산 낙엽 모형), JULES·LPJ가 기온만 쓴다는 점.
+
+## F. 선행연구는 무엇과 비교했나 — 지면모델 phenology 평가·개선 (2026-10-08 웹 확인)
+
+| 연구 | 모델 | 비교 자료 | SOS/EOS 정의 | 우리와 관련된 결과 |
+|---|---|---|---|---|
+| Peano et al. 2021, *Biogeosciences* 18, 2405–2428, doi:10.5194/bg-18-2405-2021 (CRESCENDO Part 1) | CLM4.5, CLM5.0, JULES-ES, JSBACH, LPJ-GUESS, ORCHIDEE, ISBA-CTRIP (**LM4 없음**) | 위성 LAI 3종: LAI3g(GIMMS), MODIS, CGLS (2000–2011), ESA CCI 토지피복 | LAI 연주기 진폭 **20 %** 문턱(4GST) | 모델 평균 EOS는 오히려 **≈0.5개월 이름**; EOS 정확 격자 ≈25 %(±1개월 허용 시 ≈45 %), SOS 16 % → **LM4+의 늦은 EOS는 다른 모델과 반대 방향**(논의 거리) |
+| Li et al. 2024, *JGR-Biogeosciences* 129, e2024JG008261 | CLM5.0, CLM4.5 | MODIS LAI·phenology, PhenoCam, FLUXNET 지점 | — | CLM5는 LAI 크기는 나아졌으나 **계절 주기는 CLM4.5보다 나빠짐**; 봄 시작이 관측보다 평균 ≈30일 늦음(상록 PFT) |
+| MacBean et al. 2015, *Biogeosciences* 12, 7185–7208, doi:10.5194/bg-12-7185-2015 | ORCHIDEE | MODIS NDVI v5 (모델 fAPAR와 대응)로 phenology 파라미터 **최적화** | — | 한대·온대 낙엽 PFT에서 **노화 시작이 앞당겨지며** 오차 감소, 북반구 생장기 최대 30일 단축 → 우리와 같은 방향의 수정 선례 |
+| Collier et al. 2018, *JAMES* 10, 2731–2754 (ILAMB) | 벤치마크 체계 | GPP: FLUXCOM 등 · LE/SH: FLUXNET, GBAF(=FLUXCOM 계열) · ET: GLEAM, MODIS · 알베도: CERES, GEWEX.SRB · LAI: AVHRR(GIMMS), MODIS | — | **플럭스 비교의 표준 조합** → 우리 구성(GLEAM·FLUXCOM-X·GLASS)의 근거 |
+| Delpierre et al. 2009 (프랑스 낙엽수) | 노화 모델 | 지상 관측 | — | 낮 길이가 노화를 시작시키고, 낮 길이에 민감한 냉각 적산(cold degree-day)으로 진행 → "낮 길이 × 기온" 연속형 모델의 원형 |
+| Blümel & Chmielewski 계열 / PEP725 위성–지상 비교 | 위성 phenology 검증 | PEP725 지상 관측 수천 건 | — | 위성 SOS/EOS가 자작나무·너도밤나무 지상 관측과 잘 맞음 → 서유럽 EOS 검증 자료로 사용 가능 (서지 상세 미확인) |
+| Moon et al. 2022 (온대 낙엽 활엽수 12종) | 관측 분석 | 지상·위성 | — | 기온도 영향을 주지만 **낮 길이가 모든 종에서 가장 강한 통제** (서지 상세 미확인) |
+
+정리: phenology 자체는 **위성 LAI 다중 자료(GIMMS + MODIS + CGLS)**와 **PhenoCam/FLUXNET/PEP725 지점**으로, 플럭스는 **ILAMB 조합(FLUXCOM·GLEAM·CERES/MODIS 알베도·FLUXNET)**으로 평가하는 것이 표준. 새로 필요한 자료: MODIS LAI 또는 MCD12Q2, CGLS LAI(선택), PhenoCam·FLUXNET2015·PEP725.
+
+### F-추가. Murray-Tortarolo et al. 2013, Remote Sens. 5, 4819–4838, doi:10.3390/rs5104819 (PDF 보유: `MurrayTortarolo2013_RemoteSens_LSM_LAI_HighLat.pdf`, 2026-10-08 원문 확인)
+- 대상: TRENDY 오프라인 DGVM 8개(CLM4CN, LPJ, LPJ-GUESS, ORCHIDEE, OCN, SDGVM, TRIFFID, VEGAS; **LM 계열 없음**) vs GIMMS3g 기반 ANN LAI, 1986–2005, 30°N 이북, 월 LAI.
+- 정의(§2.5): 진폭 **20 %** 문턱(월 단위, 문턱 위 첫 달 = onset, 마지막 달 = dormancy), **진폭 < 0.5 격자 제외**(우리와 같은 마스크), 여름 중 감소(가뭄 낙엽) 격자 제외.
+- 결과: 모든 모델 LAI 과대(특히 북방림); **8개 중 7개가 생장기 과대, 주원인은 늦은 휴면(dormancy 20–60일 늦음, RMSE 31–63일)**, 특히 30–50°N; onset은 모든 모델이 15–20일 늦음; GPP로 같은 방법을 쓰면 휴면이 277 ± 7일로 LAI(315 ± 10일)보다 훨씬 이름 → "잎은 남아 있지만 광합성은 이미 멈춤"; 결론 "deciduous phenology, 특히 leaf shedding 개선 필요". 열적 기준(LPJ류)이 복잡한 phenology보다 생장기 길이를 더 잘 맞춤.
+- 우리와의 관계: 같은 결론(늦은 휴면·봄도 늦음)을 LM4+에서 오프라인으로 재확인. 단 정의가 20 %라, 우리 20 % 시험(NEU·NWN ΔEOS ≈ 0)과 수치 직접 비교는 주의. GPP 휴면 비교는 우리 플럭스 분석에 그대로 쓸 수 있는 아이디어.
+
+### F-추가 2. Park, H. & Jeong, S. (2021). Leaf area index in Earth system models: how the key variable of vegetation seasonality works in climate projections. *Environ. Res. Lett.* 16, 034027. doi:10.1088/1748-9326/abe2cf (PDF 보유: `ParkJeong2021_ERL_LAI_in_ESMs.pdf`, 2026-10-08 원문 확인; 저자는 정수종 교수 연구실)
+- 대상: CMIP5·CMIP6 ESM 14개(BCC, CanESM, CESM, IPSL, MIROC, MPI, NorESM 각 2세대; **GFDL·LM4 없음**), 30°N 이북 낙엽수림, 1982–2014, GIMMS LAI3g + CRU TS.
+- 방법: 계절성 지표(연평균, 사인 진폭, 위상) + SOS/EOS/LOS(로지스틱 곡선 맞춤, Park et al. 2018); **연 최대 LAI < 0.5 격자 제외**(숲으로 한정).
+- 결과: CMIP6 연평균 1.7 vs GIMMS 1.2 m² m⁻²(CMIP5 2.2), 진폭 0.9 vs 1.2(약함), 위상 226 vs 212 DOY(늦음). **EOS: GIMMS 261 DOY, CMIP5 +22 d, CMIP6 +18 d**; 지연은 >50°N에서 평균 20 d 초과, **낙엽 침엽수림·woodland에서 가장 뚜렷**. SOS 기온 민감도: 관측 −4.5 d K⁻¹, 모델 −2.2/−2.6(약함). **EOS 기온 민감도: 관측 +0.5 d K⁻¹**, 모델 +0.7/+0.8(모델 간 편차 큼). 최근 10년 변화도 대부분 모델이 잘못 재현.
+- 표 1: **CESM2/CLM5는 낙엽 종료에 일장(daylength) 문턱 사용**, ORCHIDEE2.0은 cold stress·leaf age, CLM4는 일장+토양온도(활엽)·7일 연속 한랭(침엽).
+- 함의(논의): 늦은 EOS는 광합성 영향은 작지만(가을 일사 적음) 과도한 유지호흡·증발산, 낮은 알베도 → 탄소·토양수분·현열/잠열 분배 편향. 결론: "낙엽수 phenology, 특히 leaf senescence 개선 필요".
+- **우리에게 중요한 점**: (1) 같은 결론(EOS 지연, 북방·낙엽 침엽수에서 최대)이 CMIP ESM 14개에서 이미 보고됨 → 우리 기여는 이 목록에 없던 LM4+, 오프라인(결합 기후 편차 배제), 원인 규명(기온 단일 문턱 + 평활 지연), 낮 길이 규칙 시험. (2) 낮 길이 규칙의 위험: 관측 EOS는 가을 기온에 +0.5 d K⁻¹로 반응 → 순수 낮 길이 규칙은 민감도 ≈0이 될 수 있으니 다년 실행에서 EOS–기온 민감도를 반드시 점검. (3) CLM5가 이미 일장 문턱을 쓴다는 점 → 우리 규칙의 선례로 인용 가능. (4) 연 최대 LAI < 0.5 마스크는 숲 한정용 선례.

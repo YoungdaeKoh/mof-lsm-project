@@ -31,8 +31,10 @@ series = [("LAI", d.LAI.values, "m$^2$ m$^{-2}$"),
 
 out = ["LM4p spin-up drift: cycle 2 (ctl 1981-2010) minus cycle 1 (spin-up 1981-2010), same forcing year; non-ice land mean, Jan-Nov annual mean",
        "years per cycle: %d + %d" % (n1, len(d) - n1), ""]
+import os
+KMS = os.environ.get("KMS", "0") == "1"   # KMS poster: no suptitle, panel titles "(a) LAI" ..., output *_kms.png
 fig, axs = plt.subplots(1, 3, figsize=(12, 3.4))
-for ax, (name, y, unit) in zip(axs, series):
+for i, (ax, (name, y, unit)) in enumerate(zip(axs, series)):
     c1, c2 = y[:n1], y[n1:]
     last = (c2[-1] / c1[-1] - 1) * 100
     mean = (c2.mean() / c1.mean() - 1) * 100
@@ -46,7 +48,10 @@ for ax, (name, y, unit) in zip(axs, series):
     ax.plot(x[k:-k], np.convolve(y, np.ones(RUN) / RUN, mode="valid"), color="#0b6b48", lw=2.5,
             label="%d-yr running mean" % RUN)
     ax.set_ylim(y.mean() * (1 - YPAD), y.mean() * (1 + YPAD))   # same relative range in every panel
-    ax.set_title(("%s  (cycle 2 − cycle 1: %+.1f %%)" % (name, last)).replace("-", "−"), fontsize=10, loc="left")
+    if KMS:
+        ax.set_title("(%s) %s" % ("abc"[i], name), fontsize=11, loc="left")
+    else:
+        ax.set_title(("%s  (cycle 2 − cycle 1: %+.1f %%)" % (name, last)).replace("-", "−"), fontsize=10, loc="left")
     ax.set_ylabel(unit)
     ax.set_xlabel("Spin-up year")
     ax.set_xlim(0, len(d) + 1)
@@ -54,7 +59,11 @@ for ax, (name, y, unit) in zip(axs, series):
 axs[0].text(0.25, 0.04, "Cycle 1\n(spin-up)", transform=axs[0].transAxes, ha="center", fontsize=9, color="0.3")
 axs[0].text(0.75, 0.04, "Cycle 2 = CTRL\n(analysis 1982–2010)", transform=axs[0].transAxes, ha="center", fontsize=9, color="0.3")
 axs[0].legend(loc="upper right", fontsize=8.5, frameon=False)
-fig.suptitle("LM4+ offline spin-up after the 400-yr coupled initial state: WFDE5 1981–2010 forcing repeated twice\n(non-ice land mean; cycle difference for forcing year 2010; y axis = 60-yr mean ± 10 % in every panel)", fontsize=9.5)
-fig.tight_layout(rect=(0, 0, 1, 0.86))
-fig.savefig("../figures/fig0_spinup_lai_gpp_wood.png", dpi=200)
+if KMS:
+    fig.tight_layout()
+    fig.savefig("../figures/fig0_spinup_lai_gpp_wood_kms.png", dpi=200)
+else:
+    fig.suptitle("LM4+ offline spin-up after the 400-yr coupled initial state: WFDE5 1981–2010 forcing repeated twice\n(non-ice land mean; cycle difference for forcing year 2010; y axis = 60-yr mean ± 10 % in every panel)", fontsize=9.5)
+    fig.tight_layout(rect=(0, 0, 1, 0.86))
+    fig.savefig("../figures/fig0_spinup_lai_gpp_wood.png", dpi=200)
 open("../data/spinup_cycle_drift.txt", "w").write("\n".join(out) + "\n")

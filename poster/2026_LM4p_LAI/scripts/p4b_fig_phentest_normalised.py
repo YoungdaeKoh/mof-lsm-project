@@ -14,7 +14,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 RUNS = [("GIMMS", "GIMMS", "0.65", "-", 2.2),          # legend keeps the short run names; definitions go in the caption
-        ("base", "CTRL", "k", "-", 2.2),
+        ("base", "CTRL (TC5)", "k", "-", 2.2),
         ("tc10", "TC10", "tab:blue", "-.", 2.2),
         ("offon", "DL14+TC10", "tab:red", "--", 2.4),
         ("dayl", "DL13/12", "tab:green", "-", 2.0),
@@ -23,16 +23,32 @@ RUNS = [("GIMMS", "GIMMS", "0.65", "-", 2.2),          # legend keeps the short 
 regions, cur = [], None
 import os
 SUFFIX = "" if os.environ.get("REGSET", "default") == "default" else "_" + os.environ["REGSET"]   # same choice as p4
-for line in open("../data/phentest_regions_summary%s.txt" % SUFFIX):
-    m = re.match(r"^(\S.*\(\w{3}\))\s+\(\d+ cells\)", line)
-    if m:
-        cur = {"name": m.group(1)}; regions.append(cur); continue
-    m = re.match(r"^\s+(GIMMS|base|tc10|offon|dayl|dayl2)\s+((?:[\d.]+\s*){12})$", line.rstrip()) if cur else None
-    if m:
-        cur[m.group(1)] = np.array(m.group(2).split(), float)
+# POSTER=1: poster version with the diagnostic pilot only (GIMMS, CTRL, TC10, DL14+TC10) -> *_poster.png
+POSTER = os.environ.get("POSTER", "0") == "1"
+if POSTER:
+    RUNS = [r for r in RUNS if r[0] in ("GIMMS", "base", "tc10", "offon")]
+# BEST=1: GIMMS, CTRL and the best pilot (DL13/12, drawn in the main-run style) -> *_best.png
+BEST = os.environ.get("BEST", "0") == "1"
+if BEST:
+    RUNS = [r for r in RUNS if r[0] in ("GIMMS", "base")] + [("dayl", "DL13/12", "tab:red", "--", 2.4)]
+# REGIONS="NEU RFE NWN ESB": pick these AR6 codes (in this order) from both summary files -> 2x2 panel, *_<codes>.png
+PICK = os.environ.get("REGIONS", "").split()
+for fn in (["", "_dl"] if PICK else [SUFFIX]):
+    for line in open("../data/phentest_regions_summary%s.txt" % fn):
+        m = re.match(r"^(\S.*\(\w{3}\))\s+\(\d+ cells\)", line)
+        if m:
+            cur = {"name": m.group(1)}; regions.append(cur); continue
+        m = re.match(r"^\s+(GIMMS|base|tc10|offon|dayl|dayl2)\s+((?:[\d.]+\s*){12})$", line.rstrip()) if cur else None
+        if m:
+            cur[m.group(1)] = np.array(m.group(2).split(), float)
+if PICK:
+    code = {r["name"][-4:-1]: r for r in regions}
+    regions = [code[c] for c in PICK]
+    SUFFIX = "_" + "_".join(PICK)
 
 mon = np.arange(1, 13)
-fig, axs = plt.subplots(2, 3, figsize=(15.5, 7.2), sharex=True, sharey=True)
+nr, nc_ = (2, 2) if len(regions) == 4 else (2, 3)
+fig, axs = plt.subplots(nr, nc_, figsize=(10.5, 7.2) if nc_ == 2 else (15.5, 7.2), sharex=True, sharey=True)
 for r, ax in zip(regions, axs.ravel()):
     for key, label, col, ls, lw in RUNS:
         if key not in r:
@@ -48,8 +64,6 @@ for r, ax in zip(regions, axs.ravel()):
 for ax in axs[:, 0]:
     ax.set_ylabel("Normalized LAI")
 axs[0, 0].legend(loc="upper left", fontsize=8.5, frameon=False)
-fig.suptitle("Pilot runs 2010, seasonal timing only: each curve scaled to its own annual range (magnitude: Fig. 1). "
-             "Grey = observed target, dotted = 50 % (EOS definition)", fontsize=10)
-fig.tight_layout(rect=(0, 0, 1, 0.96))
-fig.savefig("../figures/fig3b_phentest_regions_normalised%s.png" % SUFFIX, dpi=200)
+fig.tight_layout()   # no suptitle (2026-10-08); definitions go in the caption
+fig.savefig("../figures/fig3b_phentest_regions_normalised%s%s.png" % (SUFFIX, "_poster" if POSTER else "_best" if BEST else ""), dpi=200)
 print("regions", len(regions), "| runs:", [k for k in regions[0] if k != "name"])

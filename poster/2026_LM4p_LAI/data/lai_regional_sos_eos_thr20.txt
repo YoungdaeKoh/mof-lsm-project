@@ -1,0 +1,36 @@
+LM4p ctl vs GIMMS LAI4g (consolidated), 1982-2010, regional mean (common valid cells, cos-lat weights)
+daily curve = linear interpolation of monthly means; SOS/EOS = 20 % amplitude threshold per year; mean +- sd over 29 years
+diff = LM4p - GIMMS (days, + = model later)
+
+N. Europe (NEU)  (487 cells)
+  month            1     2     3     4     5     6     7     8     9    10    11    12
+  LM4p  clim    0.65  0.64  0.65  0.72  0.96  1.99  2.49  2.69  2.81  2.12  1.11  0.79
+  GIMMS clim    0.59  0.53  0.58  1.04  1.69  2.45  2.70  2.34  1.76  1.46  1.09  0.70
+  LM4p  SOS  138.3 +-  4.1 (5/18)  EOS  323.4 +-  6.2 (11/19)  peak day 257.0  season length 185.1  min 0.63 max 2.81  valid years SOS 29 EOS 29
+  GIMMS SOS   99.7 +-  3.5 (4/10)  EOS  329.5 +-  4.7 (11/26)  peak day 196.2  season length 229.8  min 0.52 max 2.69  valid years SOS 29 EOS 29
+  diff  SOS  +38.6 +-  4.6 d   EOS   -6.1 +-  6.8 d   season length  -44.7 d   (years with model later: SOS 29/29, EOS 5/29)
+
+Russian Far East (RFE)  (494 cells)
+  month            1     2     3     4     5     6     7     8     9    10    11    12
+  LM4p  clim    0.43  0.42  0.42  0.42  0.47  1.28  2.44  2.65  2.67  1.40  0.57  0.45
+  GIMMS clim    0.36  0.20  0.14  0.31  0.93  2.21  2.88  2.57  1.46  0.77  0.49  0.42
+  LM4p  SOS  151.2 +-  3.1 (5/31)  EOS  307.5 +-  2.2 (11/4)  peak day 247.7  season length 156.3  min 0.42 max 2.69  valid years SOS 29 EOS 29
+  GIMMS SOS  123.5 +-  2.0 (5/3)  EOS  298.0 +-  6.5 (10/25)  peak day 197.0  season length 174.5  min 0.14 max 2.88  valid years SOS 29 EOS 29
+  diff  SOS  +27.7 +-  3.4 d   EOS   +9.6 +-  7.5 d   season length  -18.2 d   (years with model later: SOS 29/29, EOS 28/29)
+
+N.W. North America (NWN)  (1044 cells)
+  month            1     2     3     4     5     6     7     8     9    10    11    12
+  LM4p  clim    0.95  0.94  0.94  0.95  1.09  2.22  2.97  3.12  3.11  1.91  1.11  0.99
+  GIMMS clim    0.36  0.35  0.25  0.44  0.87  1.61  1.99  1.69  1.00  0.76  0.59  0.32
+  LM4p  SOS  143.6 +-  2.6 (5/24)  EOS  308.3 +-  3.8 (11/4)  peak day 242.4  season length 164.7  min 0.94 max 3.15  valid years SOS 29 EOS 29
+  GIMMS SOS  116.7 +-  1.8 (4/27)  EOS  316.6 +-  7.1 (11/13)  peak day 196.9  season length 200.0  min 0.25 max 1.99  valid years SOS 29 EOS 29
+  diff  SOS  +26.9 +-  2.6 d   EOS   -8.4 +-  8.3 d   season length  -35.3 d   (years with model later: SOS 29/29, EOS 6/29)
+
+E. Siberia (ESB)  (800 cells)
+  month            1     2     3     4     5     6     7     8     9    10    11    12
+  LM4p  clim    1.14  1.13  1.12  1.12  1.25  2.16  2.76  2.84  2.82  1.82  1.26  1.18
+  GIMMS clim    0.44  0.38  0.30  0.47  1.09  2.45  2.98  2.45  1.12  0.59  0.56  0.43
+  LM4p  SOS  142.8 +-  1.8 (5/23)  EOS  307.5 +-  2.0 (11/4)  peak day 239.3  season length 164.8  min 1.12 max 2.85  valid years SOS 29 EOS 29
+  GIMMS SOS  123.3 +-  2.7 (5/3)  EOS  274.3 +-  1.7 (10/1)  peak day 196.5  season length 151.0  min 0.30 max 2.98  valid years SOS 29 EOS 29
+  diff  SOS  +19.5 +-  2.5 d   EOS  +33.2 +-  2.7 d   season length  +13.7 d   (years with model later: SOS 29/29, EOS 29/29)
+

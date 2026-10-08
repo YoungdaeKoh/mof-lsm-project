@@ -201,25 +201,21 @@ begin
   bx                       = True
   bx@gsLineColor           = "black"
   bx@gsLineThicknessF      = 5.0
-  bdum = new(6, graphic)
-  bdum(0) = gsn_add_polyline(wks, p3, (/-105.,-130.,-143.,-168.,-168.,-129.,-125.,-105.,-105./), \
-                                      (/  50.,  50.,  58., 52.5, 72.6, 72.6, 77.6,  81.,  50./), bx)   ; NWN
-  bdum(1) = gsn_add_polyline(wks, p3, (/90., 90., 130., 130., 90./), (/45., 65., 65., 45., 45./), bx)   ; ESB
-  bdum(2) = gsn_add_polyline(wks, p3, (/130., 130., 180., 180., 157., 152., 130./), \
+  bdum = new(4, graphic)   ; poster (2026-10-08): the four regions of Figs. 2-3 only
+  bdum(0) = gsn_add_polyline(wks, p3, (/-10., -10., 40., 40., -10./), (/48., 72.6, 72.6, 61.3, 48./), bx)        ; NEU
+  bdum(1) = gsn_add_polyline(wks, p3, (/130., 130., 180., 180., 157., 152., 130./), \
                                       (/ 45.,  65.,  65., 59.9,  50.,  45.,  45./), bx)                 ; RFE
-  bdum(3) = gsn_add_polyline(wks, p3, (/-70., -90., -90., -50., -77., -70./), \
-                                      (/ 25.,  25.,  50.,  50.,  31.,  25./), bx)                       ; ENA
-  bdum(4) = gsn_add_polyline(wks, p3, (/-10., -10., 40., 40., -10./), (/45., 48., 61.3, 45., 45./), bx) ; WCE
-  bdum(5) = gsn_add_polyline(wks, p3, (/100., 100., 108., 117., 152., 132., 132., 100./), \
-                                      (/19.5,  37.,  37.,  45.,  45.,  25., 19.5, 19.5/), bx)           ; EAS
+  bdum(2) = gsn_add_polyline(wks, p3, (/-105.,-130.,-143.,-168.,-168.,-129.,-125.,-105.,-105./), \
+                                      (/  50.,  50.,  58., 52.5, 72.6, 72.6, 77.6,  81.,  50./), bx)   ; NWN
+  bdum(3) = gsn_add_polyline(wks, p3, (/90., 90., 130., 130., 90./), (/45., 65., 65., 45., 45./), bx)   ; ESB
   tx                       = True      ; region abbreviations, placed just outside each polygon
   tx@txFontHeightF         = 0.009
   tx@txFontColor           = "black"
   tx@txBackgroundFillColor = "white"
   tx@txPerimOn             = False
-  tdum = gsn_add_text(wks, p3, (/"NWN","ESB","RFE","ENA","WCE","EAS"/), \
-                               (/-150., 104., 152., -52., -25., 151./), \
-                               (/  78.,  71.,  71.,  38.,  47.,  30./), tx)
+  tdum = gsn_add_text(wks, p3, (/"NEU","RFE","NWN","ESB"/), \
+                               (/ -22., 152., -150., 104./), \
+                               (/  66.,  71.,   78.,  71./), tx)
 
   draw(p1)
   draw(p2)

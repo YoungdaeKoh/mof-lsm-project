@@ -1,0 +1,19 @@
+
+cells 8488 (SOS defined 8466, EOS defined 8428); RMSE in days (cos-lat weighted); constants fitted on all cells
+
+=== SOS (observed median doy 143)
+  cue        fitted constants             RMSE all | 50-75N  40-50N  20-40N
+  DL         13.75                            40.8 |   46.5    27.3    37.9   (coverage 91 %)
+  T          10                               64.8 |   19.3    27.0   117.3   (coverage 91 %)
+  GDD        100                              63.4 |   23.9    28.3   112.4   (coverage 91 %)
+  GDD+chill  0, 400, 0.08                     56.1 |   22.4    28.3    98.1   (coverage 92 %)
+  GDD+DL     20, 13.5                         24.6 |   15.3    23.7    39.8   (coverage 92 %)
+
+=== EOS (observed median doy 255)
+  cue        fitted constants             RMSE all | 50-75N  40-50N  20-40N
+  DL         12                               29.1 |   18.8    25.0    44.1   (coverage 100 %)
+  T          8.5                              43.0 |   30.4    44.9    69.6   (coverage 91 %)
+  DL+T       12.5, 22                         26.8 |   16.9    23.8    41.0   (coverage 100 %)
+
+SOS: day length median   15.9  p10-p90   12.7..  24.0 h | T median    8.3  p10-p90    3.2..  17.8 C | GDD median   29.4  p10-p90    0.0.. 578.7 | chill days median   18.0  p10-p90    0.0..  66.0
+EOS: day length median   12.7  p10-p90   10.7..  14.1 h | T median    9.8  p10-p90    1.7..  20.3 C | GDD median 1058.3  p10-p90  295.6..3153.7 | chill days median   22.0  p10-p90    0.0..  74.0

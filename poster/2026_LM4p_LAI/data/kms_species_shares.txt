@@ -1,0 +1,9 @@
+Species shares north of 50N (cos-lat weighted, cells vegetated in both maps; 4771 cells)
+  obs = CLM5 PFT area share of natural vegetation (simyr2000); model = LM4+ July leaf-area share (2010)
+  prioria  obs   0.0 %   model   0.0 %   | dominant in     0 (obs) vs     0 (model) cells
+  picea    obs  29.8 %   model  28.4 %   | dominant in  1331 (obs) vs  1403 (model) cells
+  larix    obs   7.5 %   model   0.0 %   | dominant in   312 (obs) vs     0 (model) cells
+  acer     obs   4.8 %   model  16.7 %   | dominant in     5 (obs) vs   741 (model) cells
+  c4grass  obs   0.4 %   model   0.0 %   | dominant in     5 (obs) vs     0 (model) cells
+  c3grass  obs  57.5 %   model  54.9 %   | dominant in  3118 (obs) vs  2627 (model) cells
+  same dominant species north of 50N: 57 %; globally: 50 % of 15091 cells
