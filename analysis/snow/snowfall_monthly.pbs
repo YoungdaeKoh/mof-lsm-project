@@ -1,0 +1,39 @@
+#!/bin/bash
+#PBS -N snowfall_mon
+#PBS -q workq
+#PBS -l select=1:ncpus=6:host=climate00
+#PBS -j oe
+#PBS -o /data2/ydkoh/snowdiag/snowfall_monthly.pbs.log
+# Monthly-mean precipitation fluxes (mm/day), 2001-2023, for the snow diagnostics:
+#   ERA5 hourly field (m accumulated per hour, 0.25 deg global, packed per file) -> mean hourly x 24000
+#   WFDE5 v3.0 CRU 6h means (kg m-2 s-1, 0.5 deg)                                -> monthly mean x 86400
+# Variables via qsub -v (defaults = snowfall run of 2026-10-08):
+#   EVAR=snowfall ETAG=sf WVAR=Snowf   |   EVAR=total_precipitation ETAG=tp WVAR=Rainf
+# Output: /data2/ydkoh/snowdiag/snowfall/{ERA5_${ETAG},WFDE5_${WVAR}}_mon_200101-202312.nc
+EVAR=${EVAR:-snowfall}; ETAG=${ETAG:-sf}; WVAR=${WVAR:-Snowf}
+CDO=/usr/local/cdo/1.9.3/bin/cdo
+ERA=/data1/ERA5/single_level/hourly_0.25/$EVAR/dataset
+WFD=/data2/ydkoh/WFDE5_6h/$WVAR
+OUT=/data2/ydkoh/snowdiag/snowfall
+TE=tmp_era_$ETAG; TW=tmp_wfd_$WVAR
+mkdir -p $OUT/$TE $OUT/$TW; cd $OUT
+
+one_month() {  # $1 = YYYYMM
+  local ym=$1
+  ls $ERA/ERA5h_${ym}??.nc > $TE/list_$ym.txt
+  # cdo 1.9.3 cannot chain a variable-input operator (cat) -> two steps
+  $CDO -s -O -b F32 cat $(cat $TE/list_$ym.txt) $TE/cat_$ym.nc
+  $CDO -s -O -b F32 -mulc,24000 -timmean $TE/cat_$ym.nc $TE/era_$ym.nc && /bin/rm -f $TE/cat_$ym.nc
+  [ -f $TW/wfd_$ym.nc ] || $CDO -s -O -b F32 -mulc,86400 -timmean $WFD/${WVAR}_WFDE5_CRU_${ym}_v3.0_6h.nc $TW/wfd_$ym.nc
+  echo "$ym ndays=$(wc -l < $TE/list_$ym.txt) done $(date +%H:%M:%S)"
+}
+export -f one_month; export CDO ERA WFD TE TW WVAR
+
+for y in $(seq 2001 2023); do for m in 01 02 03 04 05 06 07 08 09 10 11 12; do echo $y$m; done; done \
+  | xargs -P 6 -I{} bash -c 'one_month {}'
+
+$CDO -s -O mergetime $TE/era_??????.nc ERA5_${ETAG}_mon_200101-202312.nc
+$CDO -s -O mergetime $TW/wfd_??????.nc WFDE5_${WVAR}_mon_200101-202312.nc
+$CDO -s setattribute,${ETAG}@units=mm/day ERA5_${ETAG}_mon_200101-202312.nc tmp_$ETAG.nc && /bin/mv -f tmp_$ETAG.nc ERA5_${ETAG}_mon_200101-202312.nc
+$CDO -s setattribute,${WVAR}@units=mm/day WFDE5_${WVAR}_mon_200101-202312.nc tmp_$WVAR.nc && /bin/mv -f tmp_$WVAR.nc WFDE5_${WVAR}_mon_200101-202312.nc
+ls -la $OUT; echo ALLDONE
