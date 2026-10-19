@@ -23,7 +23,10 @@ monthly LAI interpolated to days (p3 method).
 ## Figures
 | fig | script | data | content |
 |---|---|---|---|
-| 1 | scripts/f1_ctrl_bias_regions.py | data/f1_*.txt | CTRL vs three obs: regional normalised seasonal cycle 2001-2015 + SOS/EOS bias |
+| 1 | scripts/f1_ctrl_bias_regions.py | data/f1_sos_eos_bias.txt | (a) GLASS MJJAS LAI, (b) LM4.1 - obs, (c) boreal seasonal cycle vs 3 obs, (d,e) SOS/EOS bias by latitude band (monthly, 50 %) |
+| 2 | scripts/f2_rules_schematic.py | - | (a) CTRL vs modified rules, (b) one-cell 2010 timeline (dayl_d) - draft, winter hold pending daylhold5_d |
+| 3 | scripts/f3_rule_timing_maps.py | data/f3_rule_timing_bands.txt | rule timing reconstructed from daily T: spring smoothing delay, binding gate, photoperiod vs cold rule, cold rule vs obs EOS |
+| SI | scripts/o1_obs_native_to_1deg.py, dlog.py, o2_regional_fit_native.py | data/obs_native/, data/o2_regional_fit_native.txt | native-sampling obs (8-day / half-monthly) and double-logistic dates: sampling moves dates <= 3 d |
 
 Inputs are read from ../poster/2026_LM4p_LAI/data and /Volumes/data02/LM4P; nothing large is copied here.
 Notes and decisions: ../../notes/findings.md, decisions.md (dated 2026-10-19 onwards).
