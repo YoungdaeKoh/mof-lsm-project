@@ -1,0 +1,7 @@
+Rule timing from dayl_d 2010 daily canopy temperature, C96 cells 20-80N with LAI range > 0.3; medians per latitude band
+band     cells |  tc-raw5 DL13-cold cold-obsEOS |   GDD%    tc%  thaw% |     raw5      tc5     cold
+20-40N   2946 |        0       -5        4 |      0     98      2 |       61       61      289
+40-50N   2117 |       21      -48       34 |      0     99      1 |       78      101      298
+50-60N   1743 |       24      -37       30 |      0     99      1 |      107      136      288
+60-70N    975 |       21      -22       26 |      0     96      4 |      133      154      277
+70-80N     28 |       23       -7        3 |      0    100      0 |      142      166      264

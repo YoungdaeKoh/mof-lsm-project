@@ -136,7 +136,7 @@ for nm, a, b in BANDS + [("boreal", 50, 70)]:
 
 # ---- figure
 fig = plt.figure(figsize=(13, 8.8))
-gs = fig.add_gridspec(2, 2, height_ratios=(1, 1.05), hspace=0.26, wspace=0.08)
+gs = fig.add_gridspec(2, 2, height_ratios=(1, 1.05), hspace=0.12, wspace=0.08)
 proj = ccrs.PlateCarree(central_longitude=180)
 axa = fig.add_subplot(gs[0, 0], projection=proj); axb = fig.add_subplot(gs[0, 1], projection=proj)
 axc = fig.add_subplot(gs[1, 0]); axd = fig.add_subplot(gs[1, 1])
@@ -149,8 +149,6 @@ for ax, z, cmap, lo, hi, lab, title in ((axa, g, "YlGn", 0, 5, "LAI (m$^2$ m$^{-
     ax.set_extent([-180, 180, -10, 80], crs=proj)   # full width, Pacific-centred
     im = ax.pcolormesh(lon, lat, np.ma.masked_invalid(z), cmap=cmap, vmin=lo, vmax=hi, transform=ccrs.PlateCarree(), shading="auto")
     ax.coastlines(lw=0.4, color="0.3"); ax.add_feature(cfeature.OCEAN, facecolor="#eef3f7", zorder=0)
-    for yb in (40, 50, 60, 70):   # the bands of (d)
-        ax.plot([-180, 180], [yb, yb], color="k", lw=0.8, ls="--", transform=proj)
     gl = ax.gridlines(draw_labels=True, lw=0.3, color="0.6", ls=":", xlocs=range(-180, 181, 60), ylocs=range(0, 81, 20))
     gl.top_labels = False; gl.right_labels = False; gl.xlabel_style = {"size": 7.5}; gl.ylabel_style = {"size": 7.5}
     if ax is axb:

@@ -13,7 +13,7 @@ Verb "Reducing": autumn bias mostly removed, spring bias partly; revisit after t
 | DL | phentest dayl_d | + day length 13 h (acer 12 h), 20 C cap | same | - | 292 | 2010 |
 | DL+SP | phentest daylspring5_d | DL | 5-d tc_pheno_on | - | 292 | 2010 |
 | DL+SP+WH | phentest daylhold5_d | DL | 5-d | leaf-on blocked while dayl < 12 h and tc < 20 C | 292 | 2010 |
-| (planned) | 15-yr run from HistCO2 1996 state | final rules | | | historical | 1996-2015, analysis 2001-2015 |
+| (planned) | 15-yr run from HistCO2 1996 state, daily LAI on | final rules | | | historical | 1996-2015, analysis 2001-2015 |
 
 ## Observations
 GIMMS LAI4g consolidated, GIMMS AVHRR-only (to 2015), GLASS V61 MODIS (2001-), all monthly 1 deg

@@ -52,3 +52,4 @@
 - 모델 표기: 제목·초록은 공식 명칭 LM4.1(Shevliakova 2024), Methods에서 LM4p(KIOST-ESM2 오프라인 PPA 빌드)를 한 번 정의 후 실험명에 사용.
 - "Reducing": 가을은 대부분 해소(+33→+10일), 봄은 부분(1/3) → "Correcting" 대신. 15년 결과 후 재검토.
 - 작업 폴더 `paper/2026_LM4p_phenology/`(README에 실험명표·그림 대응표).
+- (2026-10-19 추가) 15년 개선 실험은 **일별 LAI 출력 포함**(diag_table에 `"vegn","lai","lai","land_daily"` — phentest `_d`와 동일). 생산런 CTRL·HistCO2의 land_daily에는 LAI가 없음(확인). 관측 비교는 월자료(관측이 월 통합판), 일별은 개선 실험의 시점 진단용. HistCO2 일별 재실행은 하지 않음.
