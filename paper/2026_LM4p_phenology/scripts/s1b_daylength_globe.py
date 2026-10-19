@@ -12,6 +12,7 @@ import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+import matplotlib.path as mpath
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 from cartopy.feature.nightshade import Nightshade
@@ -33,6 +34,8 @@ fig, axs = plt.subplots(1, 3, figsize=(13, 5.0), subplot_kw={"projection": proj}
 for ax, (when, title) in zip(axs, DATES):
     doy = when.timetuple().tm_yday
     ax.set_extent([-180, 180, 25, 90], crs=ccrs.PlateCarree())
+    th = np.linspace(0, 2 * np.pi, 200)                              # round frame instead of the clipped octagon
+    ax.set_boundary(mpath.Path(np.c_[np.sin(th), np.cos(th)] * 0.5 + 0.5), transform=ax.transAxes)
     ax.add_feature(cfeature.OCEAN, facecolor="#dbe9f6"); ax.add_feature(cfeature.LAND, facecolor="#e9e4d4")
     ax.coastlines(lw=0.4, color="0.4")
     ax.add_feature(Nightshade(when, alpha=0.45))
@@ -50,7 +53,8 @@ for ax, (when, title) in zip(axs, DATES):
                 bbox=dict(boxstyle="round,pad=0.12", fc="white", ec="none", alpha=0.8))
     ax.plot(lon, np.zeros_like(lon), color="0.3", lw=0.8, transform=ccrs.PlateCarree())
     ax.set_title(title, fontsize=10, loc="left")
-fig.text(0.5, 0.02, "Shaded = night. Day length at a latitude = the fraction of its circle that lies on the day side (×24 h). "
-         "Leaf-off fires when that fraction falls below 13/24 while days are getting shorter.", ha="center", fontsize=8.5, color="0.3")
+fig.text(0.5, 0.04, "Viewed from above the North Pole; shaded = night. Each latitude circle is solid on the day side and dotted on the night side:\n"
+         "day length = solid fraction \u00d7 24 h. The autumn rule turns leaves off when this falls below 13 h while days are getting shorter.",
+         ha="center", fontsize=8.5, color="0.3")
 fig.savefig("../figures/s1b_daylength_globe.png", dpi=200, bbox_inches="tight")
 print("ok")
