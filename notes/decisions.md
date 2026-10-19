@@ -47,3 +47,8 @@
 - 개선 설정: 수정판 exe(phenspring2) + 가을 DL13/12 + 봄 τ5 + 일별 LAI. climate00 24랭크(≈13 h/yr → ≈8일).
 - 앙상블 불필요: 오프라인·관측 강제라 결정론적(noparam = base 비트 동일 확인). 불확실성은 연도·관측 3종·파라미터 민감도(DL 3종, τ 스윕)로 제시.
 - 선행 조건: ① daylspring5_d 2010(292 ppm 시험판) 완주·봄·가을 개선 확인 ② ctl2_co2 y2000 archive 생성.
+
+## 2026-10-19 — 논문 제목 확정 (사용자): "Reducing the delayed phenology of boreal vegetation in the LM4.1 land model"
+- 모델 표기: 제목·초록은 공식 명칭 LM4.1(Shevliakova 2024), Methods에서 LM4p(KIOST-ESM2 오프라인 PPA 빌드)를 한 번 정의 후 실험명에 사용.
+- "Reducing": 가을은 대부분 해소(+33→+10일), 봄은 부분(1/3) → "Correcting" 대신. 15년 결과 후 재검토.
+- 작업 폴더 `paper/2026_LM4p_phenology/`(README에 실험명표·그림 대응표).
