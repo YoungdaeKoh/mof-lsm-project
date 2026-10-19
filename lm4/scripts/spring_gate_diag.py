@@ -51,6 +51,7 @@ def first(cond, start=60):
 
 
 on = first(lai > lai.min(0) + 0.1 * rng)
+on50 = first(lai > lai.min(0) + 0.5 * rng)                  # half of the seasonal amplitude (obs SOS definition)
 Tx, Tn = d["vegn_temp_max"], d["vegn_temp_min"]
 gdd = np.cumsum((np.maximum(Tn - 273.16, 0) + np.maximum(Tx - 273.16, 0)) / 2, 0)
 tm = (Tx + Tn) / 2; tc = np.empty_like(tm); tc[0] = tm[:31].mean(0)
@@ -73,15 +74,17 @@ for name, gc, tcc in (("larix/c3grass", 180, 278.15), ("acer", 360, 283.16)):
     g = {"GDD": first(gdd > gc, 0), "tc": first(tc >= tcc), "thaw": first(th >= 0.3)}
     traw = first(np.apply_along_axis(lambda a: np.convolve(a, np.ones(5) / 5, "same"), 0, tm) >= tcc)   # raw 5-day mean
     last = np.argmax(np.vstack([g["GDD"], g["tc"], g["thaw"]]), 0)
+    gate = np.max(np.vstack([g["GDD"], g["tc"], g["thaw"]]), 0)   # day all three gates are open
     lines.append("\nthresholds %s: gdd_crit %d, tc_crit %.2f K" % (name, gc, tcc))
-    lines.append("%-6s %5s | %6s %6s %6s %6s %8s %6s | binding%%: %5s %5s %5s" % ("region", "cells", "GDD", "T5d", "tc", "thaw", "snowfree", "LAIon", "GDD", "tc", "thaw"))
+    lines.append("%-6s %5s | %6s %6s %6s %6s %8s %6s %6s | %6s %6s %6s | binding%%: %5s %5s %5s" % ("region", "cells", "GDD", "T5d", "tc", "thaw", "snowfree", "LAIon", "LAI50", "gate", "g->10", "g->50", "GDD", "tc", "thaw"))
     for code in ("all", "NEU", "RFE", "NWN", "ESB", "NEN", "WSB", "RAR"):
         m = ok.copy() if code == "all" else ok & (reg == ar6.map_keys(code))
         if m.sum() < 10:
             continue
         med = lambda a: np.median(a[m])
-        lines.append("%-6s %5d | %6.0f %6.0f %6.0f %6.0f %8.0f %6.0f | %14.0f %5.0f %5.0f" % (
-            code, m.sum(), med(g["GDD"]), med(traw), med(g["tc"]), med(g["thaw"]), med(snowfree), med(on),
+        lines.append("%-6s %5d | %6.0f %6.0f %6.0f %6.0f %8.0f %6.0f %6.0f | %6.0f %6.0f %6.0f | %14.0f %5.0f %5.0f" % (
+            code, m.sum(), med(g["GDD"]), med(traw), med(g["tc"]), med(g["thaw"]), med(snowfree), med(on), med(on50),
+            med(gate), med(on - gate), med(on50 - gate),
             *[100 * np.mean(last[m] == k) for k in range(3)]))
 open("../data/spring_gate_diag_2010.txt", "w").write("\n".join(lines) + "\n")
 print("\n".join(lines))

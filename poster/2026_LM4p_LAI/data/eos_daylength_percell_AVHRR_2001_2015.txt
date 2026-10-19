@@ -1,0 +1,30 @@
+Day length on the observed EOS date, cell by cell (AVHRR_2001_2015 2001-2015, 1 deg, cells north of 20N with seasonal amplitude >= 0.5)
+EOS = 50 % amplitude crossing after the peak of the climatological curve (monthly means interpolated to days); 7888 cells
+
+AR6 regions
+  NWN  n   974 | day length at EOS (h): p10 11.46 p25 12.77 median 13.30 p75 13.86 p90 14.34 | EOS doy median 250.3
+  NEN  n   534 | day length at EOS (h): p10  8.88 p25  9.62 median 11.22 p75 12.55 p90 12.86 | EOS doy median 274.5
+  ESB  n   735 | day length at EOS (h): p10 12.72 p25 13.23 median 13.54 p75 14.15 p90 14.48 | EOS doy median 243.3
+  RFE  n   506 | day length at EOS (h): p10 12.65 p25 13.01 median 13.40 p75 13.75 p90 14.15 | EOS doy median 248.0
+  WSB  n   468 | day length at EOS (h): p10 13.30 p25 13.61 median 13.78 p75 13.93 p90 14.32 | EOS doy median 242.4
+  ENA  n   428 | day length at EOS (h): p10 11.11 p25 11.23 median 11.37 p75 11.54 p90 11.76 | EOS doy median 276.3
+  WCE  n   454 | day length at EOS (h): p10 12.04 p25 12.73 median 13.22 p75 13.64 p90 14.32 | EOS doy median 246.5
+  EEU  n   343 | day length at EOS (h): p10 13.46 p25 13.69 median 13.86 p75 14.23 p90 14.80 | EOS doy median 243.0
+  NEU  n   484 | day length at EOS (h): p10  9.48 p25 13.00 median 13.74 p75 14.46 p90 14.85 | EOS doy median 246.6
+  EAS  n   569 | day length at EOS (h): p10 11.19 p25 11.58 median 11.96 p75 12.26 p90 12.44 | EOS doy median 264.4
+
+5-degree latitude bands (all longitudes)
+  20-25N n   253 | day length at EOS (h): p10 10.70 p25 10.82 median 11.10 p75 11.47 p90 11.63 | EOS doy median 305.9
+  25-30N n   277 | day length at EOS (h): p10 10.42 p25 10.89 median 11.52 p75 11.86 p90 12.16 | EOS doy median 280.8
+  30-35N n   324 | day length at EOS (h): p10 11.08 p25 11.28 median 11.81 p75 12.19 p90 12.47 | EOS doy median 269.3
+  35-40N n   385 | day length at EOS (h): p10 11.13 p25 11.36 median 11.94 p75 12.45 p90 14.03 | EOS doy median 265.0
+  40-45N n   613 | day length at EOS (h): p10 11.19 p25 11.60 median 12.27 p75 12.63 p90 13.26 | EOS doy median 258.0
+  45-50N n   839 | day length at EOS (h): p10 11.35 p25 11.64 median 12.60 p75 13.27 p90 14.20 | EOS doy median 253.1
+  50-55N n  1155 | day length at EOS (h): p10 11.21 p25 12.61 median 13.23 p75 13.59 p90 14.22 | EOS doy median 245.8
+  55-60N n  1123 | day length at EOS (h): p10  9.73 p25 12.85 median 13.46 p75 13.75 p90 13.91 | EOS doy median 245.7
+  60-65N n  1284 | day length at EOS (h): p10  9.69 p25 13.13 median 13.74 p75 14.22 p90 14.50 | EOS doy median 246.5
+  65-70N n  1168 | day length at EOS (h): p10 12.86 p25 13.64 median 14.14 p75 14.71 p90 15.01 | EOS doy median 246.9
+  70-75N n   410 | day length at EOS (h): p10  6.59 p25 10.99 median 13.74 p75 14.49 p90 14.79 | EOS doy median 252.9
+
+linear fit over all cells: day length at EOS = 10.516 + 0.0423 x latitude (h)  ->  40N 12.21 h, 50N 12.63 h, 60N 13.06 h, 70N 13.48 h
+for comparison Birch et al. 2021 (CLM5): 11 h at 45N rising linearly to 15 h at 65N
