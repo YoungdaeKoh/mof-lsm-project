@@ -330,3 +330,16 @@ AMIP 스모크(24 PE, 1 model-day, job 2933)의 FMS 클록: `Total 1026.4 s / In
 AMIP이 실제 필요한 지점은 **결합강도의 atmospheric leg**(마일스톤 2·3년차). offline로는 terrestrial leg(Dirmeyer TCI = σ(SM)×d(LH)/d(SM), 지면 변수만으로 계산 가능)까지만 나옴.
 대안 우선순위: ① **CMIP7 공개 산출물 활용** — 마일스톤 3년차 문구가 "CMIP7 지면-대기 상호작용 진단"이지 "AMIP 실험 수행"이 아니므로 애초 설계가 이쪽일 가능성 ② 외부 계산자원(720 PE급)에서 수행 후 결과 수령 ③ 자체 수행 시 5~10년으로 기간 제한(270~540 h).
 **진도보고서에 "AMIP 검증 완료, 생산런은 계산자원 확보 필요"로 기록** — 향후 자원 요청 근거.
+
+## 14. ★ 결합모델 검증 시 확인·보고할 지면(LM4+) 식생 문제 (2026-10-14, LM4p 오프라인에서 발견)
+
+오프라인 LM4p(같은 KIOST exe·KIOST 400년 결합 spin-up IC)에서 찾은 것. 결합 KIOST-ESM2 검증 때 같은 문제가 있는지 확인하고 KIOST에 보고할 목록. 근거 상세 `lm4/LM4_SPINUP_NOTES.md`.
+
+1. **종 분포 = 관측 지도가 아니라 결합 spin-up 경쟁의 산물**: cold start 때 모든 타일에 6종(c3grass·c4grass·acer·picea·larix·prioria)을 똑같이 심고 400년 PPA 경쟁·종자 확산으로 형성(KIOST 템플릿 namelist 기준, 실제 cold start 설정은 KIOST 확인 필요). 결합 기후 편차가 종 분포에 새겨져 있을 수 있음.
+2. **낙엽송(larix) 북반구 전멸**: IC의 larix 1,825 cohort가 전부 남반구(−42.7~−8.1°)에만 남음. 시베리아 낙엽송림이 picea·풀로 대체. 원인(larix 파라미터 vs 결합 기후) 미확인. → 2026-10-14: 관측 기후(WFDE5) 재파종 run에서도 수관면적 연 −2.9 %·종자 −72 %(6년) 감소, 그늘이 아니라 탄소 부족형. 낙엽송 LMA 0.076 kgC m⁻²가 문헌(0.026–0.046)의 약 2배 → **파라미터 원인 유력**(상세 `lm4/LM4_SPINUP_NOTES.md`).
+3. **사라진 종은 돌아올 경로가 없음**: `do_biogeography=F`(기후 규칙 없음). 켜도 `update_species`는 5종류 라벨 교체뿐이라 larix 불가. 종자 확산(`diffuse`, 이웃 격자 0.01 %/yr)은 근처에 공급원이 있어야 함.
+4. **열대 사바나 C4 풀 과소**: IC c4grass 170,163 cohort vs CLM5 지도 기준 재파종 366,190(2.2배). 열대 LAI 과대(계절 무관 상시 과다)와 관련 의심.
+5. **낙엽 시점이 기온만으로 결정**: 20일 평균 5 °C 기준 → 북방 낙엽(EOS)이 27–38일 늦음(1982–2010 매년). 일장 조건 없음.
+6. **코드 버그 의심** `vegn_util.F90` `add_seedlings_ppa` 24행 `if (present(germination_factor)) germ_f = 1.0` → 인자 무시, 농경지 잡초 발아 억제(0.0) 무효. 미수정.
+
+검증 방법(결합런 출력이 생기면): 종별 cohort 수·면적 지도 vs CLM5/ESA-CCI PFT, 50–90N larix 비율, 열대 C4 비율, LAI 계절(GIMMS LAI4g) EOS 지연.

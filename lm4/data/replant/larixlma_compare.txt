@@ -1,0 +1,31 @@
+larixlma_d vs replant1y_np48_d (2010, same IC), 50-75N cells with larix (n=314), unweighted cell means
+sp     var                base    larixLMA    diff%
+picea  GPP yr        7.136e-07   7.136e-07      0.0
+picea  NPP yr        4.443e-07   4.443e-07      0.0
+picea  LAI Jul       1.403e-06   1.403e-06      0.0
+picea  NSC Dec       3.172e-09   3.172e-09      0.0
+picea  bseed Dec             0           0      nan
+picea  bl_max Dec    1.878e-06   1.878e-06      0.0
+picea  bwood Dec     2.185e-07   2.185e-07      0.0
+picea  crownA Dec    0.0008489   0.0008489      0.0
+picea  nindiv Dec    3.498e-05   3.498e-05      0.0
+larix  GPP yr            0.242      0.2538      4.9
+larix  NPP yr          0.08878     0.07758    -12.6
+larix  LAI Jul           1.156       1.238      7.1
+larix  NSC Dec          0.2601      0.1918    -26.3
+larix  bseed Dec      0.002043     0.00951    365.5
+larix  bl_max Dec      0.09106     0.04825    -47.0
+larix  bwood Dec        0.5641      0.6004      6.4
+larix  crownA Dec       0.5767      0.6642     15.2
+larix  nindiv Dec         1.93       1.919     -0.6
+acer   GPP yr        2.666e-06   2.666e-06     -0.0
+acer   NPP yr          1.6e-06     1.6e-06     -0.0
+acer   LAI Jul       6.164e-06   6.164e-06      0.0
+acer   NSC Dec       2.171e-07   2.171e-07      0.0
+acer   bseed Dec             0           0      nan
+acer   bl_max Dec    1.214e-06   1.214e-06      0.0
+acer   bwood Dec     8.864e-08   8.864e-08      0.0
+acer   crownA Dec    2.857e-05   2.857e-05      0.0
+acer   nindiv Dec     0.002048    0.002048      0.0
+larix LAI monthly base: 0.33 0.03 0.00 0.00 0.05 0.99 1.16 1.12 1.10 0.69 0.09 0.01
+larix LAI monthly lma : 0.66 0.06 0.01 0.00 0.08 1.13 1.24 1.19 1.19 0.75 0.10 0.01

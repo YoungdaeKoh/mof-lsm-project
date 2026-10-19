@@ -96,3 +96,12 @@ LM4.1 수치는 Shevliakova 2024 전문에서 직접 확인.
 - 표 1: **CESM2/CLM5는 낙엽 종료에 일장(daylength) 문턱 사용**, ORCHIDEE2.0은 cold stress·leaf age, CLM4는 일장+토양온도(활엽)·7일 연속 한랭(침엽).
 - 함의(논의): 늦은 EOS는 광합성 영향은 작지만(가을 일사 적음) 과도한 유지호흡·증발산, 낮은 알베도 → 탄소·토양수분·현열/잠열 분배 편향. 결론: "낙엽수 phenology, 특히 leaf senescence 개선 필요".
 - **우리에게 중요한 점**: (1) 같은 결론(EOS 지연, 북방·낙엽 침엽수에서 최대)이 CMIP ESM 14개에서 이미 보고됨 → 우리 기여는 이 목록에 없던 LM4+, 오프라인(결합 기후 편차 배제), 원인 규명(기온 단일 문턱 + 평활 지연), 낮 길이 규칙 시험. (2) 낮 길이 규칙의 위험: 관측 EOS는 가을 기온에 +0.5 d K⁻¹로 반응 → 순수 낮 길이 규칙은 민감도 ≈0이 될 수 있으니 다년 실행에서 EOS–기온 민감도를 반드시 점검. (3) CLM5가 이미 일장 문턱을 쓴다는 점 → 우리 규칙의 선례로 인용 가능. (4) 연 최대 LAI < 0.5 마스크는 숲 한정용 선례.
+
+### F-추가 3. Park, H., Jeong, S.-J., Ho, C.-H., Park, C.-E. & Kim, J. (2018). Slowdown of spring green-up advancements in boreal forests. *Remote Sens. Environ.* 217, 191–202. doi:10.1016/j.rse.2018.08.012 (PDF 보유: `Park2018_RSE_spring_greenup_slowdown.pdf`, 2026-10-19 원문 확인)
+- SOS = NDVI3g 로지스틱 맞춤 변곡점(상세식 Park et al. 2015). WD(1/1~SOS, <0 °C 일수)·PT·GT·PR 편상관/다중회귀. chilling은 의도적으로 제외. 요약은 `notes/findings.md` 2026-10-19 항목.
+
+### F-추가 4. Park, H., Jeong, S.-J., Ho, C.-H., Kim, J., Brown, M.E. & Schaepman, M.E. (2015). Nonlinear response of vegetation green-up to local temperature variations in temperate and boreal forests in the Northern Hemisphere. *Remote Sens. Environ.* 165, 100–108. doi:10.1016/j.rse.2015.04.030 (PDF 보유: `Park2015_RSE_nonlinear_greenup_temperature.pdf`, 2026-10-19 원문 확인)
+- 로지스틱 식 Eq. 1 원출처: NDVI(t) = −γ/(1+exp(−α(1−βt))) + δ, 변곡일 1/β(= 곡선 50 %), VGrate = αβγ/4. 요약은 `notes/findings.md` 2026-10-19 항목.
+
+### F-추가 5. Murray, M.B., Cannell, M.G.R. & Smith, R.I. (1989). Date of budburst of fifteen tree species in Britain following climatic warming. *J. Appl. Ecol.* 26, 693–700. JSTOR 2404093 (PDF 보유: `Murray-DateBudburstFifteen-1989.pdf`, 2026-10-19 원문 확인)
+- NCD–GDD 식 원출처: T = a + b·exp(r·C) (T: 1/1~, >5 °C; C: 11/1~, ≤5 °C 일수), 5그룹 계수 Table 1. 요약은 `notes/findings.md` 2026-10-19 항목.

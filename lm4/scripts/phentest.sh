@@ -15,6 +15,9 @@ C=/data2/ydkoh/lm4/RUN/lm4p_ctl_1979-2024
 T=/data2/ydkoh/lm4/RUN/phentest
 EXE=/data2/ydkoh/lm4/build_gateBC/fms_esm4.5_gateBC.x
 EXE_PHENOFF=/data2/ydkoh/lm4/build_phenoff/fms_esm4.5_phenoff.x   # phenoff_build.sh
+EXE_SPRING=/data2/ydkoh/lm4/build_phenspring2/fms_esm4.5_phenspring2.x   # phenoff patch + tau_pheno_on (lm4P.phenology_spring_tau.diff)
+# (build_phenspring, 2026-10-14, is the flawed first version: 5-day leaf-on undone next day by the 20-day cold leaf-off
+#  and GDD reset -> leaf-on 8 d LATER; its result is kept as phentest/daylspring5_bug_d)
 VARIANTS=${VARIANTS:-"base tc10"}
 #   noparam phenoff exe, ctl field_table (regression: must equal base bit for bit)
 #   offon   phenoff exe, larix/c3grass tc_crit_off=283.15 K, dayl_crit_off=14 h (13.69)
@@ -93,6 +96,12 @@ stage() {   # $1 variant  $2 days
     sed -i -E "s/^( *)tc_crit *= *278\.15.*/&\n\1tc_crit_off = 293.15\n\1dayl_crit_off = 13.0/" $D/field_table
     sed -i -E '/"species", *"land_mod", *"acer"/{n;s/$/\n    tc_crit_off = 293.15\n    dayl_crit_off = 12.0/}' $D/field_table
   fi
+  # spring5 (2026-10-14): CTRL autumn, leaf-on tested on a 5-day smoothed temperature (vegn_dynamics_nml
+  #   tau_pheno_on = 5, phenspring exe; default tc_pheno ~20 d delays leaf-on by 3-4 weeks, spring_gate_diag.py)
+  # daylspring5: dayl (DL13/12 autumn) + the same spring change
+  if [ "$K" = spring5 ] || [ "$K" = daylspring5 ]; then
+    printf '\n &vegn_dynamics_nml\n    tau_pheno_on = %s\n /\n' "${TAU:-5.0}" >> $D/input.nml   # TAU=<days> overrides
+  fi
   if [ "$K" = dayl2 ]; then
     # experiment 5: thresholds from the observed EOS of each vegetation type (notes 13.70):
     # larch 13.5 h, C3 grass 12.5 h, deciduous broadleaf 11.5 h; same 20 C cap
@@ -100,6 +109,8 @@ stage() {   # $1 variant  $2 days
     sed -i -E '/"species", *"land_mod", *"c3grass"/,$ s/^( *)tc_crit *= *278\.15.*/&\n\1tc_crit_off = 293.15\n\1dayl_crit_off = 12.5/' $D/field_table
     sed -i -E '/"species", *"land_mod", *"acer"/{n;s/$/\n    tc_crit_off = 293.15\n    dayl_crit_off = 11.5/}' $D/field_table
   fi
+  # larixlma (2026-10-14): larix LMA 0.076 -> 0.038 kgC m-2 (the commented-out value in the same block;
+  # literature 0.026-0.046, Fellner et al. 2016). Applied after the fast-config copy below. Use with SEED=replant_seed.
   # default since 2026-10-08: fast offline config (LM4 notes 13.71; land physics bit-identical to ctl):
   # field_table without dry deposition, diag_table = config/diag_table.offline_fast. FULLCFG=1 keeps the ctl tables.
   # The speed-test variants below keep their own definitions.
@@ -107,6 +118,16 @@ stage() {   # $1 variant  $2 days
     *) if [ "${FULLCFG:-0}" != 1 ]; then cp -p $T/../config/field_table.offline_fast $D/field_table
                                          cp -p $T/../config/diag_table.offline_fast  $D/diag_table; fi ;; esac
   case $K in ddep1m|diag1m|cons1m) sed -i '/"dry_deposition"/d' $D/field_table ;; esac
+  # NOTE (2026-10-14): the tc10/offon/dayl/dayl2 field_table edits above run BEFORE this fast-config copy and are
+  # overwritten by it; those variants were staged before 2026-10-08 (ctl tables). Re-staging them needs FULLCFG=1
+  # or moving their edits below. New variants put their field_table edits here, after the copy.
+  if [ "$K" = daylspring5 ]; then   # experiment 4 (DL13/12) autumn settings, as in dayl
+    sed -i -E "s/^( *)tc_crit *= *278\.15.*/&\n\1tc_crit_off = 293.15\n\1dayl_crit_off = 13.0/" $D/field_table
+    sed -i -E '/"species", *"land_mod", *"acer"/{n;s/$/\n    tc_crit_off = 293.15\n    dayl_crit_off = 12.0/}' $D/field_table
+  fi
+  if [ "$K" = larixlma ]; then
+    sed -i -E '/"species", *"land_mod", *"larix"/,/"species", *"land_mod", *"acer"/ s/^ *LMA *= *0\.76e-01/    LMA =   0.38e-01/' $D/field_table
+  fi
   case $K in diag1m) cp -p $T/../config/diag_table.offline_min        $D/diag_table ;;
              cons1m) cp -p $T/../config/diag_table.offline_min_nocons $D/diag_table ;; esac
   if [ "${1%_d}" != "$1" ]; then
@@ -114,7 +135,8 @@ stage() {   # $1 variant  $2 days
   fi
   # keep the configuration diff of every variant next to the run for the record
   { echo "### field_table diff (ctl -> $1)"; diff $C/field_table $D/field_table; echo "### diag_table diff (ctl -> $1)"; diff $C/diag_table $D/diag_table; } > $D/config_diff.txt
-  case $K in noparam|offon|dayl|dayl2) ln -sfn $EXE_PHENOFF $D/model.x ;; *) ln -sfn $EXE $D/model.x ;; esac
+  case $K in noparam|offon|dayl|dayl2) ln -sfn $EXE_PHENOFF $D/model.x ;;
+             spring5|daylspring5) ln -sfn $EXE_SPRING $D/model.x ;; *) ln -sfn $EXE $D/model.x ;; esac
   echo "$1: $MO months $DA days from $Y-01-01, seed $SEED"
 }
 

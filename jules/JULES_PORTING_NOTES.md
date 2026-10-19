@@ -464,3 +464,20 @@ IC = `jules_spinA_c03.dump.20110101`. **주기 5일인 이유**: TRIFFID 누적�
 - **켤 때 할 일**: `l_nitrogen=.true.` + `&jules_prescribed_dataset`(file=위 파일, `var='deposition_n'`, `is_climatology=.true.`,
   `data_period=-2`) → 평형 모드 spin-up 3–5 cycle(토양 N이 식물에 되먹임하므로 HUM까지 볼 것) → 생산런. JULES 단위
   `deposition_n` = kg/m²/s(`variable_metadata.inc:4887`), 소비처 `soil_inorg_n_mod.F90:soil_n_deposition`.
+
+## 19. ★★★ 4개 모델 실험 프로토콜 점검 — "모델마다 조건이 다른 항목" (2026-10-04, 서버 설정 직접 확인)
+
+계기: LM4p CO₂가 292 ppm 고정임을 발견(LM4 notes §13.68). 같은 종류의 불일치를 전부 확인.
+
+| 항목 | LM4p | JULES | CLM5 | Noah-MP | 영향 |
+|---|---|---|---|---|---|
+| **CO₂** | ≈292 고정(얼어붙은 대기 추적자) | 344.9 고정(`co2_mmr`) | 367 고정(`CLM_CO2_TYPE=constant`) | 395 고정(`NoahmpTable CO2`) | **추세 비교 불가 + 평균 비교 오염** |
+| 기후 강제 | WFDE5 (data_override) | WFDE5 1° nn-filled | WFDE5 (GSWP3 모드 stream에 WFDE5 파일) | WFDE5 (`NoahMP_WFDE5_prod_1979_2023.sh`) | ✅ 통일 |
+| 토지이용 | LUH3 전이 델타를 **2010 면적 위에** 적용(§13.47, 면적 수준편향) | 식생분율 고정(WFD-EI) | 2000년 고정(`simyr2000` surfdata) | MODIS IGBP 고정 | 시점·자료 제각각 |
+| **관개** | 없음 | 없음(`l_irrig_dmd=F`) | **켜짐**(`irrigate=.true.`) | 없음(`IRRIGATION_OPTION=0`) | CLM5만 인도·중국 등 ET·LAI에 유리 |
+| 질소 | 꺼짐 | 꺼짐 | 켜짐, N 침적 **2000년 고정**(`stream_year_first/last_ndep=2000`) | 없음 | CLM5만 N 제한 |
+| 화재 | 켜짐(`fire_to_use='unpacked'`) | 꺼짐(`l_inferno=F`; fire.nml F) | 켜짐(li2016crufrc, 인구밀도 2000년 고정) | 없음 | 교란 유무 차이 |
+| 식생 분포 | 고정(`do_biogeography=F`) | 고정(`l_veg_compete=F`) | 고정(surfdata) | 고정 | 원자료는 제각각 |
+| 달력 | noleap | `l_leap=F` | NO_LEAP | gregorian(2/29 합성) | 월평균 비교엔 영향 작음 |
+
+**관측 비교에 쓸 "공통 역사 실험(B안)" 후보 규칙**: CO₂ = 1979 값(≈337 ppm) 고정 spin-up → 관측 연평균 CO₂(1979–2023). N 침적·인구밀도 등 시변 입력은 쓰는 모델만 같은 연도로(1979–2023 시변). 관개·화재·질소는 **모델 고유 기능**이라 끄고 켬을 강제로 맞추기보다 표에 명시하고 해석에 반영. 토지이용은 최소한 "시점"(1979 상태 또는 고정 연도)을 통일.

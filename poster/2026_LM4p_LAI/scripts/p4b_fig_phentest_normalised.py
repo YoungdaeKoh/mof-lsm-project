@@ -27,6 +27,11 @@ SUFFIX = "" if os.environ.get("REGSET", "default") == "default" else "_" + os.en
 POSTER = os.environ.get("POSTER", "0") == "1"
 if POSTER:
     RUNS = [r for r in RUNS if r[0] in ("GIMMS", "base", "tc10", "offon")]
+# POSTER_DL=1 (2026-10-12): DL14+TC10's autumn change is the 10 C threshold (day length < 14 h is always true by Sep
+# at 50-70N), so the day-length-controlled run DL13/12 replaces it -> *_posterdl.png
+POSTER_DL = os.environ.get("POSTER_DL", "0") == "1"
+if POSTER_DL:
+    RUNS = [r for r in RUNS if r[0] in ("GIMMS", "base", "tc10")] + [("dayl", "DL13/12", "tab:red", "--", 2.4)]
 # BEST=1: GIMMS, CTRL and the best pilot (DL13/12, drawn in the main-run style) -> *_best.png
 BEST = os.environ.get("BEST", "0") == "1"
 if BEST:
@@ -65,5 +70,5 @@ for ax in axs[:, 0]:
     ax.set_ylabel("Normalized LAI")
 axs[0, 0].legend(loc="upper left", fontsize=8.5, frameon=False)
 fig.tight_layout()   # no suptitle (2026-10-08); definitions go in the caption
-fig.savefig("../figures/fig3b_phentest_regions_normalised%s%s.png" % (SUFFIX, "_poster" if POSTER else "_best" if BEST else ""), dpi=200)
+fig.savefig("../figures/fig3b_phentest_regions_normalised%s%s.png" % (SUFFIX, "_poster" if POSTER else "_posterdl" if POSTER_DL else "_best" if BEST else ""), dpi=200)
 print("regions", len(regions), "| runs:", [k for k in regions[0] if k != "name"])

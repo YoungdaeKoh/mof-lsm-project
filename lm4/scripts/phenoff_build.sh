@@ -15,8 +15,8 @@
 set -eu
 E=/data2/ydkoh/lm4/esm4p5-lm4p-offline
 C=/data2/ydkoh/lm4/build_gateBC
-B=/data2/ydkoh/lm4/build_phenoff
-X=fms_esm4.5_phenoff.x
+B=${B:-/data2/ydkoh/lm4/build_phenoff}   # override for a separate variant build, e.g.
+X=${X:-fms_esm4.5_phenoff.x}             # B=.../build_phenspring X=fms_esm4.5_phenspring.x (spring tau_pheno_on patch, 2026-10-14)
 
 source $E/exec/env.sh
 if [ ! -d $B/src/lm4P ]; then
@@ -24,7 +24,7 @@ if [ ! -d $B/src/lm4P ]; then
   cp -as $E/src/lm4P $B/src/lm4P          # symlink tree
 fi
 ln -sfn $E/src/FMS $B/src/FMS             # lm4P Makefile also reads $(SRCROOT)FMS/include
-for p in $B/patched/*.F90; do
+for p in $B/patched/*.F90; do   # vegn_tile.F90 included for the spring patch
   f=$(basename $p)
   t=$B/src/lm4P/vegetation/$f
   rm -f $t

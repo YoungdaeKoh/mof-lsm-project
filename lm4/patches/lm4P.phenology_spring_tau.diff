@@ -1,0 +1,161 @@
+--- a/vegetation/vegn_tile.F90
++++ b/vegetation/vegn_tile.F90
+@@ -169,6 +169,9 @@
+    ! averaged quantities for PPA phenology
+    real :: tc_daily = 0.0
+    real :: tc_pheno = 0.0 ! smoothed canopy air temperature for phenology
++   ! ydkoh 2026-10: shorter-smoothed temperature for the leaf-on test only (vegn_dynamics_nml
++   ! tau_pheno_on > 0). Not in the restart: negative = unset, filled from tc_pheno on first use.
++   real :: tc_pheno_on = -1.0
+    real :: tc_dorm  = 0.0 ! smoothed temperature for dormancy calculations
+    real :: daily_t_max = -HUGE(1.0) ! accumulator for daily max, used in GDD calculations
+    real :: daily_t_min =  HUGE(1.0) ! accumulator for daily min, used in GDD calculations
+--- a/vegetation/vegn_data.F90
++++ b/vegetation/vegn_data.F90
+@@ -259,6 +259,11 @@
+ 
+ 
+   real    :: tc_crit   = 283.16 ! critical temperature for leaf drop, degK
++  ! ydkoh 2026-10: optional autumn leaf-off rule, separate from the leaf-on threshold
++  ! (LM4 notes 13.69). Leaves also drop when days are shortening AND day length
++  ! < dayl_crit_off AND tc_pheno < tc_crit_off. Negative values = rule off (default).
++  real    :: tc_crit_off   = -1.0 ! autumn leaf-off temperature, degK
++  real    :: dayl_crit_off = -1.0 ! autumn leaf-off day length, hours
+   real    :: gdd_crit  = 360.0
+   real    :: gdd_base_T =  273.16 ! base temperature for GDD calculations, degK
+   ! critical soil-water-stress index, used in place of fact_crit_phen and
+@@ -1024,6 +1029,8 @@
+   __GET_SPDATA_REAL__(fuel_intensity)
+ 
+   __GET_SPDATA_REAL__(tc_crit)
++  __GET_SPDATA_REAL__(tc_crit_off)
++  __GET_SPDATA_REAL__(dayl_crit_off)
+   __GET_SPDATA_REAL__(gdd_crit)
+   __GET_SPDATA_REAL__(gdd_base_T)
+   __GET_SPDATA_REAL__(psi_stress_crit_phen)
+@@ -1489,6 +1496,8 @@
+   call add_row(table, 'fuel_intensity',spdata(idx)%fuel_intensity)
+ 
+   call add_row(table, 'tc_crit',       spdata(idx)%tc_crit)
++  call add_row(table, 'tc_crit_off',   spdata(idx)%tc_crit_off)
++  call add_row(table, 'dayl_crit_off', spdata(idx)%dayl_crit_off)
+   call add_row(table, 'gdd_crit',      spdata(idx)%gdd_crit)
+   call add_row(table, 'gdd_base_T',    spdata(idx)%gdd_base_T)
+ 
+--- a/vegetation/vegetation.F90
++++ b/vegetation/vegetation.F90
+@@ -71,7 +71,7 @@
+      vegn_carbon_int_lm3, vegn_carbon_int_ppa,    &
+      vegn_phenology_lm3,  vegn_phenology_ppa,     &
+      vegn_growth, vegn_starvation_ppa, vegn_biogeography, &
+-     vegn_reproduction_ppa
++     vegn_reproduction_ppa, tau_pheno_on
+ use vegn_disturbance_mod, only : vegn_disturbance_init, vegn_nat_mortality_lm3, &
+      vegn_disturbance, update_fuel
+ use vegn_harvesting_mod, only : &
+@@ -2661,6 +2661,13 @@
+                 max(tile%vegn%daily_T_max-sp%gdd_base_T,0.0))/2
+            end associate ! F2003
+         enddo
++        ! ydkoh 2026-10: shorter-smoothed temperature for leaf-on (off unless tau_pheno_on > 0);
++        ! not in the restart, so it starts from tc_pheno on the first day of each run
++        if (tau_pheno_on > 0.0) then
++           if (tile%vegn%tc_pheno_on < 0.0) tile%vegn%tc_pheno_on = tile%vegn%tc_pheno
++           tile%vegn%tc_pheno_on = tile%vegn%tc_pheno_on * (1.0 - 1.0/tau_pheno_on) &
++                                 + tile%vegn%tc_daily * (1.0/tau_pheno_on)
++        endif
+         tile%vegn%tc_pheno = tile%vegn%tc_pheno * 0.95 + tile%vegn%tc_daily * 0.05
+         w = 1.0/(1+tau_smooth_T_dorm)
+         tile%vegn%tc_dorm  = w*tile%vegn%tc_daily + (1-w)*tile%vegn%tc_dorm
+@@ -2773,7 +2780,7 @@
+         if (do_ppa) then
+            call vegn_starvation_ppa(tile%vegn, tile%soil)
+            call check_conservation_2(tile,'update_vegn_slow 4.2',lmass0,fmass0,cmass0,nmass0)
+-           if (do_phenology) call vegn_phenology_ppa (tile)
++           if (do_phenology) call vegn_phenology_ppa (tile, lnd%ug_lat(l), doy)
+            call check_conservation_2(tile,'update_vegn_slow 4.3',lmass0,fmass0,cmass0,nmass0)
+         else
+            call vegn_nat_mortality_lm3(tile%vegn,tile%soil,86400.0)
+--- a/vegetation/vegn_dynamics.F90
++++ b/vegetation/vegn_dynamics.F90
+@@ -54,6 +54,7 @@
+ public :: vegn_growth           ! slow time-scale redistributor of accumulated carbon
+ public :: vegn_phenology_lm3
+ public :: vegn_phenology_ppa
++public :: tau_pheno_on
+ public :: vegn_biogeography
+ public :: vegn_reproduction_ppa
+ 
+@@ -79,8 +80,12 @@
+    ! across restarts, when an intermediate restart -- and therefore model
+    ! initialization -- happens between the start of the test and the time of seed
+    ! transport application.
++! ydkoh 2026-10: time scale (days) of a separate smoothed temperature used only for the
++! spring leaf-on test in vegn_phenology_ppa (LM4 notes, spring gate diagnosis). The default
++! tc_pheno uses weight 0.05 per day (~20 d), which delays leaf-on by 3-4 weeks. <= 0 = off.
++real :: tau_pheno_on = -1.0
+ namelist /vegn_dynamics_nml/ &
+-   deltaDBH_max, deltaLAI_max, seed_transport_repro_fix
++   deltaDBH_max, deltaLAI_max, seed_transport_repro_fix, tau_pheno_on
+ 
+ ! ---- end of namelist
+ 
+@@ -2058,8 +2063,10 @@
+ 
+ ! =============================================================================
+ ! Added by Weng 2012-02-29
+-subroutine vegn_phenology_ppa(tile)
++subroutine vegn_phenology_ppa(tile, lat, doy)
+   type(land_tile_type), intent(inout) :: tile
++  real,    intent(in) :: lat ! latitude of the tile, radian (for the autumn day-length rule)
++  integer, intent(in) :: doy ! day of year, 1..365
+ 
+   ! ---- local vars
+   integer :: i,l
+@@ -2081,10 +2088,23 @@
+   real :: wilt       ! vertically-average soil moisture content at wilting point
+   real :: theta_crit ! critical soil moisture for drought-deciduous phenology
+   logical :: drought ! drought indicator
++  real    :: decl, dayl ! solar declination (radian) and day length (hours), for the autumn rule
++  real    :: tc_on      ! smoothed temperature used by the leaf-on test
++  logical :: shortening ! true when days are getting shorter at this latitude
++  real, parameter :: pi_ = 3.14159265358979
+ 
++  ! day length from latitude and day of year (Cooper 1969 declination, sunrise
++  ! equation); days shorten when lat*d(decl)/dt < 0, i.e. after the local solstice
++  decl = 23.44*pi_/180.0 * sin(2.0*pi_*(284.0+doy)/365.0)
++  dayl = 24.0/pi_ * acos(max(-1.0, min(1.0, -tan(lat)*tan(decl))))
++  shortening = (lat*cos(2.0*pi_*(284.0+doy)/365.0) < 0.0)
+ 
+   associate(vegn=>tile%vegn, soil=>tile%soil)
+ 
++  ! ydkoh 2026-10: leaf-on uses the shorter-smoothed temperature when tau_pheno_on > 0
++  tc_on = vegn%tc_pheno
++  if (tau_pheno_on > 0.0 .and. vegn%tc_pheno_on > 0.0) tc_on = vegn%tc_pheno_on
++
+   leaf_litt_C(:) = 0.0 ; leaf_litt_N(:) = 0.0
+   root_litt_C    = 0.0 ; root_litt_N    = 0.0
+   do i = 1,vegn%n_cohorts
+@@ -2110,7 +2130,7 @@
+      select case(cc%status)
+      case (LEAF_OFF)
+         if (cc%gdd > sp%gdd_crit        .and. &
+-            vegn%tc_pheno >= sp%tc_crit .and. &
++            tc_on >= sp%tc_crit .and. &
+             .not.drought) then
+            cc%status = LEAF_ON
+            ! isa 201707215 - update target biomass at the start of the growing season
+@@ -2122,7 +2142,12 @@
+         endif
+      case (LEAF_ON)
+         ! cold-deciduous: turn leaves off and reset GDD
+-        if (vegn%tc_pheno < sp%tc_crit) then
++        ! ydkoh 2026-10: optional autumn rule (off unless both parameters > 0)
++        ! ydkoh 2026-10: with tau_pheno_on > 0 the cold test applies only on shortening days; otherwise a
++        ! 5-day leaf-on is undone next day by the 20-day tc_pheno (still < tc_crit) and GDD is reset to 0
++        if ((vegn%tc_pheno < sp%tc_crit .and. (tau_pheno_on <= 0.0 .or. shortening)) .or. &
++            (sp%tc_crit_off > 0.0 .and. sp%dayl_crit_off > 0.0 .and. shortening .and. &
++             dayl < sp%dayl_crit_off .and. vegn%tc_pheno < sp%tc_crit_off)) then
+            cc%status = LEAF_OFF
+            cc%gdd = 0.0
+         endif

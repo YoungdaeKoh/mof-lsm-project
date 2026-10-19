@@ -71,7 +71,7 @@ use vegn_dynamics_mod, only : vegn_dynamics_init, vegn_dynamics_end, &
      vegn_carbon_int_lm3, vegn_carbon_int_ppa,    &
      vegn_phenology_lm3,  vegn_phenology_ppa,     &
      vegn_growth, vegn_starvation_ppa, vegn_biogeography, &
-     vegn_reproduction_ppa
+     vegn_reproduction_ppa, tau_pheno_on
 use vegn_disturbance_mod, only : vegn_disturbance_init, vegn_nat_mortality_lm3, &
      vegn_disturbance, update_fuel
 use vegn_harvesting_mod, only : &
@@ -2661,6 +2661,13 @@ subroutine update_vegn_slow( )
                 max(tile%vegn%daily_T_max-sp%gdd_base_T,0.0))/2
            end associate ! F2003
         enddo
+        ! ydkoh 2026-10: shorter-smoothed temperature for leaf-on (off unless tau_pheno_on > 0);
+        ! not in the restart, so it starts from tc_pheno on the first day of each run
+        if (tau_pheno_on > 0.0) then
+           if (tile%vegn%tc_pheno_on < 0.0) tile%vegn%tc_pheno_on = tile%vegn%tc_pheno
+           tile%vegn%tc_pheno_on = tile%vegn%tc_pheno_on * (1.0 - 1.0/tau_pheno_on) &
+                                 + tile%vegn%tc_daily * (1.0/tau_pheno_on)
+        endif
         tile%vegn%tc_pheno = tile%vegn%tc_pheno * 0.95 + tile%vegn%tc_daily * 0.05
         w = 1.0/(1+tau_smooth_T_dorm)
         tile%vegn%tc_dorm  = w*tile%vegn%tc_daily + (1-w)*tile%vegn%tc_dorm

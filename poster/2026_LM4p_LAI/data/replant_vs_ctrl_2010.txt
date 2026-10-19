@@ -1,0 +1,24 @@
+# Monthly LAI 2010: GIMMS vs CTRL (base) vs REPL (replant1y_np48_d), common valid cells, cos-lat
+# gapclosed = share of the CTRL-GIMMS Sep-Oct gap removed by REPL; MAE12 = mean abs monthly error
+region           cells | ann GIMMS CTRL REPL (bias% CTRL -> REPL) | MJ GIMMS CTRL REPL | SO GIMMS CTRL REPL gap-closed | MAE12 CTRL -> REPL
+tropics 30S-30N   5384 | ann  2.41  3.50  3.53 (  +45% ->   +46%) | MJ  2.40  3.63  3.64 | SO  2.51  3.30  3.36 gapclosed    -8% | MAE12 1.09 -> 1.12
+20-60S            1561 | ann  1.24  2.48  2.44 ( +100% ->   +97%) | MJ  1.06  2.60  2.51 | SO  1.17  2.28  2.16 gapclosed   +11% | MAE12 1.24 -> 1.20
+50-70N            4956 | ann  1.00  1.59  1.74 (  +59% ->   +75%) | MJ  1.63  1.57  1.82 | SO  0.95  2.35  2.57 gapclosed   -16% | MAE12 0.61 -> 0.75
+30-50N            3413 | ann  1.08  1.63  1.63 (  +51% ->   +50%) | MJ  1.65  1.97  2.01 | SO  1.13  1.95  1.92 gapclosed    +4% | MAE12 0.55 -> 0.55
+global land      15109 | ann  1.70  2.55  2.59 (  +50% ->   +53%) | MJ  1.95  2.68  2.74 | SO  1.74  2.70  2.75 gapclosed    -6% | MAE12 0.85 -> 0.89
+NWN               1044 | ann  0.84  1.73  1.88 ( +105% ->  +123%) | MJ  1.22  1.73  1.97 | SO  0.87  2.56  2.78 gapclosed   -13% | MAE12 0.89 -> 1.04
+NEN                809 | ann  0.57  1.47  1.71 ( +158% ->  +201%) | MJ  0.81  1.26  1.66 | SO  0.60  2.11  2.39 gapclosed   -18% | MAE12 0.90 -> 1.14
+NEU                487 | ann  1.36  1.51  1.79 (  +11% ->   +32%) | MJ  2.14  1.58  1.97 | SO  1.62  2.61  2.85 gapclosed   -25% | MAE12 0.41 -> 0.49
+WCE                455 | ann  1.63  1.51  1.67 (   -7% ->    +3%) | MJ  3.04  1.99  2.27 | SO  1.56  2.24  2.34 gapclosed   -15% | MAE12 0.49 -> 0.54
+RAR               1112 | ann  0.47  0.48  0.48 (   +3% ->    +3%) | MJ  0.66  0.30  0.30 | SO  0.47  0.94  0.94 gapclosed    +0% | MAE12 0.26 -> 0.26
+WSB                599 | ann  0.82  1.84  1.92 ( +123% ->  +132%) | MJ  1.38  1.92  2.10 | SO  0.73  2.20  2.32 gapclosed    -9% | MAE12 1.01 -> 1.09
+ESB                800 | ann  1.11  1.70  1.72 (  +53% ->   +55%) | MJ  1.85  1.75  1.88 | SO  0.88  2.23  2.41 gapclosed   -14% | MAE12 0.68 -> 0.65
+RFE                494 | ann  1.09  1.21  1.32 (  +11% ->   +20%) | MJ  1.70  1.01  1.21 | SO  1.10  2.17  2.38 gapclosed   -20% | MAE12 0.42 -> 0.44
+ENA                426 | ann  2.17  2.42  2.84 (  +12% ->   +31%) | MJ  3.44  2.84  3.38 | SO  2.33  3.64  3.98 gapclosed   -26% | MAE12 0.65 -> 0.76
+EAS                582 | ann  1.85  2.62  2.73 (  +41% ->   +48%) | MJ  2.28  2.88  2.92 | SO  2.29  3.23  3.25 gapclosed    -2% | MAE12 0.76 -> 0.88
+NSA                377 | ann  4.94  6.30  6.28 (  +27% ->   +27%) | MJ  4.81  6.37  6.33 | SO  5.37  6.33  6.36 gapclosed    -3% | MAE12 1.36 -> 1.34
+SAM                249 | ann  3.69  4.78  4.79 (  +29% ->   +30%) | MJ  3.69  5.41  5.38 | SO  3.56  3.08  3.13 gapclosed   +10% | MAE12 1.25 -> 1.24
+WAF                286 | ann  1.73  2.81  2.91 (  +62% ->   +68%) | MJ  1.75  2.47  2.52 | SO  2.27  3.64  3.92 gapclosed   -20% | MAE12 1.11 -> 1.21
+CAF                391 | ann  3.10  4.29  4.33 (  +38% ->   +40%) | MJ  3.18  4.34  4.35 | SO  3.29  4.29  4.44 gapclosed   -15% | MAE12 1.19 -> 1.23
+SEA                626 | ann  4.03  5.81  5.79 (  +44% ->   +44%) | MJ  4.19  5.72  5.71 | SO  4.07  5.98  5.95 gapclosed    +2% | MAE12 1.78 -> 1.76
+SES                371 | ann  1.78  4.45  4.46 ( +150% ->  +150%) | MJ  1.42  4.77  4.76 | SO  1.53  3.98  4.00 gapclosed    -1% | MAE12 2.66 -> 2.68

@@ -54,6 +54,7 @@ public :: vegn_carbon_int_ppa   ! fast time-scale integrator of carbon balance
 public :: vegn_growth           ! slow time-scale redistributor of accumulated carbon
 public :: vegn_phenology_lm3
 public :: vegn_phenology_ppa
+public :: tau_pheno_on
 public :: vegn_biogeography
 public :: vegn_reproduction_ppa
 
@@ -79,8 +80,12 @@ logical :: seed_transport_repro_fix = .TRUE. ! turn to FALSE to trigger old beha
    ! across restarts, when an intermediate restart -- and therefore model
    ! initialization -- happens between the start of the test and the time of seed
    ! transport application.
+! ydkoh 2026-10: time scale (days) of a separate smoothed temperature used only for the
+! spring leaf-on test in vegn_phenology_ppa (LM4 notes, spring gate diagnosis). The default
+! tc_pheno uses weight 0.05 per day (~20 d), which delays leaf-on by 3-4 weeks. <= 0 = off.
+real :: tau_pheno_on = -1.0
 namelist /vegn_dynamics_nml/ &
-   deltaDBH_max, deltaLAI_max, seed_transport_repro_fix
+   deltaDBH_max, deltaLAI_max, seed_transport_repro_fix, tau_pheno_on
 
 ! ---- end of namelist
 
@@ -2084,6 +2089,7 @@ subroutine vegn_phenology_ppa(tile, lat, doy)
   real :: theta_crit ! critical soil moisture for drought-deciduous phenology
   logical :: drought ! drought indicator
   real    :: decl, dayl ! solar declination (radian) and day length (hours), for the autumn rule
+  real    :: tc_on      ! smoothed temperature used by the leaf-on test
   logical :: shortening ! true when days are getting shorter at this latitude
   real, parameter :: pi_ = 3.14159265358979
 
@@ -2094,6 +2100,10 @@ subroutine vegn_phenology_ppa(tile, lat, doy)
   shortening = (lat*cos(2.0*pi_*(284.0+doy)/365.0) < 0.0)
 
   associate(vegn=>tile%vegn, soil=>tile%soil)
+
+  ! ydkoh 2026-10: leaf-on uses the shorter-smoothed temperature when tau_pheno_on > 0
+  tc_on = vegn%tc_pheno
+  if (tau_pheno_on > 0.0 .and. vegn%tc_pheno_on > 0.0) tc_on = vegn%tc_pheno_on
 
   leaf_litt_C(:) = 0.0 ; leaf_litt_N(:) = 0.0
   root_litt_C    = 0.0 ; root_litt_N    = 0.0
@@ -2120,7 +2130,7 @@ subroutine vegn_phenology_ppa(tile, lat, doy)
      select case(cc%status)
      case (LEAF_OFF)
         if (cc%gdd > sp%gdd_crit        .and. &
-            vegn%tc_pheno >= sp%tc_crit .and. &
+            tc_on >= sp%tc_crit .and. &
             .not.drought) then
            cc%status = LEAF_ON
            ! isa 201707215 - update target biomass at the start of the growing season
@@ -2133,7 +2143,9 @@ subroutine vegn_phenology_ppa(tile, lat, doy)
      case (LEAF_ON)
         ! cold-deciduous: turn leaves off and reset GDD
         ! ydkoh 2026-10: optional autumn rule (off unless both parameters > 0)
-        if (vegn%tc_pheno < sp%tc_crit .or. &
+        ! ydkoh 2026-10: with tau_pheno_on > 0 the cold test applies only on shortening days; otherwise a
+        ! 5-day leaf-on is undone next day by the 20-day tc_pheno (still < tc_crit) and GDD is reset to 0
+        if ((vegn%tc_pheno < sp%tc_crit .and. (tau_pheno_on <= 0.0 .or. shortening)) .or. &
             (sp%tc_crit_off > 0.0 .and. sp%dayl_crit_off > 0.0 .and. shortening .and. &
              dayl < sp%dayl_crit_off .and. vegn%tc_pheno < sp%tc_crit_off)) then
            cc%status = LEAF_OFF

@@ -1,0 +1,336 @@
+NEE decomposition, pilot runs 2010 vs FLUXCOM-X (g C m-2 d-1; NEE<0 uptake; Reco_obs = NEE+GPP)
+
+NEU (516 cells)  closure max|NEE-(Reco-GPP)| CTRL = 0.000 ; resp vs Ra / Reco (annual) = 0.91 / 0.91 / 1.88
+  month               1      2      3      4      5      6      7      8      9     10     11     12
+  obs GPP          0.05   0.18   0.53   1.68   3.49   5.56   5.81   4.35   2.47   1.13   0.27   0.02
+  obs Reco         0.60   0.62   0.84   1.32   2.22   3.41   4.37   3.85   2.96   1.94   1.07   0.63
+  obs NEE          0.55   0.44   0.31  -0.35  -1.27  -2.15  -1.44  -0.50   0.49   0.81   0.80   0.60
+  CTRL GPP         0.01   0.01   0.08   0.80   2.16   5.86   6.37   5.25   3.33   1.13   0.17   0.01
+  CTRL Ra          0.02   0.02   0.07   0.32   0.99   2.14   2.47   2.27   1.62   0.75   0.24   0.02
+  CTRL Rh          0.25   0.20   0.27   0.51   1.23   1.89   2.69   2.03   1.21   0.67   0.44   0.27
+  CTRL Reco        0.26   0.22   0.34   0.83   2.22   4.03   5.16   4.30   2.83   1.42   0.68   0.28
+  CTRL NEE         0.26   0.21   0.26   0.03   0.06  -1.83  -1.21  -0.95  -0.50   0.29   0.51   0.27
+  TC10 GPP         0.01   0.01   0.07   0.49   1.33   3.75   5.58   4.98   3.01   0.94   0.12   0.01
+  TC10 Ra          0.02   0.02   0.06   0.24   0.67   1.59   2.44   2.12   1.42   0.57   0.14   0.02
+  TC10 Rh          0.25   0.20   0.27   0.51   1.24   1.91   2.62   1.97   1.17   0.64   0.43   0.26
+  TC10 Reco        0.26   0.22   0.33   0.76   1.91   3.50   5.05   4.09   2.59   1.21   0.58   0.28
+  TC10 NEE         0.26   0.21   0.26   0.26   0.58  -0.26  -0.53  -0.88  -0.42   0.28   0.46   0.27
+  DL14+TC10 GPP    0.01   0.01   0.08   0.80   2.16   5.86   6.37   5.25   3.15   0.99   0.12   0.01
+  DL14+TC10 Ra     0.02   0.02   0.07   0.32   0.99   2.14   2.47   2.27   1.48   0.66   0.15   0.02
+  DL14+TC10 Rh     0.25   0.20   0.27   0.51   1.23   1.89   2.69   2.03   1.21   0.66   0.44   0.27
+  DL14+TC10 Reco   0.26   0.22   0.34   0.83   2.22   4.03   5.16   4.30   2.69   1.32   0.60   0.28
+  DL14+TC10 NEE    0.26   0.21   0.26   0.03   0.06  -1.83  -1.21  -0.95  -0.45   0.33   0.47   0.28
+  DL13/12 GPP      0.01   0.01   0.08   0.80   2.16   5.86   6.37   5.25   2.78   0.61   0.08   0.00
+  DL13/12 Ra       0.02   0.02   0.07   0.32   0.99   2.14   2.47   2.27   1.28   0.45   0.12   0.01
+  DL13/12 Rh       0.25   0.20   0.27   0.51   1.23   1.89   2.69   2.03   1.20   0.66   0.44   0.27
+  DL13/12 Reco     0.26   0.22   0.34   0.83   2.22   4.03   5.16   4.30   2.48   1.10   0.57   0.28
+  DL13/12 NEE      0.26   0.21   0.26   0.03   0.06  -1.83  -1.21  -0.95  -0.30   0.49   0.49   0.28
+  DLtype GPP       0.01   0.01   0.08   0.80   2.16   5.86   6.37   5.25   2.97   0.66   0.09   0.00
+  DLtype Ra        0.02   0.02   0.07   0.32   0.99   2.14   2.47   2.27   1.40   0.41   0.14   0.01
+  DLtype Rh        0.25   0.20   0.27   0.51   1.23   1.89   2.69   2.03   1.21   0.66   0.44   0.27
+  DLtype Reco      0.26   0.22   0.34   0.83   2.22   4.03   5.16   4.30   2.60   1.07   0.58   0.28
+  DLtype NEE       0.26   0.21   0.26   0.03   0.06  -1.83  -1.21  -0.95  -0.37   0.41   0.49   0.28
+  bias decomposition: dNEE = dReco - dGPP   (model - obs)
+    CTRL       DJF    dNEE  -0.29 = dReco  -0.36 - dGPP  -0.07  | Ra  0.02 Rh  0.24 (obs Reco  0.62)
+    CTRL       MAM    dNEE  +0.56 = dReco  -0.33 - dGPP  -0.89  | Ra  0.46 Rh  0.67 (obs Reco  1.46)
+    CTRL       MayJun dNEE  +0.83 = dReco  +0.31 - dGPP  -0.52  | Ra  1.56 Rh  1.56 (obs Reco  2.81)
+    CTRL       Jul    dNEE  +0.22 = dReco  +0.79 - dGPP  +0.57  | Ra  2.47 Rh  2.69 (obs Reco  4.37)
+    CTRL       Aug    dNEE  -0.45 = dReco  +0.45 - dGPP  +0.91  | Ra  2.27 Rh  2.03 (obs Reco  3.85)
+    CTRL       SepOct dNEE  -0.75 = dReco  -0.32 - dGPP  +0.43  | Ra  1.19 Rh  0.94 (obs Reco  2.45)
+    CTRL       ann    dNEE  -0.07 = dReco  -0.10 - dGPP  -0.03  | Ra  0.91 Rh  0.97 (obs Reco  1.99)
+    TC10       DJF    dNEE  -0.29 = dReco  -0.36 - dGPP  -0.08  | Ra  0.02 Rh  0.24 (obs Reco  0.62)
+    TC10       MAM    dNEE  +0.81 = dReco  -0.46 - dGPP  -1.27  | Ra  0.32 Rh  0.67 (obs Reco  1.46)
+    TC10       MayJun dNEE  +1.88 = dReco  -0.11 - dGPP  -1.99  | Ra  1.13 Rh  1.57 (obs Reco  2.81)
+    TC10       Jul    dNEE  +0.91 = dReco  +0.68 - dGPP  -0.22  | Ra  2.44 Rh  2.62 (obs Reco  4.37)
+    TC10       Aug    dNEE  -0.39 = dReco  +0.24 - dGPP  +0.63  | Ra  2.12 Rh  1.97 (obs Reco  3.85)
+    TC10       SepOct dNEE  -0.72 = dReco  -0.55 - dGPP  +0.17  | Ra  1.00 Rh  0.91 (obs Reco  2.45)
+    TC10       ann    dNEE  +0.18 = dReco  -0.25 - dGPP  -0.44  | Ra  0.78 Rh  0.96 (obs Reco  1.99)
+    DL14+TC10  DJF    dNEE  -0.29 = dReco  -0.36 - dGPP  -0.08  | Ra  0.02 Rh  0.24 (obs Reco  0.62)
+    DL14+TC10  MAM    dNEE  +0.56 = dReco  -0.33 - dGPP  -0.89  | Ra  0.46 Rh  0.67 (obs Reco  1.46)
+    DL14+TC10  MayJun dNEE  +0.83 = dReco  +0.31 - dGPP  -0.52  | Ra  1.56 Rh  1.56 (obs Reco  2.81)
+    DL14+TC10  Jul    dNEE  +0.22 = dReco  +0.79 - dGPP  +0.57  | Ra  2.47 Rh  2.69 (obs Reco  4.37)
+    DL14+TC10  Aug    dNEE  -0.45 = dReco  +0.45 - dGPP  +0.90  | Ra  2.27 Rh  2.03 (obs Reco  3.85)
+    DL14+TC10  SepOct dNEE  -0.71 = dReco  -0.44 - dGPP  +0.27  | Ra  1.07 Rh  0.94 (obs Reco  2.45)
+    DL14+TC10  ann    dNEE  -0.07 = dReco  -0.13 - dGPP  -0.06  | Ra  0.88 Rh  0.97 (obs Reco  1.99)
+    DL13/12    DJF    dNEE  -0.29 = dReco  -0.36 - dGPP  -0.08  | Ra  0.02 Rh  0.24 (obs Reco  0.62)
+    DL13/12    MAM    dNEE  +0.56 = dReco  -0.33 - dGPP  -0.89  | Ra  0.46 Rh  0.67 (obs Reco  1.46)
+    DL13/12    MayJun dNEE  +0.83 = dReco  +0.31 - dGPP  -0.52  | Ra  1.56 Rh  1.56 (obs Reco  2.81)
+    DL13/12    Jul    dNEE  +0.22 = dReco  +0.79 - dGPP  +0.57  | Ra  2.47 Rh  2.69 (obs Reco  4.37)
+    DL13/12    Aug    dNEE  -0.45 = dReco  +0.45 - dGPP  +0.90  | Ra  2.27 Rh  2.03 (obs Reco  3.85)
+    DL13/12    SepOct dNEE  -0.55 = dReco  -0.66 - dGPP  -0.11  | Ra  0.86 Rh  0.93 (obs Reco  2.45)
+    DL13/12    ann    dNEE  -0.04 = dReco  -0.17 - dGPP  -0.13  | Ra  0.85 Rh  0.97 (obs Reco  1.99)
+    DLtype     DJF    dNEE  -0.29 = dReco  -0.36 - dGPP  -0.08  | Ra  0.02 Rh  0.24 (obs Reco  0.62)
+    DLtype     MAM    dNEE  +0.56 = dReco  -0.33 - dGPP  -0.89  | Ra  0.46 Rh  0.67 (obs Reco  1.46)
+    DLtype     MayJun dNEE  +0.83 = dReco  +0.31 - dGPP  -0.52  | Ra  1.56 Rh  1.56 (obs Reco  2.81)
+    DLtype     Jul    dNEE  +0.22 = dReco  +0.79 - dGPP  +0.57  | Ra  2.47 Rh  2.69 (obs Reco  4.37)
+    DLtype     Aug    dNEE  -0.45 = dReco  +0.45 - dGPP  +0.90  | Ra  2.27 Rh  2.03 (obs Reco  3.85)
+    DLtype     SepOct dNEE  -0.63 = dReco  -0.61 - dGPP  +0.01  | Ra  0.90 Rh  0.93 (obs Reco  2.45)
+    DLtype     ann    dNEE  -0.05 = dReco  -0.16 - dGPP  -0.11  | Ra  0.85 Rh  0.97 (obs Reco  1.99)
+
+RFE (502 cells)  closure max|NEE-(Reco-GPP)| CTRL = 0.000 ; resp vs Ra / Reco (annual) = 0.73 / 0.73 / 1.64
+  month               1      2      3      4      5      6      7      8      9     10     11     12
+  obs GPP         -0.10  -0.03   0.11   0.41   1.75   4.84   6.10   4.74   2.49   0.51   0.00  -0.09
+  obs Reco         0.29   0.30   0.35   0.53   1.41   3.24   4.34   3.75   2.38   1.06   0.51   0.39
+  obs NEE          0.38   0.33   0.24   0.12  -0.34  -1.59  -1.77  -0.99  -0.11   0.55   0.51   0.48
+  CTRL GPP         0.00   0.00   0.00   0.03   0.68   4.07   6.11   5.30   3.44   0.86   0.04   0.00
+  CTRL Ra          0.00   0.00   0.00   0.04   0.35   2.09   2.22   2.17   1.49   0.38   0.03   0.01
+  CTRL Rh          0.09   0.07   0.07   0.13   0.82   2.35   2.72   2.27   1.40   0.60   0.28   0.15
+  CTRL Reco        0.09   0.07   0.07   0.17   1.18   4.44   4.94   4.44   2.88   0.98   0.30   0.16
+  CTRL NEE         0.09   0.07   0.07   0.13   0.49   0.37  -1.18  -0.87  -0.56   0.13   0.26   0.16
+  TC10 GPP         0.00   0.00   0.00   0.03   0.65   2.32   5.08   5.15   3.17   0.71   0.03   0.00
+  TC10 Ra          0.00   0.00   0.00   0.04   0.33   1.29   2.28   2.10   1.32   0.31   0.02   0.01
+  TC10 Rh          0.09   0.07   0.07   0.13   0.83   2.50   2.77   2.24   1.37   0.59   0.27   0.15
+  TC10 Reco        0.09   0.07   0.07   0.17   1.15   3.78   5.06   4.34   2.69   0.89   0.30   0.16
+  TC10 NEE         0.09   0.07   0.07   0.13   0.51   1.47  -0.02  -0.80  -0.48   0.19   0.26   0.16
+  DL14+TC10 GPP    0.00   0.00   0.00   0.03   0.68   4.07   6.11   5.30   3.21   0.71   0.03   0.00
+  DL14+TC10 Ra     0.00   0.00   0.00   0.04   0.35   2.09   2.22   2.17   1.34   0.31   0.02   0.01
+  DL14+TC10 Rh     0.09   0.07   0.07   0.13   0.82   2.35   2.72   2.27   1.40   0.59   0.27   0.15
+  DL14+TC10 Reco   0.09   0.07   0.07   0.17   1.18   4.44   4.94   4.44   2.74   0.90   0.30   0.16
+  DL14+TC10 NEE    0.09   0.07   0.07   0.13   0.49   0.37  -1.18  -0.87  -0.47   0.19   0.26   0.16
+  DL13/12 GPP      0.00   0.00   0.00   0.03   0.68   4.07   6.11   5.30   2.86   0.46   0.02   0.00
+  DL13/12 Ra       0.00   0.00   0.00   0.04   0.35   2.09   2.22   2.17   1.14   0.21   0.02   0.01
+  DL13/12 Rh       0.09   0.07   0.07   0.13   0.82   2.35   2.72   2.27   1.40   0.59   0.27   0.16
+  DL13/12 Reco     0.09   0.07   0.07   0.17   1.18   4.44   4.94   4.44   2.54   0.80   0.30   0.16
+  DL13/12 NEE      0.09   0.07   0.07   0.13   0.49   0.37  -1.18  -0.87  -0.32   0.34   0.27   0.16
+  DLtype GPP       0.00   0.00   0.00   0.03   0.68   4.07   6.11   5.30   3.13   0.55   0.02   0.00
+  DLtype Ra        0.00   0.00   0.00   0.04   0.35   2.09   2.22   2.17   1.29   0.23   0.02   0.01
+  DLtype Rh        0.09   0.07   0.07   0.13   0.82   2.35   2.72   2.27   1.40   0.59   0.27   0.15
+  DLtype Reco      0.09   0.07   0.07   0.17   1.18   4.44   4.94   4.44   2.69   0.82   0.30   0.16
+  DLtype NEE       0.09   0.07   0.07   0.13   0.49   0.37  -1.18  -0.87  -0.44   0.27   0.27   0.16
+  bias decomposition: dNEE = dReco - dGPP   (model - obs)
+    CTRL       DJF    dNEE  -0.29 = dReco  -0.22 - dGPP  +0.07  | Ra  0.00 Rh  0.10 (obs Reco  0.32)
+    CTRL       MAM    dNEE  +0.23 = dReco  -0.29 - dGPP  -0.51  | Ra  0.13 Rh  0.34 (obs Reco  0.76)
+    CTRL       MayJun dNEE  +1.40 = dReco  +0.48 - dGPP  -0.91  | Ra  1.22 Rh  1.59 (obs Reco  2.33)
+    CTRL       Jul    dNEE  +0.59 = dReco  +0.60 - dGPP  +0.01  | Ra  2.22 Rh  2.72 (obs Reco  4.34)
+    CTRL       Aug    dNEE  +0.13 = dReco  +0.69 - dGPP  +0.56  | Ra  2.17 Rh  2.27 (obs Reco  3.75)
+    CTRL       SepOct dNEE  -0.43 = dReco  +0.21 - dGPP  +0.65  | Ra  0.94 Rh  1.00 (obs Reco  1.72)
+    CTRL       ann    dNEE  +0.11 = dReco  +0.10 - dGPP  -0.02  | Ra  0.73 Rh  0.91 (obs Reco  1.54)
+    TC10       DJF    dNEE  -0.29 = dReco  -0.22 - dGPP  +0.07  | Ra  0.00 Rh  0.10 (obs Reco  0.32)
+    TC10       MAM    dNEE  +0.23 = dReco  -0.29 - dGPP  -0.53  | Ra  0.12 Rh  0.34 (obs Reco  0.76)
+    TC10       MayJun dNEE  +1.95 = dReco  +0.14 - dGPP  -1.81  | Ra  0.81 Rh  1.66 (obs Reco  2.33)
+    TC10       Jul    dNEE  +1.75 = dReco  +0.72 - dGPP  -1.03  | Ra  2.28 Rh  2.77 (obs Reco  4.34)
+    TC10       Aug    dNEE  +0.19 = dReco  +0.60 - dGPP  +0.41  | Ra  2.10 Rh  2.24 (obs Reco  3.75)
+    TC10       SepOct dNEE  -0.36 = dReco  +0.07 - dGPP  +0.44  | Ra  0.81 Rh  0.98 (obs Reco  1.72)
+    TC10       ann    dNEE  +0.32 = dReco  +0.02 - dGPP  -0.30  | Ra  0.64 Rh  0.92 (obs Reco  1.54)
+    DL14+TC10  DJF    dNEE  -0.29 = dReco  -0.22 - dGPP  +0.07  | Ra  0.00 Rh  0.10 (obs Reco  0.32)
+    DL14+TC10  MAM    dNEE  +0.23 = dReco  -0.29 - dGPP  -0.51  | Ra  0.13 Rh  0.34 (obs Reco  0.76)
+    DL14+TC10  MayJun dNEE  +1.40 = dReco  +0.48 - dGPP  -0.91  | Ra  1.22 Rh  1.59 (obs Reco  2.33)
+    DL14+TC10  Jul    dNEE  +0.59 = dReco  +0.60 - dGPP  +0.01  | Ra  2.22 Rh  2.72 (obs Reco  4.34)
+    DL14+TC10  Aug    dNEE  +0.13 = dReco  +0.69 - dGPP  +0.56  | Ra  2.17 Rh  2.27 (obs Reco  3.75)
+    DL14+TC10  SepOct dNEE  -0.36 = dReco  +0.10 - dGPP  +0.46  | Ra  0.83 Rh  1.00 (obs Reco  1.72)
+    DL14+TC10  ann    dNEE  +0.13 = dReco  +0.08 - dGPP  -0.05  | Ra  0.71 Rh  0.91 (obs Reco  1.54)
+    DL13/12    DJF    dNEE  -0.29 = dReco  -0.22 - dGPP  +0.07  | Ra  0.00 Rh  0.10 (obs Reco  0.32)
+    DL13/12    MAM    dNEE  +0.23 = dReco  -0.29 - dGPP  -0.51  | Ra  0.13 Rh  0.34 (obs Reco  0.76)
+    DL13/12    MayJun dNEE  +1.40 = dReco  +0.48 - dGPP  -0.91  | Ra  1.22 Rh  1.59 (obs Reco  2.33)
+    DL13/12    Jul    dNEE  +0.59 = dReco  +0.60 - dGPP  +0.01  | Ra  2.22 Rh  2.72 (obs Reco  4.34)
+    DL13/12    Aug    dNEE  +0.13 = dReco  +0.69 - dGPP  +0.56  | Ra  2.17 Rh  2.27 (obs Reco  3.75)
+    DL13/12    SepOct dNEE  -0.21 = dReco  -0.05 - dGPP  +0.16  | Ra  0.67 Rh  1.00 (obs Reco  1.72)
+    DL13/12    ann    dNEE  +0.15 = dReco  +0.06 - dGPP  -0.10  | Ra  0.69 Rh  0.91 (obs Reco  1.54)
+    DLtype     DJF    dNEE  -0.29 = dReco  -0.22 - dGPP  +0.07  | Ra  0.00 Rh  0.10 (obs Reco  0.32)
+    DLtype     MAM    dNEE  +0.23 = dReco  -0.29 - dGPP  -0.51  | Ra  0.13 Rh  0.34 (obs Reco  0.76)
+    DLtype     MayJun dNEE  +1.40 = dReco  +0.48 - dGPP  -0.91  | Ra  1.22 Rh  1.59 (obs Reco  2.33)
+    DLtype     Jul    dNEE  +0.59 = dReco  +0.60 - dGPP  +0.01  | Ra  2.22 Rh  2.72 (obs Reco  4.34)
+    DLtype     Aug    dNEE  +0.13 = dReco  +0.69 - dGPP  +0.56  | Ra  2.17 Rh  2.27 (obs Reco  3.75)
+    DLtype     SepOct dNEE  -0.31 = dReco  +0.03 - dGPP  +0.34  | Ra  0.76 Rh  1.00 (obs Reco  1.72)
+    DLtype     ann    dNEE  +0.14 = dReco  +0.07 - dGPP  -0.07  | Ra  0.70 Rh  0.91 (obs Reco  1.54)
+
+NWN (1165 cells)  closure max|NEE-(Reco-GPP)| CTRL = 0.000 ; resp vs Ra / Reco (annual) = 0.81 / 0.81 / 1.78
+  month               1      2      3      4      5      6      7      8      9     10     11     12
+  obs GPP         -0.05   0.04   0.20   0.66   1.60   3.57   4.27   3.27   1.44   0.45   0.04  -0.08
+  obs Reco         0.31   0.36   0.44   0.66   1.07   2.17   2.93   2.72   1.67   0.95   0.50   0.30
+  obs NEE          0.36   0.32   0.25  -0.01  -0.53  -1.39  -1.34  -0.55   0.24   0.51   0.46   0.38
+  CTRL GPP         0.02   0.05   0.10   0.62   1.58   4.99   6.07   4.91   2.95   0.80   0.08   0.01
+  CTRL Ra          0.04   0.05   0.09   0.31   0.77   2.11   2.29   2.13   1.33   0.45   0.09   0.02
+  CTRL Rh          0.14   0.16   0.17   0.36   1.27   2.31   2.66   2.23   1.27   0.68   0.31   0.16
+  CTRL Reco        0.18   0.21   0.26   0.68   2.04   4.41   4.95   4.36   2.61   1.13   0.40   0.18
+  CTRL NEE         0.17   0.16   0.16   0.05   0.46  -0.57  -1.12  -0.56  -0.34   0.33   0.32   0.17
+  TC10 GPP         0.02   0.05   0.10   0.60   1.27   2.86   4.94   4.75   2.56   0.62   0.06   0.01
+  TC10 Ra          0.04   0.05   0.09   0.30   0.50   1.50   2.16   2.07   1.10   0.35   0.08   0.02
+  TC10 Rh          0.14   0.16   0.17   0.36   1.31   2.64   2.87   2.25   1.27   0.67   0.31   0.16
+  TC10 Reco        0.18   0.20   0.26   0.66   1.82   4.15   5.04   4.32   2.36   1.02   0.39   0.18
+  TC10 NEE         0.17   0.16   0.16   0.06   0.55   1.29   0.10  -0.43  -0.19   0.40   0.32   0.17
+  DL14+TC10 GPP    0.02   0.05   0.10   0.62   1.58   4.99   6.07   4.91   2.66   0.64   0.07   0.01
+  DL14+TC10 Ra     0.04   0.05   0.09   0.31   0.77   2.11   2.29   2.13   1.16   0.37   0.08   0.02
+  DL14+TC10 Rh     0.14   0.16   0.17   0.36   1.27   2.31   2.66   2.23   1.28   0.68   0.31   0.16
+  DL14+TC10 Reco   0.18   0.21   0.26   0.68   2.04   4.41   4.95   4.35   2.44   1.05   0.39   0.18
+  DL14+TC10 NEE    0.17   0.16   0.16   0.05   0.46  -0.57  -1.12  -0.56  -0.22   0.41   0.33   0.17
+  DL13/12 GPP      0.02   0.05   0.10   0.62   1.58   4.99   6.07   4.91   2.54   0.59   0.06   0.01
+  DL13/12 Ra       0.04   0.05   0.09   0.31   0.77   2.11   2.29   2.13   1.08   0.39   0.08   0.02
+  DL13/12 Rh       0.14   0.16   0.17   0.36   1.27   2.31   2.66   2.23   1.27   0.68   0.31   0.16
+  DL13/12 Reco     0.18   0.21   0.26   0.68   2.04   4.41   4.95   4.36   2.35   1.07   0.39   0.18
+  DL13/12 NEE      0.17   0.16   0.16   0.05   0.46  -0.57  -1.12  -0.56  -0.19   0.48   0.33   0.17
+  DLtype GPP       0.02   0.05   0.10   0.62   1.58   4.99   6.07   4.91   2.72   0.59   0.06   0.01
+  DLtype Ra        0.04   0.05   0.09   0.31   0.77   2.11   2.29   2.13   1.15   0.38   0.08   0.02
+  DLtype Rh        0.14   0.16   0.17   0.36   1.27   2.31   2.66   2.23   1.27   0.68   0.31   0.16
+  DLtype Reco      0.18   0.21   0.26   0.68   2.04   4.41   4.95   4.36   2.42   1.06   0.39   0.18
+  DLtype NEE       0.17   0.16   0.16   0.05   0.46  -0.57  -1.12  -0.56  -0.30   0.47   0.33   0.17
+  bias decomposition: dNEE = dReco - dGPP   (model - obs)
+    CTRL       DJF    dNEE  -0.19 = dReco  -0.14 - dGPP  +0.05  | Ra  0.04 Rh  0.15 (obs Reco  0.33)
+    CTRL       MAM    dNEE  +0.32 = dReco  +0.27 - dGPP  -0.05  | Ra  0.39 Rh  0.60 (obs Reco  0.72)
+    CTRL       MayJun dNEE  +0.90 = dReco  +1.60 - dGPP  +0.70  | Ra  1.44 Rh  1.79 (obs Reco  1.62)
+    CTRL       Jul    dNEE  +0.22 = dReco  +2.03 - dGPP  +1.80  | Ra  2.29 Rh  2.66 (obs Reco  2.93)
+    CTRL       Aug    dNEE  -0.01 = dReco  +1.63 - dGPP  +1.65  | Ra  2.13 Rh  2.23 (obs Reco  2.72)
+    CTRL       SepOct dNEE  -0.37 = dReco  +0.55 - dGPP  +0.93  | Ra  0.89 Rh  0.98 (obs Reco  1.31)
+    CTRL       ann    dNEE  +0.05 = dReco  +0.61 - dGPP  +0.56  | Ra  0.81 Rh  0.98 (obs Reco  1.17)
+    TC10       DJF    dNEE  -0.19 = dReco  -0.14 - dGPP  +0.05  | Ra  0.04 Rh  0.15 (obs Reco  0.33)
+    TC10       MAM    dNEE  +0.36 = dReco  +0.19 - dGPP  -0.16  | Ra  0.30 Rh  0.62 (obs Reco  0.72)
+    TC10       MayJun dNEE  +1.88 = dReco  +1.36 - dGPP  -0.52  | Ra  1.00 Rh  1.98 (obs Reco  1.62)
+    TC10       Jul    dNEE  +1.44 = dReco  +2.11 - dGPP  +0.67  | Ra  2.16 Rh  2.87 (obs Reco  2.93)
+    TC10       Aug    dNEE  +0.12 = dReco  +1.60 - dGPP  +1.48  | Ra  2.07 Rh  2.25 (obs Reco  2.72)
+    TC10       SepOct dNEE  -0.27 = dReco  +0.38 - dGPP  +0.64  | Ra  0.72 Rh  0.97 (obs Reco  1.31)
+    TC10       ann    dNEE  +0.34 = dReco  +0.54 - dGPP  +0.20  | Ra  0.69 Rh  1.03 (obs Reco  1.17)
+    DL14+TC10  DJF    dNEE  -0.19 = dReco  -0.14 - dGPP  +0.05  | Ra  0.04 Rh  0.15 (obs Reco  0.33)
+    DL14+TC10  MAM    dNEE  +0.32 = dReco  +0.27 - dGPP  -0.05  | Ra  0.39 Rh  0.60 (obs Reco  0.72)
+    DL14+TC10  MayJun dNEE  +0.91 = dReco  +1.60 - dGPP  +0.70  | Ra  1.44 Rh  1.79 (obs Reco  1.62)
+    DL14+TC10  Jul    dNEE  +0.22 = dReco  +2.03 - dGPP  +1.80  | Ra  2.29 Rh  2.66 (obs Reco  2.93)
+    DL14+TC10  Aug    dNEE  -0.01 = dReco  +1.63 - dGPP  +1.64  | Ra  2.13 Rh  2.23 (obs Reco  2.72)
+    DL14+TC10  SepOct dNEE  -0.27 = dReco  +0.43 - dGPP  +0.71  | Ra  0.77 Rh  0.98 (obs Reco  1.31)
+    DL14+TC10  ann    dNEE  +0.06 = dReco  +0.59 - dGPP  +0.53  | Ra  0.78 Rh  0.98 (obs Reco  1.17)
+    DL13/12    DJF    dNEE  -0.19 = dReco  -0.14 - dGPP  +0.05  | Ra  0.04 Rh  0.15 (obs Reco  0.33)
+    DL13/12    MAM    dNEE  +0.32 = dReco  +0.27 - dGPP  -0.05  | Ra  0.39 Rh  0.60 (obs Reco  0.72)
+    DL13/12    MayJun dNEE  +0.91 = dReco  +1.60 - dGPP  +0.70  | Ra  1.44 Rh  1.79 (obs Reco  1.62)
+    DL13/12    Jul    dNEE  +0.22 = dReco  +2.03 - dGPP  +1.80  | Ra  2.29 Rh  2.66 (obs Reco  2.93)
+    DL13/12    Aug    dNEE  -0.01 = dReco  +1.63 - dGPP  +1.65  | Ra  2.13 Rh  2.23 (obs Reco  2.72)
+    DL13/12    SepOct dNEE  -0.22 = dReco  +0.40 - dGPP  +0.62  | Ra  0.73 Rh  0.98 (obs Reco  1.31)
+    DL13/12    ann    dNEE  +0.07 = dReco  +0.58 - dGPP  +0.51  | Ra  0.78 Rh  0.98 (obs Reco  1.17)
+    DLtype     DJF    dNEE  -0.19 = dReco  -0.14 - dGPP  +0.05  | Ra  0.04 Rh  0.15 (obs Reco  0.33)
+    DLtype     MAM    dNEE  +0.32 = dReco  +0.27 - dGPP  -0.05  | Ra  0.39 Rh  0.60 (obs Reco  0.72)
+    DLtype     MayJun dNEE  +0.91 = dReco  +1.60 - dGPP  +0.70  | Ra  1.44 Rh  1.79 (obs Reco  1.62)
+    DLtype     Jul    dNEE  +0.22 = dReco  +2.03 - dGPP  +1.80  | Ra  2.29 Rh  2.66 (obs Reco  2.93)
+    DLtype     Aug    dNEE  -0.01 = dReco  +1.63 - dGPP  +1.65  | Ra  2.13 Rh  2.23 (obs Reco  2.72)
+    DLtype     SepOct dNEE  -0.29 = dReco  +0.43 - dGPP  +0.71  | Ra  0.77 Rh  0.97 (obs Reco  1.31)
+    DLtype     ann    dNEE  +0.06 = dReco  +0.59 - dGPP  +0.53  | Ra  0.78 Rh  0.98 (obs Reco  1.17)
+
+ESB (800 cells)  closure max|NEE-(Reco-GPP)| CTRL = 0.000 ; resp vs Ra / Reco (annual) = 0.86 / 0.86 / 1.74
+  month               1      2      3      4      5      6      7      8      9     10     11     12
+  obs GPP         -0.06  -0.02   0.09   0.39   1.60   5.17   6.47   4.92   2.10   0.43   0.04  -0.08
+  obs Reco         0.16   0.18   0.30   0.57   1.38   3.70   4.74   3.86   2.19   0.96   0.40   0.18
+  obs NEE          0.21   0.20   0.21   0.17  -0.21  -1.47  -1.73  -1.06   0.09   0.52   0.36   0.26
+  CTRL GPP         0.00   0.00   0.00   0.08   1.73   5.27   6.20   5.51   3.02   0.56   0.01   0.00
+  CTRL Ra          0.00   0.00   0.00   0.12   0.89   2.53   2.70   2.40   1.41   0.29   0.02   0.00
+  CTRL Rh          0.01   0.01   0.03   0.12   1.00   2.71   2.94   1.99   1.06   0.48   0.19   0.03
+  CTRL Reco        0.01   0.01   0.03   0.24   1.89   5.24   5.65   4.39   2.47   0.76   0.21   0.03
+  CTRL NEE         0.01   0.01   0.03   0.16   0.15  -0.03  -0.55  -1.12  -0.55   0.20   0.19   0.03
+  TC10 GPP         0.00   0.00   0.00   0.08   1.61   3.95   6.00   5.48   2.88   0.48   0.01   0.00
+  TC10 Ra          0.00   0.00   0.00   0.12   0.81   2.16   2.70   2.39   1.32   0.24   0.01   0.00
+  TC10 Rh          0.01   0.01   0.03   0.12   1.01   2.90   3.02   2.00   1.07   0.48   0.19   0.03
+  TC10 Reco        0.01   0.01   0.03   0.24   1.83   5.06   5.71   4.39   2.38   0.72   0.21   0.03
+  TC10 NEE         0.01   0.01   0.03   0.16   0.22   1.11  -0.28  -1.09  -0.50   0.24   0.20   0.03
+  DL14+TC10 GPP    0.00   0.00   0.00   0.08   1.73   5.27   6.19   5.51   2.90   0.48   0.01   0.00
+  DL14+TC10 Ra     0.00   0.00   0.00   0.12   0.89   2.53   2.70   2.40   1.32   0.24   0.01   0.00
+  DL14+TC10 Rh     0.01   0.01   0.03   0.12   1.00   2.71   2.94   1.99   1.06   0.48   0.19   0.03
+  DL14+TC10 Reco   0.01   0.01   0.03   0.24   1.89   5.24   5.65   4.39   2.39   0.72   0.21   0.03
+  DL14+TC10 NEE    0.01   0.01   0.03   0.16   0.15  -0.03  -0.55  -1.12  -0.51   0.24   0.20   0.03
+  DL13/12 GPP      0.00   0.00   0.00   0.08   1.73   5.27   6.19   5.51   2.64   0.38   0.01   0.00
+  DL13/12 Ra       0.00   0.00   0.00   0.12   0.89   2.53   2.70   2.40   1.19   0.21   0.01   0.00
+  DL13/12 Rh       0.01   0.01   0.03   0.12   1.00   2.71   2.94   1.99   1.07   0.48   0.19   0.03
+  DL13/12 Reco     0.01   0.01   0.03   0.24   1.89   5.24   5.65   4.39   2.26   0.69   0.21   0.03
+  DL13/12 NEE      0.01   0.01   0.03   0.16   0.15  -0.03  -0.55  -1.12  -0.38   0.31   0.20   0.03
+  DLtype GPP       0.00   0.00   0.00   0.08   1.73   5.27   6.19   5.51   2.82   0.42   0.01   0.00
+  DLtype Ra        0.00   0.00   0.00   0.12   0.89   2.53   2.70   2.40   1.29   0.22   0.01   0.00
+  DLtype Rh        0.01   0.01   0.03   0.12   1.00   2.71   2.94   1.99   1.07   0.48   0.19   0.03
+  DLtype Reco      0.01   0.01   0.03   0.24   1.89   5.24   5.65   4.39   2.35   0.70   0.21   0.03
+  DLtype NEE       0.01   0.01   0.03   0.16   0.15  -0.03  -0.55  -1.12  -0.47   0.27   0.20   0.03
+  bias decomposition: dNEE = dReco - dGPP   (model - obs)
+    CTRL       DJF    dNEE  -0.21 = dReco  -0.16 - dGPP  +0.05  | Ra  0.00 Rh  0.01 (obs Reco  0.17)
+    CTRL       MAM    dNEE  +0.06 = dReco  -0.03 - dGPP  -0.09  | Ra  0.34 Rh  0.38 (obs Reco  0.75)
+    CTRL       MayJun dNEE  +0.91 = dReco  +1.02 - dGPP  +0.12  | Ra  1.71 Rh  1.85 (obs Reco  2.54)
+    CTRL       Jul    dNEE  +1.18 = dReco  +0.91 - dGPP  -0.28  | Ra  2.70 Rh  2.94 (obs Reco  4.74)
+    CTRL       Aug    dNEE  -0.06 = dReco  +0.54 - dGPP  +0.60  | Ra  2.40 Rh  1.99 (obs Reco  3.86)
+    CTRL       SepOct dNEE  -0.48 = dReco  +0.04 - dGPP  +0.52  | Ra  0.85 Rh  0.77 (obs Reco  1.57)
+    CTRL       ann    dNEE  +0.08 = dReco  +0.19 - dGPP  +0.11  | Ra  0.86 Rh  0.88 (obs Reco  1.55)
+    TC10       DJF    dNEE  -0.21 = dReco  -0.16 - dGPP  +0.05  | Ra  0.00 Rh  0.01 (obs Reco  0.17)
+    TC10       MAM    dNEE  +0.08 = dReco  -0.05 - dGPP  -0.13  | Ra  0.31 Rh  0.39 (obs Reco  0.75)
+    TC10       MayJun dNEE  +1.51 = dReco  +0.90 - dGPP  -0.61  | Ra  1.49 Rh  1.96 (obs Reco  2.54)
+    TC10       Jul    dNEE  +1.45 = dReco  +0.98 - dGPP  -0.48  | Ra  2.70 Rh  3.02 (obs Reco  4.74)
+    TC10       Aug    dNEE  -0.03 = dReco  +0.53 - dGPP  +0.56  | Ra  2.39 Rh  2.00 (obs Reco  3.86)
+    TC10       SepOct dNEE  -0.44 = dReco  -0.02 - dGPP  +0.41  | Ra  0.78 Rh  0.77 (obs Reco  1.57)
+    TC10       ann    dNEE  +0.21 = dReco  +0.17 - dGPP  -0.05  | Ra  0.81 Rh  0.90 (obs Reco  1.55)
+    DL14+TC10  DJF    dNEE  -0.21 = dReco  -0.16 - dGPP  +0.05  | Ra  0.00 Rh  0.01 (obs Reco  0.17)
+    DL14+TC10  MAM    dNEE  +0.06 = dReco  -0.03 - dGPP  -0.09  | Ra  0.34 Rh  0.38 (obs Reco  0.75)
+    DL14+TC10  MayJun dNEE  +0.91 = dReco  +1.02 - dGPP  +0.12  | Ra  1.71 Rh  1.85 (obs Reco  2.54)
+    DL14+TC10  Jul    dNEE  +1.19 = dReco  +0.91 - dGPP  -0.28  | Ra  2.70 Rh  2.94 (obs Reco  4.74)
+    DL14+TC10  Aug    dNEE  -0.06 = dReco  +0.53 - dGPP  +0.59  | Ra  2.40 Rh  1.99 (obs Reco  3.86)
+    DL14+TC10  SepOct dNEE  -0.44 = dReco  -0.02 - dGPP  +0.42  | Ra  0.78 Rh  0.77 (obs Reco  1.57)
+    DL14+TC10  ann    dNEE  +0.09 = dReco  +0.18 - dGPP  +0.09  | Ra  0.85 Rh  0.88 (obs Reco  1.55)
+    DL13/12    DJF    dNEE  -0.21 = dReco  -0.16 - dGPP  +0.05  | Ra  0.00 Rh  0.01 (obs Reco  0.17)
+    DL13/12    MAM    dNEE  +0.06 = dReco  -0.03 - dGPP  -0.09  | Ra  0.34 Rh  0.38 (obs Reco  0.75)
+    DL13/12    MayJun dNEE  +0.91 = dReco  +1.02 - dGPP  +0.12  | Ra  1.71 Rh  1.85 (obs Reco  2.54)
+    DL13/12    Jul    dNEE  +1.19 = dReco  +0.91 - dGPP  -0.28  | Ra  2.70 Rh  2.94 (obs Reco  4.74)
+    DL13/12    Aug    dNEE  -0.06 = dReco  +0.54 - dGPP  +0.60  | Ra  2.40 Rh  1.99 (obs Reco  3.86)
+    DL13/12    SepOct dNEE  -0.34 = dReco  -0.10 - dGPP  +0.24  | Ra  0.70 Rh  0.78 (obs Reco  1.57)
+    DL13/12    ann    dNEE  +0.10 = dReco  +0.17 - dGPP  +0.06  | Ra  0.84 Rh  0.88 (obs Reco  1.55)
+    DLtype     DJF    dNEE  -0.21 = dReco  -0.16 - dGPP  +0.05  | Ra  0.00 Rh  0.01 (obs Reco  0.17)
+    DLtype     MAM    dNEE  +0.06 = dReco  -0.03 - dGPP  -0.09  | Ra  0.34 Rh  0.38 (obs Reco  0.75)
+    DLtype     MayJun dNEE  +0.91 = dReco  +1.02 - dGPP  +0.12  | Ra  1.71 Rh  1.85 (obs Reco  2.54)
+    DLtype     Jul    dNEE  +1.19 = dReco  +0.91 - dGPP  -0.28  | Ra  2.70 Rh  2.94 (obs Reco  4.74)
+    DLtype     Aug    dNEE  -0.06 = dReco  +0.54 - dGPP  +0.60  | Ra  2.40 Rh  1.99 (obs Reco  3.86)
+    DLtype     SepOct dNEE  -0.40 = dReco  -0.05 - dGPP  +0.35  | Ra  0.75 Rh  0.77 (obs Reco  1.57)
+    DLtype     ann    dNEE  +0.09 = dReco  +0.18 - dGPP  +0.08  | Ra  0.85 Rh  0.88 (obs Reco  1.55)
+
+50-70N (5107 cells)  closure max|NEE-(Reco-GPP)| CTRL = 0.000 ; resp vs Ra / Reco (annual) = 0.83 / 0.83 / 1.72
+  month               1      2      3      4      5      6      7      8      9     10     11     12
+  obs GPP         -0.07   0.00   0.18   0.76   2.11   4.60   5.33   3.90   1.86   0.56   0.07  -0.08
+  obs Reco         0.28   0.32   0.44   0.77   1.55   3.02   3.88   3.31   2.11   1.14   0.62   0.34
+  obs NEE          0.36   0.32   0.26   0.01  -0.57  -1.58  -1.46  -0.60   0.25   0.58   0.55   0.41
+  CTRL GPP         0.00   0.01   0.03   0.48   1.78   4.75   6.10   4.97   2.82   0.75   0.10   0.00
+  CTRL Ra          0.01   0.01   0.03   0.27   0.85   2.12   2.47   2.24   1.37   0.43   0.11   0.01
+  CTRL Rh          0.11   0.09   0.13   0.29   1.04   2.15   2.64   2.10   1.14   0.58   0.34   0.16
+  CTRL Reco        0.12   0.11   0.16   0.56   1.90   4.27   5.11   4.34   2.51   1.02   0.45   0.17
+  CTRL NEE         0.11   0.09   0.13   0.08   0.12  -0.48  -0.99  -0.63  -0.31   0.27   0.35   0.17
+  TC10 GPP         0.00   0.01   0.03   0.42   1.51   3.21   5.25   4.80   2.56   0.61   0.07   0.00
+  TC10 Ra          0.01   0.01   0.03   0.25   0.72   1.61   2.40   2.18   1.21   0.35   0.09   0.01
+  TC10 Rh          0.11   0.09   0.13   0.29   1.06   2.30   2.71   2.09   1.12   0.57   0.33   0.16
+  TC10 Reco        0.12   0.10   0.16   0.54   1.78   3.91   5.11   4.26   2.33   0.92   0.42   0.17
+  TC10 NEE         0.11   0.09   0.13   0.12   0.27   0.71  -0.14  -0.54  -0.23   0.31   0.35   0.17
+  DL14+TC10 GPP    0.00   0.01   0.03   0.48   1.78   4.75   6.10   4.97   2.62   0.63   0.08   0.00
+  DL14+TC10 Ra     0.01   0.01   0.03   0.27   0.85   2.12   2.47   2.24   1.24   0.37   0.09   0.01
+  DL14+TC10 Rh     0.11   0.09   0.13   0.29   1.04   2.15   2.64   2.10   1.14   0.58   0.34   0.16
+  DL14+TC10 Reco   0.12   0.11   0.16   0.56   1.90   4.27   5.11   4.34   2.38   0.95   0.43   0.17
+  DL14+TC10 NEE    0.11   0.09   0.13   0.08   0.12  -0.48  -0.99  -0.63  -0.24   0.33   0.35   0.17
+  DL13/12 GPP      0.00   0.01   0.03   0.48   1.78   4.75   6.10   4.97   2.43   0.48   0.06   0.00
+  DL13/12 Ra       0.01   0.01   0.03   0.27   0.85   2.12   2.47   2.24   1.12   0.32   0.09   0.01
+  DL13/12 Rh       0.11   0.09   0.13   0.29   1.04   2.15   2.64   2.10   1.14   0.58   0.34   0.16
+  DL13/12 Reco     0.12   0.11   0.16   0.56   1.90   4.27   5.11   4.34   2.26   0.89   0.43   0.17
+  DL13/12 NEE      0.11   0.09   0.13   0.08   0.12  -0.48  -0.99  -0.63  -0.17   0.41   0.37   0.17
+  DLtype GPP       0.00   0.01   0.03   0.48   1.78   4.75   6.10   4.97   2.60   0.52   0.06   0.00
+  DLtype Ra        0.01   0.01   0.03   0.27   0.85   2.12   2.47   2.24   1.22   0.31   0.09   0.01
+  DLtype Rh        0.11   0.09   0.13   0.29   1.04   2.15   2.64   2.10   1.14   0.58   0.34   0.16
+  DLtype Reco      0.12   0.11   0.16   0.56   1.90   4.27   5.11   4.34   2.36   0.89   0.43   0.17
+  DLtype NEE       0.11   0.09   0.13   0.08   0.12  -0.48  -0.99  -0.63  -0.25   0.37   0.37   0.17
+  bias decomposition: dNEE = dReco - dGPP   (model - obs)
+    CTRL       DJF    dNEE  -0.24 = dReco  -0.18 - dGPP  +0.05  | Ra  0.01 Rh  0.12 (obs Reco  0.31)
+    CTRL       MAM    dNEE  +0.21 = dReco  -0.05 - dGPP  -0.26  | Ra  0.39 Rh  0.49 (obs Reco  0.92)
+    CTRL       MayJun dNEE  +0.89 = dReco  +0.80 - dGPP  -0.09  | Ra  1.49 Rh  1.59 (obs Reco  2.28)
+    CTRL       Jul    dNEE  +0.46 = dReco  +1.23 - dGPP  +0.77  | Ra  2.47 Rh  2.64 (obs Reco  3.88)
+    CTRL       Aug    dNEE  -0.03 = dReco  +1.03 - dGPP  +1.07  | Ra  2.24 Rh  2.10 (obs Reco  3.31)
+    CTRL       SepOct dNEE  -0.44 = dReco  +0.14 - dGPP  +0.58  | Ra  0.90 Rh  0.86 (obs Reco  1.63)
+    CTRL       ann    dNEE  +0.03 = dReco  +0.24 - dGPP  +0.21  | Ra  0.83 Rh  0.90 (obs Reco  1.48)
+    TC10       DJF    dNEE  -0.24 = dReco  -0.18 - dGPP  +0.05  | Ra  0.01 Rh  0.12 (obs Reco  0.31)
+    TC10       MAM    dNEE  +0.27 = dReco  -0.10 - dGPP  -0.36  | Ra  0.33 Rh  0.49 (obs Reco  0.92)
+    TC10       MayJun dNEE  +1.56 = dReco  +0.56 - dGPP  -1.00  | Ra  1.16 Rh  1.68 (obs Reco  2.28)
+    TC10       Jul    dNEE  +1.32 = dReco  +1.23 - dGPP  -0.08  | Ra  2.40 Rh  2.71 (obs Reco  3.88)
+    TC10       Aug    dNEE  +0.06 = dReco  +0.96 - dGPP  +0.90  | Ra  2.18 Rh  2.09 (obs Reco  3.31)
+    TC10       SepOct dNEE  -0.38 = dReco  -0.00 - dGPP  +0.38  | Ra  0.78 Rh  0.85 (obs Reco  1.63)
+    TC10       ann    dNEE  +0.23 = dReco  +0.17 - dGPP  -0.06  | Ra  0.74 Rh  0.91 (obs Reco  1.48)
+    DL14+TC10  DJF    dNEE  -0.24 = dReco  -0.18 - dGPP  +0.05  | Ra  0.01 Rh  0.12 (obs Reco  0.31)
+    DL14+TC10  MAM    dNEE  +0.21 = dReco  -0.05 - dGPP  -0.26  | Ra  0.39 Rh  0.49 (obs Reco  0.92)
+    DL14+TC10  MayJun dNEE  +0.89 = dReco  +0.80 - dGPP  -0.09  | Ra  1.49 Rh  1.59 (obs Reco  2.28)
+    DL14+TC10  Jul    dNEE  +0.46 = dReco  +1.23 - dGPP  +0.77  | Ra  2.47 Rh  2.64 (obs Reco  3.88)
+    DL14+TC10  Aug    dNEE  -0.03 = dReco  +1.03 - dGPP  +1.06  | Ra  2.24 Rh  2.10 (obs Reco  3.31)
+    DL14+TC10  SepOct dNEE  -0.38 = dReco  +0.04 - dGPP  +0.42  | Ra  0.81 Rh  0.86 (obs Reco  1.63)
+    DL14+TC10  ann    dNEE  +0.04 = dReco  +0.23 - dGPP  +0.19  | Ra  0.81 Rh  0.90 (obs Reco  1.48)
+    DL13/12    DJF    dNEE  -0.24 = dReco  -0.18 - dGPP  +0.05  | Ra  0.01 Rh  0.12 (obs Reco  0.31)
+    DL13/12    MAM    dNEE  +0.21 = dReco  -0.05 - dGPP  -0.26  | Ra  0.39 Rh  0.49 (obs Reco  0.92)
+    DL13/12    MayJun dNEE  +0.89 = dReco  +0.80 - dGPP  -0.09  | Ra  1.49 Rh  1.59 (obs Reco  2.28)
+    DL13/12    Jul    dNEE  +0.46 = dReco  +1.23 - dGPP  +0.77  | Ra  2.47 Rh  2.64 (obs Reco  3.88)
+    DL13/12    Aug    dNEE  -0.03 = dReco  +1.03 - dGPP  +1.06  | Ra  2.24 Rh  2.10 (obs Reco  3.31)
+    DL13/12    SepOct dNEE  -0.30 = dReco  -0.05 - dGPP  +0.25  | Ra  0.72 Rh  0.86 (obs Reco  1.63)
+    DL13/12    ann    dNEE  +0.05 = dReco  +0.21 - dGPP  +0.16  | Ra  0.80 Rh  0.90 (obs Reco  1.48)
+    DLtype     DJF    dNEE  -0.24 = dReco  -0.18 - dGPP  +0.05  | Ra  0.01 Rh  0.12 (obs Reco  0.31)
+    DLtype     MAM    dNEE  +0.21 = dReco  -0.05 - dGPP  -0.26  | Ra  0.39 Rh  0.49 (obs Reco  0.92)
+    DLtype     MayJun dNEE  +0.89 = dReco  +0.80 - dGPP  -0.09  | Ra  1.49 Rh  1.59 (obs Reco  2.28)
+    DLtype     Jul    dNEE  +0.46 = dReco  +1.23 - dGPP  +0.77  | Ra  2.47 Rh  2.64 (obs Reco  3.88)
+    DLtype     Aug    dNEE  -0.03 = dReco  +1.03 - dGPP  +1.06  | Ra  2.24 Rh  2.10 (obs Reco  3.31)
+    DLtype     SepOct dNEE  -0.36 = dReco  -0.00 - dGPP  +0.35  | Ra  0.77 Rh  0.86 (obs Reco  1.63)
+    DLtype     ann    dNEE  +0.04 = dReco  +0.22 - dGPP  +0.17  | Ra  0.80 Rh  0.90 (obs Reco  1.48)

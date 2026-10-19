@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8">
+<title>LM4+ 계산 흐름과 교과서 대응</title>
+<style>
+@page { size: A4; margin: 14mm 13mm; }
+:root { --ink:#1d2430; --mute:#5a6472; --line:#c9d1dc; --fast:#e8f1fb; --fastb:#2f6db3; --day:#eaf6ec; --dayb:#2e8a46;
+        --year:#fbf0e4; --yearb:#b4651c; --in:#f1ecfa; --inb:#6b4bb0; --out:#fdeaea; --outb:#b23b3b; --note:#fff8dc; }
+body { font-family: "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; color: var(--ink); font-size: 10.2pt; line-height: 1.5; background:#fff; }
+h1 { font-size: 17pt; margin: 0 0 2mm; } h2 { font-size: 13pt; margin: 7mm 0 2mm; border-bottom: 1.5px solid var(--ink); padding-bottom: 1mm; }
+h3 { font-size: 11pt; margin: 4mm 0 1.5mm; }
+.sub { color: var(--mute); font-size: 9pt; margin-bottom: 4mm; }
+code { font-family: Menlo, monospace; font-size: 8.4pt; background:#f3f5f8; padding: 0 2px; border-radius: 2px; }
+table { border-collapse: collapse; width: 100%; font-size: 8.8pt; margin: 2mm 0; }
+th, td { border: 1px solid var(--line); padding: 1.4mm 1.8mm; vertical-align: top; text-align: left; }
+th { background: #eef1f5; }
+.ok { color:#2e7d32; font-weight:700; } .part { color:#b26a00; font-weight:700; } .no { color:#b23b3b; font-weight:700; }
+.lane { border: 1.6px solid; border-radius: 3mm; padding: 2mm 3mm 3mm; margin: 0 0 1mm; page-break-inside: avoid; }
+.lane h4 { margin: 0 0 1.5mm; font-size: 10.5pt; }
+.in { background: var(--in); border-color: var(--inb); } .fast { background: var(--fast); border-color: var(--fastb); }
+.day { background: var(--day); border-color: var(--dayb); } .year { background: var(--year); border-color: var(--yearb); }
+.out { background: var(--out); border-color: var(--outb); }
+.step { background:#fff; border:1px solid var(--line); border-radius: 2mm; padding: 1.2mm 2.2mm; margin: 1.2mm 0; font-size: 9.2pt; }
+.step b { color: var(--ink); } .step .f { color: var(--mute); font-size: 8pt; }
+.arrow { text-align:center; font-size: 13pt; line-height: 1; color: var(--mute); margin: 0.6mm 0; }
+.diamond { background:#fff7e0; border:1.4px dashed #b4651c; border-radius: 2mm; padding: 1.4mm 2.2mm; margin: 1.2mm 0; font-size: 9.2pt; }
+.two { display:flex; gap: 2mm; } .two > div { flex:1; }
+.note { background: var(--note); border-left: 4px solid #d4a017; padding: 2mm 3mm; margin: 2mm 0; font-size: 9.3pt; page-break-inside: avoid; }
+.eq { font-family: Menlo, monospace; font-size: 8.6pt; background:#f6f7f9; border:1px solid var(--line); padding: 1.5mm 2.5mm; margin: 1.5mm 0; white-space: pre-wrap; }
+.pb { page-break-before: always; }
+.small { font-size: 8.5pt; color: var(--mute); }
+</style></head><body>
+
+<h1>LM4+ 지면모델 계산 흐름과 교과서(Bonan) 대응</h1>
+<div class="sub">KIOST ESM4.5 오프라인 LM4+ (lm4P, PPA cohort) · 소스 <code>climate:/home/ydkoh/ESM4p5_KIOSTv2b/src/lm4P</code>
+(생산 빌드 소스와 동일, <code>sphum.F90</code> 패치만 다름) · 설정 <code>RUN/lm4p_ctl2_co2_1979-2023/input.nml</code> ·
+교재 Bonan, <i>Ecological Climatology</i> 3판 (OCR <code>/Volumes/data02/ecological_climatology/ECOLOGICAL_CLIMATOLOGY_OCR.txt</code>; 쪽 = 인쇄 쪽, ±1 가능) · 2026-10-14</div>
+
+<h2>1. 한 장 요약: 계산 순서 흐름도</h2>
+<p class="small">시간 간격: 빠른 단계(fast step) = 30분(<code>dt_atmos 1800 s</code>), 느린 단계(slow) = 1시간마다 호출되며 그 안에서 "날짜/해가 바뀌었나"를 보고 일·연 루틴을 실행한다(<code>vegetation.F90:2627</code>). 파일 경로의 <code>lm4P/</code>는 생략.</p>
+
+<div class="lane in"><h4>① 입력 (매 30분) — 오프라인이라 대기는 계산하지 않고 관측 기상을 끼워 넣음</h4>
+<div class="step"><b>WFDE5 기상</b>: 기온·비습·기압·바람(<code>t/sphum/p/u_bot</code>), 단파·장파 복사, 비·눈, 태양천정각 + <b>CO₂</b>(<code>co2_latlon.nc</code>, CMIP7)
+<span class="f"> — data_table 덮어쓰기 → <code>atm_land_ice_flux_exchange.F90:874-897, 2114-2150</code></span></div>
+<div class="step"><b>지표 경계층 계산</b>(Monin–Obukhov): <u>이전 단계</u> 지면 상태로 현열·잠열·CO₂ 플럭스와 그 미분을 만들어 지면에 전달(암묵 결합)
+<span class="f"> — <code>sfc_boundary_layer</code>, <code>flux_down_from_atmos</code> → <code>land_model.F90:1264-1290</code></span></div>
+</div>
+<div class="arrow">▼</div>
+
+<div class="lane fast"><h4>② 매 30분 (빠른 단계) — <code>update_land_model_fast</code> (<code>land_model.F90:1166</code>), 타일마다</h4>
+<div class="step"><b>1. 토양·눈 준비</b>: 표면 온도·증발 한계·열전도 <span class="f">— <code>soil_step_1</code> :1683, <code>snow_step_1</code> :1702</span></div>
+<div class="step"><b>2. 난류 전도도</b>: 잎·지면 ↔ 캐노피 공기 <span class="f">— <code>land_turbulence</code> :1719</span></div>
+<div class="step"><b>3. 흡수 단파</b>: 직전 단계에서 계산해 둔 코호트별 흡수율 × 입사 단파 <span class="f">— :1724</span></div>
+<div class="step"><b>4. 광합성·기공 (코호트마다)</b>: Rubisco/빛 제한 광합성 + Leuning 기공 + 식물 수리(뿌리 물 공급)
+<span class="f"> — <code>vegn_step_1</code> → <code>vegn_photosynthesis_Leuning</code> (<code>vegn_photosynthesis.F90:228</code>)</span></div>
+<div class="step"><b>5. 장파 균형</b>: PPA 층별 투과·반사 <span class="f">— <code>land_lw_balance</code> :1845</span></div>
+<div class="step"><b>6. 에너지·물 연립 풀이(암묵)</b>: 캐노피 공기 T·q, 코호트별 잎 온도, 차단수·눈 → 행렬 풀이 → 지면 에너지 수지
+<span class="f"> — :1934-2135 (<code>ludcmp</code>)</span></div>
+<div class="step"><b>7. 상태 갱신</b>: 잎·눈·토양 → 토양수분(Richards 식)·뿌리 흡수·지하수·<b>유출</b>
+<span class="f"> — <code>soil_step_2</code> (<code>soil.F90:1921</code>, <code>RICHARDS_clean</code> :2626)</span></div>
+<div class="step"><b>8. 탄소 적분</b>: GPP − 유지호흡을 <code>carbon_gain</code>에 <u>쌓아만 둠</u>(NSC로 옮기는 건 하루 1번) · 토양 분해 · 화재(fast)
+<span class="f"> — <code>vegn_carbon_int_ppa</code> (<code>vegn_dynamics.F90:968</code>, GPP :1049)</span></div>
+<div class="step" style="border:1.6px solid var(--fastb)"><b>9. 다음 단계용 경계값 — 여기서 LAI가 계산됨</b>:
+<code>LAI = 잎 탄소(bl) ÷ LMA ÷ 수관면적</code> → 코호트별 two-stream 복사 → 알베도 · 거칠기(z0)
+<span class="f"> — <code>update_land_bc_fast</code> :3457 → <code>update_derived_vegn_data</code> (<code>vegetation.F90:2419</code>), <code>vegn_radiation</code></span></div>
+</div>
+<div class="arrow">▼</div>
+<div class="lane out"><h4>③ 대기로 돌려주는 것 (매 30분)</h4>
+<div class="step">지표 온도(상향 장파), 캐노피 공기 T·q·<b>CO₂</b>, <b>현열·잠열(증발산)</b>, 알베도(가시/근적외 × 직달/산란), 운동량·열 거칠기, <b>하천 유량</b>(<code>update_river</code>)
+<span class="f"> — <code>land_model.F90:3664-3687</code>, <code>flux_up_to_atmos</code>. 오프라인에선 대기가 이를 쓰지 않고 진단·출력만.</span></div>
+</div>
+
+<div class="pb"></div>
+<div class="lane day"><h4>④ 하루 1번 (느린 단계 안, 날짜가 바뀔 때) — <code>update_vegn_slow</code> (<code>vegetation.F90:2602</code>)</h4>
+<div class="step"><b>1. 계절 지표 갱신</b>: GDD(0 °C 기준 일 적산), <code>tc_pheno</code> = 0.95×어제 + 0.05×오늘(≈20일 평활 기온) <span class="f">— :2659-2664</span></div>
+<div class="step"><b>2. 성장(<code>vegn_growth</code>)</b>: 하루치 <code>carbon_gain</code>을 저장 탄소(NSC)로 옮김(모자라면 살아있는 조직에서 빌림) → 잎·뿌리·줄기 할당, 키·지름·수관 성장, 잎 목표량 <code>bl_max</code> 갱신
+<span class="f"> — <code>vegn_dynamics.F90:1310</code>, <code>biomass_allocation_ppa</code> :1484</span></div>
+<div class="step"><b>3. 탄소 부족 사망 검사(<code>vegn_starvation_ppa</code>)</b> — 아래 상자 참고 <span class="f">— :1396</span></div>
+<div class="diamond"><b>4. 잎 ON/OFF 판정(<code>vegn_phenology_ppa</code>, 낙엽 종만; 상록은 항상 ON)</b><br>
+<b>OFF → ON</b>: GDD &gt; <code>gdd_crit</code> <b>그리고</b> 평활 기온 ≥ <code>tc_crit</code> <b>그리고</b> 토양 액체수분이 마르지 않음 →
+ON이 되면 매일 2번 단계에서 잎이 <code>bl_max</code>까지 자람 → LAI 증가 → 광합성 증가<br>
+<b>ON → OFF</b>: 평활 기온 &lt; <code>tc_crit</code> 또는 가뭄 (우리 패치: + 낮이 짧아지고 낮길이 &lt; 문턱) → 잎을 낙엽으로 버리고 GDD 0으로 리셋
+<span class="f"> — <code>vegn_dynamics.F90:2061-2192</span></div>
+<div class="step"><b>5. 수관층 재배치·코호트 병합</b>: 키 순서로 다시 층을 채움(사실상 매일) · 너무 작은 코호트 제거
+<span class="f"> — <code>vegn_relayer_cohorts_ppa</code>(<code>vegn_tile.F90:694</code>), <code>vegn_mergecohorts_ppa</code>, <code>kill_small_cohorts_ppa</code></span></div>
+<div class="step"><b>6. 화재 전이</b>(하루 1번, 탄 면적만큼 타일 분리) <span class="f">— <code>fire_transitions</code> (<code>vegn_fire.F90:3466</code>)</span></div>
+</div>
+<div class="arrow">▼</div>
+<div class="lane year"><h4>⑤ 1년 1번 (해가 바뀔 때) — 순서: 사망 → 토지이용 → (일 루틴) → 재배치 → 번식</h4>
+<div class="step"><b>1. 자연 사망</b>: 위층 <code>mortrate_d_c</code>(낙엽송 2 %, 가문비 1.4 %, 단풍 1 %/yr), 아래층 <code>mortrate_d_u</code>×(작은 나무일수록 큼) · 추위·수목한계 사망
+<span class="f"> — <code>vegn_nat_mortality_ppa</code> (<code>vegn_disturbance.F90:372</code>, 식 :536-566)</span></div>
+<div class="step"><b>2. 나무 쓰러짐 = 빈터(gap) 만들기</b>: 위층에서 죽은 수관 면적만큼 새 타일을 떼어 위층 나무를 모두 없앰
+<span class="f"> — <code>nat_mortality_splits_tiles=T</code>, :571-770</span></div>
+<div class="step"><b>3. 토지이용 전이</b>(LUH2) <span class="f">— <code>land_transitions</code> (<code>transitions.F90:415</code>)</span></div>
+<div class="step"><b>4. 번식·종자 확산</b>: 종별 종자 → 99 % 제자리, 1 % 같은 격자 다른 타일, 0.01 % 이웃 격자 → 새싹 코호트(최소량 없음)
+<span class="f"> — <code>vegn_reproduction_ppa</code> (<code>vegn_dynamics.F90:2405</code>), <code>add_seedlings_ppa</code> (<code>vegn_util.F90:230</code>)</span></div>
+<div class="step"><b>꺼져 있는 것</b>: 기후에 따른 종 재배정(<code>do_biogeography=F</code>), LM3식 교란(<code>fire_to_use='unpacked'</code>라 미실행), 질소</div>
+</div>
+
+<div class="note"><b>LAI는 어디서 나와서 어디로 가나</b> — ④-2에서 잎 탄소(bl)가 정해지고 → ②-9에서 <code>LAI = bl/LMA/수관면적</code> →
+(가) 같은 자리 two-stream 복사 → 다음 30분의 흡수 단파·광합성, (나) 거칠기·공기역학, (다) 차단 용량과 기공 계산(<code>gs_Leuning(lai)</code>).
+그래서 <b>LMA가 2배면 같은 잎 탄소로 LAI가 절반</b>, 같은 LAI를 만드는 데 탄소가 2배 든다.</div>
+
+<div class="note"><b>탄소 부족 사망(starvation mortality)이란</b><br>
+나무는 광합성으로 번 탄소를 저장 탄소(NSC, 녹말·당 같은 "통장 잔고")에 넣고, 여기서 잎·뿌리를 만들고 호흡 비용을 낸다.
+번 것보다 쓴 것이 많아 통장이 바닥나면 굶어 죽는다는 개념이다.<br>
+<b>코드</b> (<code>vegn_dynamics.F90:1419</code>): <code>if (bsw &lt; 0 .or. nsc &lt; nsc_starv_frac × bl_max)</code> → <code>deathrate = 1.0</code> → <b>그 코호트 전원 사망</b>(일부만 죽는 게 아님), 몸 전체가 낙엽·목질·뿌리 리터로 토양에 들어감. 하루 1번, 성장 직후에 검사.<br>
+<b>우리 설정</b>: 코드 기본값은 <code>nsc_starv_frac = 0.01</code>(잔고 &lt; 최대 잎량의 1 %면 사망)이지만 <b>ctl <code>input.nml:1772</code>는 0.0</b>.
+게다가 바로 앞 성장 단계가 모자란 탄소를 살아있는 조직에서 빌려 메우므로, 실제로는 <b>몸을 다 써도 빚이 남는 극단적 경우에만</b> 일어난다.<br>
+<b>정정</b>: 앞서 "낙엽송 NSC가 낮아 탄소 부족 사망 경로가 있다"고 했으나 이 설정에선 그 경로가 거의 닫혀 있다. 낙엽송 감소는 위층 사망률(2 %/yr)과 종자 부족(번식 붕괴) 쪽으로 해석해야 한다.</div>
+
+<div class="pb"></div>
+<h2>2. 교과서와 LM4+ 코드가 겹치는 부분</h2>
+<table>
+<tr><th style="width:22%">주제</th><th style="width:26%">책 위치</th><th style="width:34%">LM4+ 코드</th><th style="width:18%">판정</th></tr>
+<tr><td>잎 광합성 (Rubisco·빛 제한)</td><td>§16.6 pp.247–250, 식 16.3–16.8, Fig 16.4, Table 16.3</td><td><code>vegn_photosynthesis.F90:689-726</code> (C3), 온도 :523</td><td class="ok">같은 구조</td></tr>
+<tr><td>기공전도도 (광합성 결합형)</td><td>§16.7–16.9 pp.250–254, 식 16.9–16.14; Leuning은 p.254 인용</td><td><code>vegn_photosynthesis.F90:741</code> (Leuning), 후처리 :309-365</td><td class="ok">같은 계열</td></tr>
+<tr><td>토양수분 스트레스</td><td>§16.9 p.254 (정성)</td><td>plant hydraulics <code>vegn_hydraulics</code> :354</td><td class="part">책은 정성만</td></tr>
+<tr><td>잎 에너지 수지·잎 온도</td><td>§15.2–15.5 pp.233–237, 식 15.1–15.6</td><td>코호트별 잎 에너지식 <code>land_model.F90:1934-2100</code></td><td class="ok">같음</td></tr>
+<tr><td>LAI 정의 (투영 면적)</td><td>§17.2 p.264</td><td><code>vegn_cohort.F90:577</code>, <code>vegetation.F90:2419</code></td><td class="ok">같음</td></tr>
+<tr><td>캐노피 복사 (Beer·two-stream)</td><td>§17.3 pp.265–268, 식 17.1–17.5, Fig 17.3–17.5</td><td><code>vegn_radiation.F90:131-143</code> 코호트별 two-stream + PPA 층 쌓기 <code>land_model.F90:3195</code></td><td class="ok">같음 (층별)</td></tr>
+<tr><td>잎→캐노피 스케일링</td><td>§17.4 pp.269–273, 식 17.8–17.13</td><td>코호트 안 해석 적분 <code>lai_eq</code> :697-723</td><td class="part">방식 다름</td></tr>
+<tr><td>캐노피 모델 구조</td><td>§17.7 pp.278–281, Fig 17.13, 식 17.21–17.24</td><td>캐노피 공기 + 코호트별 잎 + 지면 연립(암묵)</td><td class="ok">two-source를 층별로 확장</td></tr>
+<tr><td>알로메트리</td><td>§24.6 p.444 (변수만), §18.4–18.5 (정성)</td><td><code>vegn_cohort.F90:741-759</code></td><td class="part">책엔 식 없음</td></tr>
+<tr><td>자기솎음 (−3/2 법칙)</td><td>§22.2 pp.376–379, 식 22.2–22.3, Fig 22.3</td><td>명시 식 없음 → 층 채우기 + 아래층 사망으로 저절로</td><td class="ok">개념 같음(창발)</td></tr>
+<tr><td>gap 동역학</td><td>§23.3 pp.401–403, 식 23.1–23.2, Fig 23.2</td><td>위층 사망 → 새 타일(빈터) <code>vegn_disturbance.F90:571-770</code></td><td class="ok">같음</td></tr>
+<tr><td>코호트 vs 평균 개체</td><td>§24.6 pp.438–445 (p.444 구분 문장)</td><td>크기별 코호트(PPA)</td><td class="ok">코호트 쪽</td></tr>
+<tr><td>DGVM 시간 구조</td><td>§25.6 pp.467–470, Fig 25.13</td><td>30분 / 일 / 연 3단 구조</td><td class="ok">같음</td></tr>
+<tr><td>생물기후 한계로 PFT 진입·퇴출</td><td>§25.6 Fig 25.13</td><td><code>do_biogeography=F</code></td><td class="no">없음</td></tr>
+<tr><td>LMA–잎 수명 trade-off</td><td>§18.6–18.7 pp.305–309, Table 18.5</td><td>PPA에선 끊김 (<code>vegn_data.F90:1257</code>)</td><td class="no">없음</td></tr>
+<tr><td>잎 나기: GDD + chilling / 잎 지기: 일장 + 저온</td><td>§18.3 pp.292–294</td><td>GDD(0 °C) + 20일 평활 기온, chilling·일장 없음</td><td class="part">부분</td></tr>
+</table>
+
+<h3>2-1. 잎 광합성 — 책 §16.6 (pp.247–250) ↔ <code>vegn_photosynthesis.F90</code></h3>
+<div class="two"><div><b>책 (Farquhar C3)</b>
+<div class="eq">A_n = min(A_c, A_j) − R_d                     (16.3)
+A_c = V_cmax (c_i − Γ*) / [c_i + K_c(1 + o_i/K_o)]   (16.4)
+A_j = J (c_i − Γ*) / (4 c_i + 8 Γ*)               (16.5)</div>
+Γ*=42.75 µmol mol⁻¹, K_c=404.9, K_o=278.4 mmol mol⁻¹ (25 °C). J_max ≈ 1.67 V_cmax.</div>
+<div><b>LM4+ (:523, :689-726)</b>
+<div class="eq">vm = Vmax·exp(3000(1/288.2 − 1/T_l))
+capgam = 0.5·kc/ko·0.21·0.209        ! Γ*
+f2 = vm(ci − capgam)/(ci + kc(1+0.209/ko))  ! A_c
+f3 = vm/2                              ! 빛 포화 상한
+Ag = Ag_l(빛 제한, 윗부분) + min(f2,f3)·lai_eq
+An = Ag − Resp</div></div></div>
+<p><b>설명</b>: 두 쪽 모두 "효소(Rubisco)가 부족한가, 빛 에너지가 부족한가 중 더 모자란 쪽이 광합성을 정한다"는 같은 원리다(책 Fig 16.4).
+LM4+의 <code>f2</code>는 책 식 16.4와 같은 형태이고, Γ*(<code>capgam</code>)도 K_c/K_o로 계산한다.
+차이점: (1) LM4+는 J(전자전달)를 따로 풀지 않고 "빛 제한 부분 + Rubisco 제한 부분"을 LAI 깊이 <code>lai_eq</code>에서 이어 붙여 코호트 전체를 한 번에 적분한다(책 §17.4의 "지수 광분포 해석 적분" 방식에 가깝다).
+(2) 온도 반응은 책이 말하는 Arrhenius + 고온 저해 대신 단순 지수식 <code>exp(3000(1/288.2 − 1/T))</code>를 쓴다. Vmax 값은 종별(낙엽송 1.7e-5, 가문비 2.1e-5, 단풍 2.0e-5 mol m⁻² s⁻¹).
+책 Table 16.3(Kattge 2009, V_cmax25 µmol m⁻² s⁻¹: 침엽 상록 62.5, 온대 활엽 낙엽 57.7)과 같은 단위로 바꾸면 17–21 µmol m⁻² s⁻¹ 수준이라 크게 낮아 보이나, LM4+ 정의(잎면적 기준·온도 기준점·코호트 적분)가 달라 직접 비교에는 추가 확인이 필요하다.</p>
+
+<h3>2-2. 기공전도도 — 책 §16.7–16.9 (pp.250–254) ↔ <code>vegn_photosynthesis.F90:741</code></h3>
+<div class="two"><div><b>책</b>
+<div class="eq">g_sw = g_0 + g_1·A_n·h_s / c_s     (16.14, Ball–Berry)
+Leuning 1995 (p.254 인용, 식은 책에 없음):
+g_sw = g_0 + a_1·A_n / [(c_s − Γ)(1 + D_s/D_0)]</div></div>
+<div><b>LM4+</b>
+<div class="eq">coef0 = (1 + ds/do1)/m_cond      ! m_cond = 7 (나무)
+ci = (ca + 1.6·coef0·capgam)/(1 + 1.6·coef0)
+gsbar = anbar/(ci − capgam)/coef0
+→ gs ∝ m·A_n / [(c_i − Γ)(1 + D_s/D_0)]</div></div></div>
+<p><b>설명</b>: 책 §16.8의 핵심 — 식물은 c_i/c_a를 거의 일정하게 유지하므로 기공은 광합성에 비례해 열린다 — 을 그대로 쓴 것이 Leuning 식이다.
+Ball–Berry가 상대습도(h_s)를 쓰는 자리에 Leuning은 포차(D_s)를 써서 "공기가 건조할수록 기공을 닫는다"를 표현한다. LM4+는 이 식을 c_i에 대해 바로 풀어(<code>ci = ...</code>) 반복 계산 없이 구한다.
+이어서 젖은 잎 감소, 상한 <code>gs_lim</code>, 경계층 전도도와 직렬 결합(책 식 16.9의 1/g = 1.4/g_b + 1.6/g_s 개념), 식물 수리 스트레스(<code>w_scale</code>)를 곱한다(:309-365). 책은 토양 건조 반응을 정성적으로만 다루고(p.254) LM4+는 plant hydraulics로 처리한다.</p>
+
+<h3>2-3. 잎 에너지와 캐노피 구조 — 책 §15.2–15.5, §17.7 ↔ <code>land_model.F90:1934-2135</code></h3>
+<p>책 식 15.1 <code>R_n = H + λE</code>(잎은 열을 저장하지 않으므로 흡수 복사 = 현열 + 잠열 + 장파)를 LM4+는 <b>코호트마다</b> 하나씩 세우고,
+캐노피 공기의 열·수증기 질량 보존식(책 식 17.22·17.24의 캐노피 공기 온도 T_ac 개념)과 지면 에너지 수지를 <b>한 행렬로 묶어 동시에</b> 푼다(암묵, <code>ludcmp</code>).
+책 Fig 17.13의 분류로 보면 대부분의 LSM이 쓰는 (c) two-source(식생 + 지면 + 캐노피 공기)를 PPA 층 수만큼 늘린 형태이고, 층이 여러 개라는 점에서 (d) multilayer에 가깝다.</p>
+
+<h3>2-4. LAI와 캐노피 복사 — 책 §17.2–17.3 (pp.264–268) ↔ <code>vegetation.F90:2413-2432</code>, <code>vegn_radiation.F90</code></h3>
+<div class="eq">책 17.2: LAI = 단위 지면적당 투영(한 면) 잎 면적.  17.1: I(z) = I_0·exp(−K_b·L(z))   (Beer 법칙)
+LM4+: leafarea = bl / LMA                      (vegn_cohort.F90:577)
+      lai = leafarea / (crownarea·(1 − internal_gap_frac))·scale   (vegetation.F90:2419)  ← "수관 안의" LAI
+      layerfrac = crownarea·nindivs·(1 − gap)/scale                (그 코호트가 덮는 지면 비율)</div>
+<p><b>설명</b>: LM4+의 코호트 LAI는 "격자 평균"이 아니라 <b>그 나무 수관 아래에서의 LAI</b>이고, 지면을 얼마나 덮는지는 <code>layerfrac</code>이 따로 담는다. 격자 LAI는 대략 Σ(lai × layerfrac)이다.
+빛은 위층 코호트들의 two-stream 투과를 거쳐 아래층으로 내려간다 — 책 Beer 법칙을 "층 단위"로 적용한 셈이다.
+LMA가 투영 면적 기준이므로 LAI도 책 정의(투영)와 같다. 책이 강조하듯 침엽수는 총면적 &gt; 2×투영이라, 위성·관측 LAI와 비교할 때 정의(투영/반-총면적)를 반드시 맞춰야 한다.</p>
+
+<h3>2-5. 숲 구조 — 책 §22.2, §23.3, §24.6 ↔ PPA</h3>
+<table>
+<tr><th>책</th><th>LM4+에서 같은 역할</th></tr>
+<tr><td><b>§22.2 자기솎음</b> (p.379, Fig 22.3): 평균 크기 m ∝ N^(−3/2). 커질수록 공간이 모자라 작은 개체가 죽음</td>
+<td>명시 식 없음. ① 키 순서로 위층부터 수관 면적을 채움(<code>vegn_tile.F90:694</code>, 넘치면 코호트 분할 :797-811) → ② 아래층으로 밀린 코호트는 그늘 + 높은 사망률 <code>mortrate_d_u(1 + A·e^{B(D*−D)}/(1+e^{B(D*−D)}))</code>(A=4, B=30, D*=0.025 m) → 자기솎음이 <b>결과로 나타남</b></td></tr>
+<tr><td><b>§23.3 gap 동역학</b> (pp.401–403): 큰 나무가 쓰러져 생긴 빈터(≈100 m²)에서 재생, 패치 하나는 들쭉날쭉하지만 많이 모으면 평형(shifting mosaic, Fig 23.2). 식 23.2 생존확률 p=(1−c)ⁿ</td>
+<td>위층 사망 수관 면적만큼 <b>새 타일</b>을 떼어 위층을 비움(<code>nat_mortality_splits_tiles=T</code>) → 빈터 타일에서 아래층·새싹이 자람. 사망률 c를 나이와 무관한 상수(<code>mortrate_d_c</code>)로 두는 것도 책 식 23.2와 같은 가정</td></tr>
+<tr><td><b>§24.6 코호트 vs 평균 개체</b> (p.444): DGVM은 "크기 분포 코호트" 또는 "평균 개체 × 밀도"로 개체를 표현. LPJ·CLM-DGVM(=CNDV)은 평균 개체</td>
+<td>LM4+는 <b>코호트</b> 쪽. 같은 종도 크기별로 따로 키워 위층/아래층 경쟁(종 구분 없음)을 직접 계산. CNDV는 PFT별 평균 나무 한 그루 × 밀도 + FPC 면적 경쟁</td></tr>
+<tr><td><b>§25.6 CLM-DGVM 구조</b> (Fig 25.13): 30분 물리 / 하루 phenology / 1년 할당·사망·정착·<b>생물기후 규칙</b></td>
+<td>시간 3단 구조는 같음(이 문서 ②④⑤). 단 <b>생물기후 규칙(PFT 진입·퇴출)은 꺼져 있음</b>, 할당은 매일(LM4+) vs 매년(CLM-DGVM)</td></tr>
+</table>
+
+<h3>2-6. 책과 다른 곳 = 이번에 찾은 문제들</h3>
+<ul>
+<li><b>LMA–잎 수명</b> (§18.6–18.7, Table 18.5: 침엽 낙엽수 LMA ≈100 g 건물 m⁻² ≈ 0.048 kg C m⁻²): LM4+ 낙엽송 0.076 kg C m⁻²(약 1.6배), PPA 모드에서 수명과 연결 끊김 → 낙엽송 잎 비용 과다·번식 붕괴.</li>
+<li><b>Phenology</b> (§18.3): 책은 잎 나기 = GDD(약 5 °C 기준) + chilling, 잎 지기 = 짧은 일장 + 저온. LM4+는 GDD 0 °C 기준 + 20일 평활 기온, chilling·일장 없음 → 봄·가을 모두 3–4주 지연(시험 패치: 가을 DL13/12, 봄 5일 평활).</li>
+<li><b>생물기후 규칙</b> (§25.6): 꺼져 있어 사라진 종(북반구 낙엽송)이 돌아오지 못함.</li>
+</ul>
+<p class="small">근거 기록: <code>lm4/LM4_SPINUP_NOTES.md</code> (2026-10-14 절들), <code>notes/findings.md</code>. 책 식 중 OCR이 깨져 표준식으로 복원한 것: 16.5, 16.14, 15.2–15.4, 17.2(일부), 22.2–22.3. Leuning 식·온도 반응식·two-stream 식은 책에 식이 없어 원 논문 표준형으로 적었다.</p>
+</body></html>

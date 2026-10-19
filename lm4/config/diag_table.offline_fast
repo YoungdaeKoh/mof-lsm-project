@@ -56,6 +56,7 @@
 "land", "geolon_t", "geolon_t", "land_month", "all", .false., "none", 1
 "land", "geolat_t", "geolat_t", "land_month", "all", .false., "none", 1
 "land", "area_ntrl", "area_ntrl", "land_month", "all", .true., "none", 2
+"land", "qco2_dvmr", "qco2_dvmr", "land_month", "all", .true., "none", 2
 "soil", "soil_ice", "soil_ice", "land_month", "all", .true., "none", 2
 "soil", "soil_liq", "soil_liq", "land_month", "all", .true., "none", 2
 "soil", "soil_psi", "soil_psi", "land_month", "all", .true., "none", 2

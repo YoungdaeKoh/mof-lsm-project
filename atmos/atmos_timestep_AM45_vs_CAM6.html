@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>대기모델 1 Time Step</title>
+<style>
+:root{
+  --dyn:#1d4ed8; --dyn-bg:#eff6ff;
+  --rad:#c2410c; --rad-bg:#fff7ed;
+  --col:#15803d; --col-bg:#f0fdf4;
+  --moist:#7e22ce; --moist-bg:#faf5ff;
+  --cpl:#92400e; --cpl-bg:#fefce8;
+  --misc:#475569; --misc-bg:#f8fafc;
+  --ink:#0f172a; --mute:#64748b; --line:#cbd5e1;
+}
+@page{size:A4; margin:11mm 11mm 12mm 11mm;}
+*{box-sizing:border-box}
+body{font-family:"Apple SD Gothic Neo","Noto Sans KR",sans-serif; color:var(--ink); background:#fff; font-size:8.6pt; line-height:1.38; margin:0}
+.page{page-break-after:always; break-after:page}
+.page:last-child{page-break-after:auto}
+h1{font-size:17pt; margin:0 0 2mm}
+h2{font-size:12.5pt; margin:0 0 1.5mm; border-bottom:2px solid var(--ink); padding-bottom:1mm}
+h3{font-size:9.8pt; margin:2.5mm 0 1mm}
+p{margin:1mm 0}
+code,.mono{font-family:Menlo,monospace; font-size:7.3pt}
+.sub{color:var(--mute); font-size:8pt}
+.legend{display:flex; flex-wrap:wrap; gap:2mm; margin:2mm 0}
+.chip{display:inline-block; border-radius:3px; padding:0.3mm 1.6mm; font-size:7.4pt; font-weight:600; color:#fff; white-space:nowrap}
+.c-dyn{background:var(--dyn)} .c-rad{background:var(--rad)} .c-col{background:var(--col)} .c-moist{background:var(--moist)} .c-cpl{background:var(--cpl)} .c-misc{background:var(--misc)}
+.book{display:inline-block; border:1px solid var(--ink); border-radius:3px; padding:0 1.3mm; font-size:7.1pt; white-space:nowrap; background:#fff}
+table{border-collapse:collapse; width:100%; font-size:7.9pt}
+th,td{border:1px solid var(--line); padding:1mm 1.4mm; vertical-align:top; text-align:left}
+th{background:#f1f5f9}
+.flow{display:flex; flex-direction:column; gap:0}
+.step{border-left:5px solid; border-radius:3px; padding:1.3mm 2mm 1.3mm 2.4mm; margin:0}
+.step .t{font-weight:700; font-size:9pt}
+.step .w{float:right; text-align:right}
+.step ul{margin:0.6mm 0 0 0; padding-left:4.2mm}
+.step li{margin:0.2mm 0}
+.s-dyn{border-color:var(--dyn); background:var(--dyn-bg)}
+.s-rad{border-color:var(--rad); background:var(--rad-bg)}
+.s-col{border-color:var(--col); background:var(--col-bg)}
+.s-moist{border-color:var(--moist); background:var(--moist-bg)}
+.s-cpl{border-color:var(--cpl); background:var(--cpl-bg)}
+.s-misc{border-color:var(--misc); background:var(--misc-bg)}
+.arrow{text-align:center; color:var(--mute); font-size:9pt; line-height:1; margin:0.5mm 0}
+.note{border:1px dashed var(--mute); border-radius:3px; padding:1.4mm 2mm; margin-top:2mm; font-size:8pt}
+.two{display:grid; grid-template-columns:1fr 1fr; gap:4mm}
+.key{background:#fef9c3; padding:0 0.6mm}
+.loopback{border:1.5px dashed var(--mute); border-radius:4px; padding:1mm 2mm; text-align:center; color:var(--mute); font-size:7.8pt; margin-top:1mm}
+svg text{font-family:"Apple SD Gothic Neo",sans-serif}
+</style>
+</head>
+<body>
+
+<!-- ============================ PAGE 1 ============================ -->
+<section class="page">
+<h1>대기모델은 1 time step 동안 무엇을 계산하나</h1>
+<p class="sub">GFDL AM4.5 (KIOST-ESM2) vs NCAR CAM6 (CESM2.1.5) — 실제 소스코드 호출 순서 + Gettelman &amp; Rood (2016) <i>Demystifying Climate Models</i> 대응표 · 2026-10-19 · MOF_LSM_project/atmos/</p>
+
+<h3>0. 이 문서 읽는 법</h3>
+<p>대기모델은 지구를 격자 기둥(column)으로 자르고, 각 기둥의 상태(바람 u,v · 온도 T · 수증기·구름 등 tracer)를 <b>Δt = 1800 s(30분)</b>씩 앞으로 밀어 갑니다. 한 번 미는 것이 <b>1 time step</b>입니다. 1년 = 17,520 step입니다(365 × 48).</p>
+<p>책 Fig. 4.6(p.49)은 한 step을 아래 <b>5가지 일</b>로 나눕니다. 이 문서의 모든 상자는 같은 5가지 색으로 칠했습니다. <b>색이 같으면 책의 같은 단계</b>입니다.</p>
+<div class="legend">
+  <span class="chip c-moist">① 물리과정: 구름·대류·강수</span>
+  <span class="chip c-col">② 기둥 안 상호작용: 난류 혼합·연직확산</span>
+  <span class="chip c-cpl">③ 성분 간 교환: 지면·해양 flux (coupler)</span>
+  <span class="chip c-rad">④ 복사: 열 출입</span>
+  <span class="chip c-dyn">⑤ 역학 코어: 바람·이류</span>
+  <span class="chip c-misc">기타: 정리·출력</span>
+</div>
+
+<div class="two">
+<div>
+<h3>책의 1-step 고리 (Fig. 4.6, p.49 · Fig. 5.7, p.73)</h3>
+<svg viewBox="0 0 330 250" width="100%">
+  <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#64748b"/></marker></defs>
+  <circle cx="165" cy="125" r="88" fill="none" stroke="#cbd5e1" stroke-width="10"/>
+  <g font-size="10.5" font-weight="700" text-anchor="middle">
+    <rect x="110" y="12" width="110" height="34" rx="5" fill="#7e22ce"/><text x="165" y="27" fill="#fff">① 물리과정</text><text x="165" y="40" fill="#fff" font-size="8.5" font-weight="400">응결·구름·화학</text>
+    <rect x="232" y="78" width="96" height="34" rx="5" fill="#15803d"/><text x="280" y="93" fill="#fff">② 기둥 상호작용</text><text x="280" y="106" fill="#fff" font-size="8.5" font-weight="400">강수 낙하·난류</text>
+    <rect x="200" y="186" width="120" height="34" rx="5" fill="#92400e"/><text x="260" y="201" fill="#fff">③ 성분 간 교환</text><text x="260" y="214" fill="#fff" font-size="8.5" font-weight="400">지면 flux (coupler)</text>
+    <rect x="12" y="186" width="116" height="34" rx="5" fill="#c2410c"/><text x="70" y="201" fill="#fff">④ 복사</text><text x="70" y="214" fill="#fff" font-size="8.5" font-weight="400">태양·적외 가열</text>
+    <rect x="2" y="78" width="104" height="34" rx="5" fill="#1d4ed8"/><text x="54" y="93" fill="#fff">⑤ 역학 코어</text><text x="54" y="106" fill="#fff" font-size="8.5" font-weight="400">바람·이류</text>
+  </g>
+  <g stroke="#64748b" stroke-width="1.6" fill="none" marker-end="url(#ah)">
+    <path d="M222,38 Q262,48 274,74"/><path d="M285,114 Q290,150 274,183"/><path d="M198,205 L132,205"/><path d="M50,183 Q32,150 48,116"/><path d="M60,76 Q78,40 106,32"/>
+  </g>
+  <text x="165" y="122" text-anchor="middle" font-size="10" fill="#0f172a" font-weight="700">1 time step</text>
+  <text x="165" y="136" text-anchor="middle" font-size="8.5" fill="#64748b">끝나면 다시 처음으로</text>
+  <text x="165" y="245" text-anchor="middle" font-size="8.5" fill="#64748b">Fig. 5.7: (a)=① + ② · (b)=④ + ③ · (c)=⑤</text>
+</svg>
+<p class="sub">책은 ①→⑤ 순서로 그렸습니다. 두 모델 코드는 둘 다 <b>⑤ 역학을 먼저</b> 돌리고 나서 ①~④ 물리를 계산합니다. 고리 모양이라 어디서 자르든 순환은 같습니다. 다만 책 p.50도 "어떤 과정을 먼저 계산하느냐가 결과를 바꿀 수 있다"고 말합니다. 이 순서 차이가 두 모델을 비교하는 핵심 축입니다(4쪽).</p>
+</div>
+<div>
+<h3>핵심 숫자 (실제 설정 파일에서 확인)</h3>
+<table>
+<tr><th></th><th>AM4.5 (KIOST-ESM2)</th><th>CAM6 (CESM2.1.5)</th></tr>
+<tr><td>격자</td><td>FV3 cubed-sphere <b>C96</b> (≈100 km), 정육면체 6면 × 96×96</td><td>FV 위경도 <b>0.9°×1.25°</b> (288×192)</td></tr>
+<tr><td>연직층</td><td><b>49</b>층 (npz)</td><td><b>32</b>층 (nlev)</td></tr>
+<tr><td>Δt (물리)</td><td><b>1800 s</b> (dt_atmos)</td><td><b>1800 s</b> (ATM_NCPL=48)</td></tr>
+<tr><td>역학 부분 step</td><td>n_split=14 → 1800/14 = <b>128.6 s</b> × 14회</td><td>nsplit 자동 8 → 1800/8 = <b>225 s</b> × 8회</td></tr>
+<tr><td>연직 remap</td><td>k_split=1 → 1회/Δt</td><td>fv_nspltvrm=2 → 2회/Δt</td></tr>
+<tr><td>복사 전체계산</td><td><b>3 h</b>마다 (rad_time_step=10800, 6 step에 1번)</td><td><b>1 h</b>마다 (iradsw=−1, 2 step에 1번)</td></tr>
+<tr><td>정역학</td><td>hydrostatic = .T.</td><td>hydrostatic (FV)</td></tr>
+<tr><td>지면 결합</td><td><b>implicit</b>: 매 Δt, 대기↔LM4 연립</td><td><b>explicit</b>: 매 Δt, CLM flux를 고정값으로</td></tr>
+<tr><td>해양 결합</td><td>dt_cpld=3600 s (2 step마다)</td><td>매 Δt (OCN_NCPL=48)</td></tr>
+</table>
+<p class="sub">CAM6 nlev=32: case <code>Buildconf/camconf/config_cache.xml</code>에서 확인.<br>
+출처: <code>atmos/code_trace/am45_input.nml.KIOST-ESM2</code> (input.nml 556·817–836·1225행), <code>cam6_atm_in.F_2000climo_f09</code>, <code>dyn_comp.F90:1436–1438</code></p>
+
+<h3>"부분 step"이 왜 필요한가</h3>
+<p>공기 중 음파·중력파는 초속 300 m 이상으로 달립니다. 격자 100 km를 1800 s에 건너뛰면 수치가 폭발합니다(CFL 조건). 그래서 <b>역학만 잘게(128–225 s) 여러 번</b> 돌리고, 비싼 물리(구름·복사)는 30분에 한 번만 계산합니다. 복사는 더 비싸서 1–3시간에 한 번만 계산하고, 사이 step에는 저장한 가열률을 재사용합니다.</p>
+</div>
+</div>
+</section>
+
+<!-- ============================ PAGE 2: AM4.5 ============================ -->
+<section class="page">
+<h2>AM4.5 (KIOST-ESM2 대기) — 1 time step 흐름도 (Δt = 1800 s)</h2>
+<p class="sub">경로는 <code>atmos/src/am45/</code> 기준이고 줄번호는 grep으로 확인했습니다. 상위 루프는 <code>coupler/full/coupler_main.F90:783</code>의 fast loop (대기·지면·해빙)입니다.</p>
+<div class="flow">
+
+<div class="step s-cpl"><span class="w"><span class="chip c-cpl">③</span> <span class="book">책 p.115 Fig.7.2</span></span>
+<div class="t">1. sfc_boundary_layer — 지면에서 오는 flux의 "초안" 계산</div>
+<ul><li>Monin-Obukhov 상사이론으로 지면과 최하층 공기 사이의 교환계수를 구하고, 현열 H·증발 E·운동량 τ를 계산합니다.</li>
+<li><span class="key">flux만이 아니라 미분값 ∂H/∂T<sub>s</sub>, ∂E/∂T<sub>s</sub>, ∂H/∂T<sub>atm</sub>도 함께</span> 만듭니다. 지면온도가 1 K 바뀌면 flux가 얼마나 바뀌는지를 미리 계산해 두는 것이고, 5단계의 implicit 결합에 쓰입니다.</li>
+<li><code>coupler_main.F90:797 → atm_land_ice_flux_exchange.F90:682 → surface_flux.F90:205</code></li></ul></div>
+<div class="arrow">▼</div>
+
+<div class="step s-dyn"><span class="w"><span class="chip c-dyn">⑤</span> <span class="book">책 p.73 Fig.5.7c</span></span>
+<div class="t">2. FV3 역학 코어 — 바람이 공기와 물을 옮긴다 (단열 과정만)</div>
+<ul><li><b>음파 부분 step × 14회 (128.6 s씩)</b>: <code>c_sw</code>(C-grid 반 step 바람·질량 flux) → <code>p_grad_c</code> → <code>d_sw</code>(D-grid 질량·온위·와도 갱신) → <code>geopk</code> → <code>one_grad_p</code>(기압경도력)</li>
+<li><code>tracer_2d</code>: 수증기·구름·에어로졸을 수평으로 옮깁니다(이류).</li>
+<li><code>Lagrangian_to_Eulerian</code>: 공기와 함께 떠다니며 늘고 준 층을 원래의 49개 hybrid 층으로 다시 나눕니다(PPM remap).</li>
+<li><code>fv_subgrid_z</code>: 위가 무겁고 아래가 가벼운 불안정 층을 섞습니다(건조 대류조정).</li>
+<li><code>coupler_main:831 → atmosphere.F90:561 → fv_dynamics.F90:73 → dyn_core.F90:88</code></li></ul></div>
+<div class="arrow">▼</div>
+
+<div class="step s-rad"><span class="w"><span class="chip c-rad">④</span> <span class="book">책 p.76 §5.4.2</span></span>
+<div class="t">3. radiation_driver — 태양·적외 복사 가열 (전체 계산은 3시간마다)</div>
+<ul><li>태양 천정각(<code>astronomy</code>) → 온실기체 → 에어로졸 광학 → 구름 광학 → <b>sea_esf</b> SW(esfsw)·LW(sealw99) → 가열률 tdt_rad, 지면 하향 SW·LW</li>
+<li>6 step 중 1번만 전부 계산하고, 나머지 5번은 저장한 값을 재사용합니다.</li>
+<li><code>coupler_main:841 → atmos_model.F90:306 → radiation_driver.F90:1651</code></li></ul></div>
+<div class="arrow">▼</div>
+
+<div class="step s-col"><span class="w"><span class="chip c-col">②</span> <span class="book">책 p.74–75</span></span>
+<div class="t">4. physics_driver_down — 난류와 항력을 계산하고, 연직확산을 "반만" 푼다</div>
+<ul><li><code>damping_driver</code>: 지형 중력파 항력(<b>topo_drag</b>), 비지형 중력파(<b>cg_drag</b>), 상층 Rayleigh 감쇠</li>
+<li><code>vert_turb_driver</code>: 경계층 난류 확산계수 K<sub>m</sub>, K<sub>h</sub> (<b>Lock entrain + stable_bl</b>)</li>
+<li><code>vert_diff_down</code>: 연직확산 방정식(삼중대각 행렬)을 <b>위에서 아래로만</b> 소거합니다. 맨 아래층은 "지면 flux가 얼마인지 모르는 상태"로 남겨 둡니다.</li>
+<li><code>coupler_main:851 → atmos_model.F90:461 → physics_driver.F90:1678 → vert_diff.F90:308</code></li></ul></div>
+<div class="arrow">▼</div>
+
+<div class="step s-cpl"><span class="w"><span class="chip c-cpl">③</span> <span class="book">책 p.125 §7.4 · p.145 §8.2</span></span>
+<div class="t">5. ★ 지면(LM4)·해빙(SIS2)이 대기와 "연립"으로 지면온도를 푼다</div>
+<ul><li><code>flux_down_from_atmos</code>: 대기 쪽 계수와 1단계의 미분값을 합쳐 "지면 flux = a + b·ΔT<sub>s</sub>" 꼴로 만들어 LM4에 전달합니다(SW·LW·강수 포함).</li>
+<li><code>update_land_model_fast</code> (LM4): 이 식을 넣어 에너지수지 SW+LW−H−LE−G = 0을 풀고 <b>새 지면온도 ΔT<sub>s</sub></b>를 얻습니다.</li>
+<li><code>flux_up_to_atmos</code>: ΔT<sub>s</sub>로 flux를 보정하고, 대기 최하층 변화 ΔT<sub>N</sub>을 확정합니다.</li>
+<li><code>coupler_main:859 / 872 / 884 / 895</code> (자세한 설명은 5쪽)</li></ul></div>
+<div class="arrow">▼</div>
+
+<div class="step s-moist"><span class="w"><span class="chip c-moist">①</span><span class="chip c-col">②</span> <span class="book">책 p.74–76 §5.4.1</span></span>
+<div class="t">6. physics_driver_up — 연직확산을 마저 풀고, 구름·비를 만든다</div>
+<ul><li><code>vert_diff_up</code>: 확정된 ΔT<sub>N</sub>에서 시작해 <b>아래에서 위로</b> 대입합니다(back-substitution). 이것으로 경계층 혼합이 끝납니다.</li>
+<li><code>convection_driver</code>: <b>UW double-plume</b> 적운 대류(심층 + 천층) + 적운 운동량 수송(cu_mo_trans)</li>
+<li><code>lscloud_driver</code>: 층운 구름량 <b>Tiedtke</b> + 미세물리 <b>MG2</b> (구름 입자 질량·수농도) → 강수. 이 강수는 <b>다음 step</b>에 지면으로 갑니다.</li>
+<li><code>coupler_main:903 → atmos_model.F90:612 → physics_driver.F90:2248 → moist_processes.F90:576</code></li></ul></div>
+<div class="arrow">▼</div>
+
+<div class="step s-misc"><span class="w"><span class="book">책 p.74 "updates are applied"</span></span>
+<div class="t">7. update_atmos_model_state — 모아 둔 물리 tendency를 한꺼번에 적용</div>
+<ul><li>3~6단계의 u,v,T,q 변화율을 모아 두었다가 <code>fv_update_phys</code>에서 FV3 상태에 <b>한 번에</b> 더합니다. 그다음 시계를 1800 s 전진합니다.</li>
+<li><code>coupler_main:950 → atmosphere.F90:1088 → fv_update_phys.F90:63</code></li></ul></div>
+
+<div class="loopback">↻ fast loop 2회(3600 s)마다: 지면 slow(식생·탄소·하천) · 해빙 slow · <b>해양 MOM6</b> 1회 → 다시 1단계로</div>
+</div>
+</section>
+
+<!-- ============================ PAGE 3: CAM6 ============================ -->
+<section class="page">
+<h2>CAM6 (CESM2.1.5 대기) — 1 time step 흐름도 (Δt = 1800 s)</h2>
+<p class="sub">경로는 <code>atmos/src/cam6/</code> 기준입니다. 상위 루프는 <code>cpl/atm_comp_mct.F90:332 atm_run_mct</code>입니다. 실제 코드 순서는 run2→run3→run4→run1이지만, 이해하기 쉽게 <b>역학부터</b> 늘어놓았습니다.</p>
+<div class="flow">
+
+<div class="step s-dyn"><span class="w"><span class="chip c-dyn">⑤</span> <span class="book">책 p.73 Fig.5.7c</span></span>
+<div class="t">1. FV 역학 코어 (위경도 격자) — 바람이 공기와 물을 옮긴다</div>
+<ul><li><b>부분 step 8회 (225 s씩)</b> = remap 구간 2개 × 4회: <code>cd_core</code> (C-grid 반 step <code>c_sw</code> → <code>geopk</code> 기압경도 → D-grid 운동량·질량·온위)</li>
+<li><code>trac2d</code>: tracer 수평 이류. <code>te_map</code>: Lagrangian 층을 hybrid η 층으로 remap (Δt당 2회, 총에너지 보정 포함)</li>
+<li><code>d_p_coupling</code>: D-grid 바람을 A-grid로 옮기고, 역학 분해(block)를 물리 column 묶음(chunk)으로 다시 나눕니다.</li>
+<li><code>cam_comp.F90:243 → stepon.F90:315 → dyn_comp.F90:687 → cd_core.F90</code></li></ul></div>
+<div class="arrow">▼</div>
+
+<div class="step s-misc"><span class="w"><span class="book">책 p.48 보존법칙</span></span>
+<div class="t">2. tphysbc 시작 — 에너지 보정과 건조 조정</div>
+<ul><li><code>check_energy_fix</code>: 역학 코어가 수치적으로 잃은 총에너지를 전구에 고르게 되돌려 줍니다.</li>
+<li><code>dadadj_tend</code>: 정역학적으로 불안정한 층을 섞습니다(건조 대류조정).</li>
+<li><code>physpkg.F90:1634 tphysbc, :1873, :1905</code></li></ul></div>
+<div class="arrow">▼</div>
+
+<div class="step s-moist"><span class="w"><span class="chip c-moist">①</span> <span class="book">책 p.75 §5.4.1</span></span>
+<div class="t">3. ZM 심층대류 (Zhang-McFarlane)</div>
+<ul><li>CAPE(대류 가용 위치에너지)를 기준으로 상승·하강류를 만들고 대류성 강수를 계산합니다. <code>physpkg.F90:1918 → zm_conv_tend</code></li></ul></div>
+<div class="arrow">▼</div>
+
+<div class="step s-col"><span class="w"><span class="chip c-col">②</span><span class="chip c-moist">①</span><span class="chip c-cpl">③</span> <span class="book">책 p.75 "special representations… near the ground"</span></span>
+<div class="t">4. macmic 루프 × 3회 (600 s씩) — CLUBB + MG2</div>
+<ul><li><code>clubb_tend_cam</code> (<b>CLUBB</b>, 내부 sub-step 300 s): <b>경계층 난류 + 천층 대류 + 구름량(macrophysics)</b>을 고차 난류 closure 하나로 함께 풉니다. <span class="key">지면 현열·증발·운동량 flux는 여기서 하부경계조건으로 들어갑니다.</span> (<code>clubb_intr.F90:1781–1783</code>)</li>
+<li><code>microp_aero_run</code>: 에어로졸이 구름 씨앗(CCN·IN)이 되는 활성화</li>
+<li><code>microp_driver_tend</code> (<b>MG2</b>): 구름물·얼음·비·눈의 질량과 수농도 → 층운성 강수</li>
+<li><code>physpkg.F90:2041–2182</code></li></ul></div>
+<div class="arrow">▼</div>
+
+<div class="step s-moist"><span class="w"><span class="chip c-moist">①</span> <span class="book">책 p.77 §5.4.3</span></span>
+<div class="t">5. 에어로졸 습윤 제거 · 대류에 의한 tracer 수송</div>
+<ul><li><code>aero_model_wetdep</code> (:2217), <code>convect_deep_tend_2</code> (:2234)</li></ul></div>
+<div class="arrow">▼</div>
+
+<div class="step s-rad"><span class="w"><span class="chip c-rad">④</span> <span class="book">책 p.76 §5.4.2</span></span>
+<div class="t">6. RRTMG 복사 (전체 계산은 1시간마다)</div>
+<ul><li>2 step 중 1번 SW·LW를 전부 계산하고, 나머지 step은 저장한 가열률만 적용합니다. 지면으로 갈 netsw·flwds를 채웁니다.</li>
+<li><code>physpkg.F90:2272 → radiation.F90:680</code></li></ul></div>
+<div class="arrow">▼</div>
+
+<div class="step s-cpl"><span class="w"><span class="chip c-cpl">③</span> <span class="book">책 p.145 §8.2 "clearing-house"</span></span>
+<div class="t">7. ★ coupler 교환 — CLM은 "이미 확정된 대기"를 보고 flux를 계산</div>
+<ul><li><code>cam_export → atm_export</code>: 최하층 T·q·u·v, 강수, 복사를 CLM·해양·해빙으로 보냅니다.</li>
+<li>CLM은 이 값으로 지면 에너지수지를 풀고 H·LE·τ를 계산합니다. 이 flux는 <code>atm_import</code>로 <b>다음 step</b>에 대기로 들어오며, 고정된 숫자로 쓰입니다(<b>explicit</b>).</li>
+<li><code>atm_comp_mct.F90:460 / :406</code></li></ul></div>
+<div class="arrow">▼</div>
+
+<div class="step s-col"><span class="w"><span class="chip c-col">②</span> <span class="book">책 p.74 "drag, or friction from the surface"</span></span>
+<div class="t">8. tphysac — 지면 flux를 받은 뒤의 물리</div>
+<ul><li><code>chem_emissions</code>(지면 배출) → <code>qneg4</code>(증발이 수증기를 음수로 만들지 않게 막음)</li>
+<li><code>vertical_diffusion_tend</code>: CAM6에서는 열·수증기를 CLUBB가 맡으므로 <b>그 외 tracer 확산 + Beljaars 지형 난류 항력</b>만 처리합니다.</li>
+<li><code>gw_tend</code>: <b>능선 기반 지형 중력파 항력</b>(gw_rdg_beta) · <code>physics_dme_adjust</code>: 수증기 변화만큼 층 질량을 다시 맞춥니다.</li>
+<li><code>physpkg.F90:1221 tphysac, :1434, :1498, :1603</code></li></ul></div>
+<div class="arrow">▼</div>
+
+<div class="step s-misc"><span class="w"><span class="book">책 p.74 "updates are applied"</span></span>
+<div class="t">9. p_d_coupling — 물리 결과를 역학으로 넘기고 출력</div>
+<ul><li>u,v는 tendency(dudt)로, T·q는 갱신된 상태 그대로 FV 격자에 넘깁니다. 그다음 history·restart를 쓰고 시계를 1800 s 전진합니다.</li>
+<li><code>stepon.F90:383 → dp_coupling.F90:698</code></li></ul></div>
+
+<div class="loopback">↻ 다시 1단계(역학)로. CAM은 물리 안에서 모듈마다 <b>상태를 즉시 갱신</b>합니다(<code>physics_update</code>). 그래서 ZM → CLUBB → MG2 → RRTMG는 차례로 "이미 바뀐 상태"를 봅니다.</div>
+</div>
+</section>
+
+<!-- ============================ PAGE 4: side-by-side ============================ -->
+<section class="page">
+<h2>나란히 비교 — 책의 5단계에 두 모델 코드를 끼워 넣기</h2>
+<table>
+<tr><th style="width:17%">책의 단계</th><th style="width:33%">AM4.5 (GFDL)</th><th style="width:33%">CAM6 (NCAR)</th><th style="width:17%">책 쪽수</th></tr>
+<tr><td><span class="chip c-dyn">⑤ 역학 코어</span><br>바람이 공기·물을 옮김</td>
+<td><b>FV3</b> 유한체적, cubed-sphere C96. 부분 step 14 × 128.6 s, Lagrangian 연직좌표 + remap 1회</td>
+<td><b>FV</b> 유한체적, 위경도 0.9°×1.25°. 부분 step 8 × 225 s, Lagrangian 연직좌표 + remap 2회</td>
+<td>p.73 Fig.5.7c, p.73–74 본문 · p.49–50 Fig.4.6 ⑤</td></tr>
+<tr><td><span class="chip c-rad">④ 복사</span></td>
+<td><b>sea_esf</b> (GFDL 자체 코드). 3 h마다</td>
+<td><b>RRTMG</b> (AER). 1 h마다</td>
+<td>p.76 §5.4.2</td></tr>
+<tr><td><span class="chip c-col">② 기둥 상호작용</span><br>경계층 난류</td>
+<td><b>Lock entrain + stable_bl</b> → K 확산계수 + implicit 연직확산 (down/up 두 단계로 나눔)</td>
+<td><b>CLUBB</b> (고차 closure). 난류·천층대류·구름량을 하나로 통합</td>
+<td>p.75 "turbulence near the ground" · p.45 Fig.4.5 ②</td></tr>
+<tr><td><span class="chip c-moist">① 물리과정</span><br>대류</td>
+<td><b>UW double-plume</b>: 한 scheme이 심층 + 천층 대류</td>
+<td><b>ZM</b>(심층) + <b>CLUBB</b>(천층): 두 scheme이 분담</td>
+<td>p.75 "one for layered… one for deep cumulus"</td></tr>
+<tr><td><span class="chip c-moist">① 물리과정</span><br>구름·미세물리</td>
+<td>구름량 <b>Tiedtke</b>(예단) + <b>MG2</b> 미세물리</td>
+<td>구름량 <b>CLUBB</b>(PDF) + <b>MG2</b> 미세물리 × 3회 sub-cycle</td>
+<td>p.75 Clausius-Clapeyron, p.72 subgrid</td></tr>
+<tr><td>중력파 항력</td>
+<td>topo_drag(지형) + cg_drag(비지형)</td>
+<td>gw_rdg_beta(능선 지형) + Beljaars 난류 지형항력</td>
+<td>p.74 "drag… mountains"</td></tr>
+<tr><td><span class="chip c-cpl">③ 성분 간 교환</span><br>지면</td>
+<td><b>implicit</b>: 대기 확산 ↓ → LM4 지면온도 → 대기 확산 ↑. 같은 Δt 안에서 연립으로 풂</td>
+<td><b>explicit</b>: CLM이 직전 대기로 flux 계산 → 다음 step에 CLUBB 하부경계로 들어감</td>
+<td>p.125–126 §7.4 · p.144–146 §8.2 · p.115 Fig.7.2</td></tr>
+<tr><td>물리 → 역학 적용 방식</td>
+<td>tendency를 <b>모았다가 한 번에</b> (fv_update_phys)</td>
+<td>모듈마다 <b>즉시 갱신</b> (physics_update, time-split)</td>
+<td>p.50 "which processes to calculate first… not always obvious"</td></tr>
+</table>
+
+<h3>같은 지도 위의 두 경로 (책 Fig. 4.6 순서로 다시 그림)</h3>
+<svg viewBox="0 0 760 190" width="100%">
+  <defs><marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#334155"/></marker></defs>
+  <text x="4" y="40" font-size="11" font-weight="700">AM4.5</text>
+  <text x="4" y="140" font-size="11" font-weight="700">CAM6</text>
+  <g font-size="9.5" font-weight="700" text-anchor="middle" fill="#fff">
+    <!-- AM4.5 row: 3(pre) 5 4 2down 3 2up/1 apply -->
+    <rect x="58"  y="20" width="70" height="36" rx="4" fill="#92400e"/><text x="93" y="36">③ 초안 flux</text><text x="93" y="49" font-weight="400" font-size="8">+ 미분값</text>
+    <rect x="140" y="20" width="70" height="36" rx="4" fill="#1d4ed8"/><text x="175" y="42">⑤ FV3</text>
+    <rect x="222" y="20" width="70" height="36" rx="4" fill="#c2410c"/><text x="257" y="42">④ sea_esf</text>
+    <rect x="304" y="20" width="84" height="36" rx="4" fill="#15803d"/><text x="346" y="36">② 확산 ↓</text><text x="346" y="49" font-weight="400" font-size="8">Lock·항력</text>
+    <rect x="400" y="20" width="84" height="36" rx="4" fill="#92400e"/><text x="442" y="36">③ LM4 연립</text><text x="442" y="49" font-weight="400" font-size="8">새 Ts</text>
+    <rect x="496" y="20" width="84" height="36" rx="4" fill="#15803d"/><text x="538" y="42">② 확산 ↑</text>
+    <rect x="592" y="20" width="84" height="36" rx="4" fill="#7e22ce"/><text x="634" y="36">① UW·Tiedtke</text><text x="634" y="49" font-weight="400" font-size="8">MG2 → 강수</text>
+    <rect x="688" y="20" width="68" height="36" rx="4" fill="#475569"/><text x="722" y="36">한 번에</text><text x="722" y="49" font-weight="400" font-size="8">적용</text>
+    <!-- CAM6 row -->
+    <rect x="58"  y="120" width="70" height="36" rx="4" fill="#1d4ed8"/><text x="93" y="142">⑤ FV</text>
+    <rect x="140" y="120" width="70" height="36" rx="4" fill="#475569"/><text x="175" y="136">에너지</text><text x="175" y="149" font-weight="400" font-size="8">fixer</text>
+    <rect x="222" y="120" width="70" height="36" rx="4" fill="#7e22ce"/><text x="257" y="142">① ZM</text>
+    <rect x="304" y="120" width="84" height="36" rx="4" fill="#15803d"/><text x="346" y="136">②① CLUBB</text><text x="346" y="149" font-weight="400" font-size="8">+MG2 ×3</text>
+    <rect x="400" y="120" width="84" height="36" rx="4" fill="#c2410c"/><text x="442" y="142">④ RRTMG</text>
+    <rect x="496" y="120" width="84" height="36" rx="4" fill="#92400e"/><text x="538" y="136">③ CLM</text><text x="538" y="149" font-weight="400" font-size="8">flux 계산</text>
+    <rect x="592" y="120" width="84" height="36" rx="4" fill="#15803d"/><text x="634" y="136">② vdiff·GWD</text><text x="634" y="149" font-weight="400" font-size="8">tphysac</text>
+    <rect x="688" y="120" width="68" height="36" rx="4" fill="#475569"/><text x="722" y="136">p_d</text><text x="722" y="149" font-weight="400" font-size="8">coupling</text>
+  </g>
+  <g stroke="#334155" stroke-width="1.3" marker-end="url(#a2)">
+    <line x1="128" y1="38" x2="138" y2="38"/><line x1="210" y1="38" x2="220" y2="38"/><line x1="292" y1="38" x2="302" y2="38"/><line x1="388" y1="38" x2="398" y2="38"/><line x1="484" y1="38" x2="494" y2="38"/><line x1="580" y1="38" x2="590" y2="38"/><line x1="676" y1="38" x2="686" y2="38"/>
+    <line x1="128" y1="138" x2="138" y2="138"/><line x1="210" y1="138" x2="220" y2="138"/><line x1="292" y1="138" x2="302" y2="138"/><line x1="388" y1="138" x2="398" y2="138"/><line x1="484" y1="138" x2="494" y2="138"/><line x1="580" y1="138" x2="590" y2="138"/><line x1="676" y1="138" x2="686" y2="138"/>
+  </g>
+  <path d="M346,58 Q394,84 442,58 M442,58 Q490,84 538,58" stroke="#92400e" stroke-width="1.4" fill="none" stroke-dasharray="3 2"/>
+  <text x="442" y="90" font-size="8.5" text-anchor="middle" fill="#92400e">대기 확산이 지면을 "감싸고" 한 번에 풀림 (implicit)</text>
+  <text x="538" y="176" font-size="8.5" text-anchor="middle" fill="#92400e">flux는 다음 step까지 고정값 (explicit)</text>
+</svg>
+<p class="sub">같은 색 블록이 두 줄에서 서로 다른 위치에 있습니다. 두 모델은 같은 일을 하지만 <b>순서와 묶는 방식</b>이 다릅니다. 가장 크게 다른 것은 갈색 ③(지면 교환)의 위치입니다. AM4.5에서는 초록 ②(난류확산) <b>사이에 끼어</b> 있고, CAM6에서는 물리 계산이 끝난 <b>뒤에</b> 따로 옵니다.</p>
+</section>
+
+<!-- ============================ PAGE 5: coupling ============================ -->
+<section class="page">
+<h2>지면–대기 결합: implicit (AM4.5–LM4) vs explicit (CAM6–CLM5)</h2>
+<p>LSM을 연구하는 입장에서 가장 중요한 차이입니다. 책 §7.4(p.125)는 "토양수분이 현열·잠열 배분을 바꾸고, 그 변화가 대기로 돌아간다"고 말합니다. 이 되먹임이 <b>코드 안에서 어떤 순서로 계산되는지</b>가 두 모델에서 다릅니다.</p>
+<div class="two">
+<div>
+<h3>AM4.5 + LM4 : implicit (삼중대각 행렬을 반으로 쪼개 풀기)</h3>
+<svg viewBox="0 0 340 300" width="100%">
+  <defs><marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#334155"/></marker></defs>
+  <g font-size="9">
+  <rect x="20" y="10" width="140" height="170" fill="#f0fdf4" stroke="#15803d"/>
+  <text x="90" y="25" text-anchor="middle" font-weight="700">대기 기둥 (49층)</text>
+  <line x1="20" y1="50" x2="160" y2="50" stroke="#cbd5e1"/><line x1="20" y1="80" x2="160" y2="80" stroke="#cbd5e1"/><line x1="20" y1="110" x2="160" y2="110" stroke="#cbd5e1"/><line x1="20" y1="140" x2="160" y2="140" stroke="#cbd5e1"/>
+  <text x="30" y="165">최하층 N</text>
+  <path d="M60,35 L60,150" stroke="#15803d" stroke-width="2.5" marker-end="url(#a3)"/>
+  <text x="66" y="70" fill="#15803d" font-weight="700">ⓐ 아래로 소거</text>
+  <text x="66" y="82" fill="#15803d" font-size="8">ΔT_k = e_k·ΔT_(k+1) + f_k</text>
+  <path d="M140,150 L140,35" stroke="#7e22ce" stroke-width="2.5" marker-end="url(#a3)"/>
+  <text x="134" y="126" fill="#7e22ce" font-weight="700" text-anchor="end">ⓓ 위로 대입</text>
+  <rect x="20" y="200" width="140" height="60" fill="#fefce8" stroke="#92400e"/>
+  <text x="90" y="216" text-anchor="middle" font-weight="700">LM4 지면</text>
+  <text x="90" y="232" text-anchor="middle" font-size="8">SW+LW−H−LE−G = 0</text>
+  <text x="90" y="246" text-anchor="middle" font-size="8">H = H₀ + (∂H/∂Ts)·ΔTs 대입</text>
+  <path d="M75,182 L75,198" stroke="#92400e" stroke-width="2" marker-end="url(#a3)"/>
+  <text x="80" y="194" font-size="8" fill="#92400e">ⓑ a + b·ΔTs</text>
+  <path d="M120,198 L120,182" stroke="#92400e" stroke-width="2" marker-end="url(#a3)"/>
+  <text x="125" y="194" font-size="8" fill="#92400e">ⓒ ΔTs</text>
+  <text x="175" y="40" font-size="8.5">ⓐ vert_diff_down</text>
+  <text x="175" y="52" font-size="7.5" fill="#64748b">vert_diff.F90:431</text>
+  <text x="175" y="200" font-size="8.5">ⓑ flux_down_from_atmos</text>
+  <text x="175" y="212" font-size="7.5" fill="#64748b">γ=1/(1−dtmass·(dflux_t+∂H/∂T_atm/cp))</text>
+  <text x="175" y="232" font-size="8.5">ⓒ update_land_model_fast</text>
+  <text x="175" y="252" font-size="8.5">ⓒ' flux_up_to_atmos</text>
+  <text x="175" y="264" font-size="7.5" fill="#64748b">ΔT_N = f_t_delt_n + e_t_n·ΔTs (:3036)</text>
+  <text x="175" y="120" font-size="8.5">ⓓ vert_diff_up</text>
+  <text x="175" y="132" font-size="7.5" fill="#64748b">vert_diff.F90:1027</text>
+  <text x="20" y="288" font-size="8.5" font-weight="700">→ 대기 최하층 T와 지면 Ts가 같은 Δt 안에서 일관되게 결정됨</text>
+  </g>
+</svg>
+</div>
+<div>
+<h3>CAM6 + CLM5 : explicit (flux를 숫자로 주고받기)</h3>
+<svg viewBox="0 0 340 300" width="100%">
+  <defs><marker id="a4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#334155"/></marker></defs>
+  <g font-size="9">
+  <rect x="20" y="10" width="140" height="170" fill="#faf5ff" stroke="#7e22ce"/>
+  <text x="90" y="25" text-anchor="middle" font-weight="700">대기 기둥 (step n)</text>
+  <line x1="20" y1="50" x2="160" y2="50" stroke="#cbd5e1"/><line x1="20" y1="80" x2="160" y2="80" stroke="#cbd5e1"/><line x1="20" y1="110" x2="160" y2="110" stroke="#cbd5e1"/><line x1="20" y1="140" x2="160" y2="140" stroke="#cbd5e1"/>
+  <text x="30" y="165">최하층: T, q, u, v</text>
+  <text x="30" y="70" fill="#7e22ce" font-weight="700">CLUBB</text>
+  <text x="30" y="82" fill="#7e22ce" font-size="8">하부경계 = 고정 flux</text>
+  <text x="30" y="94" fill="#7e22ce" font-size="8">w'θ' = H/(cp·ρ)</text>
+  <rect x="20" y="200" width="140" height="60" fill="#fefce8" stroke="#92400e"/>
+  <text x="90" y="216" text-anchor="middle" font-weight="700">CLM5 지면</text>
+  <text x="90" y="232" text-anchor="middle" font-size="8">대기 값을 고정하고</text>
+  <text x="90" y="246" text-anchor="middle" font-size="8">자기 에너지수지만 풂</text>
+  <path d="M70,182 L70,198" stroke="#92400e" stroke-width="2" marker-end="url(#a4)"/>
+  <text x="38" y="194" font-size="8" fill="#92400e">ⓐ export</text>
+  <path d="M125,198 L125,182" stroke="#92400e" stroke-width="2" marker-end="url(#a4)"/>
+  <text x="130" y="194" font-size="8" fill="#92400e">ⓑ H, LE, τ</text>
+  <text x="175" y="200" font-size="8.5">ⓐ atm_export (step n 끝)</text>
+  <text x="175" y="212" font-size="7.5" fill="#64748b">최하층 T·q·바람, 강수, 복사</text>
+  <text x="175" y="232" font-size="8.5">ⓑ atm_import (step n+1 시작)</text>
+  <text x="175" y="244" font-size="7.5" fill="#64748b">cam_in%shf, lhf, cflx, wsx</text>
+  <text x="175" y="70" font-size="8.5">ⓒ clubb_tend_cam</text>
+  <text x="175" y="82" font-size="7.5" fill="#64748b">clubb_intr.F90:1781–1783</text>
+  <text x="175" y="104" font-size="8.5">vdiff: CLUBB 모드에서는</text>
+  <text x="175" y="116" font-size="8.5">열·수증기 flux = 0</text>
+  <text x="175" y="128" font-size="7.5" fill="#64748b">vertical_diffusion.F90:1098–1104</text>
+  <text x="20" y="288" font-size="8.5" font-weight="700">→ 지면은 step n의 대기를 보고, 대기는 그 flux를 step n+1에 받음</text>
+  </g>
+</svg>
+</div>
+</div>
+<table style="margin-top:2mm">
+<tr><th>질문</th><th>AM4.5–LM4 (implicit)</th><th>CAM6–CLM5 (explicit)</th></tr>
+<tr><td>지면 모델이 받는 것</td><td>"flux = a + b·ΔTs" <b>식</b> (자기 온도에 따라 flux가 바뀜)</td><td>대기 최하층 <b>숫자</b> (T, q, 바람, 복사, 강수)</td></tr>
+<tr><td>지면 모델이 돌려주는 것</td><td>ΔTs (지면온도 변화) → 대기가 flux를 보정</td><td>H, LE, τ <b>숫자</b></td></tr>
+<tr><td>장점</td><td>Δt가 커도 수치적으로 안정 (Polcher et al. 1998; Best et al. 2004)</td><td>지면·대기 코드가 깔끔하게 분리 → CLM을 오프라인(우리 WFDE5 실행)과 결합에서 같은 코드로 씀</td></tr>
+<tr><td>약점·주의</td><td>LM4가 ∂flux/∂Ts를 반드시 제공해야 함. offline LM4는 coupler 대신 forcing 처방</td><td>flux가 1 step 늦게 들어감(lag). 지면온도 일주기가 큰 곳에서 진동 위험이 있어 Δt를 작게 유지</td></tr>
+<tr><td>우리 과제에서의 의미</td><td colspan="2">offline 진단(1차년도)에서는 이 차이가 드러나지 않습니다(대기를 forcing으로 처방). <b>결합강도의 atmospheric leg</b>(2·3차년도, KIOST AMIP)부터 이 결합 방식이 Mi·λ에 영향을 줍니다. 결합모드 결과를 비교할 때는 "결합 방식" 차이를 해석 항목에 넣어야 합니다.</td></tr>
+</table>
+</section>
+
+<!-- ============================ PAGE 6: summary ============================ -->
+<section class="page">
+<h2>정리 — 두 모델의 공통점 · 차이점 · 책이 말하는 것</h2>
+<div class="two">
+<div>
+<h3>공통점 (두 코드 + 책이 모두 말하는 것)</h3>
+<ol style="padding-left:4.5mm; margin:0">
+<li><b>역학 코어와 물리를 분리합니다.</b> 역학(⑤)은 격자 사이에서 공기를 옮기고, 물리(①–④)는 기둥 하나 안에서만 계산합니다. 책: "processes local to a grid box are estimated using parameterizations… then applied as forcing terms to the dynamics" (p.74, PDF 87).</li>
+<li><b>둘 다 Lin 계열 유한체적(FV) + Lagrangian 연직좌표</b>입니다(FV3는 FV의 후속, cubed-sphere판). 질량 보존이 강점입니다. 책 p.69: GCM은 상·하 경계만 있으므로 질량·에너지 보존을 강제하기 쉽습니다.</li>
+<li><b>Δt = 1800 s</b>이고, 역학만 잘게 sub-cycle합니다. 책: 구름 parameterization은 "the 15 min or so of a climate model time step"을 대표해야 합니다(p.75).</li>
+<li><b>복사는 가장 비싸서 드물게</b> 계산하고, 사이 step은 재사용합니다(1 h / 3 h).</li>
+<li><b>구름은 두 종류</b>(층운형 + 적운형)로 나눠 parameterize하고, 둘 다 미세물리는 <b>MG2</b>입니다(Gettelman이 이 책의 저자이자 MG의 G). 책 p.75: "usually one for layered clouds and one for deep cumulus".</li>
+<li><b>보존 보정</b>: 음수 수증기 정리(qneg/neg_adj), 에너지 fixer, 건조 대류조정이 모두 있습니다. 책 p.48: "Each process at each time step must be limited to what is available".</li>
+<li><b>지면 결합은 coupler를 통해</b> 매 step(1800 s) 이루어집니다. 책 §8.2(p.145)의 "clearing-house" 비유가 이것입니다.</li>
+<li><b>강수는 1 step 늦게 지면에 도달</b>합니다. 대기 물리가 끝난 강수가 다음 step의 지면 계산에 쓰입니다.</li>
+</ol>
+</div>
+<div>
+<h3>차이점 (해석할 때 반드시 기억할 것)</h3>
+<table>
+<tr><th></th><th>AM4.5</th><th>CAM6</th></tr>
+<tr><td>격자</td><td>cubed-sphere (극점 문제 없음)</td><td>위경도 (극 근처 필터 필요)</td></tr>
+<tr><td>연직층</td><td>49</td><td>32</td></tr>
+<tr><td>난류·천층대류</td><td>Lock + UW <b>따로</b></td><td>CLUBB <b>하나로</b></td></tr>
+<tr><td>심층대류</td><td>UW double-plume</td><td>ZM</td></tr>
+<tr><td>구름량</td><td>Tiedtke (예단 변수)</td><td>CLUBB (PDF 진단)</td></tr>
+<tr><td>복사</td><td>sea_esf, 3 h</td><td>RRTMG, 1 h</td></tr>
+<tr><td>지면 결합</td><td><b>implicit</b></td><td><b>explicit</b></td></tr>
+<tr><td>물리 적용</td><td>모아서 한 번에</td><td>모듈마다 즉시</td></tr>
+<tr><td>해양 결합</td><td>1 h</td><td>30 min</td></tr>
+</table>
+
+<h3>책 쪽수 색인 (책 인쇄 쪽, 괄호 = PDF 쪽; 차이가 장마다 11–14로 다름)</h3>
+<table>
+<tr><th>주제</th><th>책 쪽 (PDF 쪽)</th></tr>
+<tr><td>모델 상태 벡터 u,v,w,T,x<sub>n</sub> (Fig.4.4)</td><td>44 (58)</td></tr>
+<tr><td>1 time step 5단계 (Fig.4.5)</td><td>45 (58–59)</td></tr>
+<tr><td>보존 제약 · parameterization</td><td>46–48 (59–62)</td></tr>
+<tr><td>시간 전진 고리 (Fig.4.6), 순서 문제</td><td>49–50 (63–64)</td></tr>
+<tr><td>coupler (Fig.4.9)</td><td>53–54 (67–68)</td></tr>
+<tr><td>병렬 계산·기둥 수</td><td>56 (70)</td></tr>
+<tr><td>GCM 경계·보존</td><td>68–69 (81–82)</td></tr>
+<tr><td>대기모델 구성·subgrid</td><td>71–72 (84–85)</td></tr>
+<tr><td><b>GCM 1 step (Fig.5.7)</b>, 역학 코어</td><td><b>73–74 (86–87)</b></td></tr>
+<tr><td>구름 §5.4.1</td><td>74–76 (87–89)</td></tr>
+<tr><td>복사 §5.4.2 · 화학 §5.4.3</td><td>76–77 (89–90)</td></tr>
+<tr><td>지면 에너지 flux (Fig.7.2)</td><td>115 (127)</td></tr>
+<tr><td>지면–대기 상호작용 §7.4</td><td>125–126 (137–138)</td></tr>
+<tr><td>결합: clearing-house §8.2 (Fig.8.3)</td><td>144–146 (155–157)</td></tr>
+</table>
+</div>
+</div>
+<div class="note"><b>책의 한계(입문서라 다루지 않는 것)</b>: 책은 개념 수준(①–⑤)에서 멈춥니다. 역학 sub-cycling, Lagrangian remap, implicit/explicit 지면 결합, time-split/process-split처럼 <b>실제로 결과를 바꾸는 구현 선택</b>은 다루지 않습니다. 이 문서의 2–5쪽이 그 빈 곳을 코드로 채운 것입니다.
+<br><b>확인하지 못한 것</b>: AM4.5가 컴파일한 atmos_model.F90 변형, LM4 내부 지면에너지 풀이, CAM6 <code>cam_export</code>(utils, 미러에 없음). 근거 파일은 <code>atmos/code_trace/*.md</code>입니다.</div>
+</section>
+
+</body>
+</html>

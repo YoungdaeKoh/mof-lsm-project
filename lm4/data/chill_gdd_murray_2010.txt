@@ -1,0 +1,45 @@
+Murray et al. 1989 chilling model on ERA5 daily mean t2m, budburst 2010 (chill from 1 Nov 2009), 1-deg land 50-75N
+doy = predicted budburst; C = chill days (<=5 C) at that day; req = T requirement (>5 C day-degrees);
+GDD0 = LM4-style GDD (>0 C, from 1 Jan) reached on that day; d180 = doy where ERA5 GDD0 > 180 (LM4 larix gdd_crit)
+
+NEU  cells 356  d180 134
+  group      |   doy     C   req   GDD0 | doy - d180
+  G2 spruce  |   139   185    57    230 |    +3
+  G3 birch   |   137   185    51    230 |    +4
+  G4 larch   |   135   185    43    215 |    +2
+
+NWN  cells 942  d180 149
+  group      |   doy     C   req   GDD0 | doy - d180
+  G2 spruce  |   149   195    47    184 |    +0
+  G3 birch   |   149   195    48    182 |    +0
+  G4 larch   |   148   195    42    163 |    -2
+
+NEN  cells 687  d180 178
+  group      |   doy     C   req   GDD0 | doy - d180
+  G2 spruce  |   169   222    25    132 |    -6
+  G3 birch   |   174   222    43    175 |    -1
+  G4 larch   |   173   222    40    164 |    -2
+
+WSB  cells 480  d180 131
+  group      |   doy     C   req   GDD0 | doy - d180
+  G2 spruce  |   132   177    66    176 |    -1
+  G3 birch   |   126   174    54    157 |    -3
+  G4 larch   |   121   172    44    136 |    -6
+
+ESB  cells 640  d180 145
+  group      |   doy     C   req   GDD0 | doy - d180
+  G2 spruce  |   145   188    54    171 |    -1
+  G3 birch   |   144   188    50    162 |    -2
+  G4 larch   |   141   187    42    145 |    -4
+
+RAR  cells 908  d180 171
+  group      |   doy     C   req   GDD0 | doy - d180
+  G2 spruce  |   162   214    31    124 |    -7
+  G3 birch   |   165   214    44    157 |    -3
+  G4 larch   |   164   214    41    146 |    -4
+
+RFE  cells 394  d180 157
+  group      |   doy     C   req   GDD0 | doy - d180
+  G2 spruce  |   153   200    43    156 |    -3
+  G3 birch   |   154   200    47    164 |    -2
+  G4 larch   |   152   200    41    148 |    -4
