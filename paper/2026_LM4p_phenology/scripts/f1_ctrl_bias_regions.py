@@ -10,8 +10,9 @@
     the model). Bar = cos-lat mean of (CTRL - mean of the three products); error bar = cos-lat mean of the product
     spread (max-min). Cells where CTRL has no 50 % crossing before Dec 31 (no modelled leaf-off) are excluded from the
     mean and reported as a percentage above the bar. The tropics are left out (no single temperature-driven season).
-Method = poster p24 (cos-lat mean over cells valid in every product and month, monthly -> daily interpolation,
-per-year 50 % amplitude crossings, mean over years). AR6-region version of (d): ../data/f1_sos_eos_bias.txt (SI).
+Method = poster p24: monthly means placed at mid-month and linearly interpolated to days, 50 % amplitude crossings
+(per year for the regional series in c; on the 15-yr mean curve of every cell in d, e). Native-sampling / curve-fit
+versions were tested (o1, o2, dlog.py): they move the dates by <= 3 d and are kept for the SI only.
 input : ../../../poster/2026_LM4p_LAI/data/{lm4p_ctl_lai_mon_1982_2020,gimms_lai_mon_1982_2020,
         gimms_solely_lai_mon_1982_2015,glass_lai_modis_monthly_1deg_2001_2020}.nc
 output: ../figures/f1_ctrl_bias_regions.png, ../data/f1_sos_eos_bias.txt
@@ -73,7 +74,7 @@ REG.update({ab: m3.sel(region=ar6.map_keys(ab)).values.astype(bool) for ab in AR
 
 
 def region(mask):
-    """per product: mean normalised daily curve (over years) and yearly (SOS, EOS)."""
+    """per product: mean normalised daily curve (over years) and yearly (SOS, EOS), monthly interpolation."""
     w = W * (ok & mask)
     res = {}
     for k, v in data.items():
@@ -108,12 +109,12 @@ for ab in ["boreal"] + [b[0] for b in BANDS] + AR6:
     out.append("%-8s %5d | %6.1f %6.1f %6.1f %6.1f | %+6.1f %6.1f | %6.1f %6.1f %6.1f %6.1f | %+6.1f %6.1f" % (
         ab, n, *r["SOS"][0], r["SOS"][1], r["SOS"][2], r["SOS"][3], *r["EOS"][0], r["EOS"][1], r["EOS"][2], r["EOS"][3]))
 
-# ---- per-cell SOS/EOS on the 15-yr mean curve (for panel d)
+# ---- per-cell SOS/EOS on the 15-yr mean monthly curve (for panels d, e)
 AMP = 0.5
 clim = {k: v.reshape(NY, 12, 180, 360).mean(0) for k, v in data.items()}
 has_season = ok & ((clim["GIMMS"].max(0) - clim["GIMMS"].min(0)) >= AMP)
 cs = {k: np.full((180, 360), np.nan) for k in data}; ce = {k: np.full((180, 360), np.nan) for k in data}
-for i, j in zip(*np.where(has_season)):
+for i, j in zip(*np.where(has_season & land & (lat >= 20)[:, None])):
     for k in data:
         mth = clim[k][:, i, j]
         c = np.interp(DOY, np.r_[MID[-1] - 365, MID, MID[0] + 365], np.r_[mth[-1], mth, mth[0]])
@@ -122,30 +123,35 @@ obs_s = np.mean([cs[p] for p in OBS], 0); obs_e = np.mean([ce[p] for p in OBS], 
 spr_s = np.max([cs[p] for p in OBS], 0) - np.min([cs[p] for p in OBS], 0)
 spr_e = np.max([ce[p] for p in OBS], 0) - np.min([ce[p] for p in OBS], 0)
 cellbias = {}
-out += ["", "per-cell version (GIMMS amplitude >= %.1f): cos-lat mean bias, mean product spread, %% cells with no CTRL crossing" % AMP,
+out += ["", "per-cell (GIMMS amplitude >= %.1f): cos-lat mean bias, mean product spread, %% cells with no CTRL crossing" % AMP,
         "%-8s %5s | %6s %6s %6s | %6s %6s %6s" % ("band", "cells", "dSOS", "sprd", "noSOS%", "dEOS", "sprd", "noEOS%")]
+# cells where the model has (almost) no vegetation (CTRL 15-yr mean amplitude < 0.3) are a separate class, not "no leaf-off"
+noveg = (clim["CTRL"].max(0) - clim["CTRL"].min(0)) < 0.3
+out[-1] += ", % cells with no modelled vegetation (CTRL amplitude < 0.3)"
 for nm, a, b in BANDS + [("boreal", 50, 70)]:
     mk = has_season & land & ((lat >= a) & (lat < b))[:, None]
     row = []
     for cm, om, sp in ((cs["CTRL"], obs_s, spr_s), (ce["CTRL"], obs_e, spr_e)):
         v = mk & np.isfinite(cm) & np.isfinite(om)
         w = W * v
-        row += [np.nansum((cm - om) * w) / w.sum(), np.nansum(sp * w) / w.sum(), 100 * (mk & np.isfinite(om) & ~np.isfinite(cm)).sum() / max((mk & np.isfinite(om)).sum(), 1)]
+        den = max((mk & np.isfinite(om) & ~noveg).sum(), 1)
+        row += [np.nansum((cm - om) * w) / w.sum(), np.nansum(sp * w) / w.sum(), 100 * (mk & np.isfinite(om) & ~noveg & ~np.isfinite(cm)).sum() / den]
+    row.append(100 * (mk & np.isfinite(obs_e) & noveg).sum() / max((mk & np.isfinite(obs_e)).sum(), 1))
     cellbias[nm] = row
-    out.append("%-8s %5d | %+6.1f %6.1f %6.1f | %+6.1f %6.1f %6.1f" % (nm, mk.sum(), *row))
+    out.append("%-8s %5d | %+6.1f %6.1f %6.1f | %+6.1f %6.1f %6.1f | noveg %4.1f %%" % (nm, mk.sum(), *row))
 
 # ---- figure
-fig = plt.figure(figsize=(13, 8.8))
-gs = fig.add_gridspec(2, 2, height_ratios=(1, 1.05), hspace=0.12, wspace=0.08)
+fig = plt.figure(figsize=(13, 7.0))
+gs = fig.add_gridspec(2, 6, height_ratios=(1.15, 1), hspace=0.12, wspace=0.55)
 proj = ccrs.PlateCarree(central_longitude=180)
-axa = fig.add_subplot(gs[0, 0], projection=proj); axb = fig.add_subplot(gs[0, 1], projection=proj)
-axc = fig.add_subplot(gs[1, 0]); axd = fig.add_subplot(gs[1, 1])
+axa = fig.add_subplot(gs[0, 0:3], projection=proj); axb = fig.add_subplot(gs[0, 3:6], projection=proj)
+axc = fig.add_subplot(gs[1, 0:2]); axd = fig.add_subplot(gs[1, 2:4]); axe = fig.add_subplot(gs[1, 4:6])
 
-g = data["GIMMS"].reshape(NY, 12, 180, 360)[:, 4:9].mean((0, 1))
+g = data["GLASS"].reshape(NY, 12, 180, 360)[:, 4:9].mean((0, 1))
 m = data["CTRL"].reshape(NY, 12, 180, 360)[:, 4:9].mean((0, 1))
 mb = np.where(ok, m - g, np.nan)
-for ax, z, cmap, lo, hi, lab, title in ((axa, g, "YlGn", 0, 5, "LAI (m$^2$ m$^{-2}$)", "(a) Observed LAI, May–Sep mean %d–%d (GIMMS LAI4g)" % (A, B)),
-                                        (axb, mb, "RdBu_r", -2.5, 2.5, "ΔLAI (m$^2$ m$^{-2}$)", "(b) CTRL − observed, May–Sep mean")):
+for ax, z, cmap, lo, hi, lab, title in ((axa, g, "YlGn", 0, 5, "LAI (m$^2$ m$^{-2}$)", "(a) GLASS LAI (MJJAS, %d–%d)" % (A, B)),
+                                        (axb, mb, "RdBu_r", -2.5, 2.5, "ΔLAI (m$^2$ m$^{-2}$)", "(b) Diff. LM4.1 − Obs. (MJJAS)")):
     ax.set_extent([-180, 180, -10, 80], crs=proj)   # full width, Pacific-centred
     im = ax.pcolormesh(lon, lat, np.ma.masked_invalid(z), cmap=cmap, vmin=lo, vmax=hi, transform=ccrs.PlateCarree(), shading="auto")
     ax.coastlines(lw=0.4, color="0.3"); ax.add_feature(cfeature.OCEAN, facecolor="#eef3f7", zorder=0)
@@ -156,14 +162,14 @@ for ax, z, cmap, lo, hi, lab, title in ((axa, g, "YlGn", 0, 5, "LAI (m$^2$ m$^{-
     cb = fig.colorbar(im, ax=ax, orientation="horizontal", pad=0.06, shrink=0.6, aspect=35); cb.set_label(lab, fontsize=8); cb.ax.tick_params(labelsize=7.5)
     ax.set_title(title, loc="left", fontsize=10)
 wb = W * (ok & REG["boreal"])
-axb.text(0.01, 0.03, "50–70N land mean: %+.2f (%+.0f %%)" % (np.nansum(mb * wb) / wb.sum(), 100 * np.nansum(m * wb) / np.nansum(g * wb) - 100),
+axb.text(0.01, 0.03, "50–70N land: %+.2f (%+.0f %%)" % (np.nansum(mb * wb) / wb.sum(), 100 * np.nansum(m * wb) / np.nansum(g * wb) - 100),
          transform=axb.transAxes, fontsize=8, bbox=dict(fc="white", ec="none", alpha=0.85))
 
 # (c) boreal seasonal cycle
 O = np.array([boreal_res[p][0] for p in OBS])
-axc.fill_between(DOY, O.min(0), O.max(0), color="0.55", alpha=0.45, lw=0, label="Observed range (GIMMS, AVHRR, GLASS)")
+axc.fill_between(DOY, O.min(0), O.max(0), color="0.55", alpha=0.45, lw=0, label="Observed range\n(GIMMS, AVHRR, GLASS)")
 axc.plot(DOY, O.mean(0), color="0.2", lw=1.3, label="Observed mean")
-axc.plot(DOY, boreal_res["CTRL"][0], color="tab:red", lw=2.4, label="CTRL")
+axc.plot(DOY, boreal_res["CTRL"][0], color="tab:red", lw=2.4, label="LM4.1 (CTRL)")
 axc.axhline(0.5, color="0.6", lw=0.7, ls=":")
 bb = bias["boreal"]
 for key, j, col in (("SOS", 0, "#2c7fb8"), ("EOS", 1, "#d95f0e")):
@@ -173,28 +179,28 @@ for key, j, col in (("SOS", 0, "#2c7fb8"), ("EOS", 1, "#d95f0e")):
 axc.set_xticks([1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335]); axc.set_xticklabels(list("JFMAMJJASOND"), fontsize=8.5)
 axc.set_xlim(1, 365); axc.set_ylim(-0.03, 1.08); axc.grid(alpha=0.25); axc.tick_params(labelsize=8.5)
 axc.set_ylabel("Normalised LAI", fontsize=9)
-axc.set_title("(c) Boreal land (50–70N, %d cells): seasonal cycle %d–%d" % (boreal_n, A, B), loc="left", fontsize=10)
-axc.legend(loc="upper left", fontsize=8, frameon=False)
+axc.set_title("(c) Seasonal cycle (boreal 50–70N, %d–%d)" % (A, B), loc="left", fontsize=10)
+axc.legend(loc="upper left", fontsize=7.5, frameon=False)
 
-# (d) bars by latitude band (per-cell statistics)
+# (d) SOS and (e) EOS bias by latitude band (per-cell statistics)
 names = [b[0] for b in BANDS]
-x = np.arange(len(names)); wd = 0.36
-for j, (key, col, off, k0) in enumerate((("SOS", "#2c7fb8", -wd / 2, 0), ("EOS", "#d95f0e", wd / 2, 3))):
+x = np.arange(len(names))
+for ax, key, col, k0, pl in ((axd, "SOS", "#2c7fb8", 0, "d"), (axe, "EOS", "#d95f0e", 3, "e")):
     b = np.array([cellbias[nm][k0] for nm in names]); sp = np.array([cellbias[nm][k0 + 1] for nm in names])
     nn = np.array([cellbias[nm][k0 + 2] for nm in names])
-    axd.bar(x + off, b, wd, color=col, alpha=0.85, label="CTRL \u2212 observed mean, %s" % key)
-    axd.errorbar(x + off, b, yerr=sp / 2, fmt="none", ecolor="k", elinewidth=1, capsize=3,
-                 label="observational spread (max \u2212 min of 3 products)" if j == 0 else None)
-    for xi, bi, ni in zip(x + off, b, nn):
-        axd.text(xi, bi + sp.max() / 2 + 1.5 if bi >= 0 else bi - 5, "%+.0f" % bi, ha="center", fontsize=8, color=col)
+    ax.bar(x, b, 0.6, color=col, alpha=0.85, label="LM4.1 \u2212 observed mean")
+    ax.errorbar(x, b, yerr=sp / 2, fmt="none", ecolor="k", elinewidth=1, capsize=4, label="observational spread\n(max \u2212 min of 3 products)")
+    for xi, bi, si, ni in zip(x, b, sp, nn):
+        ax.text(xi, max(bi, 0) + si / 2 + 1.5, "%+.0f" % bi, ha="center", va="bottom", fontsize=8.5, color=col)
         if ni >= 1:
-            axd.text(x[0] - 0.45, -10 if key == "SOS" else -14.5, "CTRL no leaf-off: %s %.0f %% of cells" % (key, ni), ha="left", fontsize=7, color=col)
-axd.axhline(0, color="k", lw=0.8)
-axd.set_xticks(x); axd.set_xticklabels(names, fontsize=9)
-axd.set_ylabel("Bias (days, + = model later)", fontsize=9); axd.yaxis.set_label_position("right"); axd.yaxis.tick_right()
-axd.set_title("(d) CTRL SOS and EOS bias by latitude band (cells with an observed season)", loc="left", fontsize=10)
-axd.legend(fontsize=7.5, frameon=False, loc="upper left", ncol=1)
-axd.grid(axis="y", alpha=0.25); axd.set_ylim(-17, 74)
+            ax.text(xi, -19.5, "no leaf-off\n%.0f %% cells" % ni, ha="center", va="bottom", fontsize=7, color="0.3")
+    ax.axhline(0, color="k", lw=0.8)
+    ax.set_xticks(x); ax.set_xticklabels(names, fontsize=8.5); ax.tick_params(axis="y", labelsize=8.5)
+    ax.set_title("(%s) %s bias (LM4.1)" % (pl, key), loc="left", fontsize=10)
+    ax.grid(axis="y", alpha=0.25); ax.set_ylim(-22, 72); ax.set_xlim(-0.6, len(names) - 0.4)
+axd.set_ylabel("Bias (days, + = model later)", fontsize=9)
+axd.legend(fontsize=7.5, frameon=False, loc="upper left")
+axe.text(0.98, 0.96, "cells with an observed season\n(GIMMS amplitude \u2265 0.5)", transform=axe.transAxes, ha="right", va="top", fontsize=7.5, color="0.3")
 fig.savefig("../figures/f1_ctrl_bias_regions.png", dpi=200, bbox_inches="tight")
 open("../data/f1_sos_eos_bias.txt", "w").write("\n".join(out) + "\n")
 print("\n".join(out[-7:]))
