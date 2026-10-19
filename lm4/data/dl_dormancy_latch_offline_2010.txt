@@ -1,0 +1,9 @@
+Dormancy latch candidates, c3grass rules on dayl_d 2010 temperatures (offline state machine, drought ignored)
+per band: winter re-greening % (leaf-on < 60 d after local winter solstice) | median first leaf-on, days after solstice | obs SOS (GIMMS 2010) days after solstice; model LAI 50 % ~ leaf-on + 8 d
+
+band    cells | obs SOS     | CUR               | EQ12              | HOLD12            | EQ11              | SOL60             | SOL30            
+50-70N   2718 |    151      |   0 % re, on  154 |   0 % re, on  154 |   0 % re, on  154 |   0 % re, on  154 |   0 % re, on  154 |   0 % re, on  154
+40-50N   2117 |    135      |   7 % re, on  112 |   1 % re, on  112 |   0 % re, on  112 |   1 % re, on  112 |   1 % re, on  112 |   5 % re, on  112
+20-40N   2946 |    134      |  59 % re, on   33 |   7 % re, on   91 |   3 % re, on   91 |  36 % re, on   63 |   7 % re, on   60 |  62 % re, on   30
+20-40S   1912 |    147      |  87 % re, on    8 |   0 % re, on   92 |   4 % re, on   92 |  59 % re, on   56 |   0 % re, on   60 |  86 % re, on   30
+40-60S    245 |    127      |  38 % re, on   65 |   0 % re, on   92 |   0 % re, on   92 |   0 % re, on   75 |   0 % re, on   66 |  32 % re, on   66

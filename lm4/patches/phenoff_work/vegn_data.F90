@@ -264,6 +264,10 @@ type spec_data_type
   ! < dayl_crit_off AND tc_pheno < tc_crit_off. Negative values = rule off (default).
   real    :: tc_crit_off   = -1.0 ! autumn leaf-off temperature, degK
   real    :: dayl_crit_off = -1.0 ! autumn leaf-off day length, hours
+  ! ydkoh 2026-10: winter hold for the same rule. Leaves cannot switch on while day length
+  ! < dayl_crit_on AND tc_pheno < tc_crit_off (stateless, so it survives restarts; stops
+  ! mid-winter re-greening after the solstice). Negative = off (default).
+  real    :: dayl_crit_on  = -1.0 ! winter hold day length, hours
   real    :: gdd_crit  = 360.0
   real    :: gdd_base_T =  273.16 ! base temperature for GDD calculations, degK
   ! critical soil-water-stress index, used in place of fact_crit_phen and
@@ -1031,6 +1035,7 @@ subroutine read_species_data(name, sp, errors_found)
   __GET_SPDATA_REAL__(tc_crit)
   __GET_SPDATA_REAL__(tc_crit_off)
   __GET_SPDATA_REAL__(dayl_crit_off)
+  __GET_SPDATA_REAL__(dayl_crit_on)
   __GET_SPDATA_REAL__(gdd_crit)
   __GET_SPDATA_REAL__(gdd_base_T)
   __GET_SPDATA_REAL__(psi_stress_crit_phen)
@@ -1498,6 +1503,7 @@ subroutine print_species_data(unit, skip_default)
   call add_row(table, 'tc_crit',       spdata(idx)%tc_crit)
   call add_row(table, 'tc_crit_off',   spdata(idx)%tc_crit_off)
   call add_row(table, 'dayl_crit_off', spdata(idx)%dayl_crit_off)
+  call add_row(table, 'dayl_crit_on',  spdata(idx)%dayl_crit_on)
   call add_row(table, 'gdd_crit',      spdata(idx)%gdd_crit)
   call add_row(table, 'gdd_base_T',    spdata(idx)%gdd_base_T)
 

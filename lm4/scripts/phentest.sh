@@ -16,6 +16,7 @@ T=/data2/ydkoh/lm4/RUN/phentest
 EXE=/data2/ydkoh/lm4/build_gateBC/fms_esm4.5_gateBC.x
 EXE_PHENOFF=/data2/ydkoh/lm4/build_phenoff/fms_esm4.5_phenoff.x   # phenoff_build.sh
 EXE_SPRING=/data2/ydkoh/lm4/build_phenspring2/fms_esm4.5_phenspring2.x   # phenoff patch + tau_pheno_on (lm4P.phenology_spring_tau.diff)
+EXE_HOLD=/data2/ydkoh/lm4/build_phenhold/fms_esm4.5_phenhold.x   # phenspring2 + winter hold dayl_crit_on (2026-10-19)
 # (build_phenspring, 2026-10-14, is the flawed first version: 5-day leaf-on undone next day by the 20-day cold leaf-off
 #  and GDD reset -> leaf-on 8 d LATER; its result is kept as phentest/daylspring5_bug_d)
 VARIANTS=${VARIANTS:-"base tc10"}
@@ -99,7 +100,9 @@ stage() {   # $1 variant  $2 days
   # spring5 (2026-10-14): CTRL autumn, leaf-on tested on a 5-day smoothed temperature (vegn_dynamics_nml
   #   tau_pheno_on = 5, phenspring exe; default tc_pheno ~20 d delays leaf-on by 3-4 weeks, spring_gate_diag.py)
   # daylspring5: dayl (DL13/12 autumn) + the same spring change
-  if [ "$K" = spring5 ] || [ "$K" = daylspring5 ]; then
+  # daylhold5 (2026-10-19): daylspring5 + winter hold, leaf-on blocked while day length < 12 h and tc_pheno < 20 C
+  #   (dayl_crit_on = 12 for larix/acer/c3grass; stops mid-winter re-greening, dl_dormancy_latch_offline.py)
+  if [ "$K" = spring5 ] || [ "$K" = daylspring5 ] || [ "$K" = daylhold5 ]; then
     printf '\n &vegn_dynamics_nml\n    tau_pheno_on = %s\n /\n' "${TAU:-5.0}" >> $D/input.nml   # TAU=<days> overrides
   fi
   if [ "$K" = dayl2 ]; then
@@ -121,9 +124,12 @@ stage() {   # $1 variant  $2 days
   # NOTE (2026-10-14): the tc10/offon/dayl/dayl2 field_table edits above run BEFORE this fast-config copy and are
   # overwritten by it; those variants were staged before 2026-10-08 (ctl tables). Re-staging them needs FULLCFG=1
   # or moving their edits below. New variants put their field_table edits here, after the copy.
-  if [ "$K" = daylspring5 ]; then   # experiment 4 (DL13/12) autumn settings, as in dayl
+  if [ "$K" = daylspring5 ] || [ "$K" = daylhold5 ]; then   # experiment 4 (DL13/12) autumn settings, as in dayl
     sed -i -E "s/^( *)tc_crit *= *278\.15.*/&\n\1tc_crit_off = 293.15\n\1dayl_crit_off = 13.0/" $D/field_table
     sed -i -E '/"species", *"land_mod", *"acer"/{n;s/$/\n    tc_crit_off = 293.15\n    dayl_crit_off = 12.0/}' $D/field_table
+  fi
+  if [ "$K" = daylhold5 ]; then
+    sed -i -E "s/^( *)dayl_crit_off *= *.*/&\n\1dayl_crit_on = 12.0/" $D/field_table
   fi
   if [ "$K" = larixlma ]; then
     sed -i -E '/"species", *"land_mod", *"larix"/,/"species", *"land_mod", *"acer"/ s/^ *LMA *= *0\.76e-01/    LMA =   0.38e-01/' $D/field_table
@@ -136,7 +142,7 @@ stage() {   # $1 variant  $2 days
   # keep the configuration diff of every variant next to the run for the record
   { echo "### field_table diff (ctl -> $1)"; diff $C/field_table $D/field_table; echo "### diag_table diff (ctl -> $1)"; diff $C/diag_table $D/diag_table; } > $D/config_diff.txt
   case $K in noparam|offon|dayl|dayl2) ln -sfn $EXE_PHENOFF $D/model.x ;;
-             spring5|daylspring5) ln -sfn $EXE_SPRING $D/model.x ;; *) ln -sfn $EXE $D/model.x ;; esac
+             spring5|daylspring5) ln -sfn $EXE_SPRING $D/model.x ;; daylhold5) ln -sfn $EXE_HOLD $D/model.x ;; *) ln -sfn $EXE $D/model.x ;; esac
   echo "$1: $MO months $DA days from $Y-01-01, seed $SEED"
 }
 

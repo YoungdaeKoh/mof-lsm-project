@@ -1,0 +1,19 @@
+DL13/12 (dayl_d) vs CTRL (base), 2010, C96 cells with max LAI > 0.1; LAI from land_month
+
+(1) where the rule can fire (c3grass condition, rule days from reconstructed tc_pheno) and annual-mean LAI change
+group                   cells | LAI CTRL   LAI DL   dLAI% | min dL%    <-5% | rule days median
+20S-20N rule days = 0    3051 |     3.95     3.95    -0.0 |    -0.0      1% |     0
+20S-20N rule days > 0    1934 |     3.46     3.43    -1.0 |    -0.0      9% |    55
+                              lat median 4.3, annual Tmean median 20.8 C, cells losing >20 % annual LAI: 46
+20-60S rule days = 0      149 |     1.60     1.59    -1.0 |    +0.0      9% |     0
+20-60S rule days > 0     2058 |     2.58     2.16   -16.1 |    -7.1     69% |    48
+                              lat median -29.2, annual Tmean median 20.1 C, cells losing >20 % annual LAI: 460
+20-40N (all)             3236 |     1.66     1.51    -9.0 |    -0.0     53% |    70
+50-70N (all, reference)   2810 |     1.82     1.67    -8.1 |    +0.0     60% |   103
+
+(2) subtropics 20-40N, cells with CTRL amplitude >= 0.3: 2854 (2347 with SOS in all three)
+  SOS shift DL - CTRL, own 50 % amplitude : median -0.0 d, mean -14.2 d
+  SOS shift DL - CTRL, CTRL's threshold    : median +0.0 d, mean -6.2 d
+  Jan-Feb LAI   CTRL 1.38 -> DL 1.38 (+0.0 %)
+  Apr-Jun LAI   CTRL 1.82 -> DL 1.82 (+0.0 %)
+  annual max    CTRL 2.64 -> DL 2.59

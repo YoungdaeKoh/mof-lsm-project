@@ -2129,9 +2129,12 @@ subroutine vegn_phenology_ppa(tile, lat, doy)
      ! onset of phenology
      select case(cc%status)
      case (LEAF_OFF)
+        ! ydkoh 2026-10: winter hold (off unless dayl_crit_on and tc_crit_off > 0)
         if (cc%gdd > sp%gdd_crit        .and. &
             tc_on >= sp%tc_crit .and. &
-            .not.drought) then
+            .not.drought .and. &
+            .not.(sp%dayl_crit_on > 0.0 .and. sp%tc_crit_off > 0.0 .and. &
+                  dayl < sp%dayl_crit_on .and. vegn%tc_pheno < sp%tc_crit_off)) then
            cc%status = LEAF_ON
            ! isa 201707215 - update target biomass at the start of the growing season
            !                 for grasses to avoid using previous year targets

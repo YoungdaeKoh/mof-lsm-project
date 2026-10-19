@@ -1905,3 +1905,9 @@ LM4p = `postproc/lm4p_ctl/yearly`(lm4p_to_latlon.py, nearest 1°)의 `lai`를 CD
 - ERA5 2010 적용(`lm4/scripts/chill_gdd_murray.py` → `lm4/data/chill_gdd_murray_2010.txt`): 7개 북방 지역 모두 chill day 172–222로 포화 → 낙엽송 요구량을 0 °C 기준 GDD로 바꾸면 136–215 ≈ GDD180, 출엽 −2~−6일뿐(목표 −8~−29). **chilling 도입은 북방 봄 지연의 해법이 아님.** LM4 CTRL 문턱일은 ERA5 d180과 대체로 일치.
 - 다음 가설: 문턱일→LAI 50 % 사이 성장 지연(11–24일, 기간 불일치 대략치). NEXT = dayl_d 2010 일별 LAI로 셀별 "leaf-on 문턱일 → LAI 50 %" 간격 계산.
 - **성장 지연 확인 (2026-10-19)**: dayl_d 2010 셀별 gate(세 조건 모두 열린 날)→LAI 50 % 중앙값 6–14일(NEU 14 최대, 전체 8) → 11–24일 대략치는 과대, 성장 지연은 주원인 아님. 봄 지연 본체 = 평활기온 문턱 지연 → τ5 패치(`daylspring5_d`) 방향 유지. 상세 findings 10-19.
+### 겨울 휴면 유지(winter hold) 패치 (2026-10-19)
+- 문제: 일장 끄기 규칙은 `shortening`일 때만 작동 → 동지 후 온화한 겨울(tc ≥ 5 °C)에서 다시 잎이 켜짐(남반구 7월 1.48→1.85, 북반구 20–40N 1월 1.60 vs GIMMS 0.75). 오프라인 상태기계 비교(findings 10-19, `dl_dormancy_latch_offline.py`)에서 EQ12(잠금) ≈ HOLD12(무상태)가 재개엽 0–7 %로 최선, 50–70N 불변.
+- 구현(무상태 = restart 안전; 연 체인이 1월 1일 restart라 잠금 변수는 북반구 겨울에 소실됨): `vegn_data.F90` 종 파라미터 `dayl_crit_on`(기본 −1 = 끔), `vegn_dynamics.F90` 잎 켜기 조건에 `.not.(dayl_crit_on>0 .and. tc_crit_off>0 .and. dayl<dayl_crit_on .and. tc_pheno<tc_crit_off)` 추가. diff `lm4/patches/lm4P.phenology_winter_hold.diff`(phenspring2 소스 위).
+- 빌드 `/data2/ydkoh/lm4/build_phenhold/fms_esm4.5_phenhold.x`(10-19 15:14, make/link 오류 0, 생산 exe 7/20 불변). 서버 `phenoff_build.sh`가 B/X 덮어쓰기 없는 옛 판이라 로컬 git 판으로 교체.
+- 변형 `daylhold5` = daylspring5 + larix/acer/c3grass `dayl_crit_on = 12.0`(phentest.sh; 서버엔 실행 중 잡 보호를 위해 `RUN/phentest_v2.sh`로 배포). 스테이징 `RUN/phentest/daylhold5_d`(2010 12개월). 대기열 `RUN/queue_daylhold5.sh`: daylspring5_d(전 연도) 종료 후 climate00 24랭크 자동 시작, 로그 `RUN/queue_daylhold5.out`.
+- 판정 계획: 남반구 7월·북반구 20–40N 1월 LAI vs GIMMS, 50–70N SOS/EOS가 daylspring5_d와 같은지, c4grass·prioria LAI 간접 변화.
