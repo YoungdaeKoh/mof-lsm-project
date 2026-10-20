@@ -1,0 +1,38 @@
+Murray 1989 chilling vs LM4 acer gate on ERA5 t2m, budburst 2010 (chill from 1 Nov 2009), 1-deg land, medians
+g20/g5 = acer gate doy with 20-d / 5-d smoothed T (>10 C) and GDD0 > 360; Murray doy, C = chill days, exc = b exp(rC)
+delay = median over cells of max(g5, Murray) - g5; need = -(DLS5 SOS bias) from p26 (positive = must be later)
+
+ENA  cells 372  g20 126  g5 120  (g5-g20 -10)  need +23
+  group      |   doy     C    exc |  delay %delayed
+  G1 Fagus   |   123   123    357 |     +8      65%
+  G3 Betula  |    98   121     50 |     +0      23%
+
+EAS  cells 504  g20 110  g5 90  (g5-g20 -8)  need +59
+  group      |   doy     C    exc |  delay %delayed
+  G1 Fagus   |   121    94    461 |    +26      72%
+  G3 Betula  |    92    94     86 |     +0      47%
+
+WCE  cells 423  g20 128  g5 119  (g5-g20 -9)  need -4
+  group      |   doy     C    exc |  delay %delayed
+  G1 Fagus   |   128   121    363 |     +8      81%
+  G3 Betula  |   107   121     50 |     +0       6%
+
+40-50N  cells 1845  g20 138  g5 123  (g5-g20 -8)  need +15
+  group      |   doy     C    exc |  delay %delayed
+  G1 Fagus   |   128   144    295 |     +0      48%
+  G3 Betula  |   110   142     34 |     +0      11%
+
+30-40N  cells 1425  g20 88  g5 70  (g5-g20 -9)  need -
+  group      |   doy     C    exc |  delay %delayed
+  G1 Fagus   |   112    51    684 |    +41      86%
+  G3 Betula  |    85    51    193 |    +11      63%
+
+NEU  cells 356  g20 170  g5 151  (g5-g20 -15)  need -6
+  group      |   doy     C    exc |  delay %delayed
+  G1 Fagus   |   140   185    204 |     +0      23%
+  G3 Betula  |   137   185     15 |     +0       0%
+
+50-70N  cells 4436  g20 171  g5 161  (g5-g20 -9)  need -8
+  group      |   doy     C    exc |  delay %delayed
+  G1 Fagus   |   144   190    195 |     +0       6%
+  G3 Betula  |   144   190     13 |     +0       0%

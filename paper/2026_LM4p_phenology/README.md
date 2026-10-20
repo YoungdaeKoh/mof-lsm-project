@@ -20,6 +20,18 @@ GIMMS LAI4g consolidated, GIMMS AVHRR-only (to 2015), GLASS V61 MODIS (2001-), a
 (poster/2026_LM4p_LAI/data/). FLUXCOM-X GPP 2001-2021. SOS/EOS = 50 % of the annual amplitude of
 monthly LAI interpolated to days (p3 method).
 
+## Planned main figures (2026-10-20, decisions.md "논문 범위 = 가을 중심")
+Scope: autumn day-length rule is the main contribution; spring = diagnosis + partial fix (tau5) as discussion.
+| fig | message | built from |
+|---|---|---|
+| 1 | problem: CTRL SOS/EOS bias | f1 (as is) |
+| 2 | how the threshold was constrained: obs EOS/SOS day length vs latitude (3 products), onset slope 0.19 = Birch vs 50 % slope 0.05 | s6, s7, s4 txt (new script) |
+| 3 | why CTRL is late (rule timing) + CTRL vs corrected SOS/EOS bias | f3 + f4 merged |
+| 4 | LAI / GPP / NEE seasonal improvement (spring NEE bias = respiration, out of scope) | p21-type flux vs obs |
+| 5 | why it improved: dGPP follows dfAPAR (GPP/fAPAR unchanged) | gpp_vs_fapar_dl |
+Rule schematic (f2) -> equations in Methods; rule box (f2a) -> SI. Wording: "process-based bias reduction", not "bias correction".
+Draft figures below are the 2010 versions; final = 15-yr CTRL/FULL pair.
+
 ## Figures
 | fig | script | data | content |
 |---|---|---|---|

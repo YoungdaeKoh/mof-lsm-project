@@ -1911,6 +1911,7 @@ LM4p = `postproc/lm4p_ctl/yearly`(lm4p_to_latlon.py, nearest 1°)의 `lai`를 CD
 - 빌드 `/data2/ydkoh/lm4/build_phenhold/fms_esm4.5_phenhold.x`(10-19 15:14, make/link 오류 0, 생산 exe 7/20 불변). 서버 `phenoff_build.sh`가 B/X 덮어쓰기 없는 옛 판이라 로컬 git 판으로 교체.
 - 변형 `daylhold5` = daylspring5 + larix/acer/c3grass `dayl_crit_on = 12.0`(phentest.sh; 서버엔 실행 중 잡 보호를 위해 `RUN/phentest_v2.sh`로 배포). 스테이징 `RUN/phentest/daylhold5_d`(2010 12개월). 대기열 `RUN/queue_daylhold5.sh`: daylspring5_d(전 연도) 종료 후 climate00 24랭크 자동 시작, 로그 `RUN/queue_daylhold5.out`.
 - 판정 계획: 남반구 7월·북반구 20–40N 1월 LAI vs GIMMS, 50–70N SOS/EOS가 daylspring5_d와 같은지, c4grass·prioria LAI 간접 변화.
+- **결과 (2026-10-20, findings 10-20 "daylhold5_d 결과")**: 50–70N SOS 불변(+8.0일) · 20–40S 7월 LAI 1.89→1.05(GIMMS 0.90) · 겨울 재개엽 % DL 수준 복귀 · 북반구 1월은 seed 상속이라 12월로 판정(20–40N 1.12→0.94, GIMMS 0.81) · **온대 봄 조기 개엽(ENA −23, 40–50N −14)은 미해결**. c4grass·prioria 간접 변화는 아직 안 봄.
 - **실행 순서 사고 (2026-10-19 15:19)**: daylspring5_d 전 연도(14:06 시작)를 daylhold5 우선 실행으로 잘못 해석해 1시간 13분 진행 후 중단 → 사용자 의도는 "돌고 있으면 spring 먼저". 15:20 `phentest_v2.sh`로 재스테이징·재시작(climate00 24랭크, 로그 `RUN/phentest_daylspring5_full_d.out`), `queue_daylhold5.sh` 재가동(종료 후 daylhold5_d 자동 시작). 예상: daylspring5_d ≈10-20 02–04시, daylhold5_d ≈10-20 오후.
 ### 위도 의존 가을 일장 문턱 패치 (2026-10-20)
 - 근거: findings 10-20 s7(관측 EOS 일장 = 12.0 + 0.05(|lat|−40) h, GIMMS·GLASS·상록 제외 맞춤 기울기 0.050–0.056) + 오프라인 예측(`autumn_latrule_offline.py`, 50–70N +9.3→+5.9일, TIB −31→+10.5일, 온도 게이트 기각).

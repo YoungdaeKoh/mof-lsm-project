@@ -77,3 +77,11 @@
 - 실험 `phasewfde5_d`: CTRL 설정 그대로, forcing의 눈/비만 WFDE5 Snowf/Rainf(고도 보정 상 분할)로. 대조 = `phentest/base`(같은 exe·seed·랭크).
 - 왜 1년: 2년 쌍은 대조군도 새로 돌려야 해 climate00 ≈44 h → phenology 실험(봄 판정·FULL)과 경합. 1년으로 효과 크기부터 확인, 크면 2009–2010 쌍으로 확장.
 - 왜 하나: 램프가 강설을 1.2–1.5배 늘리는데도 LM4p SWE는 −24 % → 적설 부족이 입력이 아닌 눈 물리 쪽임을 실험으로 확인해야 나중 적설 보정 방향이 정해짐.
+
+## 2026-10-20 — 논문 범위 = 가을 중심, 봄은 진단 + 부분 개선 (사용자 결정 "나로 하자", **교수님 확인 대기**); 그림 5장 구조
+- 이번 논문: 가을 일장 규칙(관측으로 정한 문턱)이 주 기여. 봄은 원인 진단(20일 평활 지연) + τ5 부분 개선·온대 부작용을 Discussion/한계로 제시. 봄 확정 수정(τ5 + chilling 등)은 후속 논문/과제.
+- 왜: 가을 결과가 강함(50–70N EOS +34→+11일, 9–10월 GPP 편차 −57 %, GPP/fAPAR 불변 = 보상 오차 아님). 봄 τ5는 보레알 SOS를 절반 줄이지만 온대 조기 개엽(ENA −23, 40–50N −15일)을 만들고, 원인이 보레알 이득과 같은 acer라 종 구분으로 못 가름(`spring_species_increment`). chilling 브레이크는 방향은 맞으나 크기 불확실(G1 0–100 %, G3 ≈0). Astra 검토(10-20)도 "봄 실패 시 억지로 넣지 말 것".
+- 부수 이점: 15년 FULL에서 τ5를 빼면 `tc_pheno_on` restart 미저장 문제가 사라짐(가을 일장·winter hold는 무상태).
+- 그림(본문 5장): 1 문제(CTRL 편차) · 2 관측으로 맞춘 문턱(관측 3종 EOS/SOS 일장 vs 위도, 개시 0.19 = Birch vs 50 % 0.05) · 3 원인(규칙 시점) + CTRL vs 보정 SOS/EOS · 4 LAI·GPP·NEE 개선(NEE 봄 편차는 호흡 문제로 범위 밖 명시) · 5 흡수광(fAPAR)으로 설명. 규칙 모식도는 Methods 식으로, 2a 규칙 상자는 SI.
+- 표현: "bias correction"(통계 후처리로 오해) 대신 "process-based bias reduction / reduced at its source".
+- 미정: 가을 문턱 = DL13/12 상수 vs dayllat 위도식 → dayllat_d 결과(10-21 04시) 후 결정. winter hold 포함 여부도 함께.
