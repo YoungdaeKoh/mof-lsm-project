@@ -1,0 +1,21 @@
+EOS 2010 bias vs mean of GIMMS/AVHRR/GLASS (days, cos-lat), monthly interp 50 %; acer = July leaf-area share (base 2010)
+acer >= 0.3, 20-90N          n 1879 acer 0.76 | obs EOS 263.8 (spread  6.3) | CTRL +47.0  DL13/12 +15.0  change -32.0 | cells DL earlier  93 %
+acer >= 0.5, 20-90N          n 1600 acer 0.82 | obs EOS 263.4 (spread  5.5) | CTRL +46.8  DL13/12 +15.8  change -31.0 | cells DL earlier  93 %
+acer >= 0.7, 20-90N          n 1277 acer 0.88 | obs EOS 261.6 (spread  5.0) | CTRL +46.0  DL13/12 +16.9  change -29.1 | cells DL earlier  93 %
+acer < 0.1, 20-90N (ref)     n 4681 acer 0.00 | obs EOS 253.0 (spread  3.7) | CTRL +30.7  DL13/12  +4.2  change -26.6 | cells DL earlier  84 %
+acer>=0.5 20-30N             n   63 acer 0.74 | obs EOS 291.4 (spread 18.7) | CTRL +56.6  DL13/12  +5.7  change -50.9 | cells DL earlier  89 %
+acer>=0.5 30-40N             n  268 acer 0.74 | obs EOS 274.1 (spread  2.8) | CTRL +66.9  DL13/12 +19.7  change -47.2 | cells DL earlier  96 %
+acer>=0.5 40-50N             n  563 acer 0.85 | obs EOS 265.1 (spread  1.1) | CTRL +43.3  DL13/12  +9.6  change -33.7 | cells DL earlier 100 %
+acer>=0.5 50-60N             n  643 acer 0.86 | obs EOS 252.1 (spread 10.9) | CTRL +38.4  DL13/12 +20.9  change -17.5 | cells DL earlier  87 %
+acer>=0.5 ENA                n  338 acer 0.84 | obs EOS 271.4 (spread  4.5) | CTRL +47.3  DL13/12 +11.1  change -36.2 | cells DL earlier  99 %
+all cells ENA                n  412 acer 0.72 | obs EOS 273.5 (spread  2.3) | CTRL +47.9  DL13/12 +11.7  change -36.3 | cells DL earlier  98 %
+acer>=0.5 WCE                n  247 acer 0.78 | obs EOS 257.9 (spread 15.1) | CTRL +42.0  DL13/12 +12.5  change -29.5 | cells DL earlier 100 %
+all cells WCE                n  451 acer 0.46 | obs EOS 251.9 (spread 15.0) | CTRL +43.0  DL13/12 +11.5  change -31.6 | cells DL earlier  96 %
+acer>=0.5 EAS                n  223 acer 0.74 | obs EOS 276.8 (spread 14.3) | CTRL +61.9  DL13/12 +12.9  change -49.0 | cells DL earlier  99 %
+all cells EAS                n  451 acer 0.44 | obs EOS 276.4 (spread 13.5) | CTRL +57.3  DL13/12  +5.7  change -51.6 | cells DL earlier  94 %
+acer>=0.5 EEU                n   52 acer 0.85 | obs EOS 245.4 (spread  9.2) | CTRL +43.7  DL13/12 +26.8  change -16.8 | cells DL earlier  98 %
+all cells EEU                n  360 acer 0.14 | obs EOS 232.4 (spread 12.2) | CTRL +36.2  DL13/12 +12.1  change -24.1 | cells DL earlier  72 %
+acer>=0.5 CNA                n  127 acer 0.88 | obs EOS 264.6 (spread  3.7) | CTRL +64.9  DL13/12 +22.6  change -42.3 | cells DL earlier  98 %
+all cells CNA                n  276 acer 0.42 | obs EOS 261.3 (spread  1.8) | CTRL +55.7  DL13/12 +22.2  change -33.5 | cells DL earlier  83 %
+acer>=0.5 WNA                n    8 (too few)
+all cells WNA                n  197 acer 0.04 | obs EOS 259.9 (spread  1.4) | CTRL +29.5  DL13/12  -5.6  change -35.1 | cells DL earlier  73 %

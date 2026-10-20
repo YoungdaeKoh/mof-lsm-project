@@ -17,6 +17,7 @@ EXE=/data2/ydkoh/lm4/build_gateBC/fms_esm4.5_gateBC.x
 EXE_PHENOFF=/data2/ydkoh/lm4/build_phenoff/fms_esm4.5_phenoff.x   # phenoff_build.sh
 EXE_SPRING=/data2/ydkoh/lm4/build_phenspring2/fms_esm4.5_phenspring2.x   # phenoff patch + tau_pheno_on (lm4P.phenology_spring_tau.diff)
 EXE_HOLD=/data2/ydkoh/lm4/build_phenhold/fms_esm4.5_phenhold.x   # phenspring2 + winter hold dayl_crit_on (2026-10-19)
+EXE_LAT=/data2/ydkoh/lm4/build_phenlat/fms_esm4.5_phenlat.x   # phenhold + latitude-dependent autumn threshold (2026-10-20)
 # (build_phenspring, 2026-10-14, is the flawed first version: 5-day leaf-on undone next day by the 20-day cold leaf-off
 #  and GDD reset -> leaf-on 8 d LATER; its result is kept as phentest/daylspring5_bug_d)
 VARIANTS=${VARIANTS:-"base tc10"}
@@ -62,7 +63,11 @@ stage() {   # $1 variant  $2 days
   done
   ln -sf $C/INPUT/* $D/INPUT/
   for r in $SEED/*.res*; do ln -sf $r $D/INPUT/; done
-  ln -sfn /data2/ydkoh/lm4/forcing_WFDE5_lm4p/wfde5_atm_${Y}.nc $D/FORCING/wfde5_atm.nc
+  # phasewfde5 (2026-10-20): same as base (CTRL, gateBC exe) but the forcing takes snow/rain from WFDE5 Snowf/Rainf
+  #   instead of the 0-2 C TBOT ramp (lm4p_offline_wfde5_to_atm.py <y> wfde5); every other forcing field identical
+  FSUF=""; case $1 in phasewfde5*) FSUF=_phasewfde5 ;; esac
+  ln -sfn /data2/ydkoh/lm4/forcing_WFDE5_lm4p/wfde5_atm_${Y}${FSUF}.nc $D/FORCING/wfde5_atm.nc
+  [ -e $D/FORCING/wfde5_atm.nc ] || { echo "missing forcing wfde5_atm_${Y}${FSUF}.nc"; exit 1; }
   if [ "$2" -ge 365 ]; then MO=12; DA=0; else MO=0; DA=$2; fi
   npcfg $1
   if [ "$NP" = 48 ]; then   # production decomposition, template unchanged (fv/land 2,4, SIS 6,8, io group 48)
@@ -128,6 +133,13 @@ stage() {   # $1 variant  $2 days
     sed -i -E "s/^( *)tc_crit *= *278\.15.*/&\n\1tc_crit_off = 293.15\n\1dayl_crit_off = 13.0/" $D/field_table
     sed -i -E '/"species", *"land_mod", *"acer"/{n;s/$/\n    tc_crit_off = 293.15\n    dayl_crit_off = 12.0/}' $D/field_table
   fi
+  # dayllat (2026-10-20): autumn rule only, threshold 12.0 + 0.05 (|lat| - 40) h for larix/acer/c3grass
+  #   (s7_eos_daylength_lat_fit.py, autumn_latrule_offline.py); spring = CTRL, as dayl -> compare with dayl_d
+  if [ "$K" = dayllat ]; then
+    sed -i -E "s/^( *)tc_crit *= *278\.15.*/&\n\1tc_crit_off = 293.15\n\1dayl_crit_off = 12.0/" $D/field_table
+    sed -i -E '/"species", *"land_mod", *"acer"/{n;s/$/\n    tc_crit_off = 293.15\n    dayl_crit_off = 12.0/}' $D/field_table
+    sed -i -E "s/^( *)dayl_crit_off *= *.*/&\n\1dayl_off_slope = 0.05\n\1dayl_off_lat0 = 40.0/" $D/field_table
+  fi
   if [ "$K" = daylhold5 ]; then
     sed -i -E "s/^( *)dayl_crit_off *= *.*/&\n\1dayl_crit_on = 12.0/" $D/field_table
   fi
@@ -139,10 +151,26 @@ stage() {   # $1 variant  $2 days
   if [ "${1%_d}" != "$1" ]; then
     sed -i '/^"land", "precip", "precip", "land_daily"/a "vegn", "lai", "lai", "land_daily", "all", .true., "none", 2' $D/diag_table
   fi
+  # dayllat (2026-10-20): albedo-snow-vegetation diagnostics for the spring/autumn transitions (diag only):
+  #   daily albedo_dir/dif, snow_frac, snow_depth; monthly albedo_dir/dif (absent from the fast table, present in dayl_d)
+  #   (also for phasewfde5: the snow-phase test needs daily snow)
+  if [ "$K" = dayllat ] || [ "$K" = phasewfde5 ]; then
+    for v in albedo_dir albedo_dif snow_frac snow_depth; do
+      sed -i "/^\"vegn\", \"lai\", \"lai\", \"land_daily\"/a \"land\", \"$v\", \"$v\", \"land_daily\", \"all\", .true., \"none\", 2" $D/diag_table
+    done
+    for v in albedo_dir albedo_dif; do
+      sed -i "/^\"land\", \"snow_frac\", \"snow_frac\", \"land_month\"/a \"land\", \"$v\", \"$v\", \"land_month\", \"all\", .true., \"none\", 2" $D/diag_table
+    done
+  fi
+  if [ "$K" = phasewfde5 ]; then   # received snowfall and snowmelt (dropped from the fast table), monthly
+    for v in fprec_l melts; do
+      sed -i "/^\"land\", \"snow_frac\", \"snow_frac\", \"land_month\"/a \"land\", \"$v\", \"$v\", \"land_month\", \"all\", .true., \"none\", 2" $D/diag_table
+    done
+  fi
   # keep the configuration diff of every variant next to the run for the record
   { echo "### field_table diff (ctl -> $1)"; diff $C/field_table $D/field_table; echo "### diag_table diff (ctl -> $1)"; diff $C/diag_table $D/diag_table; } > $D/config_diff.txt
   case $K in noparam|offon|dayl|dayl2) ln -sfn $EXE_PHENOFF $D/model.x ;;
-             spring5|daylspring5) ln -sfn $EXE_SPRING $D/model.x ;; daylhold5) ln -sfn $EXE_HOLD $D/model.x ;; *) ln -sfn $EXE $D/model.x ;; esac
+             spring5|daylspring5) ln -sfn $EXE_SPRING $D/model.x ;; daylhold5) ln -sfn $EXE_HOLD $D/model.x ;; dayllat) ln -sfn $EXE_LAT $D/model.x ;; *) ln -sfn $EXE $D/model.x ;; esac
   echo "$1: $MO months $DA days from $Y-01-01, seed $SEED"
 }
 

@@ -2090,6 +2090,7 @@ subroutine vegn_phenology_ppa(tile, lat, doy)
   logical :: drought ! drought indicator
   real    :: decl, dayl ! solar declination (radian) and day length (hours), for the autumn rule
   real    :: tc_on      ! smoothed temperature used by the leaf-on test
+  real    :: dayl_off   ! autumn leaf-off day length of this species at this latitude, hours
   logical :: shortening ! true when days are getting shorter at this latitude
   real, parameter :: pi_ = 3.14159265358979
 
@@ -2146,11 +2147,13 @@ subroutine vegn_phenology_ppa(tile, lat, doy)
      case (LEAF_ON)
         ! cold-deciduous: turn leaves off and reset GDD
         ! ydkoh 2026-10: optional autumn rule (off unless both parameters > 0)
+        ! ydkoh 2026-10: threshold rises with latitude when dayl_off_slope /= 0
+        dayl_off = sp%dayl_crit_off + sp%dayl_off_slope*(abs(lat)*180.0/pi_ - sp%dayl_off_lat0)
         ! ydkoh 2026-10: with tau_pheno_on > 0 the cold test applies only on shortening days; otherwise a
         ! 5-day leaf-on is undone next day by the 20-day tc_pheno (still < tc_crit) and GDD is reset to 0
         if ((vegn%tc_pheno < sp%tc_crit .and. (tau_pheno_on <= 0.0 .or. shortening)) .or. &
             (sp%tc_crit_off > 0.0 .and. sp%dayl_crit_off > 0.0 .and. shortening .and. &
-             dayl < sp%dayl_crit_off .and. vegn%tc_pheno < sp%tc_crit_off)) then
+             dayl < dayl_off .and. vegn%tc_pheno < sp%tc_crit_off)) then
            cc%status = LEAF_OFF
            cc%gdd = 0.0
         endif

@@ -1,0 +1,12 @@
+Spring order 2010 (doy medians); NET = evergreen needleleaf share (CLM5); model = dayl_d
+group              cells | snowof albdrp  SOS10  SOS50 | S10-snow S50-snow |S10-sn|<8 |  Msnow MSOS50 M-O SOS50
+45-55N              1719 |    101     95    100    145 |       +3      +42       24% |    102    147       +1
+55-65N              2156 |    124    117    108    150 |      -16      +25       21% |    123    158       +7
+65-75N              1351 |    143    141    113    156 |      -24      +13        1% |    144    176      +18
+NET < 20 %          3008 |    135    131    115    153 |      -15      +20       17% |    125    157       +8
+NET 20-50 %         1015 |    119    112    107    148 |      -14      +29       17% |    119    155       +7
+NET >= 50 %         1203 |    115    101     88    146 |      -24      +30       17% |    115    151       +5
+50-70N NET<20%      2262 |    136    133    118    153 |      -16      +19       18% |    132    164      +11
+50-70N NET>=50%     1039 |    118    103     86    146 |      -27      +28       15% |    118    153       +5
+
+50-70N cell correlations (n 4210): r(SOS10, snow-off) 0.17, r(SOS50, snow-off) 0.72, r(albedo drop, snow-off) 0.80

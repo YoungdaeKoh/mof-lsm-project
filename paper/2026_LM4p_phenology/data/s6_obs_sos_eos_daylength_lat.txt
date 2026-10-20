@@ -1,0 +1,16 @@
+Observed (GIMMS 1982-2010 clim) SOS / EOS / LOS by latitude; equinoxes = doy 79 (Mar 20) and doy 265 (Sep 22), 12 h
+band    cells |   SOS dl_SOS |   EOS dl_EOS |   LOS | SOS<79%
+25-30N    314 |   140   13.2 |   295   11.1 |   140 |   14.2
+30-35N    392 |   105   12.9 |   272   11.7 |   143 |   18.9
+35-40N    585 |   104   12.9 |   262   12.1 |   134 |   25.6
+40-45N    737 |   124   14.0 |   263   12.0 |   136 |    5.8
+45-50N    932 |   135   14.8 |   257   12.4 |   128 |    1.0
+50-55N   1175 |   139   15.7 |   250   12.9 |   115 |    0.0
+55-60N   1119 |   143   16.7 |   251   13.0 |   109 |    0.0
+60-65N   1284 |   147   18.3 |   252   13.2 |   105 |    0.0
+65-70N   1182 |   154   22.0 |   252   13.5 |    98 |    0.0
+
+Weighted least-squares slope against latitude (25-70N, n 7720 cells):
+  SOS +0.95 d/deg   EOS -0.19 d/deg   LOS -1.14 d/deg
+  day length at SOS +0.222 h/deg   at EOS +0.027 h/deg
+  across-cell SD: SOS 28.1 d, EOS 27.4 d; day length at SOS 3.26 h, at EOS 1.55 h

@@ -1,0 +1,8 @@
+Sep-Oct 2010, CTRL vs DL13/12, C96 cells with CTRL LAI > 0.5; gpp in kg C m-2 yr-1 (model units)
+band    cells | LAI_C LAI_X  dLAI% |  dGPP%  dfAP% | GPP/LAI_C GPP/LAI_X | GPP/fAP_C GPP/fAP_X | k_fit
+40-50N   1978 |  2.50  1.87  -25.1 |  -19.2  -16.1 |    0.463    0.499 |    1.740    1.674 |  0.30
+50-60N   1793 |  2.81  2.14  -24.1 |  -18.5  -15.9 |    0.319    0.342 |    1.250    1.212 |  0.31
+60-70N    925 |  2.59  1.49  -42.6 |  -18.4  -28.6 |    0.219    0.311 |    0.841    0.961 |  1.07
+50-70N   2718 |  2.74  1.91  -30.1 |  -18.5  -20.1 |    0.287    0.334 |    1.117    1.139 |  0.61
+
+50-70N cell level (n 2718): GPP ratio median 0.846, fAPAR ratio median 0.800, r(GPP ratio, fAPAR ratio) 0.79, median |GPP ratio - fAPAR ratio| 0.096

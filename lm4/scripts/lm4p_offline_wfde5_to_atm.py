@@ -17,16 +17,25 @@ Fields that ARE expressible as a factor stay out of the file: p_bot reuses
 p_surf, and the four shortwave components are FSDS * 0.25 in data_table.
 Constants (v_bot, z_bot, gust, slp) live in data_table too.
 
-Usage: python wfde5_to_lm4p_atm.py <year>
+Usage: python wfde5_to_lm4p_atm.py <year> [ramp|wfde5]
+  ramp  (default): split PRECTmms with the TBOT ramp below (all runs up to 2026-10).
+  wfde5 (2026-10-20): take the phase from WFDE5 itself -- Snowf / Rainf 6-h means
+        (/data2/ydkoh/WFDE5_6h/{Snowf,Rainf}/, elevation-corrected phase, lon -180..180 rolled to the CLM
+        0..360 grid, Feb 29 dropped like the noleap CLM file); written to wfde5_atm_<year>_phasewfde5.nc.
+        Each chunk checks Snowf + Rainf = PRECTmms on land (same source, checked 2010-01: max diff 1e-6 mm/d).
 """
 import sys
+import calendar
 import numpy as np
 import netCDF4 as nc
 from scipy.ndimage import distance_transform_edt
 
 YEAR = int(sys.argv[1]) if len(sys.argv) > 1 else 1981
+PHASE = sys.argv[2] if len(sys.argv) > 2 else "ramp"
+assert PHASE in ("ramp", "wfde5")
 SRC = "/data2/ydkoh/2026_MOF_LSM/Atm_forc/1_CLM_WFDE5/%d_wfde5.nc" % YEAR
-DST = "/data2/ydkoh/lm4/forcing_WFDE5_lm4p/wfde5_atm_%d.nc" % YEAR
+DST = "/data2/ydkoh/lm4/forcing_WFDE5_lm4p/wfde5_atm_%d%s.nc" % (YEAR, "" if PHASE == "ramp" else "_phasewfde5")
+W6 = "/data2/ydkoh/WFDE5_6h/%s/%s_WFDE5_CRU_%d%02d_v3.0_6h.nc"
 
 TFRZ = 273.15
 SNOW_RAMP = 2.0   # all snow at/below TFRZ, all rain at TFRZ+SNOW_RAMP
@@ -45,6 +54,36 @@ def fill_indices(land):
     jj = idx[0][:, nx:2 * nx]
     ii = idx[1][:, nx:2 * nx] % nx          # fold tiled lon back into range
     return jj, ii
+
+
+class WFDE5Phase:
+    """Snowf / Rainf of one noleap year, read month by month on demand (6-h steps, Feb 29 dropped)."""
+
+    def __init__(self, var, lon_clm):
+        self.var = var
+        self.steps = []                                   # (month, index within the month file)
+        for m in range(1, 13):
+            nd = calendar.monthrange(YEAR, m)[1]
+            for k in range(nd * 4):
+                if m == 2 and k >= 28 * 4:
+                    continue                              # Feb 29 (leap years) not in the noleap year
+                self.steps.append((m, k))
+        f = nc.Dataset(W6 % (var, var, YEAR, 1))
+        lon = f.variables["lon"][:].astype("f8"); f.close()
+        self.roll = int(np.argmin(np.abs(lon - lon_clm[0])))   # -179.75.. -> 0.25..
+        assert np.allclose(np.roll(lon, -self.roll) % 360.0, lon_clm), "lon mismatch"
+        self.cache = {}
+
+    def get(self, s, e):
+        out = []
+        for m, k in self.steps[s:e]:
+            if m not in self.cache:
+                f = nc.Dataset(W6 % (self.var, self.var, YEAR, m))
+                assert len(f.variables["time"]) == calendar.monthrange(YEAR, m)[1] * 4
+                self.cache = {m: np.roll(np.ma.filled(f.variables[self.var][:].astype("f4"), np.nan), -self.roll, axis=2)}
+                f.close()
+            out.append(self.cache[m][k])
+        return np.array(out)
 
 
 def main():
@@ -112,6 +151,9 @@ def main():
     lon2d = np.ones((ny, 1)) * lon[None, :]
 
     days = tvar[:].astype("f8")
+    if PHASE == "wfde5":
+        assert nt == 1460, "expected a noleap 6-h year"
+        snowf, rainf = WFDE5Phase("Snowf", lon), WFDE5Phase("Rainf", lon)
     CH = 200                                  # time chunk
     for s in range(0, nt, CH):
         e = min(s + CH, nt)
@@ -122,9 +164,17 @@ def main():
 
         tb = np.ma.filled(src.variables["TBOT"][s:e, :, :], np.nan)[:, jj, ii]
         pr = np.ma.filled(src.variables["PRECTmms"][s:e, :, :], np.nan)[:, jj, ii]
-        fsnow = np.clip((TFRZ + SNOW_RAMP - tb) / SNOW_RAMP, 0.0, 1.0)
-        vout["fprec"][s:e, :, :] = pr * fsnow
-        vout["lprec"][s:e, :, :] = pr * (1.0 - fsnow)
+        if PHASE == "ramp":
+            fsnow = np.clip((TFRZ + SNOW_RAMP - tb) / SNOW_RAMP, 0.0, 1.0)
+            vout["fprec"][s:e, :, :] = pr * fsnow
+            vout["lprec"][s:e, :, :] = pr * (1.0 - fsnow)
+        else:
+            sf, rf = snowf.get(s, e), rainf.get(s, e)
+            p0 = np.ma.filled(src.variables["PRECTmms"][s:e, :, :], np.nan)   # before the ocean fill
+            d = np.nanmax(np.abs((sf + rf)[:, land] - p0[:, land]))
+            assert d < 1e-9, "Snowf + Rainf != PRECTmms (max %.3g kg/m2/s)" % d
+            vout["fprec"][s:e, :, :] = sf[:, jj, ii]
+            vout["lprec"][s:e, :, :] = rf[:, jj, ii]
 
         d = days[s:e]
         doy = np.floor(d) + 1.0
@@ -140,9 +190,10 @@ def main():
         print("  %d/%d" % (e, nt), flush=True)
 
     dst.source = "WFDE5 (CLM format) reprocessed for FMS data_override"
-    dst.notes = ("ocean cells filled by nearest valid land (lon-periodic); "
-                 "snow fraction = clip((%.2f-T)/%.1f,0,1); "
-                 "coszen instantaneous at timestamp" % (TFRZ + SNOW_RAMP, SNOW_RAMP))
+    phase = ("snow fraction = clip((%.2f-T)/%.1f,0,1)" % (TFRZ + SNOW_RAMP, SNOW_RAMP) if PHASE == "ramp"
+             else "fprec/lprec = WFDE5 Snowf/Rainf (WFDE5 elevation-corrected phase)")
+    dst.notes = ("ocean cells filled by nearest valid land (lon-periodic); %s; "
+                 "coszen instantaneous at timestamp" % phase)
     dst.close()
     src.close()
     print("wrote", DST)

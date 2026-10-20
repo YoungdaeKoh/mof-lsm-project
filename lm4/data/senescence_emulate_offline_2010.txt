@@ -1,0 +1,65 @@
+Offline gradual-senescence emulation on dayl_d 2010 (medians over C96 cells; bias = model - obs)
+onset dl_sen = 13.5 + 0.19(|lat|-45) h; obs LAI = GLASS 2010 daily, obs GPP = FLUXCOM-X Aug 2010 (g C m-2 d-1)
+
+40-50N  n 1051  onset doy 235, switch doy 258 (medians); obs Aug LAI 2.94, Sep LAI 1.94, EOS50 262, Aug GPP 6.82
+  case        dAugLAI  dSepLAI   dEOS50   dAugGPP   AugGPP%
+  dayl_d        -0.12    +0.19     +6.0     -0.76      +0.0
+  sen k=1%      -0.15    -0.10     +3.0     -0.80      -0.9
+  sen k=2%      -0.18    -0.30     -0.5     -0.85      -2.2
+  sen k=3%      -0.22    -0.48     -6.0     -0.91      -3.1
+
+50-60N  n 877  onset doy 217, switch doy 252 (medians); obs Aug LAI 2.30, Sep LAI 1.44, EOS50 256, Aug GPP 5.18
+  case        dAugLAI  dSepLAI   dEOS50   dAugGPP   AugGPP%
+  dayl_d        +0.19    +0.61     +8.0     +0.53      +0.0
+  sen k=1%      -0.02    +0.12     +4.0     +0.23      -4.7
+  sen k=2%      -0.20    -0.23     -4.0     -0.01     -10.0
+  sen k=3%      -0.31    -0.50    -14.0     -0.24     -14.7
+
+60-70N  n 797  onset doy 218, switch doy 254 (medians); obs Aug LAI 1.41, Sep LAI 0.76, EOS50 250, Aug GPP 3.59
+  case        dAugLAI  dSepLAI   dEOS50   dAugGPP   AugGPP%
+  dayl_d        +1.88    +1.28     +6.0     +2.26      +0.0
+  sen k=1%      +1.62    +0.76     +5.0     +2.06      -4.4
+  sen k=2%      +1.43    +0.35     +1.0     +1.84      -8.9
+  sen k=3%      +1.22    +0.02     -9.0     +1.64     -13.7
+
+50-70N  n 1674  onset doy 218, switch doy 254 (medians); obs Aug LAI 1.79, Sep LAI 1.02, EOS50 253, Aug GPP 4.38
+  case        dAugLAI  dSepLAI   dEOS50   dAugGPP   AugGPP%
+  dayl_d        +0.64    +0.85     +7.0     +1.29      +0.0
+  sen k=1%      +0.39    +0.35     +5.0     +1.03      -4.8
+  sen k=2%      +0.21    -0.03     -1.0     +0.72      -9.6
+  sen k=3%      +0.06    -0.27    -11.0     +0.43     -14.2
+
+ESB  n 314  onset doy 218, switch doy 254 (medians); obs Aug LAI 2.24, Sep LAI 1.08, EOS50 248, Aug GPP 5.41
+  case        dAugLAI  dSepLAI   dEOS50   dAugGPP   AugGPP%
+  dayl_d        -0.05    +0.74    +17.0     +0.49      -0.0
+  sen k=1%      -0.24    +0.20    +13.0     +0.19      -5.2
+  sen k=2%      -0.42    -0.18     +4.5     -0.17      -9.0
+  sen k=3%      -0.60    -0.44     -6.0     -0.50     -12.9
+
+WSB  n 93  onset doy 217, switch doy 254 (medians); obs Aug LAI 2.07, Sep LAI 1.17, EOS50 254, Aug GPP 5.12
+  case        dAugLAI  dSepLAI   dEOS50   dAugGPP   AugGPP%
+  dayl_d        +0.23    +0.63     +7.0     +0.42      +0.0
+  sen k=1%      +0.02    +0.03     +4.0     +0.11      -5.5
+  sen k=2%      -0.12    -0.28     -4.0     -0.22     -12.1
+  sen k=3%      -0.27    -0.57    -15.0     -0.54     -18.3
+
+NWN  n 332  onset doy 217, switch doy 254 (medians); obs Aug LAI 1.42, Sep LAI 0.82, EOS50 253, Aug GPP 3.47
+  case        dAugLAI  dSepLAI   dEOS50   dAugGPP   AugGPP%
+  dayl_d        +1.24    +1.52     +3.0     +2.45      +0.0
+  sen k=1%      +1.03    +0.75     +2.0     +2.16      -4.1
+  sen k=2%      +0.84    +0.32     -3.0     +1.84      -9.2
+  sen k=3%      +0.69    +0.01    -13.0     +1.59     -13.9
+
+RFE  n 241  onset doy 217, switch doy 253 (medians); obs Aug LAI 2.15, Sep LAI 1.10, EOS50 254, Aug GPP 5.34
+  case        dAugLAI  dSepLAI   dEOS50   dAugGPP   AugGPP%
+  dayl_d        -0.26    +0.44     +7.0     +0.23      +0.0
+  sen k=1%      -0.41    +0.01     +5.0     -0.08      -3.6
+  sen k=2%      -0.50    -0.34     +0.0     -0.43      -7.8
+  sen k=3%      -0.58    -0.52    -10.0     -0.75     -12.1
+
+ENA  n 269  onset doy 236, switch doy 264 (medians); obs Aug LAI 3.62, Sep LAI 2.64, EOS50 266, Aug GPP 7.93
+  case        dAugLAI  dSepLAI   dEOS50   dAugGPP   AugGPP%
+  dayl_d        -0.43    +0.31     +6.0     -0.67      +0.0
+  sen k=1%      -0.50    -0.24     +2.0     -0.74      -0.8
+  sen k=2%      -0.55    -0.71     -1.0     -0.83      -1.7
+  sen k=3%      -0.62    -1.06     -8.0     -0.93      -2.3

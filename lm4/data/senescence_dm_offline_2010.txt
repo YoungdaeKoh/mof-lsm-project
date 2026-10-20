@@ -1,0 +1,69 @@
+Delpierre-type canopy decline on dayl_d 2010 (medians over 2725 C96 cells; bias = model - GLASS 2010)
+
+50-70N (n 1674): obs Aug LAI 1.79, Sep LAI 1.02, EOS50 253
+  case                               dAugLAI dSepLAI  dEOS50  loss%/d  dEOS/dT
+  dayl_d (7.5 %/d switch)              +0.64   +0.85    +7.0      7.3     +nan
+  DM-DBF published Y=8268              +0.71   +0.92   +14.0     14.3    +1.00
+  DM-DBF, Ycrit cal. Y=1               +0.71   +0.23    +5.0     13.8    +0.00
+  DM x=1, Ycrit cal. Y=1               +0.71   +0.23    +5.0     13.8    +0.00
+  DM x=0 (no T), cal. Y=1              +0.71   +0.23    +5.0     10.1    +0.00
+  DM onset lat, x=2, cal. Y=15197      +0.44   +0.09    -0.5      4.5    +3.00
+  DM onset lat, x=1, cal. Y=884        +0.37   +0.12    +0.0      3.8    +2.00
+  DM onset lat, x=0 (no T), cal. Y=56   +0.29   +0.11    -0.5      2.8    +0.00
+
+40-50N (n 1051): obs Aug LAI 2.94, Sep LAI 1.94, EOS50 262
+  case                               dAugLAI dSepLAI  dEOS50  loss%/d  dEOS/dT
+  dayl_d (7.5 %/d switch)              -0.12   +0.19    +6.0      4.7     +nan
+  DM-DBF published Y=8268              -0.01   +0.52   +11.0      6.4    +2.00
+  DM-DBF, Ycrit cal. Y=1               -0.01   -0.69    -7.0      4.7    +0.00
+  DM x=1, Ycrit cal. Y=1               -0.01   -0.69    -7.0      4.7    +0.00
+  DM x=0 (no T), cal. Y=1              -0.01   -0.69    -7.0      4.6    +0.00
+  DM onset lat, x=2, cal. Y=15197      -0.05   +0.42   +21.0      3.5    +4.00
+  DM onset lat, x=1, cal. Y=884        -0.06   +0.28   +14.0      3.3    +3.00
+  DM onset lat, x=0 (no T), cal. Y=56   -0.09   +0.04    +4.0      3.3    +0.00
+
+ESB (n 314): obs Aug LAI 2.24, Sep LAI 1.08, EOS50 248
+  case                               dAugLAI dSepLAI  dEOS50  loss%/d  dEOS/dT
+  dayl_d (7.5 %/d switch)              -0.05   +0.74   +17.0      6.7     +nan
+  DM-DBF published Y=8268              -0.03   +0.60   +17.0     15.4    +1.00
+  DM-DBF, Ycrit cal. Y=1               -0.03   +0.03   +10.0     13.3    +0.00
+  DM x=1, Ycrit cal. Y=1               -0.03   +0.03   +10.0     13.3    +0.00
+  DM x=0 (no T), cal. Y=1              -0.03   +0.03   +10.0      9.6    +0.00
+  DM onset lat, x=2, cal. Y=15197      -0.36   +0.03    +7.5      4.6    +3.00
+  DM onset lat, x=1, cal. Y=884        -0.39   +0.01    +7.0      3.8    +2.00
+  DM onset lat, x=0 (no T), cal. Y=56   -0.42   -0.04    +4.0      2.8    +0.00
+
+NWN (n 332): obs Aug LAI 1.42, Sep LAI 0.82, EOS50 253
+  case                               dAugLAI dSepLAI  dEOS50  loss%/d  dEOS/dT
+  dayl_d (7.5 %/d switch)              +1.24   +1.52    +3.0      8.0     +nan
+  DM-DBF published Y=8268              +1.51   +1.49   +13.0     16.1    +1.00
+  DM-DBF, Ycrit cal. Y=1               +1.51   +0.81    +6.0     12.8    +0.00
+  DM x=1, Ycrit cal. Y=1               +1.51   +0.81    +6.0     12.8    +0.00
+  DM x=0 (no T), cal. Y=1              +1.51   +0.81    +6.0      9.6    +0.00
+  DM onset lat, x=2, cal. Y=15197      +1.07   +0.28    -5.0      4.8    +3.00
+  DM onset lat, x=1, cal. Y=884        +1.03   +0.48    -3.0      3.9    +2.00
+  DM onset lat, x=0 (no T), cal. Y=56   +1.00   +0.62    -0.5      2.7    +0.00
+
+RFE (n 241): obs Aug LAI 2.15, Sep LAI 1.10, EOS50 254
+  case                               dAugLAI dSepLAI  dEOS50  loss%/d  dEOS/dT
+  dayl_d (7.5 %/d switch)              -0.26   +0.44    +7.0      7.3     +nan
+  DM-DBF published Y=8268              -0.26   +0.44   +12.0     15.6    +1.00
+  DM-DBF, Ycrit cal. Y=1               -0.26   -0.23    +3.0     15.8    +0.00
+  DM x=1, Ycrit cal. Y=1               -0.26   -0.23    +3.0     15.8    +0.00
+  DM x=0 (no T), cal. Y=1              -0.26   -0.23    +3.0     11.7    +0.00
+  DM onset lat, x=2, cal. Y=15197      -0.48   +0.00    +3.0      4.5    +4.00
+  DM onset lat, x=1, cal. Y=884        -0.48   -0.07    +2.0      3.8    +2.00
+  DM onset lat, x=0 (no T), cal. Y=56   -0.49   -0.24    +1.0      2.9    +0.00
+
+ENA (n 269): obs Aug LAI 3.62, Sep LAI 2.64, EOS50 266
+  case                               dAugLAI dSepLAI  dEOS50  loss%/d  dEOS/dT
+  dayl_d (7.5 %/d switch)              -0.43   +0.31    +6.0      6.4     +nan
+  DM-DBF published Y=8268              -0.43   +0.07    +5.0      7.4    +2.00
+  DM-DBF, Ycrit cal. Y=1               -0.43   -1.35   -11.0      nan    +0.00
+  DM x=1, Ycrit cal. Y=1               -0.43   -1.35   -11.0      nan    +0.00
+  DM x=0 (no T), cal. Y=1              -0.43   -1.35   -11.0      nan    +0.00
+  DM onset lat, x=2, cal. Y=15197      -0.50   -0.12   +12.0      4.1    +4.00
+  DM onset lat, x=1, cal. Y=884        -0.53   -0.34    +7.0      3.7    +3.00
+  DM onset lat, x=0 (no T), cal. Y=56   -0.56   -0.63    +0.0      3.6    +0.00
+
+obs GLASS 2010 50-70N loss%/d (90->10 %) median 1.9

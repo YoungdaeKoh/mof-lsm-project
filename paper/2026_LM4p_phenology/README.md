@@ -26,6 +26,7 @@ monthly LAI interpolated to days (p3 method).
 | 1 | scripts/f1_ctrl_bias_regions.py | data/f1_sos_eos_bias.txt | (a) GLASS MJJAS LAI, (b) LM4.1 - obs, (c) boreal seasonal cycle vs 3 obs, (d,e) SOS/EOS bias by latitude band (monthly, 50 %) |
 | 2 | scripts/f2_rules_schematic.py | - | (a) CTRL vs modified rules, (b) one-cell 2010 timeline (dayl_d) - draft, winter hold pending daylhold5_d |
 | 3 | scripts/f3_rule_timing_maps.py | data/f3_rule_timing_bands.txt | rule timing reconstructed from daily T: spring smoothing delay, binding gate, photoperiod vs cold rule, cold rule vs obs EOS |
+| 4 | scripts/f4_bias_change.py | data/f4_bias_change.txt | SOS/EOS bias maps CTRL vs EXP + latitude-band bars; CASE switch (2010 draft: CTRL = phentest base, EXP = dayl_d; 15-yr pair later) |
 | 2a | scripts/f2a_rule_box.py | - | Weng et al. 2015 rule box with the added winter-hold and photoperiod terms in red (spring change not shown) |
 | S1 | scripts/s1_daylength_formula.py, s1b_daylength_globe.py | - | day-length terms of the patch: declination / day-length curves (30-70N, 40S) and north-pole globe view on 21 Jun, 5 Sep (50N reaches 13 h), 21 Dec |
 | SI | scripts/o1_obs_native_to_1deg.py, dlog.py, o2_regional_fit_native.py | data/obs_native/, data/o2_regional_fit_native.txt | native-sampling obs (8-day / half-monthly) and double-logistic dates: sampling moves dates <= 3 d |

@@ -1,0 +1,56 @@
+--- a/src/lm4P/vegetation/vegn_data.F90
++++ b/src/lm4P/vegetation/vegn_data.F90
+@@ -264,6 +264,10 @@
+   ! < dayl_crit_off AND tc_pheno < tc_crit_off. Negative values = rule off (default).
+   real    :: tc_crit_off   = -1.0 ! autumn leaf-off temperature, degK
+   real    :: dayl_crit_off = -1.0 ! autumn leaf-off day length, hours
++  ! ydkoh 2026-10: optional latitude dependence of the autumn threshold; the rule uses
++  ! dayl_crit_off + dayl_off_slope*(|lat| - dayl_off_lat0), lat in degrees. 0 = constant (default).
++  real    :: dayl_off_slope = 0.0  ! hours per degree latitude
++  real    :: dayl_off_lat0  = 40.0 ! reference latitude, degrees
+   ! ydkoh 2026-10: winter hold for the same rule. Leaves cannot switch on while day length
+   ! < dayl_crit_on AND tc_pheno < tc_crit_off (stateless, so it survives restarts; stops
+   ! mid-winter re-greening after the solstice). Negative = off (default).
+@@ -1035,6 +1039,8 @@
+   __GET_SPDATA_REAL__(tc_crit)
+   __GET_SPDATA_REAL__(tc_crit_off)
+   __GET_SPDATA_REAL__(dayl_crit_off)
++  __GET_SPDATA_REAL__(dayl_off_slope)
++  __GET_SPDATA_REAL__(dayl_off_lat0)
+   __GET_SPDATA_REAL__(dayl_crit_on)
+   __GET_SPDATA_REAL__(gdd_crit)
+   __GET_SPDATA_REAL__(gdd_base_T)
+@@ -1503,6 +1509,8 @@
+   call add_row(table, 'tc_crit',       spdata(idx)%tc_crit)
+   call add_row(table, 'tc_crit_off',   spdata(idx)%tc_crit_off)
+   call add_row(table, 'dayl_crit_off', spdata(idx)%dayl_crit_off)
++  call add_row(table, 'dayl_off_slope', spdata(idx)%dayl_off_slope)
++  call add_row(table, 'dayl_off_lat0', spdata(idx)%dayl_off_lat0)
+   call add_row(table, 'dayl_crit_on',  spdata(idx)%dayl_crit_on)
+   call add_row(table, 'gdd_crit',      spdata(idx)%gdd_crit)
+   call add_row(table, 'gdd_base_T',    spdata(idx)%gdd_base_T)
+--- a/src/lm4P/vegetation/vegn_dynamics.F90
++++ b/src/lm4P/vegetation/vegn_dynamics.F90
+@@ -2090,6 +2090,7 @@
+   logical :: drought ! drought indicator
+   real    :: decl, dayl ! solar declination (radian) and day length (hours), for the autumn rule
+   real    :: tc_on      ! smoothed temperature used by the leaf-on test
++  real    :: dayl_off   ! autumn leaf-off day length of this species at this latitude, hours
+   logical :: shortening ! true when days are getting shorter at this latitude
+   real, parameter :: pi_ = 3.14159265358979
+ 
+@@ -2146,11 +2147,13 @@
+      case (LEAF_ON)
+         ! cold-deciduous: turn leaves off and reset GDD
+         ! ydkoh 2026-10: optional autumn rule (off unless both parameters > 0)
++        ! ydkoh 2026-10: threshold rises with latitude when dayl_off_slope /= 0
++        dayl_off = sp%dayl_crit_off + sp%dayl_off_slope*(abs(lat)*180.0/pi_ - sp%dayl_off_lat0)
+         ! ydkoh 2026-10: with tau_pheno_on > 0 the cold test applies only on shortening days; otherwise a
+         ! 5-day leaf-on is undone next day by the 20-day tc_pheno (still < tc_crit) and GDD is reset to 0
+         if ((vegn%tc_pheno < sp%tc_crit .and. (tau_pheno_on <= 0.0 .or. shortening)) .or. &
+             (sp%tc_crit_off > 0.0 .and. sp%dayl_crit_off > 0.0 .and. shortening .and. &
+-             dayl < sp%dayl_crit_off .and. vegn%tc_pheno < sp%tc_crit_off)) then
++             dayl < dayl_off .and. vegn%tc_pheno < sp%tc_crit_off)) then
+            cc%status = LEAF_OFF
+            cc%gdd = 0.0
+         endif
