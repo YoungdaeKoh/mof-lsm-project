@@ -19,9 +19,10 @@ D = np.arange(1, 366.0)
 MID = np.array([15.5, 45, 74.5, 105, 135.5, 166, 196.5, 227.5, 258, 288.5, 319, 349.5])
 OBS = [("GIMMS", "gimms_lai_mon_1982_2020.nc", 1982), ("AVHRR", "gimms_solely_lai_mon_1982_2015.nc", 1982),
        ("GLASS", "glass_lai_modis_monthly_1deg_2001_2020.nc", 2001)]
-RUNS = [("CTRL", "base"), ("DL", "dayl"), ("DLS5", "daylspring5"), ("DLH5", "daylhold5")]   # DLH5 = DLS5 + spring 12 h floor
+RUNS = [("CTRL", "base"), ("DL", "dayl"), ("DLS5", "daylspring5"), ("DLH5", "daylhold5"),
+        ("DLLAT", "dayllat")]   # DLH5 = DLS5 + spring 12 h floor; DLLAT = autumn 12.0 + 0.05(|lat|-40) h, spring CTRL
 RUNS = [r for r in RUNS if os.path.exists("../data/%s.lai.%d-%d.1deg.nc" % (r[1], YEAR, YEAR))]
-REGIONS = ("50-70N", "40-50N", "NEU", "RFE", "NWN", "ESB", "NEN", "WSB", "RAR", "EEU", "WCE", "ENA", "EAS")
+REGIONS = ("50-70N", "40-50N", "NEU", "RFE", "NWN", "ESB", "NEN", "WSB", "RAR", "EEU", "WCE", "ENA", "EAS", "TIB")
 
 fields = {}
 for name, f, y0 in OBS:

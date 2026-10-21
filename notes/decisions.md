@@ -85,3 +85,7 @@
 - 그림(본문 5장): 1 문제(CTRL 편차) · 2 관측으로 맞춘 문턱(관측 3종 EOS/SOS 일장 vs 위도, 개시 0.19 = Birch vs 50 % 0.05) · 3 원인(규칙 시점) + CTRL vs 보정 SOS/EOS · 4 LAI·GPP·NEE 개선(NEE 봄 편차는 호흡 문제로 범위 밖 명시) · 5 흡수광(fAPAR)으로 설명. 규칙 모식도는 Methods 식으로, 2a 규칙 상자는 SI.
 - 표현: "bias correction"(통계 후처리로 오해) 대신 "process-based bias reduction / reduced at its source".
 - 미정: 가을 문턱 = DL13/12 상수 vs dayllat 위도식 → dayllat_d 결과(10-21 04시) 후 결정. winter hold 포함 여부도 함께.
+
+## 2026-10-21 — FULL 가을 규칙 = DLLAT(위도 문턱 12.0 + 0.05(|lat|−40) h) (사용자 결정 "DLLAT으로 하는게 맞겠다")
+- 왜: dayllat_d 2010에서 DL13/12 대비 고위도·TIB EOS 개선(50–70N +10.9→+8.9, RAR +10.3→+5.3, TIB −30.2→−2.9), 중위도 소폭 악화(40–50N +7.5→+9.8, EAS +5.4→+9.2), MAE는 비슷 → 성능은 동급, 그러나 관측으로 정한 문턱이라 논문 그림 2("관측 제약")와 일치하고 상수 13 h의 근거 질문을 피함. 2010에 맞춘 추가 튜닝은 하지 않음(과적합 방지).
+- 다음: FULL 전에 2년 연쇄 테스트런(2010–2011, DLLAT, 봄 CTRL)으로 restart 연쇄·2년째 상태 확인.

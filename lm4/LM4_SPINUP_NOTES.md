@@ -1926,3 +1926,9 @@ LM4p = `postproc/lm4p_ctl/yearly`(lm4p_to_latlon.py, nearest 1°)의 `lai`를 CD
 - forcing: `lm4p_offline_wfde5_to_atm.py <y> wfde5` → `forcing_WFDE5_lm4p/wfde5_atm_{2009,2010,2011}_phasewfde5.nc`(+경계 2레코드 `append_boundary_phase.py`). 2010 대조: 강수 외 전 변수 차 0, 총강수 차 1e−10 (`cmp_phase_forcing.py`).
 - 설계: 대조군 = 기존 `phentest/base`(2010, CTRL, gateBC exe, 24랭크, 램프) — 생산 ctl(48 PE)과는 비트 동일 아님이라 base와 비교. 실험 `phasewfde5_d` = base와 같은 exe·seed(ctl archive/y2009)·field_table, forcing만 `_phasewfde5`; 진단 추가(일별 albedo_dir/dif·snow_frac·snow_depth, 월별 albedo·fprec_l·melts). 한계: 1월 1일 적설은 램프 이력(2009 겨울) → 2010 봄은 부분 효과, 2010 가을–겨울은 완전 효과. 효과가 크면 2009–2010 2년 쌍(대조 포함, ≈44 h)으로 확장.
 - 스크립트 `phentest.sh`(서버 `RUN/phentest_v4.sh`; v3는 queue_dayllat이 사용 중이라 덮어쓰지 않음), 대기열 `RUN/queue_phasewfde5.sh`(dayllat_d 종료 후 climate00 24랭크 자동 시작, 로그 `RUN/queue_phasewfde5.out`), 10-20 16:15 가동. 예상: dayllat_d ≈10-21 04시 종료 → phasewfde5_d ≈10-21 15시 종료.
+### DLLAT 2년 연쇄 테스트런 dayllat_y2011_d (2026-10-21)
+- 목적: FULL 15년 전 restart 연쇄 검증 — 1년째 = 기존 `dayllat_d`(2010), 2년째 = 그 RESTART(2011-01-01 03:00)에서 2011년. 가을 규칙 = DLLAT(decisions 10-21), 봄 CTRL, τ5·hold 없음(무상태 규칙이라 restart 안전).
+- `phentest.sh`에 연도 접미사 `_yYYYY` 추가(`kind()`가 제거, `yearcfg()`가 Y 설정; 기존 이름 동작 불변 로컬 시험). 서버 `RUN/phentest_v5.sh`(md5 일치, v4는 phasewfde5 대기열이 사용 중). 스테이징 `SEED=phentest/dayllat_d/RESTART VARIANTS=dayllat_y2011_d bash phentest_v5.sh setup 365` → 1년째와 차이는 input.nml `current_date` 한 줄뿐(field_table·diag_table 동일, exe phenlat, forcing `wfde5_atm_2011.nc`).
+- 대기열 `RUN/queue_dayllat_y2011.sh`(phasewfde5_d 종료 후 climate00 24랭크 자동 시작, 로그 `RUN/queue_dayllat_y2011.out`), 10-21 11:32 가동. 예상: phasewfde5_d ≈10-21 17:30 종료 → dayllat_y2011_d ≈10-22 06시 종료.
+- 판정: ① rc=0·FATAL 0·2012-01-01 restart ② 연속성: 2011-01-01 LAI = dayllat_d 2010-12-31 LAI ③ 2011 SOS/EOS vs 관측 2011·생산 CTRL 2011(48 PE, 비트 동일 아님).
+- (참고) 10-21 오전 Claude Code 백그라운드 데몬 세션이 macOS에서 data01/02 접근(읽기·쓰기) 거부 → iTerm에서 `claude --resume`으로 새 프로세스 띄워 해결.

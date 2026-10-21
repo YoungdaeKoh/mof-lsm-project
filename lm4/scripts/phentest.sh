@@ -46,11 +46,15 @@ Y=2010; NP=24
 #   _np48  48 ranks with the production layout (template unchanged); submit with ncpus=48
 #   _l14 / _l41  24 ranks, land layout 1,4 / 4,1 per cube face instead of 2,2
 npcfg() { NP=24; LL=""; case $1 in *_np48*) NP=48 ;; esac; case $1 in *_l14*) LL=1,4 ;; *_l41*) LL=4,1 ;; esac; }
-kind()  { local k=${1%_d}; k=${k%_np48}; k=${k%_l14}; k=${k%_l41}; echo $k; }
+kind()  { local k=${1%_d}; k=${k%_y20[0-9][0-9]}; k=${k%_np48}; k=${k%_l14}; k=${k%_l41}; echo $k; }
+# year suffix _yYYYY (2026-10-21): run year YYYY instead of 2010, e.g. dayllat_y2011_d = year 2 of a chain,
+#   staged with SEED=$T/dayllat_d/RESTART (the restart written at the end of the 2010 run)
+yearcfg() { case $1 in *_y20[0-9][0-9]*) Y=$(echo $1 | grep -o '_y20[0-9][0-9]' | tr -d '_y') ;; esac; }
 SEED=${SEED:-$C/archive/y2009}            # override with SEED=<dir> (e.g. the replanted restart)
 
 stage() {   # $1 variant  $2 days
   D=$T/$1
+  yearcfg $1
   # never wipe a finished run by accident: a run that wrote its end-of-run restart is kept
   # unless FORCE=1 is given (LM4 notes 13.70, raw results are not reproducible for free)
   if [ -s $D/RESTART/coupler.res ] && [ "${FORCE:-0}" != 1 ]; then
