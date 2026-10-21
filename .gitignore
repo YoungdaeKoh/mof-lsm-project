@@ -62,3 +62,9 @@ reference/*.pdf
 
 # regenerable GIMMS 1-degree cache (rebuilt by lai_trend_vs_gimms.py in ~5 min)
 lm4/data/gimms_1deg_1982_1996.npz
+
+# ===== Added 2026-10-21: copyrighted PDFs, large npz caches, Word lock files =====
+*.pdf
+*.npz
+~$*
+.mplconfig/

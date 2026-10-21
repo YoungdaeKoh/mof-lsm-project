@@ -1,0 +1,25 @@
+GDD of leaf-OFF cohorts on 1 Jan 2011 (restart after 2010), unweighted; >=crit = gate already open
+
+CTRL (base)
+  acer    30-40N OFF  51190 | GDD median    84 p90   147 | >= crit   1% | zero  13%
+  acer    40-50N OFF 109070 | GDD median   119 p90   268 | >= crit   1% | zero  11%
+  acer    50-70N OFF  80959 | GDD median   143 p90   283 | >= crit   2% | zero  15%
+  c3grass 30-40N OFF  17714 | GDD median     0 p90    94 | >= crit   8% | zero  65%
+  c3grass 40-50N OFF  29472 | GDD median     0 p90    50 | >= crit   3% | zero  54%
+  c3grass 50-70N OFF  29799 | GDD median     0 p90    48 | >= crit   1% | zero  51%
+
+DL (dayl_d)
+  acer    30-40N OFF  52091 | GDD median   285 p90   381 | >= crit  14% | zero  12%
+  acer    40-50N OFF 109890 | GDD median   290 p90   493 | >= crit  30% | zero  11%
+  acer    50-70N OFF  81292 | GDD median   259 p90   459 | >= crit  22% | zero  15%
+  c3grass 30-40N OFF  19558 | GDD median     0 p90   177 | >= crit   9% | zero  59%
+  c3grass 40-50N OFF  30052 | GDD median     0 p90   171 | >= crit   8% | zero  52%
+  c3grass 50-70N OFF  29786 | GDD median     0 p90   164 | >= crit   6% | zero  50%
+
+DLH5 (daylhold5_d)
+  acer    30-40N OFF  52154 | GDD median   670 p90   784 | >= crit  88% | zero  12%
+  acer    40-50N OFF 109576 | GDD median   509 p90   781 | >= crit  68% | zero  11%
+  acer    50-70N OFF  81406 | GDD median   266 p90   546 | >= crit  27% | zero  15%
+  c3grass 30-40N OFF  21776 | GDD median     0 p90   868 | >= crit  46% | zero  52%
+  c3grass 40-50N OFF  30482 | GDD median     0 p90   872 | >= crit  47% | zero  51%
+  c3grass 50-70N OFF  29821 | GDD median     0 p90   510 | >= crit  39% | zero  50%

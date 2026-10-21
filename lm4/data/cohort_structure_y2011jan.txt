@@ -1,0 +1,70 @@
+LM4p vegetation structure, daylhold5_d restart 1 Jan 2011 (C96), unweighted counts
+totals: cells 17306, vegetated tiles 95499, cohorts 1341847
+
+Tiles per grid cell by latitude band: mean / median / max
+   -60..-20N cells  2234 | 4.6 / 3 / 17
+   -20.. 20N cells  5132 | 6.7 / 4 / 17
+    20.. 40N cells  3915 | 5.1 / 4 / 17
+    40.. 50N cells  2390 | 6.6 / 5 / 16
+    50.. 70N cells  3177 | 4.7 / 4 / 14
+    70.. 90N cells   458 | 1.1 / 1 / 4
+
+Tiles by land use: count, cohorts per tile mean/median/max, canopy layers mean/max, age since disturbance median (yr)
+  pasture    14549 | 6.8 / 6 / 38 | 1.00 / 1 | 1511
+  crop       14256 | 3.7 / 4 / 6 | 1.00 / 2 | 1511
+  natural    48433 | 18.0 / 18 / 65 | 1.92 / 4 | 43
+  secondary  18261 | 17.6 / 16 / 50 | 1.87 / 3 | 18
+
+Cohorts per tile, 50-70N natural tiles, by species (tiles where present): presence %, mean / max cohorts, height median (m)
+  picea     89.7% | 9.3 / 23 | 10.9
+  acer      80.9% | 8.5 / 25 | 8.9
+  c3grass  100.0% | 2.0 / 3 | 0.1
+
+Example tile (50-70N natural, has picea+acer+c3grass, most cohorts): face 3 cell 7928 tile 5 lat 55.5, age 70 yr, 46 cohorts, tiles in this cell 9
+  species  height layer   n per m2  crown m2  status    GDD
+  acer       33.5     1     0.0000    199.37     OFF    325
+  acer       32.0     1     0.0000    152.86     OFF    325
+  acer       30.0     1     0.0000    106.82     OFF    325
+  picea      29.1     1     0.0000    591.58      ON 1502722
+  picea      28.6     1     0.0000    335.87      ON 1019082
+  acer       28.3     1     0.0000     80.62     OFF    325
+  picea      27.8     1     0.0000    183.95      ON 720954
+  picea      27.2     1     0.0000    132.19      ON 600527
+  picea      26.3     1     0.0001     91.14      ON 488038
+  acer       25.5     1     0.0000     51.23     OFF    325
+  picea      25.0     1     0.0004     61.27      ON 395257
+  picea      23.9     1     0.0006     45.70      ON 337196
+  acer       23.7     1     0.0002     37.88     OFF    326
+  picea      22.4     1     0.0020     33.46      ON 290707
+  picea      20.7     1     0.0022     24.30      ON 240808
+  acer       20.0     1     0.0062     20.83     OFF    326
+  picea      18.7     1     0.0116     17.63      ON 193400
+  acer       17.2     1     0.0230     12.89     OFF    328
+  picea      16.8     1     0.0005     13.15      ON 169330
+  acer       14.7     1     0.0202      8.18     OFF    329
+  acer       14.5     2     0.0015      7.84     OFF    329
+  acer       14.0     2     0.0000      7.17     OFF    323
+  picea      14.0     2     0.0000      8.78      ON 236821
+  picea      12.6     2     0.0001      7.09      ON 191005
+  picea      11.9     2     0.0000      6.39      ON 221416
+  acer       11.7     2     0.0000      4.38     OFF    323
+  picea      10.1     2     0.0000      4.86      ON 189847
+  picea      10.0     2     0.0008      4.76      ON 144433
+  acer        9.5     2     0.0000      2.59     OFF    323
+  acer        9.4     2     0.0000      2.54     OFF    329
+  acer        7.6     2     0.0000      1.52     OFF    329
+  acer        7.6     2     0.0000      1.51     OFF    323
+  acer        6.4     2     0.0000      1.02     OFF    329
+  picea       6.3     2     0.0000      2.38      ON 167954
+  acer        6.1     2     0.0017      0.93     OFF    323
+  acer        5.3     2     0.0000      0.68     OFF    329
+  acer        4.4     2     0.0000      0.47     OFF    329
+  acer        3.0     2     0.0000      0.21     OFF    329
+  acer        2.0     2     0.0000      0.09     OFF    329
+  acer        1.1     2     1.0283      0.02     OFF    323
+  acer        0.5     2     9.1188      0.01     OFF    328
+  picea       0.5     2     0.1183      0.12      ON   9695
+  picea       0.5     2     0.0423      0.12     OFF      0
+  acer        0.5     2     4.2496      0.01     OFF      0
+  c3grass     0.1     2     0.0319      0.50     OFF    409
+  c3grass     0.1     2     0.0006      0.50     OFF      0
