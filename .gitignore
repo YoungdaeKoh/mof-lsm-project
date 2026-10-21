@@ -68,3 +68,13 @@ lm4/data/gimms_1deg_1982_1996.npz
 *.npz
 ~$*
 .mplconfig/
+
+# ===== Added 2026-10-21: external copies and huge report attachments =====
+# (ASCII globs: Korean dir names are NFD on disk and NFC patterns do not match)
+.claude/
+CESM_postprocessing-master/
+atmos/book/
+lm4/LAI/reference/
+2026/7*/KIOST-ESM/
+2026/6*/*/
+2026/6*/_*.pptx

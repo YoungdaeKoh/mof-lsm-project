@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>해수부 1.7 — ERA5→CLM forcing 구축 작업요약 (2026-06-16~17)</title>
+<style>
+  body{font-family:-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+       max-width:960px;margin:0 auto;padding:30px 24px;color:#1a2733;line-height:1.6;background:#fafbfc;}
+  h1{color:#10314b;border-bottom:3px solid #2f5597;padding-bottom:8px;font-size:26px;}
+  h2{color:#10314b;margin-top:34px;border-left:5px solid #2f5597;padding-left:10px;font-size:20px;}
+  h3{color:#1f6fb2;margin-top:22px;font-size:16px;}
+  code{background:#eef2f6;padding:2px 6px;border-radius:4px;font-size:13px;color:#b1361e;}
+  pre{background:#10314b;color:#e8eef4;padding:14px;border-radius:8px;overflow-x:auto;font-size:13px;}
+  table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px;}
+  th,td{border:1px solid #cdd7e1;padding:8px 10px;text-align:left;vertical-align:top;}
+  th{background:#10314b;color:#fff;}
+  tr:nth-child(even){background:#eef2f6;}
+  .ok{color:#1a7a3a;font-weight:bold;}
+  .bad{color:#c0392b;font-weight:bold;}
+  .warn{color:#b9770e;font-weight:bold;}
+  .box{background:#fff;border:1px solid #cdd7e1;border-radius:8px;padding:14px 18px;margin:14px 0;}
+  .key{background:#fff7e6;border:1px solid #ffd591;border-radius:8px;padding:12px 16px;margin:14px 0;}
+  .milestone{background:#e6f4ea;border:1px solid #95d5a8;border-radius:8px;padding:12px 16px;margin:14px 0;}
+  small{color:#64748b;}
+</style>
+</head>
+<body>
+
+<h1>해수부 세부 1.7 — ERA5 → CLM 대기강제력(forcing) 구축</h1>
+<p><small>작업기간: 2026-06-16 ~ 06-17 · 작성: ydkoh · 과제: 차세대 해양기후모델 지면-식생모델 진단</small></p>
+
+<div class="milestone">
+<b>🎯 1차년도 deliverable 연결</b> — ② 평가용 자료 DB(forcing) + ③ offline simulation. 다중 LSM 테스트베드 중 <b>CLM5</b>의 ERA5 강제력을 GSWP3 포맷으로 구축하고 1979 1년 적분 완주.
+</div>
+
+<h2>1. 목표</h2>
+<p>raw ERA5(0.25°, 시간별)를 CLM5 offline 구동용 대기강제력으로 변환. 기존 GSWP3 datm 스트림 포맷에 그대로 끼울 수 있게 제작 → CLM datm이 읽어 offline 적분.</p>
+<ul>
+<li>코드: <code>era5_to_clm5.ncl</code> (climate00 <code>/data2/ydkoh/2026_MOF_LSM/Atm_forc/1_CLM/</code>)</li>
+<li>출력: 연 1파일 <code>YYYY_era5.nc</code> (0.5°, 6-hourly, 7변수 + 격자메타)</li>
+<li>설계: <b>코드1(공용 물리변환)</b> / <b>코드2(모델별 포맷)</b> 분리 개념 — 현재 CLM은 단일 스크립트로 통합</li>
+</ul>
+
+<h2>2. 변환 파이프라인</h2>
+<p>raw ERA5 0.25°(721×1440, lat 내림차순, short 패킹) → 변수환산 → lat flip(S→N) → 보존 regrid 0.5°(360×720, GSWP3 domain) → noleap time → NetCDF4Classic 저장.</p>
+
+<table>
+<tr><th>CLM 변수</th><th>ERA5 입력</th><th>처리</th></tr>
+<tr><td>TBOT</td><td>t2m</td><td>그대로 (K)</td></tr>
+<tr><td>PSRF</td><td>sp</td><td>그대로 (Pa)</td></tr>
+<tr><td>QBOT</td><td>d2m + sp</td><td>비습 환산 e=611.21·exp(17.502(Td−273.16)/(Td−32.19)); q=0.621981e/(sp−0.378e)</td></tr>
+<tr><td>WIND</td><td>u10, v10</td><td>√(u²+v²), 합성 후 regrid</td></tr>
+<tr><td>FLDS</td><td>avg_sdlwrf</td><td>그대로 (W/m², 6-hourly avg)</td></tr>
+<tr><td>FSDS</td><td>avg_sdswrf (hourly)</td><td><span class="ok">hourly mean flux → 6h 평균</span> (초기 ssrA÷3600은 폐기)</td></tr>
+<tr><td>PRECTmms</td><td>tp (hourly)</td><td>6 hourly 합 ×1000 ÷21600 → kg/m²/s</td></tr>
+</table>
+
+<div class="box">
+<b>공통 처리</b>: ① <code>short2flt</code>로 언패킹(NCL 자동 안 함) · ② lat 90→−90 이라 regrid 전 <code>(:,::-1,:)</code> flip 필수 · ③ 윤년 <code>drop_feb29</code>로 2/29 제거(CLM noleap, 1460 step) · ④ time <code>ispan(0,nt-1)*0.25+0.125</code> (구간중심) · ⑤ 격자메타 LONGXY/LATIXY/EDGE는 GSWP3 domain에서 복사.
+</div>
+
+<h2>2.5 처리 흐름도 (한눈에)</h2>
+<pre>
+[ Input ] ERA5 Hourly 0.25°  (t2m, d2m, sp, u10, v10, avg_sdswrf, avg_sdlwrf, tp)
+   │
+   ▼
+[ Step 1. Load & Pre-process ]
+   ├─ 파일 일괄 읽기 (addfiles, ListSetType cat)
+   ├─ short2flt 언패킹 + 위도 역순 정렬 (::-1, → S→N)
+   └─ 윤일(Feb 29) 제거 (drop_feb29, noleap)
+   │
+   ▼
+[ Step 2. Variable Calc & Temporal Aggregation ]
+   ├─ TBOT  ← t2m (그대로)
+   ├─ PSRF  ← sp  (그대로)
+   ├─ QBOT  ← d2m, sp 로 수증기압 e → 비습 q 계산
+   ├─ FLDS  ← avg_sdlwrf (그대로, 6h avg)
+   ├─ FSDS  ← avg_sdswrf 6시간 평균 (dim_avg_n_Wrap, flux)
+   ├─ PRECTmms ← tp 6시간 누적 (dim_sum_n_Wrap) → kg/m²/s
+   └─ WIND  ← √(u10² + v10²)
+   │
+   ▼
+[ Step 3. Spatial Regridding ]
+   ├─ Target = GSWP3 0.5° 2D 격자 (LATIXY, LONGXY)
+   └─ area_conserve_remap_Wrap 로 7변수 보존 보간 (0.25°→0.5°)
+   │
+   ▼
+[ Step 4. Metadata & Time Axis ]
+   ├─ 6-hourly time 배열 (ispan*0.25+0.125, noleap)
+   └─ setmeta: 1D 좌표 제거 + CLM5 변수명/단위 부여
+   │
+   ▼
+[ Output ] NetCDF4Classic  yyyy_era5.nc
+   └─ 7변수 + 2D 격자/경계 (LONGXY/LATIXY/EDGEE/W/S/N) + time(noleap)
+</pre>
+<p><small>※ 초기엔 FSDS=ssrd÷3600(6h-1h샘플)이었으나 CLM longwave balance 크래시 유발 → hourly <code>avg_sdswrf</code>(mean flux) 6h평균으로 교체. 출력은 <b>NetCDF4Classic</b>(datm 호환·NC_CHAR calendar) 필수.</small></p>
+
+<h2>3. ★ 디버깅 — 출력 포맷이 핵심 함정이었음</h2>
+<p>forcing 데이터(값·격자·time)는 정상인데 datm이 거부. <b>출력 NetCDF 포맷</b> 때문. 두 단계로 드러남:</p>
+
+<table>
+<tr><th>포맷</th><th>증상</th><th>원인</th></tr>
+<tr><td class="bad">LargeFile (64-bit offset/CDF-2)</td><td><code>shr_stream_verifyTCoord: elapsed seconds must be increasing</code> (하루 경계서 secs 75600→10800 리셋)</td><td>datm이 time 좌표 오독. ncdump·cd_calendar는 정상이라 혼란</td></tr>
+<tr><td class="bad">NetCDF4</td><td><code>shr_stream_getCalendar: nf90_get_att calendar</code></td><td>calendar 속성이 NC_STRING으로 기록됨 (datm은 NC_CHAR 기대)</td></tr>
+<tr><td class="ok">NetCDF4Classic ✅</td><td>정상 — datm 읽고 런 완주</td><td>HDF5기반(2GB 한계 없음) + classic모델(NC_STRING 없음 → 속성 NC_CHAR)</td></tr>
+</table>
+
+<div class="key">
+<b>교훈</b> — CLM forcing 출력은 <code>setfileoption("nc","Format","NetCDF4Classic")</code>. 검증: <code>ncdump -k</code> → <b>netCDF-4 classic model</b>, <code>time:calendar="noleap"</code>(string 표기 없이). GSWP3 원본은 classic(CDF-1) monthly라 둘 다 비껴감.
+</div>
+
+<h3>그 외 잡은 이슈</h3>
+<ul>
+<li><b>변수별 시간해상도 상이</b> — instant(t2m 등) 6-hourly, tp·복사 hourly. 6h로 통일(precip 합, 복사 평균).</li>
+<li><b>solar(ssrd) 폐기</b> — 6h 샘플 + 1h 누적이라 일적산 깨짐 → CLM <b>longwave energy balance error</b> 크래시 유발. <span class="ok">hourly mean shortwave flux 재다운 → 6h 평균으로 교체하여 해결.</span></li>
+<li><b>1983 wind 결손</b> — u10/v10 1983년 2월 전체(28일) 누락. 코드에 ntime 체크/skip 권장.</li>
+<li><b>datm 스트림 검증</b> — fileNames에 나열된 <b>모든 연도 파일</b>을 init 때 검증. 미완성/깨진 파일 끼면 즉사.</li>
+<li><b>NCL 함정</b> — <code>&</code>는 좌표연산자뿐(문장 구분자 X); procedure는 global 미참조(인자 전달); 서버 비대화형 ncl은 <code>NCARG_ROOT</code> 필요.</li>
+</ul>
+
+<h2>4. CLM offline 적분 결과</h2>
+<div class="milestone">
+<b class="ok">✅ 1979 1년 완주</b> — I2000Clm50Sp @ f19_g17, 1979 forcing(NetCDF4Classic). balance error 없이 12개월 적분 완료.
+</div>
+<ul>
+<li>출력: <code>archive/I2000_ERA5_spinup/lnd/hist/I2000_ERA5_spinup.clm2.h0.0001-01 ~ 0001-12.nc</code> (월평균 12개)</li>
+<li>모델달력 0001 = forcing 1979 (DATM_CLMNCEP_YR_ALIGN=1979 매핑)</li>
+<li>주요 변수: <b>H2OSOI</b>(토양수분 m³/m³), <b>TSOI</b>(토양온도 K) — 층별</li>
+<li>restart: <code>clm2.r.0002-01-01</code> (이어서 적분 가능)</li>
+</ul>
+<p><small>forcing 값 검증: TBOT 212–316K, PSRF 50658–105023Pa, FLDS 82–478 W/m², FSDS 0–1110 W/m²(avg 175), 모두 물리적 정상.</small></p>
+
+<h2>5. 다음 단계</h2>
+<table>
+<tr><th>항목</th><th>계획</th></tr>
+<tr><td>다년 forcing</td><td>1980~ 같은 스크립트로 재생성(NetCDF4Classic+윤년+hourly solar). 1980-82는 옛 버전이라 재생성 필요</td></tr>
+<tr><td>spin-up</td><td>단일 1979 ×10~20(시연·층별 진단) → 추후 1979–1988 블록 ×4~5회(50년, 정식). 서버 스케줄러 없어 RESUBMIT 대신 STOP_N 통적분 + 수동 CONTINUE</td></tr>
+<tr><td>층별 진단</td><td>H2OSOI/TSOI <b>층별</b> 시계열 — 표층(빠른 평형) vs 깊은층(미평형 drift)로 spin-up 상태 시각화</td></tr>
+<tr><td>관측 비교</td><td>ERA5-Land(soil_temperature_level, volumetric_soil_water_layer) + ESA CCI·GLEAM. 층깊이·단위·격자 매칭 후 bias 지도·계절순환·Taylor</td></tr>
+<tr><td>해상도</td><td>f19 spin-up → <code>finidat + use_init_interp=.true.</code>로 f09 보간 → f09 짧은 재평형 (비용 절감 패턴)</td></tr>
+</table>
+
+<h2>6. 핵심 경로·명령</h2>
+<pre>
+# forcing 생성 (climate00)
+cd /data2/ydkoh/2026_MOF_LSM/Atm_forc/1_CLM
+setenv NCARG_ROOT /usr/local/ncl_ncarg/6.6.2_gcc485
+/usr/local/ncl_ncarg/6.6.2_gcc485/bin/ncl era5_to_clm5.ncl   # yr_start/yr_end 설정
+ncdump -k tmp/1979_era5.nc      # → netCDF-4 classic model 확인
+
+# CLM 실행 (case: I2000_ERA5_spinup)
+./xmlchange DATM_CLMNCEP_YR_START=1979,DATM_CLMNCEP_YR_END=1979,DATM_CLMNCEP_YR_ALIGN=1979
+./xmlchange STOP_N=10,STOP_OPTION=nyears,CONTINUE_RUN=FALSE
+nohup ./case.submit &           # 스케줄러 없어 nohup 백그라운드
+
+# 결과 (archive)
+/data2/ydkoh/cesm2_output/archive/I2000_ERA5_spinup/lnd/hist/*.clm2.h0.*.nc
+</pre>
+
+<p><small>raw ERA5: <code>/data1/ERA5/single_level/hourly_0.25/&lt;변수&gt;/dataset/ERA5h_YYYYMMDD.nc</code> · 관측: 로컬 <code>/Users/youngdaekoh/data2/{ERA5L_swvl,SoilMoisture(ESACCI/SMAP),GLEAM,GRACE,...}</code></small></p>
+
+<h2>7. era5_to_clm5.ncl — 변수 전체 정의</h2>
+<p>읽기 배열 8개(<code>era5_var1</code> 폴더 / <code>era5_invar</code> 파일내 변수명) → 출력 7개(<code>clm5_vars</code>). 풍속은 u·v 2개에서 1개(WIND)로 합성되어 입력 8 → 출력 7.</p>
+
+<table>
+<tr><th>#</th><th>era5_var1 (폴더)</th><th>era5_invar (변수)</th><th>→ CLM (clm5_vars)</th><th>long_name</th><th>units</th><th>시간</th><th>처리</th></tr>
+<tr><td>0</td><td>2m_temperature</td><td>t2m</td><td>TBOT</td><td>temperature at the lowest atm level</td><td>K</td><td>6h</td><td>그대로</td></tr>
+<tr><td>1</td><td>2m_dewpoint_temperature</td><td>d2m</td><td>QBOT</td><td>specific humidity at the lowest atm level</td><td>kg/kg</td><td>6h</td><td>비습 환산 (+sp)</td></tr>
+<tr><td>2</td><td>surface_pressure</td><td>sp</td><td>PSRF</td><td>surface pressure at the lowest atm level</td><td>Pa</td><td>6h</td><td>그대로 (QBOT 원료 겸용)</td></tr>
+<tr><td>3</td><td>10m_u_component_of_wind</td><td>u10</td><td rowspan="2">WIND</td><td rowspan="2">wind at the lowest atm level</td><td rowspan="2">m/s</td><td>6h</td><td rowspan="2">√(u²+v²), regrid 전 합성</td></tr>
+<tr><td>4</td><td>10m_v_component_of_wind</td><td>v10</td><td>6h</td></tr>
+<tr><td>5</td><td>mean_surface_downward_short_wave_radiation_flux</td><td>avg_sdswrf</td><td>FSDS</td><td>total incident solar radiation</td><td>W/m**2</td><td><b>hourly</b></td><td>6h 평균 (flux)</td></tr>
+<tr><td>6</td><td>total_precipitation</td><td>tp</td><td>PRECTmms</td><td>PRECTmms total precipitation</td><td>mm H2O / sec</td><td><b>hourly</b></td><td>6h 합 ×1000 ÷21600</td></tr>
+<tr><td>7</td><td>mean_surface_downward_long_wave_radiation_flux</td><td>avg_sdlwrf</td><td>FLDS</td><td>incident longwave radiation</td><td>W/m**2</td><td>6h</td><td>그대로</td></tr>
+</table>
+
+<div class="box">
+<b>설정값</b>: <code>era5_dir = /data1/ERA5/single_level/hourly_0.25</code> · 출력 <code>out_dir = ./tmp/</code> · <code>yr_start / yr_end</code> (연도 루프) · 목표격자 = GSWP3 domain <code>domain.lnd.360x720_gswp3.0v1.c170606.nc</code> 의 LATIXY/LONGXY.<br>
+<b>주요 함수</b>: <code>short2flt</code>(언패킹) · <code>drop_feb29</code>(윤년 제거, cd_calendar로 mo=2&amp;dy=29 인덱스 제외) · <code>area_conserve_remap_Wrap</code>(보존 regrid) · <code>setmeta</code>(차원명·time·long_name·units·_FillValue 부여) · <code>setfileoption("nc","Format","NetCDF4Classic")</code>.
+</div>
+
+<h2>8. spin-up 실행 스크립트 (I2000_ERA5_forc.csh)</h2>
+<p><small>climate00 <code>/home/ydkoh/run_scripts/I2000_ERA5_forc.csh</code> — case 생성·빌드·1년 적분.</small></p>
+<pre>
+#!/bin/tcsh -f
+cd ~/CESM/cime/scripts
+
+set CCSMROOT = /home/ydkoh/CESM
+set CNAME    = I2000_ERA5_spinup
+set COMPSET  = I2000Clm50Sp        # CLM5 satellite-phenology (Sp), 탄소순환 없음
+set RES      = f19_g17             # 1.9° 대기 / 격자
+
+rm -rf $CCSMROOT/cases/$CNAME
+rm -rf /data2/ydkoh/cesm2_output/$CNAME
+
+./create_newcase --case $CCSMROOT/cases/$CNAME \
+                 --compset $COMPSET --res $RES \
+                 --machine climate00 --compiler intel \
+                 --mpilib mvapich2 --run-unsupported
+
+cd $CCSMROOT/cases/$CNAME
+./case.setup
+
+# forcing 연도 = 모델 0001년차에 1979 매핑
+./xmlchange DATM_CLMNCEP_YR_START=1979
+./xmlchange DATM_CLMNCEP_YR_END=1979
+./xmlchange DATM_CLMNCEP_YR_ALIGN=1979
+./preview_namelists
+
+# 우리 ERA5 강제력으로 GSWP3 스트림 덮어쓰기 (filePath/fileNames만 수정해둔 사본)
+cp ../user_datm.streams.txt.CLMGSWP3v1.Solar  ./
+cp ../user_datm.streams.txt.CLMGSWP3v1.Precip ./
+cp ../user_datm.streams.txt.CLMGSWP3v1.TPQW   ./
+chmod u+w user_datm.streams.txt.*
+
+./xmlchange STOP_N=1,STOP_OPTION=nyears        # 1년 적분
+./xmlchange REST_N=1,REST_OPTION=nyears        # 1년마다 restart
+./xmlchange CONTINUE_RUN=FALSE
+
+cat >> user_nl_clm << EOF
+hist_nhtfrq = 0      # 월평균 출력
+hist_mfilt  = 1      # 파일당 1 time → 월 1파일
+EOF
+
+./case.build
+./.case.run
+</pre>
+<div class="box">
+<b>스트림 매핑</b> (user_datm.streams.txt.CLMGSWP3v1.*): filePath=<code>/data2/.../1_CLM/tmp</code>, fileNames=<code>1979_era5.nc</code>, 변수매핑 GSWP3 그대로 (Solar <code>FSDS swdn</code> / Precip <code>PRECTmms precn</code> / TPQW <code>TBOT tbot · WIND wind · QBOT shum · PSRF pbot · FLDS lwdn</code>). 우리 파일 변수명이 GSWP3와 동일해 매핑 무수정.<br>
+<b>이어서 적분</b>: <code>CONTINUE_RUN=TRUE</code> + <code>STOP_N=N</code> (서버 스케줄러 없어 RESUBMIT 대신 수동). 다년이면 stream에 연도파일 추가 + YR_END 확대(YR_ALIGN=1979 유지 → 모델 0002=1980).
+</div>
+
+<h2>9. 문제 해결 로그 (시간순)</h2>
+<table>
+<tr><th>증상 / 에러</th><th>원인</th><th>해결</th></tr>
+<tr><td>NCL <code>Assignment type mismatch</code> (time)</td><td>regrid 결과가 ERA5 정수형 time 좌표 상속</td><td>setmeta에서 <code>delete(x&amp;time)</code> 후 재할당</td></tr>
+<tr><td>NCL <code>undefined procedure setmeta</code></td><td><code>&amp;</code>를 문장 구분자로 사용 (NCL은 좌표연산자뿐)</td><td>한 줄 한 문장으로 분리</td></tr>
+<tr><td><code>One or more variable sizes violate format constraints</code></td><td>classic(CDF-1) 2GB/변수 한계 초과</td><td>LargeFile → 최종 NetCDF4Classic</td></tr>
+<tr><td>regrid <code>Input latitudes oriented N→S</code></td><td>wind만 flip 누락 (u/v 미flip 상속)</td><td>wind도 <code>(:,::-1,:)</code></td></tr>
+<tr><td class="bad">datm <code>verifyTCoord: elapsed seconds must be increasing</code></td><td><b>LargeFile(64-bit offset) → datm time 오독</b></td><td>NetCDF4(→ 후속 문제) → NetCDF4Classic</td></tr>
+<tr><td class="bad">datm <code>getCalendar: nf90_get_att calendar</code></td><td><b>NetCDF4 → calendar 속성이 NC_STRING</b> (datm은 NC_CHAR)</td><td>NetCDF4Classic (classic모델=NC_CHAR)</td></tr>
+<tr><td>윤년 1980 time=1464 / noleap 불일치</td><td>2/29 미제거</td><td><code>drop_feb29</code> 함수 추가</td></tr>
+<tr><td>1983 변환 ntime 불일치</td><td>u10/v10 1983년 2월 전체(28일) 데이터 결손</td><td>해당연도 skip 또는 결손 보완 (미해결, 인지)</td></tr>
+<tr><td class="bad">CLM <code>BalanceCheck: longwave energy balance error</code> (~3개월서 크래시)</td><td>solar(ssrd 6h-1h샘플) 일적산 깨짐 → 지면 과열 → LW 수지 실패</td><td>hourly mean shortwave flux(avg_sdswrf) 재다운 → 6h 평균으로 교체</td></tr>
+<tr><td>datm getCalendar 재발 (다른 파일)</td><td>fileNames에 나열된 미완성/구버전 파일까지 init서 검증</td><td>모든 연도 파일을 동일 포맷으로 재생성 후 나열</td></tr>
+</table>
+
+<h2>10. CESM datm — 외부 대기강제력 연결 방법 (핵심 정리)</h2>
+<p>I 컴셋(CLM-only)의 대기 입력은 <b>datm(data atmosphere)</b>이 담당. 기본 GSWP3 스트림을 <b>우리 ERA5 파일로 override</b>하는 게 요점. xmlchange만으론 안 되고 <b>user 스트림 파일</b>이 필요.</p>
+
+<h3>① 작동 원리 — override</h3>
+<ul>
+<li>CESM 자동생성: <code>CaseDocs/datm.streams.txt.CLMGSWP3v1.{Solar,Precip,TPQW}</code> (읽기전용, preview마다 재생성 — 직접 수정 X)</li>
+<li>사용자 사본: <b>case 루트</b>에 <code>user_datm.streams.txt.CLMGSWP3v1.*</code> 두면 datm이 이걸 우선 사용</li>
+<li>스트림 이름 <code>CLMGSWP3v1</code> 유지 → 시간보간(Solar=coszen, Precip=nearest, TPQW=linear) 자동 상속</li>
+</ul>
+
+<h3>② 수정 절차</h3>
+<pre>
+cd &lt;case&gt;
+# 자동본을 user_ 로 복사 (case 루트)
+cp CaseDocs/datm.streams.txt.CLMGSWP3v1.Solar  user_datm.streams.txt.CLMGSWP3v1.Solar
+cp CaseDocs/datm.streams.txt.CLMGSWP3v1.Precip user_datm.streams.txt.CLMGSWP3v1.Precip
+cp CaseDocs/datm.streams.txt.CLMGSWP3v1.TPQW   user_datm.streams.txt.CLMGSWP3v1.TPQW
+chmod u+w user_datm.streams.txt.*
+</pre>
+
+<h3>③ 각 user 스트림에서 고친 것 — &lt;fieldInfo&gt; 안 2곳만</h3>
+<table>
+<tr><th>태그</th><th>기존(GSWP3)</th><th>수정(ERA5)</th></tr>
+<tr><td><code>&lt;filePath&gt;</code></td><td>/data1/.../GSWP3/Solar</td><td><b>/data2/ydkoh/2026_MOF_LSM/Atm_forc/1_CLM/tmp</b></td></tr>
+<tr><td><code>&lt;fileNames&gt;</code></td><td>월별 파일 수십 개 나열</td><td><b>1979_era5.nc</b> (연 1파일; 다년이면 연도파일 나열)</td></tr>
+<tr><td><code>&lt;domainInfo&gt;</code></td><td>domain.lnd.360x720_gswp3</td><td><b>그대로</b> (우리도 0.5° 동일격자)</td></tr>
+<tr><td><code>&lt;variableNames&gt;</code></td><td>Solar <code>FSDS swdn</code> / Precip <code>PRECTmms precn</code> / TPQW <code>TBOT tbot · WIND wind · QBOT shum · PSRF pbot · FLDS lwdn</code></td><td><b>그대로</b> (파일 변수명 GSWP3와 일치시킴)</td></tr>
+</table>
+
+<h3>④ xmlchange — 연도 정렬</h3>
+<pre>
+./xmlchange DATM_CLMNCEP_YR_START=1979   # forcing 가용 시작연
+./xmlchange DATM_CLMNCEP_YR_END=1979     # 가용 끝연 (다년이면 확대)
+./xmlchange DATM_CLMNCEP_YR_ALIGN=1979   # 모델 0001년차 ↔ forcing 1979 매핑
+./preview_namelists                       # → CaseDocs에 우리 경로 반영 확인
+</pre>
+
+<div class="key">
+<b>핵심 포인트</b><br>
+• 우리 파일을 <b>GSWP3 포맷 클론</b>(0.5°·동일 변수명·noleap·NetCDF4Classic)으로 만들었기에 스트림은 <b>filePath/fileNames만</b> 바꾸면 끝. domain·매핑·보간 무수정.<br>
+• datm은 init 때 <b>fileNames에 나열된 모든 파일</b>의 time/calendar를 검증 → 미완성·구버전 파일 끼면 즉사.<br>
+• YR_END &lt; 적분길이면 datm이 forcing을 <b>자동 cycle</b>(taxMode) → spin-up 반복에 사용.<br>
+• 격자 정합: forcing 0.5° ≠ 모델격자(f19/f09)여도 datm이 모델격자로 보간하므로 무방.
+</div>
+
+<hr>
+<p><small>이 문서는 2026-06-16~17 ERA5→CLM forcing 구축·디버깅·datm 연결 작업을 요약. 핵심 성과: 포맷 함정(NetCDF4Classic) 규명 + CLM 1979 1년 적분 완주. 핵심 교훈: <b>CLM datm 강제력은 NetCDF4Classic + noleap(NC_CHAR calendar) + 보존 regrid + 일적산 보존 flux</b>, 연결은 <b>user_datm 스트림에서 filePath/fileNames만 교체</b>.</small></p>
+
+</body>
+</html>
